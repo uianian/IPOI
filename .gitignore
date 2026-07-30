@@ -1,0 +1,37 @@
+# Datasets and generated runtime artifacts
+dataset/
+**/.runtime/
+
+# Python cache and environments
+**/__pycache__/
+*.pyc
+**/.pytest_cache/
+**/.venv/
+**/venv/
+*.egg-info/
+
+# Logs
+*.log
+*.jsonl
+
+# Local secrets and machine-specific files
+.env
+*.env
+.DS_Store
+
+# Model weights and large binary artifacts
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+*.safetensors
+
+# Frontend / JS caches if later added
+**/node_modules/
+
+# Third-party demo assets that are not needed in the root repo
+pdf_parsing/INF-MLLM/**/docs/
+pdf_parsing/INF-MLLM/**/assets/
+pdf_parsing/INF-MLLM/**/demo_data/
+pdf_parsing/INF-MLLM/**/drive/chromedriver

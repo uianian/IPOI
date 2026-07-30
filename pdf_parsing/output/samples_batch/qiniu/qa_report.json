@@ -1,0 +1,497 @@
+{
+  "total_pages": 666,
+  "issue_count": 69,
+  "issues_by_tag": {
+    "vertical_table_low_structure": 20,
+    "table_structure_medium": 48,
+    "missing_table_high_numeric": 1
+  },
+  "table_structure_confidence_pages": {
+    "low": 20,
+    "medium": 48,
+    "high": 118
+  },
+  "reparse_pages": [
+    4,
+    212,
+    216,
+    263,
+    264,
+    276,
+    311,
+    314,
+    316,
+    344,
+    347,
+    358,
+    360,
+    539,
+    541,
+    562,
+    577,
+    582,
+    584,
+    585,
+    586
+  ],
+  "reparse_pages_csv": "4,212,216,263,264,276,311,314,316,344,347,358,360,539,541,562,577,582,584,585,586",
+  "review_pages": [
+    4,
+    212,
+    216,
+    263,
+    264,
+    276,
+    311,
+    314,
+    316,
+    344,
+    347,
+    358,
+    360,
+    539,
+    541,
+    577,
+    582,
+    584,
+    585,
+    586
+  ],
+  "issues": [
+    {
+      "page": 4,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=1993, notes=['colspan_year_mismatch']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 18,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=2411, notes=['complex_colspan_header']"
+    },
+    {
+      "page": 19,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=614, notes=['sparse_table']"
+    },
+    {
+      "page": 30,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=539, notes=['sparse_table']"
+    },
+    {
+      "page": 137,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=636, notes=['sparse_table']"
+    },
+    {
+      "page": 186,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=541, notes=['sparse_table']"
+    },
+    {
+      "page": 191,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=570, notes=['sparse_table']"
+    },
+    {
+      "page": 192,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=610, notes=['sparse_table']"
+    },
+    {
+      "page": 205,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=734, notes=['sparse_table']"
+    },
+    {
+      "page": 212,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=427, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 216,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=407, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 255,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1177, notes=['complex_colspan_header']"
+    },
+    {
+      "page": 263,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=311, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 264,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=233, notes=['sparse_table', 'truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 265,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1174, notes=['sparse_table']"
+    },
+    {
+      "page": 275,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=633, notes=['sparse_table']"
+    },
+    {
+      "page": 276,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=522, notes=['truncated_or_header_only', 'sparse_table']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 278,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=767, notes=['sparse_table']"
+    },
+    {
+      "page": 295,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=650, notes=['sparse_table']"
+    },
+    {
+      "page": 296,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=494, notes=['sparse_table']"
+    },
+    {
+      "page": 310,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=561, notes=['sparse_table']"
+    },
+    {
+      "page": 311,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=222, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 314,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=464, notes=['truncated_or_header_only', 'sparse_table']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 315,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=345, notes=['sparse_table']"
+    },
+    {
+      "page": 316,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=462, notes=['sparse_table', 'truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 317,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=563, notes=['sparse_table']"
+    },
+    {
+      "page": 326,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=769, notes=['sparse_table']"
+    },
+    {
+      "page": 340,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=644, notes=['sparse_table']"
+    },
+    {
+      "page": 343,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=336, notes=['sparse_table']"
+    },
+    {
+      "page": 344,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=323, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 347,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=214, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 358,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=442, notes=['sparse_table', 'truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 360,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=453, notes=['sparse_table', 'truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 374,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=358, notes=['sparse_table']"
+    },
+    {
+      "page": 396,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=541, notes=['sparse_table']"
+    },
+    {
+      "page": 398,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1029, notes=['sparse_table']"
+    },
+    {
+      "page": 409,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=539, notes=['sparse_table']"
+    },
+    {
+      "page": 426,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=331, notes=['sparse_table']"
+    },
+    {
+      "page": 428,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=534, notes=['sparse_table']"
+    },
+    {
+      "page": 430,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=710, notes=['sparse_table']"
+    },
+    {
+      "page": 443,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=436, notes=['sparse_table']"
+    },
+    {
+      "page": 479,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=339, notes=['sparse_table']"
+    },
+    {
+      "page": 539,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=1402, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 541,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=333, notes=['truncated_or_header_only', 'sparse_table']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 543,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=547, notes=['sparse_table']"
+    },
+    {
+      "page": 553,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=647, notes=['complex_colspan_header', 'sparse_table']"
+    },
+    {
+      "page": 554,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=808, notes=['sparse_table']"
+    },
+    {
+      "page": 556,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=483, notes=['sparse_table']"
+    },
+    {
+      "page": 557,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=963, notes=['sparse_table']"
+    },
+    {
+      "page": 558,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1280, notes=['sparse_table']"
+    },
+    {
+      "page": 559,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1169, notes=['sparse_table']"
+    },
+    {
+      "page": 560,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1340, notes=['sparse_table']"
+    },
+    {
+      "page": 561,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=566, notes=['sparse_table']"
+    },
+    {
+      "page": 562,
+      "tag": "missing_table_high_numeric",
+      "severity": "high",
+      "detail": "无 table，text 中约 42 个数值字段、15 行",
+      "suggest_reparse": true
+    },
+    {
+      "page": 564,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=2417, notes=['sparse_table']"
+    },
+    {
+      "page": 565,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=541, notes=['sparse_table']"
+    },
+    {
+      "page": 566,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1215, notes=['sparse_table']"
+    },
+    {
+      "page": 567,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1215, notes=['sparse_table']"
+    },
+    {
+      "page": 568,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=233, notes=['sparse_table']"
+    },
+    {
+      "page": 575,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=477, notes=['sparse_table']"
+    },
+    {
+      "page": 577,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=607, notes=['sparse_table', 'truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 578,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=838, notes=['sparse_table']"
+    },
+    {
+      "page": 582,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=318, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 584,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=421, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 585,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=712, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 586,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=220, notes=['truncated_or_header_only']",
+      "suggest_reparse": true
+    },
+    {
+      "page": 634,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=711, notes=['sparse_table']"
+    },
+    {
+      "page": 635,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=1222, notes=['sparse_table']"
+    },
+    {
+      "page": 648,
+      "tag": "table_structure_medium",
+      "severity": "low",
+      "detail": "score=556, notes=['sparse_table']"
+    }
+  ]
+}

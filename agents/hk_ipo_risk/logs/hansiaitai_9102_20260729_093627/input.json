@@ -1,0 +1,56 @@
+{
+  "startedAt": "2026-07-29T01:37:06Z",
+  "endpoint": "POST /api/v1/projects/{clientProjectId}/analysis/start",
+  "baseUrl": "http://127.0.0.1:9102",
+  "mode": "formal_LLM (ANALYSIS_FINANCE_RULES_ONLY=0)",
+  "request": {
+    "clientProjectId": "proj-19fa6ad4a0b",
+    "taskId": "task_expert_20260728_000008"
+  },
+  "parseMeta": {
+    "taskId": "task_expert_20260728_000008",
+    "clientProjectId": "proj-19fa6ad4a0b",
+    "ticker": "3378.HK",
+    "stockCode": "03378",
+    "fileName": "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf",
+    "isBiotech": true,
+    "issuerType": "biotech",
+    "companyName": "翰思艾泰生物医药科技(武汉)股份有限公司",
+    "listDate": "2025-12-23",
+    "listingDate": "20251223",
+    "pdfSha256": "f18b422ec5b3d56a394bc730434f4f1e8a89d8d64d4b599a3e92043fc9aa7e6d",
+    "sampleKey": "03378_15-12-2025_翰思艾泰－Ｂ_全球發售",
+    "pageCount": 704,
+    "stub": true,
+    "params": {
+      "gpus": "auto",
+      "page_workers": 2,
+      "min_free_mib": 20000,
+      "dpi": 300,
+      "batch_size": 2,
+      "max_new_tokens": 16384,
+      "rotate_mode": "none",
+      "rotate_fallback": false,
+      "no_figures": true,
+      "save_risk_chunks": true,
+      "skip_qa": true,
+      "maxPages": null,
+      "forceReparse": false,
+      "matchedBy": "sha256"
+    },
+    "parseJsonPath": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json",
+    "indexStatus": "ready",
+    "indexProgress": 100,
+    "prepId": "prep_20260728_000003",
+    "createdAt": "2026-07-28T03:03:15Z",
+    "startedAt": "2026-07-28T03:03:15Z",
+    "finishedAt": "2026-07-28T03:03:18Z",
+    "status": "completed",
+    "indexMessage": "向量索引已就绪"
+  },
+  "packages": {
+    "finance": "/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_task_expert_20260728_000008_finance.json",
+    "legal": "/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_task_expert_20260728_000008_legal.json"
+  },
+  "chatModel": "default from agents/ipo settings.yaml (google/gemma-4-31b-it)"
+}

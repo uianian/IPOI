@@ -1,0 +1,64 @@
+system:
+  app_name: "ipo-risk-agent"
+  debug: true
+  log_level: "INFO"
+
+llm:
+  provider: "openrouter"                    # "vllm"、"openai" 或 "openrouter"
+  api_key: ""                               # 请通过环境变量 OPENROUTER_API_KEY 或 OPENAI_API_KEY 设置
+  api_base: "https://openrouter.ai/api/v1"   # OpenAI API 端点
+  vllm_base_url: "http://localhost:8000/v1"
+  embedding_model: "text-embedding-3-large"
+  chat_model: "google/gemma-4-31b-it"
+  fallback_embedding_model: "BAAI/bge-small-zh-v1.5"
+  fallback_embedding_cache: "~/.cache/ipo_risk/embedding_fallback"
+  fallback_embedding_mirror: "https://hf-mirror.com"
+  max_retries: 3
+  timeout_seconds: 60
+  max_tokens: 4096
+  temperature: 0.1
+
+retrieval:
+  chunk_size: 512
+  chunk_overlap: 64
+  faiss_index_type: "IndexFlatIP"
+  top_k: 10
+  index_root: ".runtime/indexes"
+  bm25_weight: 0.3
+  vector_weight: 0.5
+  grep_weight: 0.2
+  rrf_k: 60
+  grep_boost_rank: 3
+
+debate:
+  max_rounds: 3
+  consensus_threshold: 0.8
+
+fusion:
+  fundamental_weight: 0.65
+  sentiment_weight: 0.35
+  risk_levels:
+    very_low: [0, 20]
+    low: [20, 40]
+    medium: [40, 60]
+    high: [60, 80]
+    very_high: [80, 100]
+
+sentiment:
+  factor_weights:
+    market_temperature: 0.3
+    sector_liquidity: 0.25
+    public_opinion: 0.25
+    ipo_subscription: 0.2
+  data_freshness_hours: 24
+  extreme_move_threshold: 0.05
+
+database:
+  postgres_url: "postgresql+asyncpg://postgres:postgres@localhost:5432/ipo_risk"
+  redis_url: "redis://localhost:6379/0"
+  cache_ttl_hours: 24
+
+api:
+  host: "0.0.0.0"
+  port: 8080
+  cors_origins: ["*"]

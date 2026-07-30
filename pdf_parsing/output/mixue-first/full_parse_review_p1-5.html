@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parse Review - mixue</title>
+<style>
+  body { font-family: "PingFang SC", "Noto Sans CJK SC", sans-serif; max-width: 980px; margin: 0 auto; padding: 24px; line-height: 1.6; color: #111827; background: #f9fafb; }
+  .summary { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .page { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
+  .page.failed { border-color: #fca5a5; background: #fff7f7; }
+  .page h2 { margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+  .element { margin: 14px 0; padding: 12px; border-left: 4px solid #e5e7eb; background: #fcfcfd; border-radius: 0 8px 8px 0; }
+  .meta { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .badge { color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+  .header-text { color: #6b7280; font-weight: 600; margin: 0; }
+  .footer-text { color: #9ca3af; text-align: center; margin: 0; }
+  .caption { color: #374151; font-style: italic; margin: 0; }
+  .footnote { color: #4b5563; font-size: 14px; margin: 0; padding-left: 12px; border-left: 3px solid #d1d5db; }
+  .figure-box { border: 2px dashed #f59e0b; background: #fffbeb; color: #92400e; padding: 24px; text-align: center; border-radius: 8px; }
+  .table-wrap { overflow-x: auto; }
+  .table-wrap table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  .table-wrap td, .table-wrap th { border: 1px solid #d1d5db; padding: 6px 8px; vertical-align: top; }
+  .stats-table { width: 100%; border-collapse: collapse; }
+  .stats-table th, .stats-table td { border: 1px solid #e5e7eb; padding: 8px 10px; text-align: left; }
+  .warn { color: #b91c1c; font-weight: 600; }
+  .cat-title { border-left-color: #2563eb; }
+  .cat-table { border-left-color: #059669; }
+  .cat-figure { border-left-color: #d97706; }
+</style>
+</head>
+<body>
+
+<section class="summary">
+  <h1>PDF 解析审阅：mixue</h1>
+  <ul>
+    <li>总页数：<strong>558</strong></li>
+    <li>总元素数：<strong>5588</strong></li>
+    <li>解析失败页：7</li>
+  </ul>
+  <h2>元素类型分布</h2>
+  <table class="stats-table">
+    <thead><tr><th>类型</th><th>数量</th><th>空文本数</th></tr></thead>
+    <tbody><tr><td><span class='badge' style='background:#111827'>正文</span> <code>text</code></td><td>3131</td><td>0</td></tr><tr><td><span class='badge' style='background:#2563eb'>标题</span> <code>title</code></td><td>937</td><td>0</td></tr><tr><td><span class='badge' style='background:#9ca3af'>页脚</span> <code>footer</code></td><td>553</td><td>0</td></tr><tr><td><span class='badge' style='background:#6b7280'>页眉</span> <code>header</code></td><td>545</td><td>0</td></tr><tr><td><span class='badge' style='background:#059669'>表格</span> <code>table</code></td><td>249</td><td>0</td></tr><tr><td><span class='badge' style='background:#d97706'>图片</span> <code>figure</code></td><td>84</td><td>84</td></tr><tr><td><span class='badge' style='background:#065f46'>表脚注</span> <code>table_footnote</code></td><td>34</td><td>0</td></tr><tr><td><span class='badge' style='background:#047857'>表注</span> <code>table_caption</code></td><td>30</td><td>0</td></tr><tr><td><span class='badge' style='background:#92400e'>图注</span> <code>figure_caption</code></td><td>24</td><td>0</td></tr><tr><td><span class='badge' style='background:#4b5563'>页脚注</span> <code>page_footnote</code></td><td>1</td><td>0</td></tr></tbody>
+  </table>
+</section>
+
+<section class="page"><h2>第 1 页</h2><div class="element cat-title"><div class="meta"><span class="badge" style="background:#2563eb">标题</span><code>[100, 42, 676, 89]</code></div><h2>蜜雪冰城股份有限公司</h2></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[100, 94, 476, 113]</code></div><p>（於中華人民共和國註冊成立的股份有限公司）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[102, 116, 234, 134]</code></div><p>股份代號：2097</p></div>
+<div class="element cat-figure"><div class="meta"><span class="badge" style="background:#d97706">图片</span><code>[82, 150, 865, 872]</code></div><div class="figure-box">🖼️ 图片区域 — 未提取 OCR 文本</div></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[764, 165, 907, 198]</code></div><p>全球發售</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[280, 876, 774, 906]</code></div><p>你爱我❤️我爱你 蜜雪冰城甜蜜蜜</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[278, 914, 776, 942]</code></div><p>聯席保薦人、整體協調人、聯席全球協調人、聯席帳簿管理人及聯席牽頭經辦人（按英文字母順序排序）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[249, 949, 424, 968]</code></div><p>BofA SECURITIES</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[496, 947, 598, 969]</code></div><p>Goldman Sachs 高盛</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[625, 946, 804, 969]</code></div><p>UBS 瑞銀集團</p></div></section>
+<section class="page"><h2>第 2 页</h2><div class="element cat-header"><div class="meta"><span class="badge" style="background:#6b7280">页眉</span><code>[446, 39, 551, 56]</code></div><p class="header-text">重要提示</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[149, 91, 521, 104]</code></div><p>重要提示：閣下如對本招股章程的任何內容有任何疑問，應微询獨立專業意見。</p></div>
+<div class="element cat-figure"><div class="meta"><span class="badge" style="background:#d97706">图片</span><code>[268, 122, 386, 231]</code></div><div class="figure-box">🖼️ 图片区域 — 未提取 OCR 文本</div></div>
+<div class="element cat-figure"><div class="meta"><span class="badge" style="background:#d97706">图片</span><code>[395, 131, 720, 194]</code></div><div class="figure-box">🖼️ 图片区域 — 未提取 OCR 文本</div></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[396, 198, 720, 225]</code></div><p>始于1997·冰淇淋与茶</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[402, 239, 594, 258]</code></div><p>MIXUE Group</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[339, 260, 656, 282]</code></div><p>蜜雪冰城股份有限公司</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[340, 285, 653, 299]</code></div><p>（於中華人民共和國註冊成立的股份有限公司）</p></div>
+<div class="element cat-title"><div class="meta"><span class="badge" style="background:#2563eb">标题</span><code>[454, 309, 542, 327]</code></div><h2>全球發售</h2></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[292, 330, 772, 358]</code></div><p>全球發售的發售股份數量：17,059,900股H股（視乎超額配股權行使與否而定）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[340, 358, 756, 374]</code></div><p>香港發售股份數量：1,706,000股H股（可予重新分配）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[340, 374, 772, 400]</code></div><p>國際發售股份數量：15,353,900股H股（可予重新分配及視乎超額配股權行使與否而定）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[422, 400, 854, 455]</code></div><p>發售價：每股H股202.50港元，另加1.0%經紀佣金、0.0027%證監會交易徵費、0.00015%會財局交易徵費及0.00565%聯交所交易費（須於申請時以港元繳足，多繳款項可予退還）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[438, 455, 685, 469]</code></div><p>面值：每股H股人民幣1.00元</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[407, 469, 558, 484]</code></div><p>股份代號：2097</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[238, 496, 755, 522]</code></div><p>聯席保薦人、整體協調人、聯席全球協調人、聯席賬簿管理人及聯席牽頭經辦人（按英文字母順序排序）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[207, 525, 313, 538]</code></div><p>BofA Securities</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[446, 526, 552, 538]</code></div><p>Goldman Sachs</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[718, 526, 754, 538]</code></div><p>UBS</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[283, 547, 711, 573]</code></div><p>整體協調人、聯席全球協調人、聯席賬簿管理人及聯席牽頭經辦人（按英文字母順序排序）</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[298, 577, 342, 589]</code></div><p>CICC</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[655, 577, 700, 589]</code></div><p>HTSC</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[327, 599, 668, 614]</code></div><p>聯席全球協調人、聯席賬簿管理人及聯席牽頭經辦人</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[474, 617, 522, 629]</code></div><p>ICBCI</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[386, 634, 609, 648]</code></div><p>聯席賬簿管理人及聯席牽頭經辦人</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[275, 653, 368, 666]</code></div><p>GF Securities</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[655, 653, 700, 666]</code></div><p>CMBI</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 689, 858, 713]</code></div><p>香港交易及結算所有限公司、香港聯合交易所有限公司及香港中央結算有限公司對本招股章程的內容概不負責，對其準確性或完整性亦不發表任何聲明，並明確表示概不就本招股章程全部或任何部分內容而產生或因依賴該等內容而引致的任何損失承擔任何責任。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 715, 858, 738]</code></div><p>本招股章程連同本招股章程附錄五「送呈香港公司註冊處處長及展示文件」所述文件已根據香港法例第32章《公司（清盤及攤項條文）條例》第342C條規定送呈香港公司註冊處處長登記。香港證券及期貨事務監察委員會及香港公司註冊處處長對本招股章程或上述任何其他文件的內容概不負責。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 741, 858, 762]</code></div><p>除非另行作出公佈，否則發售價將為每股H股202.50港元。香港發售股份的申請人須於申請時支付發售價每股香港發售股份202.50港元，連同1.0%的經紀佣金、0.0027%證監會交易徵費、0.00015%的會計局交易徵費及0.00565%的香港聯交所交易費。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 764, 858, 809]</code></div><p>整體協調人（代表包銷商）經本公司同意後，可在認為合適的情況下於截止遞交香港公開發售申請當日上午或之前，隨時調減本招股章程所述的香港發售股份數目及／或調低發售價（即202.50港元）。於該情況下，本公司將在作出有關調減決定後在可行情況下盡早且無論如何不遲於截止遞交香港公開發售申請當日上午，在本公司網站www.mxbc.com及聯交所網站www.hkexnews.hk刊登調減香港發售股份數目及／或調低發售價的通知。進一步詳情請參閱本招股章程「全球發售的架構」及「如何申請香港發售股份」章節。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 811, 858, 832]</code></div><p>倘若於上市日期上午八時正前發生若干事件，整體協調人（為其本身及代表包銷商）可終止香港包銷商於香港包銷協議項下的責任。請參閱本招股章程「包銷」一節。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 836, 639, 847]</code></div><p>有意投資者在作出投資決定前，應仔細考慮本招股章程所載所有資料，包括「風險因素」一節所載的風險因素。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[138, 850, 858, 894]</code></div><p>發售股份並無亦不會根據美國證券法或美國任何州證券法登記，且不得於美國境內或向美國人士（定義見S規例）或以其名義或為其利益提呈發售、出售、抵押或轉讓，惟豁免遵守美國證券法登記規定或毋須遵守該等規定的交易除外。發售股份可依據第144A條於美國境內及向美國人士提呈發售及出售，或另一項依據美國證券法的登記豁免或毋須遵守美國證券法登記規定的交易而僅向合資格機構買家提呈發售及出售。發售股份可依據S規例在美國境外以離岸交易方式向非美國人士提呈發售、出售及交付。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[477, 912, 522, 923]</code></div><p>重要通知</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[149, 926, 656, 938]</code></div><p>我們已就香港公開發售採取全電子化申請程序。我們不會就香港公開發售向公眾人士提供本招股章程的印刷本。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[149, 940, 835, 952]</code></div><p>招股章程於香港聯交所網站www.hkexnews.hk及本公司網站www.mxbc.com可供閱覽。閣下需要本招股章程的印刷本，可從上述網址下載並打印。</p></div>
+<div class="element cat-footer"><div class="meta"><span class="badge" style="background:#9ca3af">页脚</span><code>[725, 964, 855, 979]</code></div><p class="footer-text">2025年2月21日</p></div></section>
+<section class="page"><h2>第 3 页</h2><div class="element cat-header"><div class="meta"><span class="badge" style="background:#6b7280">页眉</span><code>[445, 38, 553, 57]</code></div><p class="header-text">重要提示</p></div>
+<div class="element cat-title"><div class="meta"><span class="badge" style="background:#2563eb">标题</span><code>[340, 98, 656, 118]</code></div><h2>致香港發售股份投資者的重要通知</h2></div>
+<div class="element cat-title"><div class="meta"><span class="badge" style="background:#2563eb">标题</span><code>[411, 144, 585, 162]</code></div><h2>全電子化申請程序</h2></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[195, 189, 613, 208]</code></div><p>本公司已就香港公開發售採取全電子化申請程序。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[148, 235, 848, 277]</code></div><p>本招股章程可於聯交所網站www.hkexnews.hk「披露易&gt;新上市&gt;新上市資料」分部及我們的網站www.mxbc.com查閱。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[148, 303, 850, 368]</code></div><p>本公司將不會提供任何實體渠道以接收任何香港發售股份公眾認購申請。本招股章程電子版本內容與根據公司（清盤及雜項條文）條例第342C條向香港公司註冊處處長登記的招股章程內容相同。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[195, 394, 647, 413]</code></div><p>閣下可通過以下其中一種方式申請認購香港發售股份：</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[195, 439, 747, 457]</code></div><p>(1) 在網上通過白表eIPO服務於www.eipo.com.hk遞交申請；或</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[194, 485, 849, 549]</code></div><p>(2) 通過香港結算EIPO渠道以電子方式促使香港結算代理人代表閣下申請，指示閣下的經紀或託管商（須為香港結算參與者）通過香港結算FINI系統發出電子認購指示，代表閣下申請香港發售股份。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[150, 575, 849, 618]</code></div><p>倘閣下為中介公司、經紀或代理，務請提示閣下的顧客、客戶或主事人（如適用）注意，本招股章程可於上述網址網上查閱。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[148, 643, 849, 685]</code></div><p>有關閣下申請認購香港發售股份的程序的進一步詳情，請參閱本招股章程「如何申請香港發售股份」一節。</p></div></section>
+<section class="page"><h2>第 4 页</h2><div class="element cat-title"><div class="meta"><span class="badge" style="background:#2563eb">标题</span><code>[444, 38, 553, 57]</code></div><h2>重要提示</h2></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[136, 87, 858, 129]</code></div><p>閣下通過白表eIPO服務或香港結算EIPO渠道申請認購的股數須至少為100股香港發售股份，並為下表所列的其中一個數量。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[136, 155, 858, 219]</code></div><p>倘閣下透過白表eIPO服務提交申請，閣下可參考下表以了解閣下所選擇的香港發售股份數量的應付金額。閣下必須在申請香港發售股份時全額支付申請時應付的相應金額。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[136, 246, 858, 288]</code></div><p>倘閣下透過香港結算EIPO渠道申請，閣下須按閣下的經紀或託管商指明的金額（根據香港適用法律及條例規定）就閣下的申請預先撥資。</p></div>
+<div class="element cat-table"><div class="meta"><span class="badge" style="background:#059669">表格</span><code>[150, 312, 848, 624]</code></div><div class="table-wrap"><table><tr><td>申請認購的香港發售股份數目</td><td>申請時應缴款項^(1)</td><td>香港發售股份數目</td><td>申請時應缴款項^(2)</td><td>香港發售股份數目</td><td>申請時應缴款項^(1)</td><td>香港發售股份數目</td><td>申請時應缴款項^(2)</td></tr><tr><td></td><td>港元</td><td></td><td>港元</td><td></td><td>港元</td><td></td><td>港元</td></tr><tr><td>100</td><td>20,454.22</td><td>1,000</td><td>204,542.21</td><td>6,000</td><td>1,227,253.28</td><td>75,000</td><td>15,340,665.93</td></tr><tr><td>200</td><td>40,908.44</td><td>1,500</td><td>306,813.32</td><td>7,000</td><td>1,431,795.49</td><td>100,000</td><td>20,454,221.26</td></tr><tr><td>300</td><td>61,362.66</td><td>2,000</td><td>409,084.43</td><td>8,000</td><td>1,636,337.70</td><td>200,000</td><td>40,908,442.50</td></tr><tr><td>400</td><td>81,816.89</td><td>2,500</td><td>511,355.53</td><td>9,000</td><td>1,840,879.91</td><td>300,000</td><td>61,362,663.76</td></tr><tr><td>500</td><td>102,271.10</td><td>3,000</td><td>613,626.63</td><td>10,000</td><td>2,045,422.13</td><td>400,000</td><td>81,816,885.00</td></tr><tr><td>600</td><td>122,725.32</td><td>3,500</td><td>715,897.74</td><td>15,000</td><td>3,068,133.19</td><td>500,000</td><td>102,271,106.26</td></tr><tr><td>700</td><td>143,179.55</td><td>4,000</td><td>818,168.86</td><td>20,000</td><td>4,090,844.26</td><td>600,000</td><td>122,725,327.50</td></tr><tr><td>800</td><td>163,633.76</td><td>4,500</td><td>920,439.96</td><td>25,000</td><td>5,113,555.31</td><td>700,000</td><td>143,179,548.76</td></tr><tr><td>900</td><td>184,087.99</td><td>5,000</td><td>1,022,711.07</td><td>50,000</td><td>10,227,110.63</td><td>853,000^(1)</td><td>174,474,507.27</td></tr></table></div></div>
+<div class="element cat-table_footnote"><div class="meta"><span class="badge" style="background:#065f46">表脚注</span><code>[137, 644, 482, 660]</code></div><p class="footnote">(1) 閣下可申請認購的香港發售股份最高數目。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[136, 679, 859, 749]</code></div><p>(2) 應缴款項包括經紀佣金、證監會交易徵費、聯交所交易費及會財局交易徵費。若閣下的申請獲接納，經紀佣金將支付予交易所參與者（定義見上市規則），而證監會交易徵費、聯交所交易費及會財局交易徵費將支付予聯交所（證監會交易徵費由聯交所代表證監會收取；而會財局交易徵費由聯交所代表會財局收取）。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[184, 771, 849, 790]</code></div><p>任何其他數量的香港發售股份的申請概不會獲考慮，且該等申請可能會被拒絕。</p></div></section>
+<section class="page"><h2>第 5 页</h2><div class="element cat-header"><div class="meta"><span class="badge" style="background:#6b7280">页眉</span><code>[419, 38, 578, 57]</code></div><p class="header-text">預期時間表\(^{(1)}\)</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[152, 98, 846, 142]</code></div><p>倘香港公開發售的下列預期時間表有任何變動，本公司將在香港於本公司網站www.mxbc.com及聯交所網站www.hkexnews.hk刊登公告。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[137, 179, 859, 221]</code></div><p>香港公開發售開始 …… 2025年2月21日（星期五）
+上午九時正</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[137, 248, 859, 380]</code></div><p>通過指定網站www.eipo.com.hk以白表eIPO服務
+
+完成電子申請的截止時間$^{(2)}$ …… 2025年2月26日（星期三）
+上午十一時三十分
+
+開始辦理申請登記時間$^{(3)}$ …… 2025年2月26日（星期三）
+上午十一時四十五分</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[137, 408, 859, 493]</code></div><p>(a)通過網上銀行轉賬或繳費靈付款轉賬完成
+白表eIPO申請付款；及(b)通過香港結算的
+FINI系統提交EIPO申請的截止時間$^{(4)}$ …… 2025年2月26日（星期三）
+中午十二時正</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[137, 520, 859, 608]</code></div><p>倘閣下指示閣下的經紀或託管商（須為香港結算參與者）根據閣下的指示通過香港結算的FINI系統代表閣下提交EIPO申請以申請香港發售股份，則閣下應聯絡閣下的經紀或託管商，查詢作出有關指示的最早及截止時間（其可能按經紀或託管商而有所不同）。</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[185, 633, 859, 674]</code></div><p>截止辦理申請登記時間$^{(3)}$ …… 2025年2月26日（星期三）
+中午十二時正</p></div>
+<div class="element cat-text"><div class="meta"><span class="badge" style="background:#111827">正文</span><code>[137, 701, 859, 812]</code></div><p>於本公司網站www.mxbc.com$^{(5)}$及聯交所
+網站www.hkexnews.hk公佈國際發售的認購
+踊躍程度、香港公開發售的申請水平及
+發售股份的分配基準 …… 2025年2月28日（星期五）
+下午十一時正或之前</p></div>
+<div class="element cat-footer"><div class="meta"><span class="badge" style="background:#9ca3af">页脚</span><code>[485, 944, 517, 958]</code></div><p class="footer-text">- i -</p></div></section>
+</body>
+</html>

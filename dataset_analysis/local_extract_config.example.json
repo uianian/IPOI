@@ -1,0 +1,13 @@
+{
+  "sample_list": "dataset_analysis/output/sample_list.csv",
+  "source_dataset_root": "dataset",
+  "dest_dir": "dataset/sample",
+  "catalog": "dataset_analysis/output/ipo_catalog_with_metrics.csv",
+  "overwrite": true,
+  "_notes": {
+    "source_dataset_root": "本地解压后的招股书根目录。可与服务器目录名不同，只要其下（含子文件夹）能找到对应 PDF 即可。",
+    "matching": "按文件名前 5 位 stock_code 匹配，例如 02097_*.pdf；不依赖 catalog 中的服务器绝对路径。",
+    "filename": "复制后保持源文件原始文件名不变（含 2025 乱码文件名）。",
+    "paths": "相对路径相对于项目根目录；Windows 本地也可使用绝对路径，如 D:/IPOI/dataset"
+  }
+}

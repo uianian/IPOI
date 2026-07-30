@@ -1,0 +1,84 @@
+{
+  "generated_at": "2026-07-24T17:46:02",
+  "n_docs": 1,
+  "ok": 1,
+  "failed": 0,
+  "records": [
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/pdf_parsing/pdf/03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf",
+      "stem": "03378_15-12-2025_翰思艾泰－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售",
+      "started_at": "2026-07-24T17:04:50",
+      "page_workers": 2,
+      "gpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "pass1": {
+        "pages": 704,
+        "elapsed_sec": 2471.4,
+        "sec_per_page": 3.51,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 104,
+        "issues_by_tag": {
+          "table_structure_medium": 70,
+          "vertical_table_low_structure": 25,
+          "truncated": 1,
+          "missing_table_high_numeric": 8
+        },
+        "reparse_pages_csv": "35,149,181,191,241,250,251,263,273,308,311,312,314,360,365,385,394,429,459,491,548,562,563,564,572,595,596,613,614,618,620,688,698",
+        "reparse_pages": [
+          35,
+          149,
+          181,
+          191,
+          241,
+          250,
+          251,
+          263,
+          273,
+          308,
+          311,
+          312,
+          314,
+          360,
+          365,
+          385,
+          394,
+          429,
+          459,
+          491,
+          548,
+          562,
+          563,
+          564,
+          572,
+          595,
+          596,
+          613,
+          614,
+          618,
+          620,
+          688,
+          698
+        ]
+      },
+      "elapsed_sec": 2471.5,
+      "finished_at": "2026-07-24T17:46:02",
+      "status": "ok",
+      "gpu_id": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  ]
+}

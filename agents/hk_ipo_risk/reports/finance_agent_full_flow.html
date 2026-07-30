@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>财务穿透 Agent 全流程图</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --panel-soft: #f1f4f8;
+      --text: #18212f;
+      --muted: #5d6b7c;
+      --line: #c8d0dc;
+      --line-strong: #8291a7;
+      --accent: #2357c6;
+      --accent-soft: #e7eefc;
+      --warn: #8a5a00;
+      --warn-soft: #fff3d6;
+      --ok: #126b45;
+      --ok-soft: #e4f5ed;
+      --danger: #9a3412;
+      --danger-soft: #fff0e8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+    h2 {
+      margin: 32px 0 12px;
+      font-size: 21px;
+    }
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+    p { margin: 6px 0; }
+    .muted { color: var(--muted); }
+    .header {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 22px;
+    }
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-soft);
+      color: var(--muted);
+      padding: 4px 10px;
+      font-size: 13px;
+    }
+    .badge.primary {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .card.soft { background: var(--panel-soft); }
+    .card h3:first-child { margin-top: 0; }
+    .diagram-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      overflow-x: auto;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .swatch {
+      width: 18px;
+      height: 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .swatch.input { background: var(--accent-soft); border-color: var(--accent); }
+    .swatch.decision { background: var(--warn-soft); border-color: var(--warn); }
+    .swatch.process { background: var(--panel-soft); }
+    .swatch.output { background: var(--ok-soft); border-color: var(--ok); }
+    .swatch.error { background: var(--danger-soft); border-color: var(--danger); }
+    svg {
+      min-width: 1220px;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .node rect, .node polygon, .node ellipse {
+      stroke-width: 1.4;
+    }
+    .node-title {
+      fill: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .node-small {
+      fill: var(--muted);
+      font-size: 12px;
+    }
+    .edge {
+      stroke: var(--line-strong);
+      stroke-width: 1.4;
+      fill: none;
+      marker-end: url(#arrow);
+    }
+    .edge.dashed {
+      stroke-dasharray: 5 5;
+    }
+    .edge-label {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .section-title {
+      fill: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      background: var(--panel-soft);
+      font-weight: 700;
+    }
+    tr:last-child td { border-bottom: 0; }
+    code {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      main { padding: 16px; }
+      .grid, .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="header">
+    <h1>财务穿透 Agent 全流程图（HTML / SVG）</h1>
+    <p class="muted">
+      分析对象：<code>agents/hk_ipo_risk</code> 当前财务穿透 Agent。核心输入为
+      <strong>招股书 JSON</strong> 与 <strong>是否 18A / 18C / biotech</strong>，
+      流程覆盖 ReAct、单次 LLM、纯规则、证据缺失、门控分支、规则托底和最终报告输出。
+    </p>
+    <div class="badges">
+      <span class="badge primary">默认：ReAct + 规则托底</span>
+      <span class="badge">可降级：单次 LLM</span>
+      <span class="badge">可降级：纯规则</span>
+      <span class="badge">中期列单独标记</span>
+      <span class="badge">18A 启用 2.4 / 3.5</span>
+      <span class="badge">3.4 按盈利状态启用</span>
+      <span class="badge">证据页码可追溯</span>
+    </div>
+  </section>
+
+  <h2>一、总览流程图</h2>
+  <p class="muted">
+    这张图从“输入”开始，沿着运行模式、证据、指标、门控、LLM、规则托底、异常降级和输出一路展开。
+    方框表示处理步骤，菱形表示判断，虚线表示异常或降级路径。
+  </p>
+  <div class="legend">
+    <span><i class="swatch input"></i>输入 / 外部资料</span>
+    <span><i class="swatch process"></i>处理步骤</span>
+    <span><i class="swatch decision"></i>判断 / 分支</span>
+    <span><i class="swatch output"></i>输出 / 汇合</span>
+    <span><i class="swatch error"></i>异常 / 降级</span>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 1220 2140" role="img" aria-label="财务穿透 Agent 全流程图">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+          <path d="M0,0 L0,6 L8,3 z" fill="#8291a7"></path>
+        </marker>
+      </defs>
+
+      <!-- lane titles -->
+      <text x="40" y="36" class="section-title">输入层</text>
+      <text x="40" y="295" class="section-title">运行模式选择</text>
+      <text x="40" y="560" class="section-title">证据与指标层</text>
+      <text x="40" y="920" class="section-title">门控与条件分支</text>
+      <text x="40" y="1280" class="section-title">分析、托底、输出层</text>
+
+      <!-- inputs -->
+      <g class="node">
+        <rect x="80" y="64" width="260" height="86" rx="12" fill="#e7eefc" stroke="#2357c6"></rect>
+        <text x="210" y="96" text-anchor="middle" class="node-title">招股书 JSON</text>
+        <text x="210" y="120" text-anchor="middle" class="node-small">full_parse.json / 已解析内容</text>
+        <text x="210" y="140" text-anchor="middle" class="node-small">主表、章节、页码、文本/HTML</text>
+      </g>
+      <g class="node">
+        <rect x="470" y="64" width="260" height="86" rx="12" fill="#e7eefc" stroke="#2357c6"></rect>
+        <text x="600" y="96" text-anchor="middle" class="node-title">发行人类型</text>
+        <text x="600" y="120" text-anchor="middle" class="node-small">general / 18a / 18c / biotech</text>
+        <text x="600" y="140" text-anchor="middle" class="node-small">决定 2.4、3.5；不直接决定 3.4</text>
+      </g>
+      <g class="node">
+        <rect x="860" y="64" width="260" height="86" rx="12" fill="#e7eefc" stroke="#2357c6"></rect>
+        <text x="990" y="96" text-anchor="middle" class="node-title">运行参数</text>
+        <text x="990" y="120" text-anchor="middle" class="node-small">retrieval_json / parse_json</text>
+        <text x="990" y="140" text-anchor="middle" class="node-small">rules_only / pipeline / max_turns</text>
+      </g>
+
+      <path class="edge" d="M210 150 V214"></path>
+      <path class="edge" d="M600 150 V214"></path>
+      <path class="edge" d="M990 150 V214"></path>
+
+      <!-- start -->
+      <g class="node">
+        <rect x="430" y="214" width="340" height="72" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="244" text-anchor="middle" class="node-title">启动财务穿透 Agent</text>
+        <text x="600" y="268" text-anchor="middle" class="node-small">建立本次运行状态：文档、公司、参数、日志</text>
+      </g>
+
+      <path class="edge" d="M600 286 V332"></path>
+
+      <!-- mode decision -->
+      <g class="node">
+        <polygon points="600,332 760,405 600,478 440,405" fill="#fff3d6" stroke="#8a5a00"></polygon>
+        <text x="600" y="390" text-anchor="middle" class="node-title">选择运行模式？</text>
+        <text x="600" y="415" text-anchor="middle" class="node-small">看 LLM 是否可用、是否强制规则或 pipeline</text>
+      </g>
+
+      <path class="edge" d="M440 405 H230 V520"></path>
+      <text x="285" y="390" text-anchor="middle" class="edge-label">--finance-rules-only</text>
+      <path class="edge" d="M760 405 H970 V520"></path>
+      <text x="910" y="390" text-anchor="middle" class="edge-label">--finance-pipeline 或 LLM 不可用</text>
+      <path class="edge" d="M600 478 V520"></path>
+      <text x="625" y="500" class="edge-label">默认</text>
+
+      <g class="node">
+        <rect x="90" y="520" width="280" height="86" rx="12" fill="#fff0e8" stroke="#9a3412"></rect>
+        <text x="230" y="552" text-anchor="middle" class="node-title">纯规则路径</text>
+        <text x="230" y="576" text-anchor="middle" class="node-small">不调用 LLM</text>
+        <text x="230" y="596" text-anchor="middle" class="node-small">直接抽数、门控、规则打分</text>
+      </g>
+      <g class="node">
+        <rect x="460" y="520" width="280" height="86" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="552" text-anchor="middle" class="node-title">默认 ReAct 路径</text>
+        <text x="600" y="576" text-anchor="middle" class="node-small">LLM 多轮选择工具</text>
+        <text x="600" y="596" text-anchor="middle" class="node-small">最终 submit 后规则托底</text>
+      </g>
+      <g class="node">
+        <rect x="830" y="520" width="280" height="86" rx="12" fill="#fff0e8" stroke="#9a3412"></rect>
+        <text x="970" y="552" text-anchor="middle" class="node-title">单次 LLM / 降级路径</text>
+        <text x="970" y="576" text-anchor="middle" class="node-small">不用多轮 ReAct</text>
+        <text x="970" y="596" text-anchor="middle" class="node-small">LLM 失败则再转纯规则</text>
+      </g>
+
+      <path class="edge" d="M230 606 V666 H600"></path>
+      <path class="edge" d="M600 606 V666"></path>
+      <path class="edge" d="M970 606 V666 H600"></path>
+
+      <!-- evidence -->
+      <g class="node">
+        <rect x="430" y="666" width="340" height="82" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="696" text-anchor="middle" class="node-title">加载财务证据包</text>
+        <text x="600" y="720" text-anchor="middle" class="node-small">优先使用离线 retrieval_json</text>
+        <text x="600" y="740" text-anchor="middle" class="node-small">必要时可走 live retrieval</text>
+      </g>
+      <path class="edge" d="M600 748 V790"></path>
+
+      <g class="node">
+        <polygon points="600,790 750,858 600,926 450,858" fill="#fff3d6" stroke="#8a5a00"></polygon>
+        <text x="600" y="844" text-anchor="middle" class="node-title">主表证据是否可用？</text>
+        <text x="600" y="868" text-anchor="middle" class="node-small">TBL_IS / TBL_BS / TBL_CF</text>
+      </g>
+      <path class="edge" d="M450 858 H240 V1000"></path>
+      <text x="315" y="842" text-anchor="middle" class="edge-label">缺失或很弱</text>
+      <path class="edge" d="M600 926 V1000"></path>
+      <text x="625" y="955" class="edge-label">可用</text>
+      <path class="edge" d="M750 858 H960 V1000"></path>
+      <text x="900" y="842" text-anchor="middle" class="edge-label">部分缺失</text>
+
+      <g class="node">
+        <rect x="90" y="1000" width="300" height="96" rx="12" fill="#fff0e8" stroke="#9a3412"></rect>
+        <text x="240" y="1030" text-anchor="middle" class="node-title">证据不足处理</text>
+        <text x="240" y="1054" text-anchor="middle" class="node-small">保留缺失说明</text>
+        <text x="240" y="1074" text-anchor="middle" class="node-small">尝试章节上下文补证据</text>
+      </g>
+      <g class="node">
+        <rect x="450" y="1000" width="300" height="96" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="1030" text-anchor="middle" class="node-title">抽取财务指标</text>
+        <text x="600" y="1054" text-anchor="middle" class="node-small">表格 / 文本主表同等处理</text>
+        <text x="600" y="1074" text-anchor="middle" class="node-small">保留字段、年份、页码、摘录</text>
+      </g>
+      <g class="node">
+        <rect x="810" y="1000" width="300" height="96" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="960" y="1030" text-anchor="middle" class="node-title">补充证据登记</text>
+        <text x="960" y="1054" text-anchor="middle" class="node-small">TBL_BS_COMPANY 单独展示</text>
+        <text x="960" y="1074" text-anchor="middle" class="node-small">不混入综合资产负债表</text>
+      </g>
+
+      <path class="edge" d="M240 1096 V1148 H600"></path>
+      <path class="edge" d="M600 1096 V1148"></path>
+      <path class="edge" d="M960 1096 V1148 H600"></path>
+
+      <g class="node">
+        <rect x="430" y="1148" width="340" height="96" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="1178" text-anchor="middle" class="node-title">指标清洗与口径处理</text>
+        <text x="600" y="1202" text-anchor="middle" class="node-small">完整年度 vs 中期列：2025_i1</text>
+        <text x="600" y="1222" text-anchor="middle" class="node-small">OTHER_INCOME 不冒充 REV；BS 口径校验</text>
+      </g>
+
+      <path class="edge" d="M600 1244 V1298"></path>
+
+      <!-- gates -->
+      <g class="node">
+        <polygon points="600,1298 760,1370 600,1442 440,1370" fill="#fff3d6" stroke="#8a5a00"></polygon>
+        <text x="600" y="1348" text-anchor="middle" class="node-title">是否 18A / 18C / biotech？</text>
+        <text x="600" y="1374" text-anchor="middle" class="node-small">决定 2.4 和 3.5 是否启用</text>
+      </g>
+      <path class="edge" d="M440 1370 H240 V1510"></path>
+      <text x="310" y="1354" text-anchor="middle" class="edge-label">否：general</text>
+      <path class="edge" d="M760 1370 H960 V1510"></path>
+      <text x="900" y="1354" text-anchor="middle" class="edge-label">是：18A/18C/biotech</text>
+
+      <g class="node">
+        <rect x="90" y="1510" width="300" height="92" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="240" y="1540" text-anchor="middle" class="node-title">一般发行人分支</text>
+        <text x="240" y="1564" text-anchor="middle" class="node-small">跳过 2.4 / 3.5</text>
+        <text x="240" y="1584" text-anchor="middle" class="node-small">重点看盈利质量、现金流、偿债</text>
+      </g>
+      <g class="node">
+        <rect x="810" y="1510" width="300" height="92" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="960" y="1540" text-anchor="middle" class="node-title">18A 专项分支</text>
+        <text x="960" y="1564" text-anchor="middle" class="node-small">启用 2.4；法务启用 3.5 管线</text>
+        <text x="960" y="1584" text-anchor="middle" class="node-small">财务重点看现金跑道</text>
+      </g>
+
+      <path class="edge" d="M240 1602 V1640 H600"></path>
+      <path class="edge" d="M960 1602 V1640 H600"></path>
+
+      <g class="node">
+        <polygon points="600,1640 760,1710 600,1780 440,1710" fill="#fff3d6" stroke="#8a5a00"></polygon>
+        <text x="600" y="1688" text-anchor="middle" class="node-title">盈利状态？</text>
+        <text x="600" y="1714" text-anchor="middle" class="node-small">只看完整年度；缺失则 unknown</text>
+      </g>
+
+      <path class="edge" d="M440 1710 H240 V1840"></path>
+      <text x="310" y="1694" text-anchor="middle" class="edge-label">已盈利</text>
+      <path class="edge" d="M600 1780 V1840"></path>
+      <text x="625" y="1810" class="edge-label">未盈利</text>
+      <path class="edge" d="M760 1710 H960 V1840"></path>
+      <text x="900" y="1694" text-anchor="middle" class="edge-label">盈利未知</text>
+
+      <g class="node">
+        <rect x="90" y="1840" width="300" height="96" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="240" y="1870" text-anchor="middle" class="node-title">跳过 3.4</text>
+        <text x="240" y="1894" text-anchor="middle" class="node-small">原因：确认已盈利</text>
+        <text x="240" y="1914" text-anchor="middle" class="node-small">仍分析现金流质量和偿债能力</text>
+      </g>
+      <g class="node">
+        <rect x="450" y="1840" width="300" height="96" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="1870" text-anchor="middle" class="node-title">启用 3.4 现金流消耗压力</text>
+        <text x="600" y="1894" text-anchor="middle" class="node-small">计算月消耗、现金跑道、消耗变化</text>
+        <text x="600" y="1914" text-anchor="middle" class="node-small">适用于所有未盈利公司，不限 18A</text>
+      </g>
+      <g class="node">
+        <rect x="810" y="1840" width="300" height="96" rx="12" fill="#fff3d6" stroke="#8a5a00"></rect>
+        <text x="960" y="1870" text-anchor="middle" class="node-title">保守启用 3.4</text>
+        <text x="960" y="1894" text-anchor="middle" class="node-small">原因：盈利状态 unknown</text>
+        <text x="960" y="1914" text-anchor="middle" class="node-small">不得默认“已盈利”而跳过</text>
+      </g>
+
+      <path class="edge" d="M240 1936 V1988 H600"></path>
+      <path class="edge" d="M600 1936 V1988"></path>
+      <path class="edge" d="M960 1936 V1988 H600"></path>
+
+      <g class="node">
+        <rect x="430" y="1988" width="340" height="78" rx="12" fill="#f1f4f8" stroke="#c8d0dc"></rect>
+        <text x="600" y="2018" text-anchor="middle" class="node-title">LLM 财务穿透分析</text>
+        <text x="600" y="2042" text-anchor="middle" class="node-small">整合盈利、现金流、偿债、业务背景与 3.4 结果</text>
+      </g>
+
+      <path class="edge" d="M600 2066 V2090"></path>
+      <g class="node">
+        <rect x="430" y="2090" width="340" height="42" rx="12" fill="#e4f5ed" stroke="#126b45"></rect>
+        <text x="600" y="2116" text-anchor="middle" class="node-title">规则托底合并 → 输出报告</text>
+      </g>
+    </svg>
+  </div>
+
+  <h2>二、3.4 现金流消耗压力、盈利门控与风险托底细化</h2>
+  <div class="note">
+    <strong>关键说明：</strong>
+    3.4 现金流消耗压力不是只有 18A 才启用。当前逻辑中，3.4 主要由
+    <strong>盈利状态</strong>决定：确认已盈利才跳过；未盈利或盈利状态未知时都会启用。
+    18A / 18C / biotech 主要影响 2.4 研发/商业化专项，以及法务侧 3.5 管线风险。
+  </div>
+  <div class="two-col">
+    <section class="card">
+      <h3>1. 盈利状态分支</h3>
+      <table>
+        <thead>
+          <tr><th>判断结果</th><th>后续动作</th><th>注意事项</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>已盈利</strong></td>
+            <td>跳过未盈利专属的现金消耗 3.4；仍分析盈利质量、现金流与偿债。</td>
+            <td>只有“最近完整年度盈利”才视为已盈利。</td>
+          </tr>
+          <tr>
+            <td><strong>未盈利</strong></td>
+            <td>启用现金消耗与现金跑道计算；连续亏损、CFO 负值进入规则托底。</td>
+            <td>18A 公司常见未盈利，但仍需识别现金压力。</td>
+          </tr>
+          <tr>
+            <td><strong>盈利未知</strong></td>
+            <td>不默认当作已盈利；继续启用 3.4，报告里标注可信度限制。</td>
+            <td>避免因为 NET_LOSS 缺失而误跳过现金压力分析。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h3>2. 现金跑道分支</h3>
+      <table>
+        <thead>
+          <tr><th>跑道区间</th><th>规则含义</th><th>分数影响</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>&lt; 12 个月</strong></td>
+            <td>短期资金压力明显，需要重点提示融资依赖或持续经营压力。</td>
+            <td>+20</td>
+          </tr>
+          <tr>
+            <td><strong>12–24 个月</strong></td>
+            <td>不算立即断粮，但仍存在中期融资压力。</td>
+            <td>+10</td>
+          </tr>
+          <tr>
+            <td><strong>&gt; 24 个月</strong></td>
+            <td>现金储备相对充足，不触发跑道扣分。</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>无法计算</strong></td>
+            <td>保留“指标缺失”说明，不凭空给出跑道结论。</td>
+            <td>按可用规则处理</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <h2>三、运行模式、异常与汇合规则</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>默认 ReAct 路径</h3>
+      <p>LLM 多轮决定下一步：先召回财务证据，再抽数、推导门控、必要时补上下文证据，最后提交完整财务分析。</p>
+      <p class="muted">汇合点：提交后统一进入规则托底。</p>
+    </section>
+    <section class="card">
+      <h3>单次 LLM 路径</h3>
+      <p>用户指定 <code>--finance-pipeline</code> 或 ReAct 不可用时，系统先抽数和门控，再让 LLM 一次性分析。</p>
+      <p class="muted">若单次 LLM 失败，继续降级到规则路径。</p>
+    </section>
+    <section class="card">
+      <h3>纯规则路径</h3>
+      <p>用户指定 <code>--finance-rules-only</code> 或 LLM 完全不可用时，不调用模型，直接用规则给出可解释分数。</p>
+      <p class="muted">适合无 API key、模型故障或回归测试。</p>
+    </section>
+  </div>
+
+  <div class="note">
+    <strong>统一汇合点：</strong>
+    无论是 ReAct、单次 LLM，还是纯规则，最终都会汇合到同一类输出：
+    <code>risk_score</code>、<code>risk_level</code>、<code>score_breakdown</code>、
+    <code>metrics</code>、<code>gates</code>、<code>evidence_summary</code> 和推理日志。
+  </div>
+
+  <h2>四、规则托底覆盖的所有硬信号</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>风险信号</th>
+        <th>触发条件</th>
+        <th>分数</th>
+        <th>处理细节</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>CONTINUOUS_LOSS</code></td>
+        <td>完整年度序列显示持续亏损</td>
+        <td>+25</td>
+        <td>若同时存在单年亏损，不重复叠加单年项。</td>
+      </tr>
+      <tr>
+        <td><code>SINGLE_YEAR_LOSS</code></td>
+        <td>最近完整年度亏损，但未构成连续亏损</td>
+        <td>+15</td>
+        <td>只看完整年度，不把中期列当全年。</td>
+      </tr>
+      <tr>
+        <td><code>CFO_NEGATIVE</code></td>
+        <td>经营活动现金流持续为负</td>
+        <td>+15</td>
+        <td>属于硬信号，会防止模型把风险压得过低。</td>
+      </tr>
+      <tr>
+        <td><code>GP_MARGIN_DROP</code></td>
+        <td>毛利率下降超过 5 个百分点</td>
+        <td>+10</td>
+        <td>适用于有收入与毛利的发行人；18A 无产品收入时可能不触发。</td>
+      </tr>
+      <tr>
+        <td><code>CASH_RUNWAY_LT_12</code></td>
+        <td>未盈利且现金跑道不足 12 个月</td>
+        <td>+20</td>
+        <td>现金优先用最新一期；中期 CFO 按 8 个月年化。</td>
+      </tr>
+      <tr>
+        <td><code>CASH_RUNWAY_12_24</code></td>
+        <td>未盈利且现金跑道在 12–24 个月</td>
+        <td>+10</td>
+        <td>提示中期融资压力，不等于立即高危。</td>
+      </tr>
+      <tr>
+        <td><code>BURN_YOY_UP_30</code></td>
+        <td>现金消耗同比上升超过 30%</td>
+        <td>+15</td>
+        <td>优先同口径中期对比；否则用完整年度对比。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>五、证据与口径处理的特殊情况</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>表格解析成文本</h3>
+      <p>不直接判失败。系统会按行标签和年份继续抽取，让文本型主表也能进入分析。</p>
+    </section>
+    <section class="card">
+      <h3>贵公司资产负债表</h3>
+      <p><code>TBL_BS_COMPANY</code> 单独作为证据展示，不混入综合资产负债表，避免口径污染。</p>
+    </section>
+    <section class="card">
+      <h3>18A 无产品收入</h3>
+      <p>保留 <code>OTHER_INCOME</code>，不把“其他收入及收益”误当主营收入 <code>REV</code>。</p>
+    </section>
+    <section class="card">
+      <h3>中期列</h3>
+      <p>如 <code>2025_i1</code> 只作为中期，不进入完整年度盈利门控；现金跑道可使用最新中期现金。</p>
+    </section>
+    <section class="card">
+      <h3>指标缺失</h3>
+      <p>缺失时报告中保留说明，不默认盈利、不默认现金充足，也不编造不存在的指标。</p>
+    </section>
+    <section class="card">
+      <h3>LLM 叙述偏低</h3>
+      <p>若最终规则托底后风险等级高于模型措辞，会追加注释，提示以最终等级为准。</p>
+    </section>
+  </div>
+
+  <h2>六、最终输出物</h2>
+  <table>
+    <thead>
+      <tr><th>输出</th><th>用途</th><th>读法</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>.runtime/*_finance_legal.json</code></td>
+        <td>机器可读结果，包含完整 metrics、gates、features、trace。</td>
+        <td>用于调试、二次分析和报告生成。</td>
+      </tr>
+      <tr>
+        <td><code>reports/*_finance_legal_report.md</code></td>
+        <td>面向人阅读的 Markdown 报告。</td>
+        <td>先看总览分数，再看分项、指标、证据页码。</td>
+      </tr>
+      <tr>
+        <td><code>logs/*_finance_*.log/.jsonl</code></td>
+        <td>推理过程与工具调用记录。</td>
+        <td>用于追溯 LLM 每轮为什么这么做。</td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

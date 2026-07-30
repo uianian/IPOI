@@ -1,0 +1,42 @@
+{
+  "report_id": "3cb593a4-65f0-45b9-af0d-8500cd76617b",
+  "doc_id": "example_bxk_02315",
+  "company_name": "百奥赛图基因科技有限公司",
+  "generated_at": "2026-07-13 17:23:03.890446",
+  "risk_assessment": {
+    "overall_score": 17.5,
+    "overall_level": "very_low",
+    "fundamental_score": 0.0,
+    "fundamental_weight": 0.65,
+    "sentiment_score": 50.0,
+    "sentiment_weight": 0.35,
+    "factor_details": [],
+    "risk_level_mapping": {
+      "very_low": [
+        0.0,
+        20.0
+      ],
+      "low": [
+        20.0,
+        40.0
+      ],
+      "medium": [
+        40.0,
+        60.0
+      ],
+      "high": [
+        60.0,
+        80.0
+      ],
+      "very_high": [
+        80.0,
+        100.0
+      ]
+    }
+  },
+  "high_risk_factors": [],
+  "conflicts": [],
+  "debate_results": [],
+  "summary": "综合风险评分: 17.5，风险等级: very_low，冲突数: 0，辩论轮次: 0",
+  "trace_root_id": null
+}

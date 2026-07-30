@@ -1,0 +1,2076 @@
+{
+  "doc_id": "task_expert_20260728_000008",
+  "finance": {
+    "agent": "finance",
+    "doc_id": "task_expert_20260728_000008",
+    "risk_score": 70.0,
+    "risk_level": "high",
+    "score_breakdown": [
+      {
+        "code": "CONTINUOUS_LOSS",
+        "delta": 25.0,
+        "rule_ref": "doc§2.1",
+        "evidence": [
+          {
+            "page": 562,
+            "excerpt": "截至12月31日止年度 截至8月31日止八個月 附註 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 其他收入及收益 5 6,664 7,681 12,313 2,626 研發成本 5 (46,663) (74,721) (50,523) (56,178) 行政開支 6 (17,220) (46,192) (16,116) (27,436) 其他開…",
+            "source_type": "text",
+            "field_code": "TBL_IS",
+            "confidence": 1.0
+          }
+        ],
+        "note": "（规则托底上调）",
+        "metric_value": null,
+        "evidence_page": null
+      },
+      {
+        "code": "CFO_NEGATIVE",
+        "delta": 15.0,
+        "rule_ref": "Cash Flow",
+        "evidence": [],
+        "note": "CFO持續為負且流出擴大",
+        "metric_value": "-104,894.0",
+        "evidence_page": 80
+      },
+      {
+        "code": "RUNWAY_MED",
+        "delta": 5.0,
+        "rule_ref": "Liquidity",
+        "evidence": [],
+        "note": "現金跑道在12-24個月之間，風險中等",
+        "metric_value": "20.21 months",
+        "evidence_page": 0
+      },
+      {
+        "code": "ASSET_EROSION",
+        "delta": 10.0,
+        "rule_ref": "Solvency",
+        "evidence": [],
+        "note": "淨資產快速下降",
+        "metric_value": "144,791.0",
+        "evidence_page": 0
+      },
+      {
+        "code": "FIN_DEP",
+        "delta": 5.0,
+        "rule_ref": "Business Context",
+        "evidence": [],
+        "note": "高度依賴IPO及外部融資",
+        "metric_value": "N/A",
+        "evidence_page": 498
+      },
+      {
+        "code": "CASH_RUNWAY_12_24",
+        "delta": 10.0,
+        "rule_ref": "doc§3.4",
+        "evidence": [
+          {
+            "page": 563,
+            "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 8,340 11,820 11,907 使用權資產 15 15,661 12,309 10,525 其他無形資產 16 558 447 587 預付款項、其他應收款項及其他資產 18 531 330 330 按公允價值計入損益（「按公允價值計入損益」）的…",
+            "source_type": "text",
+            "field_code": "TBL_BS",
+            "confidence": 1.0
+          }
+        ],
+        "note": "（规则托底）",
+        "metric_value": null,
+        "evidence_page": null
+      }
+    ],
+    "risk_points": [
+      {
+        "code": "NET_LOSS_INC",
+        "level": "medium",
+        "rule_ref": "Profitability",
+        "value": null,
+        "description": "2024年淨虧損達116.92百萬元，較上年增加約38%",
+        "evidence": []
+      },
+      {
+        "code": "CFO_NEG",
+        "level": "medium",
+        "rule_ref": "Cash Flow",
+        "value": null,
+        "description": "2024年經營活動現金流淨額為-104.89百萬元，現金流出壓力大",
+        "evidence": []
+      },
+      {
+        "code": "NET_ASSET_DROP",
+        "level": "medium",
+        "rule_ref": "Solvency",
+        "value": null,
+        "description": "淨資產由2023年的319.58百萬元下降至2025年一季度的144.79百萬元",
+        "evidence": []
+      }
+    ],
+    "metrics": {
+      "OTHER_INCOME": {
+        "2023": 6664.0,
+        "2024": 7681.0,
+        "2024_i1": 12313.0,
+        "2025_i1": 2626.0
+      },
+      "RD_EXP": {
+        "2023": -46663.0,
+        "2024": -74721.0,
+        "2024_i1": -50523.0,
+        "2025_i1": -56178.0
+      },
+      "SGA": {
+        "2023": -17220.0,
+        "2024": -46192.0,
+        "2024_i1": -16116.0,
+        "2025_i1": -27436.0
+      },
+      "NET_LOSS": {
+        "2023": -85160.0,
+        "2024": -116922.0,
+        "2024_i1": -48420.0,
+        "2025_i1": -87438.0
+      },
+      "NET_ASSETS": {
+        "2023": 319581.0,
+        "2024": 216604.0,
+        "2025_i1": 144791.0
+      },
+      "CASH_EQ": {
+        "2023": 162000.0,
+        "2024": 161214.0,
+        "2025_i1": 150000.0
+      },
+      "CV_PREF": {
+        "2023": null,
+        "2024": 131564.0,
+        "2025_i1": 138481.0
+      },
+      "TOTAL_ASSETS": {
+        "2023": 586240.0,
+        "2024": 501471.0,
+        "2025_i1": 444298.0
+      },
+      "TOTAL_LIAB": {
+        "2023": 266659.0,
+        "2024": 284867.0,
+        "2025_i1": 299507.0
+      },
+      "CFO": {
+        "2023": -51994.0,
+        "2024": -104894.0,
+        "2024_i1": -67918.0,
+        "2025_i1": -59390.0
+      },
+      "CFI": {
+        "2023": 93956.0,
+        "2024": 96620.0,
+        "2024_i1": 78432.0,
+        "2025_i1": 35742.0
+      },
+      "CFF": {
+        "2023": 90220.0,
+        "2024": 6486.0,
+        "2024_i1": 8463.0,
+        "2025_i1": 12492.0
+      },
+      "END_CASH": {
+        "2023": 162000.0,
+        "2024": 161214.0,
+        "2024_i1": 181346.0,
+        "2025_i1": 150000.0
+      },
+      "cash_burn": {
+        "skipped": false,
+        "reason": null,
+        "END_CASH": 150000.0,
+        "BURN_RATE_MONTHLY": 7423.75,
+        "CASH_RUNWAY_MONTHS": 20.21,
+        "burn_yoy_up_gt_30": false,
+        "burn_basis": "2025_i1/8m"
+      }
+    },
+    "features": {
+      "scoring_mode": "react+rules_floor",
+      "rules_floor": {
+        "rules_score": 50.0,
+        "rules_score_deduped": 70.0,
+        "llm_score": 50.0,
+        "final_score": 70.0,
+        "flags": {
+          "continuous_net_loss": true,
+          "latest_full_year_loss": true,
+          "cfo_persistently_negative": true,
+          "gp_margin_drop_gt_5pp": false,
+          "runway_lt_12": false,
+          "runway_12_24": true,
+          "burn_yoy_up_gt_30": false
+        }
+      },
+      "negative_findings": [
+        {
+          "code": "CONT_LOSS",
+          "description": "連續年度錄得淨虧損且虧損金額增加",
+          "rule_ref": "Profitability Rule"
+        },
+        {
+          "code": "NEG_CFO",
+          "description": "經營活動現金流持續為負且流出規模擴大",
+          "rule_ref": "Cash Flow Rule"
+        },
+        {
+          "code": "ASSET_EROSION",
+          "description": "淨資產規模快速下降",
+          "rule_ref": "Solvency Rule"
+        }
+      ],
+      "bs_reconcile": {
+        "changed": false,
+        "notes": [],
+        "TOTAL_ASSETS_RECONCILED": {},
+        "extract_notes": [
+          "TOTAL_ASSETS ← 非流動資產總值+流動資產總值",
+          "TOTAL_LIAB ← 流動負債總額+非流動負債總額"
+        ]
+      },
+      "dimensions": [
+        {
+          "analysis": "公司處於典型的生物科技研發階段，持續錄得淨虧損。2023年及2024年淨虧損分別為人民幣85.16百萬元及116.92百萬元，虧損規模呈擴大趨勢，反映研發投入增加。",
+          "dimension": "profitability_growth"
+        },
+        {
+          "analysis": "經營活動現金流持續為負，2024年CFO為-104.89百萬元，較2023年的-51.99百萬元大幅增加，現金流出壓力增大。",
+          "dimension": "cash_flow"
+        },
+        {
+          "analysis": "截至2025年第一季度，現金及現金等價物約1.5億元，測算現金跑道約20.21個月。雖然短期流動性尚可，但淨資產從2023年的3.2億元下降至2025年一季度的1.45億元，資產侵蝕明顯。",
+          "dimension": "solvency"
+        },
+        {
+          "analysis": "作為18A生物科技公司，高度依賴外部融資及IPO所得款項以支持候選藥物的臨床開發。目前無產品商業化收入，財務風險集中於研發進度及後續融資能力。",
+          "dimension": "business_context"
+        }
+      ],
+      "llm_analysis": {
+        "dimensions": [
+          {
+            "analysis": "公司處於典型的生物科技研發階段，持續錄得淨虧損。2023年及2024年淨虧損分別為人民幣85.16百萬元及116.92百萬元，虧損規模呈擴大趨勢，反映研發投入增加。",
+            "dimension": "profitability_growth"
+          },
+          {
+            "analysis": "經營活動現金流持續為負，2024年CFO為-104.89百萬元，較2023年的-51.99百萬元大幅增加，現金流出壓力增大。",
+            "dimension": "cash_flow"
+          },
+          {
+            "analysis": "截至2025年第一季度，現金及現金等價物約1.5億元，測算現金跑道約20.21個月。雖然短期流動性尚可，但淨資產從2023年的3.2億元下降至2025年一季度的1.45億元，資產侵蝕明顯。",
+            "dimension": "solvency"
+          },
+          {
+            "analysis": "作為18A生物科技公司，高度依賴外部融資及IPO所得款項以支持候選藥物的臨床開發。目前無產品商業化收入，財務風險集中於研發進度及後續融資能力。",
+            "dimension": "business_context"
+          }
+        ],
+        "negative_findings": [
+          {
+            "code": "CONT_LOSS",
+            "description": "連續年度錄得淨虧損且虧損金額增加",
+            "rule_ref": "Profitability Rule"
+          },
+          {
+            "code": "NEG_CFO",
+            "description": "經營活動現金流持續為負且流出規模擴大",
+            "rule_ref": "Cash Flow Rule"
+          },
+          {
+            "code": "ASSET_EROSION",
+            "description": "淨資產規模快速下降",
+            "rule_ref": "Solvency Rule"
+          }
+        ],
+        "reasoning": "公司為典型的18A生物科技公司，目前無收入，處於高研發投入期。雖然現金跑道約20個月，足以支持短期運營，但淨虧損和CFO流出規模在快速擴大，且淨資產大幅縮水，存在較高的財務依賴風險。",
+        "risk_level": "high",
+        "risk_points": [
+          {
+            "code": "NET_LOSS_INC",
+            "description": "2024年淨虧損達116.92百萬元，較上年增加約38%",
+            "evidence_page": 0,
+            "level": "medium",
+            "metric_value": "-116,922.0",
+            "rule_ref": "Profitability"
+          },
+          {
+            "code": "CFO_NEG",
+            "description": "2024年經營活動現金流淨額為-104.89百萬元，現金流出壓力大",
+            "evidence_page": 80,
+            "level": "medium",
+            "metric_value": "-104,894.0",
+            "rule_ref": "Cash Flow"
+          },
+          {
+            "code": "NET_ASSET_DROP",
+            "description": "淨資產由2023年的319.58百萬元下降至2025年一季度的144.79百萬元",
+            "evidence_page": 0,
+            "level": "medium",
+            "metric_value": "144,791.0",
+            "rule_ref": "Solvency"
+          }
+        ],
+        "risk_score": 70.0,
+        "score_breakdown": [
+          {
+            "code": "CONTINUOUS_LOSS",
+            "delta": 25.0,
+            "rule_ref": "doc§2.1",
+            "evidence": [
+              {
+                "page": 562,
+                "excerpt": "截至12月31日止年度 截至8月31日止八個月 附註 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 其他收入及收益 5 6,664 7,681 12,313 2,626 研發成本 5 (46,663) (74,721) (50,523) (56,178) 行政開支 6 (17,220) (46,192) (16,116) (27,436) 其他開…",
+                "source_type": "text",
+                "field_code": "TBL_IS",
+                "confidence": 1.0
+              }
+            ],
+            "note": "（规则托底上调）",
+            "metric_value": null,
+            "evidence_page": null
+          },
+          {
+            "code": "CFO_NEGATIVE",
+            "delta": 15.0,
+            "evidence_page": 80,
+            "metric_value": "-104,894.0",
+            "note": "CFO持續為負且流出擴大",
+            "rule_ref": "Cash Flow"
+          },
+          {
+            "code": "RUNWAY_MED",
+            "delta": 5.0,
+            "evidence_page": 0,
+            "metric_value": "20.21 months",
+            "note": "現金跑道在12-24個月之間，風險中等",
+            "rule_ref": "Liquidity"
+          },
+          {
+            "code": "ASSET_EROSION",
+            "delta": 10.0,
+            "evidence_page": 0,
+            "metric_value": "144,791.0",
+            "note": "淨資產快速下降",
+            "rule_ref": "Solvency"
+          },
+          {
+            "code": "FIN_DEP",
+            "delta": 5.0,
+            "evidence_page": 498,
+            "metric_value": "N/A",
+            "note": "高度依賴IPO及外部融資",
+            "rule_ref": "Business Context"
+          },
+          {
+            "code": "CASH_RUNWAY_12_24",
+            "delta": 10.0,
+            "rule_ref": "doc§3.4",
+            "evidence": [
+              {
+                "page": 563,
+                "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 8,340 11,820 11,907 使用權資產 15 15,661 12,309 10,525 其他無形資產 16 558 447 587 預付款項、其他應收款項及其他資產 18 531 330 330 按公允價值計入損益（「按公允價值計入損益」）的…",
+                "source_type": "text",
+                "field_code": "TBL_BS",
+                "confidence": 1.0
+              }
+            ],
+            "note": "（规则托底）",
+            "metric_value": null,
+            "evidence_page": null
+          }
+        ],
+        "summary": "翰思艾泰為典型未盈利生物科技公司，研發投入高導致淨虧損及CFO流出擴大，淨資產快速下降，雖現金跑道約20個月，但財務依賴度高，風險等級中等。",
+        "rules_floor": {
+          "rules_score": 50.0,
+          "rules_score_deduped": 70.0,
+          "llm_score": 50.0,
+          "final_score": 70.0,
+          "flags": {
+            "continuous_net_loss": true,
+            "latest_full_year_loss": true,
+            "cfo_persistently_negative": true,
+            "gp_margin_drop_gt_5pp": false,
+            "runway_lt_12": false,
+            "runway_12_24": true,
+            "burn_yoy_up_gt_30": false
+          }
+        }
+      },
+      "model_think_excerpt": "I have all the necessary information:\n- **Profitability**: Unprofitable. Net loss in 2023 (-85,160) and 2024 (-116,922).\n- **Cash Flow**: CFO is negative and increasing in absolute terms (2023: -51,994; 2024: -104,894).\n- **Solvency/Liquidity**:\n    - Cash and equivalents (2025_i1): 150,000.\n    - Cash runway: ~20.21 months.\n    - Net assets are decreasing (2023: 319,581 -> 2024: 216,604 -> 2025_i1: 144,791).\n    - There is a mention of a current liability net amount of 15.2 million RMB, primari",
+      "think_status": "ok",
+      "submit_warnings": [
+        "rules_floor_raised:CONTINUOUS_LOSS",
+        "rules_floor_added:CASH_RUNWAY_12_24"
+      ],
+      "react_turns": 5,
+      "run_log": {
+        "log": "/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/.runtime/analyses/analysis_20260729_000012/logs/翰思艾泰生物医药科技_武汉_股份有限公司_finance_20260729_094031.log",
+        "jsonl": "/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/.runtime/analyses/analysis_20260729_000012/logs/翰思艾泰生物医药科技_武汉_股份有限公司_finance_20260729_094031.jsonl"
+      }
+    },
+    "gates": {
+      "is_unprofitable": true,
+      "latest_full_year_loss": true,
+      "continuous_net_loss": true,
+      "net_series": {
+        "2023": -85160.0,
+        "2024": -116922.0
+      },
+      "profitability_known": true,
+      "profitability_status": "unprofitable",
+      "profitability_basis": "NET_LOSS/年內利潤 series; positive=profit",
+      "issuer_type": "biotech",
+      "is_biotech_18a": true,
+      "skip_3_4": false,
+      "skip_3_4_reason": null,
+      "skip_2_4": false,
+      "skip_2_4_reason": null,
+      "skip_3_5": false,
+      "skip_3_5_reason": null
+    },
+    "evidence_summary": {
+      "table_meta": {
+        "TBL_IS": {
+          "page": 562,
+          "years": [
+            "2023",
+            "2024",
+            "2024_i1",
+            "2025_i1"
+          ],
+          "category": "text",
+          "n_hits": 1,
+          "excerpt": "截至12月31日止年度 截至8月31日止八個月 附註 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 其他收入及收益 5 6,664 7,681 12,313 2,626 研發成本 5 (46,663) (74,721) (50,523) (56,178) 行政開支 6 (17,220) (46,192) (16,116) (27,436) 其他開…",
+          "source_type": "text"
+        },
+        "TBL_BS": {
+          "page": 563,
+          "years": [
+            "2023",
+            "2024",
+            "2025_i1"
+          ],
+          "category": "text",
+          "n_hits": 1,
+          "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 8,340 11,820 11,907 使用權資產 15 15,661 12,309 10,525 其他無形資產 16 558 447 587 預付款項、其他應收款項及其他資產 18 531 330 330 按公允價值計入損益（「按公允價值計入損益」）的…",
+          "source_type": "text"
+        },
+        "TBL_CF": {
+          "page": 569,
+          "years": [
+            "2023",
+            "2024",
+            "2024_i1",
+            "2025_i1"
+          ],
+          "category": "table",
+          "n_hits": 1,
+          "excerpt": "截至12月31日止年度 截至8月31日止八個月 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 經營活動所得現金流量 除税前虧損 (93,423) (122,820) (60,417) (99,933) 就下列各項作出調整： 利息開支 8 2,280 9,379 5,853 7,532 銀行利息收入 5 (1,867) (1,618) (350) …",
+          "source_type": "table"
+        },
+        "TBL_BS_COMPANY": {
+          "page": 572,
+          "years": [
+            "2023",
+            "2024",
+            "2025_i1"
+          ],
+          "category": "text",
+          "n_hits": 1,
+          "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 6,405 10,099 10,393 使用權資產 15 15,452 12,309 10,214 於附屬公司的投資 17 78,438 78,438 78,438 其他無形資產 18 - - 214 預付款項、其他應收款項及其他資產 18 531 - …",
+          "source_type": "text"
+        }
+      },
+      "evidence_keys": [
+        "TBL_IS",
+        "TBL_BS",
+        "TBL_CF",
+        "TBL_BS_COMPANY"
+      ],
+      "snippets": [
+        {
+          "field_code": "TBL_IS",
+          "page": 562,
+          "source_type": "text",
+          "excerpt": "截至12月31日止年度 截至8月31日止八個月 附註 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 其他收入及收益 5 6,664 7,681 12,313 2,626 研發成本 5 (46,663) (74,721) (50,523) (56,178) 行政開支 6 (17,220) (46,192) (16,116) (27,436) 其他開…"
+        },
+        {
+          "field_code": "TBL_BS",
+          "page": 563,
+          "source_type": "text",
+          "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 8,340 11,820 11,907 使用權資產 15 15,661 12,309 10,525 其他無形資產 16 558 447 587 預付款項、其他應收款項及其他資產 18 531 330 330 按公允價值計入損益（「按公允價值計入損益」）的…"
+        },
+        {
+          "field_code": "TBL_CF",
+          "page": 569,
+          "source_type": "table",
+          "excerpt": "截至12月31日止年度 截至8月31日止八個月 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 經營活動所得現金流量 除税前虧損 (93,423) (122,820) (60,417) (99,933) 就下列各項作出調整： 利息開支 8 2,280 9,379 5,853 7,532 銀行利息收入 5 (1,867) (1,618) (350) …"
+        },
+        {
+          "field_code": "TBL_BS_COMPANY",
+          "page": 572,
+          "source_type": "text",
+          "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 6,405 10,099 10,393 使用權資產 15 15,452 12,309 10,214 於附屬公司的投資 17 78,438 78,438 78,438 其他無形資產 18 - - 214 預付款項、其他應收款項及其他資產 18 531 - …"
+        }
+      ],
+      "section_evidence_hits": [
+        {
+          "page": 80,
+          "excerpt": "截至2023年及2024年12月31日止年度以及截至2024年及2025年8月31日止八個月，我們經營活動所用現金流量淨額分別為人民幣52.0百萬元、人民幣104.9百萬元、人民幣67.9百萬元及人民幣59.4百萬元。我們的經營活動可能會不時產生現金流出淨額。有關詳情，請參閱本招股章程「財務資料－流動資金及資本資源－經營活動所用現金流量淨額」。我們對資本資源足以支持營運的時間段的預測屬於前瞻性陳述，涉及風險及不確定性。我們作出該估計所依據的假設可能會被證明有誤，且我們耗盡現有資本資源的速度可能比我們目前的預期更快。倘若我們未能維持充足的營運資金或獲得充足的融資以滿足我們的資金需求，我們可能無法按計劃繼續營運，不能履行付款義務及無法滿足資本開支需求，從而可能對我們的業務、財務狀況、經營業績及前景造成重大不利影響。",
+          "section_id": "risk_factors",
+          "section_title": "風險因素",
+          "source_type": "text",
+          "category": "text",
+          "bbox": [
+            337,
+            813,
+            2133,
+            1551
+          ],
+          "score": 3.386,
+          "match_sources": [
+            "section",
+            "grep",
+            "bm25"
+          ],
+          "matched_terms": [
+            "融資",
+            "資金需求"
+          ],
+          "element_index": 3
+        },
+        {
+          "page": 498,
+          "excerpt": "我們的主要現金用途乃為候選藥物的臨床前及臨床開發、行政開支及其他經常性開支提供資金。截至2023年及2024年12月31日止年度以及截至2024年及2025年8月31日止八個月，我們經營活動所用現金流淨額分別為人民幣52.0百萬元、人民幣104.9百萬元、人民幣67.9百萬元及人民幣59.4百萬元，乃主要由於我們於往績記錄期間產生大量研發成本及管理開支。我們的經營現金流量將繼續受到研發成本的影響。於往績記錄期間及直至最後實際可行日期，我們主要通過向樂普轉讓我們於泰州翰中的股權以及首次公開發售前投資滿足我們的營運資金需求。截至最後實際可行日期，我們已獲得額外承諾銀行融資總額人民幣170.0百萬元，其中人民幣120.0百萬元未動用。",
+          "section_id": "financial_information",
+          "section_title": "財務資料",
+          "source_type": "text",
+          "category": "text",
+          "bbox": [
+            337,
+            1670,
+            2133,
+            2259
+          ],
+          "score": 3.3818,
+          "match_sources": [
+            "section",
+            "grep",
+            "bm25"
+          ],
+          "matched_terms": [
+            "融資",
+            "資金需求"
+          ],
+          "element_index": 7
+        },
+        {
+          "page": 80,
+          "excerpt": "截至2025年8月31日，我們錄得流動負債淨額人民幣15.2百萬元，此乃主要由於普通股贖回負債人民幣138.5百萬元已入賬為流動負債，而其贖回權將於上市完成前一日自動終止。流動負債淨額狀況可能使我們面臨流動性不足的風險。此進而使我們須尋求充足的融資管道。倘我們無法維持充足的營運資金或取得足夠的股權或債務融資以滿足我們的資金需求，我們可能無法按計劃持續運營，並被迫縮減營運規模，此可能會對我們的業務、財務狀況、經營業績及前景產生重大不利影響。",
+          "section_id": "risk_factors",
+          "section_title": "風險因素",
+          "source_type": "text",
+          "category": "text",
+          "bbox": [
+            339,
+            1789,
+            2133,
+            2229
+          ],
+          "score": 3.3721,
+          "match_sources": [
+            "section",
+            "grep",
+            "bm25"
+          ],
+          "matched_terms": [
+            "融資",
+            "資金需求"
+          ],
+          "element_index": 5
+        },
+        {
+          "page": 498,
+          "excerpt": "我們的管理層密切監控現金及現金結餘的用途，並致力為我們的營運維持穩健的流動資金狀況。展望未來，我們相信全球發售所得款項淨額、來自潛在合作安排的資金以及候選藥物商業化後我們營運所產生的現金將共同滿足我們的流動資金需求。隨著我們業務的不斷擴張，我們可能需要通過公開或私人發售、債務融資、合作安排或",
+          "section_id": "financial_information",
+          "section_title": "財務資料",
+          "source_type": "text",
+          "category": "text",
+          "bbox": [
+            337,
+            2345,
+            2133,
+            2633
+          ],
+          "score": 3.3646,
+          "match_sources": [
+            "section",
+            "grep",
+            "bm25"
+          ],
+          "matched_terms": [
+            "融資",
+            "資金需求"
+          ],
+          "element_index": 8
+        },
+        {
+          "page": 501,
+          "excerpt": "融資活動所得現金流量淨額",
+          "section_id": "financial_information",
+          "section_title": "財務資料",
+          "source_type": "text",
+          "category": "title",
+          "bbox": [
+            342,
+            585,
+            930,
+            648
+          ],
+          "score": 2.5512,
+          "match_sources": [
+            "section",
+            "grep",
+            "bm25"
+          ],
+          "matched_terms": [
+            "融資"
+          ],
+          "element_index": 2
+        }
+      ],
+      "section_routes": [
+        {
+          "intent": "financing_dependency",
+          "query": "融資依賴、資金來源、未來資金需求",
+          "route": [
+            {
+              "section_id": "history_and_corporate_structure",
+              "section_title": "歷史、發展及公司架構",
+              "start_page": 241,
+              "end_page": 276,
+              "confidence": 0.95
+            },
+            {
+              "section_id": "financial_information",
+              "section_title": "財務資料",
+              "start_page": 474,
+              "end_page": 507,
+              "confidence": 0.95
+            },
+            {
+              "section_id": "risk_factors",
+              "section_title": "風險因素",
+              "start_page": 73,
+              "end_page": 126,
+              "confidence": 0.95
+            }
+          ],
+          "source": "section_parse:/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json"
+        }
+      ],
+      "run_log": {
+        "log": "/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/.runtime/analyses/analysis_20260729_000012/logs/翰思艾泰生物医药科技_武汉_股份有限公司_finance_20260729_094031.log",
+        "jsonl": "/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/.runtime/analyses/analysis_20260729_000012/logs/翰思艾泰生物医药科技_武汉_股份有限公司_finance_20260729_094031.jsonl"
+      }
+    },
+    "trace": {
+      "tool_calls": [
+        {
+          "turn": 1,
+          "tool": "retrieve_finance",
+          "arguments": {
+            "reason": "開始財務穿透分析，首先需要獲取三張財務主表（損益表、資產負債表、現金流量表）。"
+          },
+          "observation": {
+            "ok": true,
+            "source": "offline:/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_task_expert_20260728_000008_finance.json",
+            "tables": [
+              "TBL_IS",
+              "TBL_BS",
+              "TBL_BS_COMPANY",
+              "TBL_CF"
+            ],
+            "skipped_fields": 0,
+            "hint": "下一步可调用 extract_metrics"
+          },
+          "duration_ms": 6264
+        },
+        {
+          "turn": 2,
+          "tool": "extract_metrics",
+          "arguments": {
+            "reason": "從主表中抽取標準財務指標，以便後續計算門控和風險評分。"
+          },
+          "observation": {
+            "ok": true,
+            "metric_keys": [
+              "OTHER_INCOME",
+              "RD_EXP",
+              "SGA",
+              "NET_LOSS",
+              "NET_ASSETS",
+              "CASH_EQ",
+              "CV_PREF",
+              "TOTAL_ASSETS",
+              "TOTAL_LIAB",
+              "CFO",
+              "CFI",
+              "CFF",
+              "END_CASH"
+            ],
+            "years": [
+              "2023",
+              "2024"
+            ],
+            "metrics_summary": {
+              "OTHER_INCOME": {
+                "2023": 6664.0,
+                "2024": 7681.0,
+                "2024_i1": 12313.0,
+                "2025_i1": 2626.0
+              },
+              "NET_PROFIT_OR_LOSS": {
+                "2023": -85160.0,
+                "2024": -116922.0,
+                "2024_i1": -48420.0,
+                "2025_i1": -87438.0
+              },
+              "CFO": {
+                "2023": -51994.0,
+                "2024": -104894.0,
+                "2024_i1": -67918.0,
+                "2025_i1": -59390.0
+              },
+              "CASH_EQ": {
+                "2023": 162000.0,
+                "2024": 161214.0,
+                "2025_i1": 150000.0
+              },
+              "END_CASH": {
+                "2023": 162000.0,
+                "2024": 161214.0,
+                "2024_i1": 181346.0,
+                "2025_i1": 150000.0
+              },
+              "TOTAL_ASSETS": {
+                "2023": 586240.0,
+                "2024": 501471.0,
+                "2025_i1": 444298.0
+              },
+              "TOTAL_LIAB": {
+                "2023": 266659.0,
+                "2024": 284867.0,
+                "2025_i1": 299507.0
+              },
+              "NET_ASSETS": {
+                "2023": 319581.0,
+                "2024": 216604.0,
+                "2025_i1": 144791.0
+              }
+            },
+            "metric_note": "NET_PROFIT_OR_LOSS 为底线利润/亏损字段；正数=盈利，负数=亏损。",
+            "bs_reconcile": {
+              "changed": false,
+              "note": null
+            },
+            "hint": "下一步可调用 derive_gates"
+          },
+          "duration_ms": 1147
+        },
+        {
+          "turn": 3,
+          "tool": "derive_gates",
+          "arguments": {
+            "reason": "根據提取的指標計算盈利門控和生物科技公司門控，確定是否需要計算現金跑道。"
+          },
+          "observation": {
+            "ok": true,
+            "gates": {
+              "is_unprofitable": true,
+              "continuous_net_loss": true,
+              "latest_full_year_loss": true,
+              "skip_3_4": false,
+              "skip_3_4_reason": null,
+              "skip_2_4": false,
+              "issuer_type": "biotech",
+              "is_biotech_18a": true,
+              "net_series": {
+                "2023": -85160.0,
+                "2024": -116922.0
+              },
+              "profitability_basis": "NET_LOSS/年內利潤 series; positive=profit",
+              "profitability_known": true,
+              "profitability_status": "unprofitable"
+            },
+            "fast_path": {
+              "eligible": false,
+              "reason": null
+            },
+            "hint": "若未盈利可 calc_cash_runway；非主表主题可 retrieve_context_evidence；否则 submit"
+          },
+          "duration_ms": 1416
+        },
+        {
+          "turn": 4,
+          "tool": "calc_cash_runway",
+          "arguments": {
+            "reason": "公司處於持續虧損狀態且為生物科技公司，需測算現金跑道以評估其生存能力。"
+          },
+          "observation": {
+            "ok": true,
+            "cash_burn": {
+              "skipped": false,
+              "reason": null,
+              "CASH_RUNWAY_MONTHS": 20.21,
+              "BURN_RATE_MONTHLY": 7423.75,
+              "END_CASH": 150000.0
+            }
+          },
+          "duration_ms": 5962
+        },
+        {
+          "turn": 4,
+          "tool": "retrieve_context_evidence",
+          "arguments": {
+            "intent": "financing_dependency",
+            "query": "融資依賴、資金來源、未來資金需求",
+            "reason": "生物科技公司高度依賴外部融資，需確認其資金來源及對融資的依賴程度。"
+          },
+          "observation": {
+            "ok": true,
+            "doc_id": "task_expert_20260728_000008",
+            "intent": "financing_dependency",
+            "query": "融資依賴、資金來源、未來資金需求",
+            "n": 5,
+            "route": [
+              {
+                "section_id": "history_and_corporate_structure",
+                "section_title": "歷史、發展及公司架構",
+                "start_page": 241,
+                "end_page": 276,
+                "confidence": 0.95
+              },
+              {
+                "section_id": "financial_information",
+                "section_title": "財務資料",
+                "start_page": 474,
+                "end_page": 507,
+                "confidence": 0.95
+              },
+              {
+                "section_id": "risk_factors",
+                "section_title": "風險因素",
+                "start_page": 73,
+                "end_page": 126,
+                "confidence": 0.95
+              }
+            ],
+            "hits": [
+              {
+                "page": 80,
+                "section_id": "risk_factors",
+                "source_type": "text",
+                "score": 3.386,
+                "matched_terms": [
+                  "融資",
+                  "資金需求"
+                ],
+                "excerpt": "截至2023年及2024年12月31日止年度以及截至2024年及2025年8月31日止八個月，我們經營活動所用現金流量淨額分別為人民幣52.0百萬元、人民幣104.9百萬元、人民幣67.9百萬元及人民幣59.4百萬元。我們的經營活動可能會不"
+              },
+              {
+                "page": 498,
+                "section_id": "financial_information",
+                "source_type": "text",
+                "score": 3.3818,
+                "matched_terms": [
+                  "融資",
+                  "資金需求"
+                ],
+                "excerpt": "我們的主要現金用途乃為候選藥物的臨床前及臨床開發、行政開支及其他經常性開支提供資金。截至2023年及2024年12月31日止年度以及截至2024年及2025年8月31日止八個月，我們經營活動所用現金流淨額分別為人民幣52.0百萬元、人民幣1"
+              },
+              {
+                "page": 80,
+                "section_id": "risk_factors",
+                "source_type": "text",
+                "score": 3.3721,
+                "matched_terms": [
+                  "融資",
+                  "資金需求"
+                ],
+                "excerpt": "截至2025年8月31日，我們錄得流動負債淨額人民幣15.2百萬元，此乃主要由於普通股贖回負債人民幣138.5百萬元已入賬為流動負債，而其贖回權將於上市完成前一日自動終止。流動負債淨額狀況可能使我們面臨流動性不足的風險。此進而使我們須尋求充"
+              },
+              {
+                "page": 498,
+                "section_id": "financial_information",
+                "source_type": "text",
+                "score": 3.3646,
+                "matched_terms": [
+                  "融資",
+                  "資金需求"
+                ],
+                "excerpt": "我們的管理層密切監控現金及現金結餘的用途，並致力為我們的營運維持穩健的流動資金狀況。展望未來，我們相信全球發售所得款項淨額、來自潛在合作安排的資金以及候選藥物商業化後我們營運所產生的現金將共同滿足我們的流動資金需求。隨著我們業務的不斷擴張，"
+              },
+              {
+                "page": 501,
+                "section_id": "financial_information",
+                "source_type": "text",
+                "score": 2.5512,
+                "matched_terms": [
+                  "融資"
+                ],
+                "excerpt": "融資活動所得現金流量淨額"
+              }
+            ],
+            "hint": "完整证据已保存到 state；submit 时引用 page/section/excerpt 即可"
+          },
+          "duration_ms": 5962
+        },
+        {
+          "turn": 5,
+          "tool": "submit_finance_report",
+          "arguments": {
+            "dimensions": [
+              {
+                "analysis": "公司處於典型的生物科技研發階段，持續錄得淨虧損。2023年及2024年淨虧損分別為人民幣85.16百萬元及116.92百萬元，虧損規模呈擴大趨勢，反映研發投入增加。",
+                "dimension": "profitability_growth"
+              },
+              {
+                "analysis": "經營活動現金流持續為負，2024年CFO為-104.89百萬元，較2023年的-51.99百萬元大幅增加，現金流出壓力增大。",
+                "dimension": "cash_flow"
+              },
+              {
+                "analysis": "截至2025年第一季度，現金及現金等價物約1.5億元，測算現金跑道約20.21個月。雖然短期流動性尚可，但淨資產從2023年的3.2億元下降至2025年一季度的1.45億元，資產侵蝕明顯。",
+                "dimension": "solvency"
+              },
+              {
+                "analysis": "作為18A生物科技公司，高度依賴外部融資及IPO所得款項以支持候選藥物的臨床開發。目前無產品商業化收入，財務風險集中於研發進度及後續融資能力。",
+                "dimension": "business_context"
+              }
+            ],
+            "negative_findings": [
+              {
+                "code": "CONT_LOSS",
+                "description": "連續年度錄得淨虧損且虧損金額增加",
+                "rule_ref": "Profitability Rule"
+              },
+              {
+                "code": "NEG_CFO",
+                "description": "經營活動現金流持續為負且流出規模擴大",
+                "rule_ref": "Cash Flow Rule"
+              },
+              {
+                "code": "ASSET_EROSION",
+                "description": "淨資產規模快速下降",
+                "rule_ref": "Solvency Rule"
+              }
+            ],
+            "reasoning": "公司為典型的18A生物科技公司，目前無收入，處於高研發投入期。雖然現金跑道約20個月，足以支持短期運營，但淨虧損和CFO流出規模在快速擴大，且淨資產大幅縮水，存在較高的財務依賴風險。",
+            "risk_level": "medium",
+            "risk_points": [
+              {
+                "code": "NET_LOSS_INC",
+                "description": "2024年淨虧損達116.92百萬元，較上年增加約38%",
+                "evidence_page": 0,
+                "level": "medium",
+                "metric_value": "-116,922.0",
+                "rule_ref": "Profitability"
+              },
+              {
+                "code": "CFO_NEG",
+                "description": "2024年經營活動現金流淨額為-104.89百萬元，現金流出壓力大",
+                "evidence_page": 80,
+                "level": "medium",
+                "metric_value": "-104,894.0",
+                "rule_ref": "Cash Flow"
+              },
+              {
+                "code": "NET_ASSET_DROP",
+                "description": "淨資產由2023年的319.58百萬元下降至2025年一季度的144.79百萬元",
+                "evidence_page": 0,
+                "level": "medium",
+                "metric_value": "144,791.0",
+                "rule_ref": "Solvency"
+              }
+            ],
+            "risk_score": 50,
+            "score_breakdown": [
+              {
+                "code": "CONT_LOSS",
+                "delta": 15,
+                "evidence_page": 0,
+                "metric_value": "-116,922.0",
+                "note": "持續虧損且金額增加",
+                "rule_ref": "Profitability"
+              },
+              {
+                "code": "NEG_CFO",
+                "delta": 15,
+                "evidence_page": 80,
+                "metric_value": "-104,894.0",
+                "note": "CFO持續為負且流出擴大",
+                "rule_ref": "Cash Flow"
+              },
+              {
+                "code": "RUNWAY_MED",
+                "delta": 5,
+                "evidence_page": 0,
+                "metric_value": "20.21 months",
+                "note": "現金跑道在12-24個月之間，風險中等",
+                "rule_ref": "Liquidity"
+              },
+              {
+                "code": "ASSET_EROSION",
+                "delta": 10,
+                "evidence_page": 0,
+                "metric_value": "144,791.0",
+                "note": "淨資產快速下降",
+                "rule_ref": "Solvency"
+              },
+              {
+                "code": "FIN_DEP",
+                "delta": 5,
+                "evidence_page": 498,
+                "metric_value": "N/A",
+                "note": "高度依賴IPO及外部融資",
+                "rule_ref": "Business Context"
+              }
+            ],
+            "summary": "翰思艾泰為典型未盈利生物科技公司，研發投入高導致淨虧損及CFO流出擴大，淨資產快速下降，雖現金跑道約20個月，但財務依賴度高，風險等級中等。"
+          },
+          "observation": {
+            "ok": true,
+            "finished": true,
+            "risk_score": 70.0,
+            "risk_level": "high",
+            "warnings": [
+              "rules_floor_raised:CONTINUOUS_LOSS",
+              "rules_floor_added:CASH_RUNWAY_12_24"
+            ],
+            "summary": "翰思艾泰為典型未盈利生物科技公司，研發投入高導致淨虧損及CFO流出擴大，淨資產快速下降，雖現金跑道約20個月，但財務依賴度高，風險等級中等。",
+            "rules_floor": {
+              "rules_score": 50.0,
+              "rules_score_deduped": 70.0,
+              "llm_score": 50.0,
+              "final_score": 70.0,
+              "flags": {
+                "continuous_net_loss": true,
+                "latest_full_year_loss": true,
+                "cfo_persistently_negative": true,
+                "gp_margin_drop_gt_5pp": false,
+                "runway_lt_12": false,
+                "runway_12_24": true,
+                "burn_yoy_up_gt_30": false
+              }
+            }
+          },
+          "duration_ms": 22662
+        }
+      ],
+      "elapsed_sec": 38.149,
+      "scoring_mode": "react+rules_floor",
+      "structured_reasoning": "公司為典型的18A生物科技公司，目前無收入，處於高研發投入期。雖然現金跑道約20個月，足以支持短期運營，但淨虧損和CFO流出規模在快速擴大，且淨資產大幅縮水，存在較高的財務依賴風險。",
+      "n_turns": 5,
+      "run_log": {
+        "log": "/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/.runtime/analyses/analysis_20260729_000012/logs/翰思艾泰生物医药科技_武汉_股份有限公司_finance_20260729_094031.log",
+        "jsonl": "/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/.runtime/analyses/analysis_20260729_000012/logs/翰思艾泰生物医药科技_武汉_股份有限公司_finance_20260729_094031.jsonl"
+      }
+    },
+    "summary": "翰思艾泰為典型未盈利生物科技公司，研發投入高導致淨虧損及CFO流出擴大，淨資產快速下降，雖現金跑道約20個月，但財務依賴度高，風險等級中等。"
+  },
+  "legal": {
+    "agent": "legal",
+    "doc_id": "task_expert_20260728_000008",
+    "risk_score": 51.0,
+    "risk_level": "medium",
+    "score_breakdown": [
+      {
+        "code": "REDEMPTION_MEDIUM",
+        "delta": 12.0,
+        "rule_ref": "doc§3.1",
+        "evidence": [
+          {
+            "page": 605,
+            "excerpt": "根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售，",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.080638
+          },
+          {
+            "page": 605,
+            "excerpt": "倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073964
+          },
+          {
+            "page": 574,
+            "excerpt": "儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073692
+          },
+          {
+            "page": 582,
+            "excerpt": "對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073576
+          },
+          {
+            "page": 604,
+            "excerpt": "2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。",
+            "source_type": "table",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073463
+          }
+        ],
+        "note": null,
+        "metric_value": null,
+        "evidence_page": null
+      },
+      {
+        "code": "RELATED_PARTY_DISCLOSURE",
+        "delta": 15.0,
+        "rule_ref": "doc§3.2",
+        "evidence": [
+          {
+            "page": 30,
+            "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.050298
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.038787
+          },
+          {
+            "page": 30,
+            "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.050298
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.038787
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 5.355
+          }
+        ],
+        "note": "存在关联交易披露",
+        "metric_value": null,
+        "evidence_page": null
+      },
+      {
+        "code": "CONCENTRATION_DISCLOSURE",
+        "delta": 12.0,
+        "rule_ref": "doc§3.3",
+        "evidence": [
+          {
+            "page": 28,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.073236
+          },
+          {
+            "page": 28,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.073236
+          },
+          {
+            "page": 387,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 2.3748
+          },
+          {
+            "page": 29,
+            "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.048537
+          },
+          {
+            "page": 29,
+            "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.048042
+          }
+        ],
+        "note": "存在客户/供应商集中度披露",
+        "metric_value": null,
+        "evidence_page": null
+      },
+      {
+        "code": "PIPELINE_DISCLOSURE",
+        "delta": 12.0,
+        "rule_ref": "doc§3.5",
+        "evidence": [
+          {
+            "page": 16,
+            "excerpt": "除HX301乃自Onconova Therapeutics, Inc.授權引進外，我們的管線候選產品全部由我們自主研發。我們構建產品管線，旨在利用先天及適應性免疫實現潛在協同效應。我們的產品管線旨在解決現有檢查點抑制劑免疫療法的局限性，包括免疫抑制性腫瘤微環境致使「冷腫瘤」響應有限以及其他未獲滿足的醫療需求，從而為各種癌症患者及其他疾病適應症患者帶來臨床裨益。截至最後實際可行日期，我們已建立由10",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.065458
+          },
+          {
+            "page": 17,
+            "excerpt": "我們根據相關方案及批准進行HX009的臨床研究。於2024年9月，我們的中國法律顧問連同獨家保薦人及其法律顧問在北京與國家藥監局藥審中心臨床試驗管理辦公室的審查員進行了面對面訪談，期間已確認（其中包括）我們已完成一項常規I期臨床研究，且HX009的國家藥監局一次性傘式批准允許本公司在III期研究之前進行HX009-I-01中國研究下的臨床研究，而無需再次獲得國家藥監局的監管批准。有關詳情請參閱本招",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.06533
+          },
+          {
+            "page": 20,
+            "excerpt": "我們的核心產品HX009是一種同時靶向CD47及PD-1的雙特異性抗體融合蛋白。根據弗若斯特沙利文報告，截至最後實際可行日期，HX009的臨床試驗進展在同類CD47靶向雙特異性抗體／雙功能融合蛋白產品中處於全球領先地位。",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.051811
+          },
+          {
+            "page": 27,
+            "excerpt": "我們的研發團隊通常負責核心產品及其他管線產品的全球開發。我們的研發團隊有能力在中國及其他司法權區同時開展不同開發階段的臨床項目。彼等平均擁有10年左右的行業工作經驗，且幾乎全部擁有本科或以上學歷。就自主發現及開發的候選藥物而言，我們與臨床開發團隊共同開展藥物發現、質量保證及臨床活動，其中包括：(i)協調所有臨床開發工作；(ii)制定臨床試驗的關鍵要素；(iii)安排及協調合適的CRO參與臨床試驗，",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.050864
+          },
+          {
+            "page": 14,
+            "excerpt": "截至最後實際可行日期，我們已開發十種候選藥物組成的管線，包括我們的核心產品HX009及兩種主要產品HX044及HX301，其中有八種針對腫瘤科的候選藥物及兩種針對自身免疫疾病的候選藥物。截至最後實際可行日期，我們的核心產品以及主要產品分別在中國及澳大利亞進行臨床試驗。下圖概述截至最後實際可行日期我們管線產品的開發狀態。",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.05027
+          }
+        ],
+        "note": "存在核心产品/管线进度披露",
+        "metric_value": null,
+        "evidence_page": null
+      }
+    ],
+    "risk_points": [
+      {
+        "code": "REDEMPTION_MEDIUM",
+        "level": "medium",
+        "rule_ref": "doc§3.1",
+        "value": null,
+        "description": "REDEMPTION_MEDIUM",
+        "evidence": [
+          {
+            "page": 605,
+            "excerpt": "根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售，",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.080638
+          },
+          {
+            "page": 605,
+            "excerpt": "倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073964
+          },
+          {
+            "page": 574,
+            "excerpt": "儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073692
+          },
+          {
+            "page": 582,
+            "excerpt": "對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073576
+          },
+          {
+            "page": 604,
+            "excerpt": "2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。",
+            "source_type": "table",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073463
+          }
+        ]
+      },
+      {
+        "code": "RELATED_PARTY_DISCLOSURE",
+        "level": "medium",
+        "rule_ref": "doc§3.2",
+        "value": null,
+        "description": "存在关联交易披露",
+        "evidence": [
+          {
+            "page": 30,
+            "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.050298
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.038787
+          },
+          {
+            "page": 30,
+            "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.050298
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.038787
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 5.355
+          }
+        ]
+      },
+      {
+        "code": "CONCENTRATION_DISCLOSURE",
+        "level": "medium",
+        "rule_ref": "doc§3.3",
+        "value": null,
+        "description": "存在客户/供应商集中度披露",
+        "evidence": [
+          {
+            "page": 28,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.073236
+          },
+          {
+            "page": 28,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.073236
+          },
+          {
+            "page": 387,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 2.3748
+          },
+          {
+            "page": 29,
+            "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.048537
+          },
+          {
+            "page": 29,
+            "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.048042
+          }
+        ]
+      },
+      {
+        "code": "PIPELINE_DISCLOSURE",
+        "level": "medium",
+        "rule_ref": "doc§3.5",
+        "value": null,
+        "description": "存在核心产品/管线进度披露",
+        "evidence": [
+          {
+            "page": 16,
+            "excerpt": "除HX301乃自Onconova Therapeutics, Inc.授權引進外，我們的管線候選產品全部由我們自主研發。我們構建產品管線，旨在利用先天及適應性免疫實現潛在協同效應。我們的產品管線旨在解決現有檢查點抑制劑免疫療法的局限性，包括免疫抑制性腫瘤微環境致使「冷腫瘤」響應有限以及其他未獲滿足的醫療需求，從而為各種癌症患者及其他疾病適應症患者帶來臨床裨益。截至最後實際可行日期，我們已建立由10",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.065458
+          },
+          {
+            "page": 17,
+            "excerpt": "我們根據相關方案及批准進行HX009的臨床研究。於2024年9月，我們的中國法律顧問連同獨家保薦人及其法律顧問在北京與國家藥監局藥審中心臨床試驗管理辦公室的審查員進行了面對面訪談，期間已確認（其中包括）我們已完成一項常規I期臨床研究，且HX009的國家藥監局一次性傘式批准允許本公司在III期研究之前進行HX009-I-01中國研究下的臨床研究，而無需再次獲得國家藥監局的監管批准。有關詳情請參閱本招",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.06533
+          },
+          {
+            "page": 20,
+            "excerpt": "我們的核心產品HX009是一種同時靶向CD47及PD-1的雙特異性抗體融合蛋白。根據弗若斯特沙利文報告，截至最後實際可行日期，HX009的臨床試驗進展在同類CD47靶向雙特異性抗體／雙功能融合蛋白產品中處於全球領先地位。",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.051811
+          },
+          {
+            "page": 27,
+            "excerpt": "我們的研發團隊通常負責核心產品及其他管線產品的全球開發。我們的研發團隊有能力在中國及其他司法權區同時開展不同開發階段的臨床項目。彼等平均擁有10年左右的行業工作經驗，且幾乎全部擁有本科或以上學歷。就自主發現及開發的候選藥物而言，我們與臨床開發團隊共同開展藥物發現、質量保證及臨床活動，其中包括：(i)協調所有臨床開發工作；(ii)制定臨床試驗的關鍵要素；(iii)安排及協調合適的CRO參與臨床試驗，",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.050864
+          },
+          {
+            "page": 14,
+            "excerpt": "截至最後實際可行日期，我們已開發十種候選藥物組成的管線，包括我們的核心產品HX009及兩種主要產品HX044及HX301，其中有八種針對腫瘤科的候選藥物及兩種針對自身免疫疾病的候選藥物。截至最後實際可行日期，我們的核心產品以及主要產品分別在中國及澳大利亞進行臨床試驗。下圖概述截至最後實際可行日期我們管線產品的開發狀態。",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.05027
+          }
+        ]
+      }
+    ],
+    "metrics": {},
+    "features": {
+      "3.1": {
+        "exists": true,
+        "trigger_condition": null,
+        "redemption_price_or_rate": null,
+        "amount": null,
+        "remaining_months": null,
+        "redemption_high": false,
+        "redemption_medium": true,
+        "evidence": [
+          {
+            "page": 605,
+            "excerpt": "根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售，",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.080638
+          },
+          {
+            "page": 605,
+            "excerpt": "倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073964
+          },
+          {
+            "page": 574,
+            "excerpt": "儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073692
+          },
+          {
+            "page": 582,
+            "excerpt": "對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。",
+            "source_type": "text",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073576
+          },
+          {
+            "page": 604,
+            "excerpt": "2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。",
+            "source_type": "table",
+            "field_code": "REDEMPTION_CLAUSE",
+            "confidence": 0.073463
+          }
+        ],
+        "evidence_strength": "high",
+        "search_log": {
+          "keywords_tried": [
+            "赎回",
+            "贖回",
+            "对赌",
+            "對賭",
+            "回购",
+            "回購",
+            "优先股",
+            "優先股",
+            "领售",
+            "領售",
+            "撤资",
+            "撤資",
+            "贖回權",
+            "可換股",
+            "可转换可赎回",
+            "可轉換可贖回",
+            "股东协议",
+            "股東協議",
+            "特别权利",
+            "特別權利",
+            "赎回权终止",
+            "特別權利終止"
+          ],
+          "pages_scanned": [
+            80,
+            262,
+            271,
+            574,
+            582,
+            604,
+            605
+          ],
+          "raw_hits": 13,
+          "filtered_noise": 0,
+          "strong_hits": 13,
+          "note": "命中对赌/赎回相关披露"
+        }
+      },
+      "3.2": {
+        "exists": true,
+        "ratio_pct": 5.0,
+        "related_party_ratio_gt_30": false,
+        "related_party_rising": false,
+        "evidence": [
+          {
+            "page": 30,
+            "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.050298
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.038787
+          },
+          {
+            "page": 30,
+            "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.050298
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 0.038787
+          },
+          {
+            "page": 415,
+            "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+            "source_type": "text",
+            "field_code": "RELATED_PARTY",
+            "confidence": 5.355
+          }
+        ],
+        "evidence_strength": "high",
+        "theme_filter": {
+          "prefer_hits": 12,
+          "weak_hits": 0,
+          "noise_excluded": true
+        }
+      },
+      "3.3": {
+        "exists": true,
+        "top1_customer_pct": null,
+        "top5_customer_pct": null,
+        "top1_supplier_pct": 20.4,
+        "top5_supplier_pct": 20.4,
+        "concentration_high": false,
+        "evidence": [
+          {
+            "page": 28,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.073236
+          },
+          {
+            "page": 28,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.073236
+          },
+          {
+            "page": 387,
+            "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 2.3748
+          },
+          {
+            "page": 29,
+            "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.048537
+          },
+          {
+            "page": 29,
+            "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+            "source_type": "table",
+            "field_code": "CONCENTRATION",
+            "confidence": 0.048042
+          }
+        ],
+        "evidence_strength": "high"
+      },
+      "3.5": {
+        "exists": true,
+        "skipped": false,
+        "pipeline_high": false,
+        "stages_mentioned": [
+          "III期",
+          "II期",
+          "I期"
+        ],
+        "evidence": [
+          {
+            "page": 16,
+            "excerpt": "除HX301乃自Onconova Therapeutics, Inc.授權引進外，我們的管線候選產品全部由我們自主研發。我們構建產品管線，旨在利用先天及適應性免疫實現潛在協同效應。我們的產品管線旨在解決現有檢查點抑制劑免疫療法的局限性，包括免疫抑制性腫瘤微環境致使「冷腫瘤」響應有限以及其他未獲滿足的醫療需求，從而為各種癌症患者及其他疾病適應症患者帶來臨床裨益。截至最後實際可行日期，我們已建立由10",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.065458
+          },
+          {
+            "page": 17,
+            "excerpt": "我們根據相關方案及批准進行HX009的臨床研究。於2024年9月，我們的中國法律顧問連同獨家保薦人及其法律顧問在北京與國家藥監局藥審中心臨床試驗管理辦公室的審查員進行了面對面訪談，期間已確認（其中包括）我們已完成一項常規I期臨床研究，且HX009的國家藥監局一次性傘式批准允許本公司在III期研究之前進行HX009-I-01中國研究下的臨床研究，而無需再次獲得國家藥監局的監管批准。有關詳情請參閱本招",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.06533
+          },
+          {
+            "page": 20,
+            "excerpt": "我們的核心產品HX009是一種同時靶向CD47及PD-1的雙特異性抗體融合蛋白。根據弗若斯特沙利文報告，截至最後實際可行日期，HX009的臨床試驗進展在同類CD47靶向雙特異性抗體／雙功能融合蛋白產品中處於全球領先地位。",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.051811
+          },
+          {
+            "page": 27,
+            "excerpt": "我們的研發團隊通常負責核心產品及其他管線產品的全球開發。我們的研發團隊有能力在中國及其他司法權區同時開展不同開發階段的臨床項目。彼等平均擁有10年左右的行業工作經驗，且幾乎全部擁有本科或以上學歷。就自主發現及開發的候選藥物而言，我們與臨床開發團隊共同開展藥物發現、質量保證及臨床活動，其中包括：(i)協調所有臨床開發工作；(ii)制定臨床試驗的關鍵要素；(iii)安排及協調合適的CRO參與臨床試驗，",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.050864
+          },
+          {
+            "page": 14,
+            "excerpt": "截至最後實際可行日期，我們已開發十種候選藥物組成的管線，包括我們的核心產品HX009及兩種主要產品HX044及HX301，其中有八種針對腫瘤科的候選藥物及兩種針對自身免疫疾病的候選藥物。截至最後實際可行日期，我們的核心產品以及主要產品分別在中國及澳大利亞進行臨床試驗。下圖概述截至最後實際可行日期我們管線產品的開發狀態。",
+            "source_type": "text",
+            "field_code": "PIPELINE_RISK",
+            "confidence": 0.05027
+          }
+        ],
+        "evidence_strength": "high",
+        "search_log": {
+          "raw_hits": 10,
+          "strong_hits": 10,
+          "high_hits": 0,
+          "pages_scanned": [
+            14,
+            16,
+            17,
+            20,
+            27
+          ]
+        }
+      },
+      "3.4": {
+        "owner": "finance",
+        "skipped_by_legal": true
+      },
+      "3.6": {
+        "valuation_inversion": false,
+        "evidence": []
+      }
+    },
+    "gates": {
+      "skip_3_5": false,
+      "skip_3_5_reason": null,
+      "issuer_type": "biotech"
+    },
+    "evidence_summary": {
+      "3.1_pages": [
+        605,
+        605,
+        574,
+        582,
+        604
+      ],
+      "3.2_pages": [
+        30,
+        415,
+        30,
+        415,
+        415
+      ],
+      "3.3_pages": [
+        28,
+        28,
+        387,
+        29,
+        29
+      ],
+      "3.1_search_log": {
+        "keywords_tried": [
+          "赎回",
+          "贖回",
+          "对赌",
+          "對賭",
+          "回购",
+          "回購",
+          "优先股",
+          "優先股",
+          "领售",
+          "領售",
+          "撤资",
+          "撤資",
+          "贖回權",
+          "可換股",
+          "可转换可赎回",
+          "可轉換可贖回",
+          "股东协议",
+          "股東協議",
+          "特别权利",
+          "特別權利",
+          "赎回权终止",
+          "特別權利終止"
+        ],
+        "pages_scanned": [
+          80,
+          262,
+          271,
+          574,
+          582,
+          604,
+          605
+        ],
+        "raw_hits": 13,
+        "filtered_noise": 0,
+        "strong_hits": 13,
+        "note": "命中对赌/赎回相关披露"
+      },
+      "snippets": [
+        {
+          "section": "3.1",
+          "page": 605,
+          "excerpt": "根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售，",
+          "source_type": "text"
+        },
+        {
+          "section": "3.1",
+          "page": 605,
+          "excerpt": "倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.1",
+          "page": 574,
+          "excerpt": "儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會",
+          "source_type": "text"
+        },
+        {
+          "section": "3.1",
+          "page": 582,
+          "excerpt": "對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.1",
+          "page": 604,
+          "excerpt": "2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。",
+          "source_type": "table"
+        },
+        {
+          "section": "3.2",
+          "page": 30,
+          "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.2",
+          "page": 415,
+          "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.2",
+          "page": 30,
+          "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.2",
+          "page": 415,
+          "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.2",
+          "page": 415,
+          "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+          "source_type": "text"
+        },
+        {
+          "section": "3.3",
+          "page": 28,
+          "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+          "source_type": "table"
+        },
+        {
+          "section": "3.3",
+          "page": 28,
+          "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+          "source_type": "table"
+        },
+        {
+          "section": "3.3",
+          "page": 387,
+          "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。",
+          "source_type": "table"
+        },
+        {
+          "section": "3.3",
+          "page": 29,
+          "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+          "source_type": "table"
+        },
+        {
+          "section": "3.3",
+          "page": 29,
+          "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+          "source_type": "table"
+        }
+      ]
+    },
+    "trace": {
+      "tool_calls": [
+        {
+          "tool": "retrieve_legal",
+          "source": "offline:/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_task_expert_20260728_000008_legal.json",
+          "fields": [
+            "REDEMPTION_CLAUSE",
+            "RELATED_PARTY",
+            "CONCENTRATION",
+            "CASH_BURN_PRESSURE",
+            "PIPELINE_RISK",
+            "PRE_IPO_VALUATION"
+          ],
+          "per_query": 6,
+          "has_evidence_by_field": true,
+          "hint": null
+        },
+        {
+          "tool": "parse_grep",
+          "path": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json",
+          "hits": 0,
+          "pages": []
+        },
+        {
+          "tool": "retrieve_section_evidence",
+          "intents": {
+            "redemption": {
+              "hits": 3,
+              "pages": [
+                262,
+                271,
+                80
+              ],
+              "route": [
+                {
+                  "section_id": "history_and_corporate_structure",
+                  "section_title": "歷史、發展及公司架構",
+                  "start_page": 241,
+                  "end_page": 276,
+                  "confidence": 0.95
+                },
+                {
+                  "section_id": "risk_factors",
+                  "section_title": "風險因素",
+                  "start_page": 73,
+                  "end_page": 126,
+                  "confidence": 0.95
+                }
+              ]
+            },
+            "related_party": {
+              "hits": 8,
+              "pages": [
+                415,
+                415,
+                416,
+                425,
+                425,
+                424,
+                425,
+                424
+              ],
+              "route": [
+                {
+                  "section_id": "connected_transactions",
+                  "section_title": "關連交易",
+                  "start_page": 415,
+                  "end_page": 425,
+                  "confidence": 0.95
+                },
+                {
+                  "section_id": "business",
+                  "section_title": "業務",
+                  "start_page": 277,
+                  "end_page": 414,
+                  "confidence": 0.95
+                },
+                {
+                  "section_id": "financial_information",
+                  "section_title": "財務資料",
+                  "start_page": 474,
+                  "end_page": 507,
+                  "confidence": 0.95
+                }
+              ]
+            },
+            "concentration": {
+              "hits": 1,
+              "pages": [
+                387
+              ],
+              "route": [
+                {
+                  "section_id": "business",
+                  "section_title": "業務",
+                  "start_page": 277,
+                  "end_page": 414,
+                  "confidence": 0.95
+                },
+                {
+                  "section_id": "risk_factors",
+                  "section_title": "風險因素",
+                  "start_page": 73,
+                  "end_page": 126,
+                  "confidence": 0.95
+                },
+                {
+                  "section_id": "financial_information",
+                  "section_title": "財務資料",
+                  "start_page": 474,
+                  "end_page": 507,
+                  "confidence": 0.95
+                }
+              ]
+            }
+          }
+        },
+        {
+          "tool": "extract_legal",
+          "sections": {
+            "3.1": {
+              "exists": true,
+              "skipped": null,
+              "evidence_n": 5,
+              "search_log": {
+                "keywords_tried": [
+                  "赎回",
+                  "贖回",
+                  "对赌",
+                  "對賭",
+                  "回购",
+                  "回購",
+                  "优先股",
+                  "優先股",
+                  "领售",
+                  "領售",
+                  "撤资",
+                  "撤資",
+                  "贖回權",
+                  "可換股",
+                  "可转换可赎回",
+                  "可轉換可贖回",
+                  "股东协议",
+                  "股東協議",
+                  "特别权利",
+                  "特別權利",
+                  "赎回权终止",
+                  "特別權利終止"
+                ],
+                "pages_scanned": [
+                  80,
+                  262,
+                  271,
+                  574,
+                  582,
+                  604,
+                  605
+                ],
+                "raw_hits": 13,
+                "filtered_noise": 0,
+                "strong_hits": 13,
+                "note": "命中对赌/赎回相关披露"
+              },
+              "top1_supplier_pct": null,
+              "top5_supplier_pct": null
+            },
+            "3.2": {
+              "exists": true,
+              "skipped": null,
+              "evidence_n": 5,
+              "search_log": null,
+              "top1_supplier_pct": null,
+              "top5_supplier_pct": null
+            },
+            "3.3": {
+              "exists": true,
+              "skipped": null,
+              "evidence_n": 5,
+              "search_log": null,
+              "top1_supplier_pct": 20.4,
+              "top5_supplier_pct": 20.4
+            },
+            "3.5": {
+              "exists": true,
+              "skipped": false,
+              "evidence_n": 5,
+              "search_log": {
+                "raw_hits": 10,
+                "strong_hits": 10,
+                "high_hits": 0,
+                "pages_scanned": [
+                  14,
+                  16,
+                  17,
+                  20,
+                  27
+                ]
+              },
+              "top1_supplier_pct": null,
+              "top5_supplier_pct": null
+            }
+          }
+        },
+        {
+          "tool": "score_legal",
+          "risk_score": 51.0,
+          "breakdown_n": 4
+        }
+      ],
+      "elapsed_sec": 3.222
+    },
+    "summary": "法務 3.1/3.2/3.3 抽取完成；3.5=啓用；風險分 51.0 (medium)"
+  },
+  "reference_fundamental_score": 61.45,
+  "cross_agent_features": [],
+  "master": null,
+  "note": "reference_fundamental_score = legal*0.45 + finance*0.55; master/cross_agent_features 为本轮占位，总控辩论未启用"
+}

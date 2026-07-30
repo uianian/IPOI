@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-07-29T01:40:31Z",
+  "mode": "formal_LLM",
+  "note": "override chat-model to google/gemma-4-31b-it (non-free) per README; previous :free hit 429",
+  "request": {
+    "clientProjectId": "proj-19fa6ad4a0b",
+    "taskId": "task_expert_20260728_000008",
+    "llmConfig": {
+      "model": "google/gemma-4-31b-it"
+    }
+  },
+  "parseMeta": {
+    "taskId": "task_expert_20260728_000008",
+    "companyName": "翰思艾泰生物医药科技(武汉)股份有限公司",
+    "issuerType": "biotech",
+    "parseJsonPath": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json",
+    "indexStatus": "ready"
+  }
+}

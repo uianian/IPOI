@@ -1,0 +1,27 @@
+{
+  "total_pages": 70,
+  "total_elements": 786,
+  "categories": {
+    "text": 469,
+    "title": 134,
+    "header": 73,
+    "footer": 69,
+    "table": 27,
+    "table_footnote": 8,
+    "table_caption": 4,
+    "figure": 2
+  },
+  "failed_pages": [
+    697
+  ],
+  "empty_pages": [
+    697
+  ],
+  "html_tables": 27,
+  "markdown_tables": 0,
+  "table_structure_confidence_pages": {
+    "high": 11,
+    "medium": 2,
+    "low": 2
+  }
+}

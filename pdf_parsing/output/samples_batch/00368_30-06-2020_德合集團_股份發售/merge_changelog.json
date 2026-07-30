@@ -1,0 +1,177 @@
+{
+  "base": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/00368_30-06-2020_德合集團_股份發售/full_parse.json",
+  "patch": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/00368_30-06-2020_德合集團_股份發售-reparse/00368_30-06-2020_德合集團_股份發售/full_parse.json",
+  "pages": [
+    14,
+    23,
+    92,
+    114,
+    115,
+    117,
+    152,
+    153,
+    163,
+    182,
+    184,
+    187,
+    189,
+    195,
+    196,
+    200,
+    202,
+    220,
+    228,
+    235,
+    237,
+    287,
+    336,
+    345,
+    353,
+    356,
+    398,
+    399
+  ],
+  "prefer_higher_table_score": true,
+  "changelog": [
+    {
+      "page": 14,
+      "action": "keep_base",
+      "detail": "score patch=811 <= base=811"
+    },
+    {
+      "page": 23,
+      "action": "keep_base",
+      "detail": "score patch=311 <= base=311"
+    },
+    {
+      "page": 92,
+      "action": "keep_base",
+      "detail": "score patch=426 <= base=426"
+    },
+    {
+      "page": 114,
+      "action": "keep_base",
+      "detail": "score patch=611 <= base=611"
+    },
+    {
+      "page": 115,
+      "action": "keep_base",
+      "detail": "score patch=865 <= base=865"
+    },
+    {
+      "page": 117,
+      "action": "keep_base",
+      "detail": "score patch=998 <= base=998"
+    },
+    {
+      "page": 152,
+      "action": "keep_base",
+      "detail": "score patch=213 <= base=213"
+    },
+    {
+      "page": 153,
+      "action": "keep_base",
+      "detail": "score patch=321 <= base=321"
+    },
+    {
+      "page": 163,
+      "action": "keep_base",
+      "detail": "score patch=221 <= base=221"
+    },
+    {
+      "page": 182,
+      "action": "keep_base",
+      "detail": "score patch=314 <= base=314"
+    },
+    {
+      "page": 184,
+      "action": "keep_base",
+      "detail": "score patch=422 <= base=422"
+    },
+    {
+      "page": 187,
+      "action": "keep_base",
+      "detail": "score patch=313 <= base=313"
+    },
+    {
+      "page": 189,
+      "action": "keep_base",
+      "detail": "score patch=209 <= base=209"
+    },
+    {
+      "page": 195,
+      "action": "keep_base",
+      "detail": "score patch=478 <= base=478"
+    },
+    {
+      "page": 196,
+      "action": "keep_base",
+      "detail": "score patch=448 <= base=448"
+    },
+    {
+      "page": 200,
+      "action": "keep_base",
+      "detail": "score patch=913 <= base=913"
+    },
+    {
+      "page": 202,
+      "action": "keep_base",
+      "detail": "score patch=1722 <= base=1722"
+    },
+    {
+      "page": 220,
+      "action": "keep_base",
+      "detail": "score patch=205 <= base=205"
+    },
+    {
+      "page": 228,
+      "action": "keep_base",
+      "detail": "score patch=675 <= base=675"
+    },
+    {
+      "page": 235,
+      "action": "keep_base",
+      "detail": "score patch=339 <= base=339"
+    },
+    {
+      "page": 237,
+      "action": "keep_base",
+      "detail": "score patch=452 <= base=452"
+    },
+    {
+      "page": 287,
+      "action": "keep_base",
+      "detail": "score patch=413 <= base=413"
+    },
+    {
+      "page": 336,
+      "action": "keep_base",
+      "detail": "score patch=663 <= base=663"
+    },
+    {
+      "page": 345,
+      "action": "keep_base",
+      "detail": "score patch=664 <= base=664"
+    },
+    {
+      "page": 353,
+      "action": "keep_base",
+      "detail": "score patch=789 <= base=789"
+    },
+    {
+      "page": 356,
+      "action": "keep_base",
+      "detail": "score patch=425 <= base=425"
+    },
+    {
+      "page": 398,
+      "action": "keep_base",
+      "detail": "score patch=321 <= base=321"
+    },
+    {
+      "page": 399,
+      "action": "keep_base",
+      "detail": "score patch=213 <= base=213"
+    }
+  ]
+}

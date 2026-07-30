@@ -1,0 +1,67 @@
+# 对应特征定义文档第三章 + GPT 法务七维合并为 5 Skill 预设
+source: "dataset/招股书关键信息抽取与风险特征定义.md §三 + GPT Legal Agent plan"
+sections:
+  "3.1":
+    field_code: REDEMPTION_CLAUSE
+    skill: legal_shareholder_rights
+    extract_fields:
+      - exists
+      - trigger_condition
+      - redemption_price_or_rate
+      - amount
+      - remaining_months
+      - rights_cleared_pre_ipo
+      - evidence
+    keywords: ["赎回", "贖回", "对赌", "對賭", "回购", "回購", "优先股", "優先股", "领售", "撤资", "特殊权利", "清理"]
+  "3.2":
+    field_code: RELATED_PARTY
+    skill: legal_related_party
+    extract_fields:
+      - party_name
+      - relationship
+      - txn_type
+      - amount
+      - ratio_pct
+      - waiver
+      - fair_price
+      - commercial_purpose
+      - dependency
+      - evidence
+    keywords: ["关联交易", "關連交易", "关联方", "關連方", "持续关连", "公允"]
+  "3.3":
+    field_code: CONCENTRATION
+    cross_agent: concentration
+    extract_fields:
+      - top1_customer_pct
+      - top5_customer_pct
+      - top1_supplier_pct
+      - top5_supplier_pct
+      - single_dependency
+      - evidence
+    keywords: ["前五大客户", "五大客戶", "最大客户", "供应商", "供應商", "集中"]
+  "3.4":
+    owner: finance
+    gate: unprofitable_only
+  "3.5":
+    field_code: PIPELINE_RISK
+    gate: biotech_only
+    extract_fields: [pipeline_stage, clinical_hold, license_in, ip_ownership]
+  "3.6":
+    field_code: PRE_IPO_VALUATION
+    extract_fields: [rounds, post_money, ipo_vs_preipo_discount, valuation_inversion]
+
+# 扩展 Skill 预设（GPT 合并后）
+skills:
+  legal_governance:
+    extract_fields: [controlling_shareholder, actual_controller, concert_party, ab_shares, board_structure, control_gt_50]
+    keywords: ["控股股东", "控股股東", "实际控制人", "實際控制人", "一致行动", "AB股", "双重股权", "董事会"]
+  legal_shareholder_rights:
+    maps_to: ["3.1"]
+  legal_related_party:
+    maps_to: ["3.2"]
+  legal_contracts_and_ip:
+    extract_fields: [contract_type, counterparty, term, termination_risk, patent, trademark, copyright, self_owned_core_tech]
+    keywords: ["重大合同", "独家", "獨家", "供应协议", "供應協議", "特许经营", "加盟", "专利", "商標", "商标", "著作权", "授权"]
+  legal_regulatory_litigation:
+    extract_fields: [penalty, investigation, license, case_name, claim_amount, stage, impact]
+    keywords: ["处罚", "處罰", "调查", "調查", "违规", "整改", "许可证", "诉讼", "訴訟", "仲裁", "食品安全", "数据安全", "环保"]

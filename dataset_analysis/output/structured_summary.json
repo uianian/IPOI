@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-07-11T18:42:08",
+  "ipo_pdf_total": 565,
+  "year_distribution": {
+    "2020": 138,
+    "2021": 88,
+    "2022": 87,
+    "2023": 63,
+    "2024": 73,
+    "2025": 116
+  },
+  "unprofitable_proxy_count": 58,
+  "unprofitable_proxy_ratio": 0.103,
+  "share_table_match_count": 18,
+  "share_table_match_ratio": 0.032,
+  "share_table_listdate_max": null,
+  "share_table_note": "hksharedescription 是存量港股证券快照(约803条)，S_INFO_LISTDATE 为首次上市日(最大约2009)，OPDATE/S_INFO_DELISTDATE 可出现2024-2026，不代表2020-2025新股全覆盖",
+  "delisted_count": 18,
+  "eod_coverage_count": 555,
+  "eod_windcode_match_count": 555,
+  "eod_windcode_match_ratio": 0.982,
+  "windcode_rule_distribution": {
+    "strip_zero": 535,
+    "pad4": 20
+  },
+  "performance_distribution": {
+    "平稳": 255,
+    "破发/走弱": 134,
+    "暴跌": 103,
+    "暴涨": 63,
+    "无行情": 10
+  },
+  "industry_distribution": {
+    "未知": 491,
+    "其他": 40,
+    "生物科技/医药": 10,
+    "TMT/互联网": 6,
+    "消费/零售": 5,
+    "地产/建筑": 5,
+    "工业/制造": 5,
+    "金融": 3
+  },
+  "list_price_available": 18,
+  "day1_return_stats": {
+    "count": 555.0,
+    "mean": -0.011843448082002139,
+    "std": 0.16109422763627318,
+    "min": -0.7766666666666667,
+    "25%": -0.08667939401404107,
+    "50%": -0.008196721311475417,
+    "75%": 0.046606334841629,
+    "max": 0.7954545454545455
+  },
+  "day5_return_stats": {
+    "count": 555.0,
+    "mean": 0.005216258712123848,
+    "std": 0.2974554824877638,
+    "min": -0.7866666666666666,
+    "25%": -0.14256231090620947,
+    "50%": -0.01709401709401711,
+    "75%": 0.08641053489003529,
+    "max": 2.255555555555556
+  }
+}

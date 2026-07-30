@@ -1,0 +1,676 @@
+# 与 dataset/招股书关键信息抽取与风险特征定义.md 第二、三章一一对应
+# source: 马宝灵 2026-07-01
+# finance → 第二章标准化财务指标；legal → 第三章非标隐性风险特征
+
+finance:
+  description: "财务穿透Agent — 对应文档第二章（2.1损益表 / 2.2资产负债表 / 2.3现金流量表 / 2.4 18A专项）"
+  doc_chapter: "二、标准化财务指标抽取清单"
+  # 2.1–2.3：按表类型整表召回；仅附录一（概要/正文不取）
+  appendix_only: true
+  top_k_per_table: 3
+  # 2.4 等非主表字段：仍按字段 Top-K
+  top_k_per_field: 5
+  top_k_per_query: 5
+  # 非生物科技发行人：skip=跳过 2.4；downweight=保留但强降权
+  non_biotech_gate: skip
+  weights:
+    grep: 0.40
+    bm25: 0.25
+    vector: 0.35
+  grep_boost_rank: 5
+  queries:
+    # ---------- 2.1 / 2.2 / 2.3：三种主表整表召回（指标在表内，不按字段切 Top-K）----------
+    - name: TBL_IS
+      section: "2.1"
+      field_code: TBL_IS
+      table_type: income_statement
+      recall_unit: table
+      appendix_only: true
+      label: "综合损益表"
+      covers_fields:
+        - REV
+        - COGS
+        - GP
+        - GP_MARGIN
+        - R&D_EXP
+        - SG&A
+        - NET_LOSS
+        - ADJ_NET
+      query: "綜合損益表 合併損益表 綜合全面收益表 合併綜合收益表 損益及其他全面收益表"
+      grep_terms:
+        - 綜合損益表
+        - 综合损益表
+        - 合併損益表
+        - 合并损益表
+        - 損益及其他全面收益表
+        - 綜合全面收益表
+        - 综合全面收益表
+        - 合併綜合收益表
+        - 合并综合收益表
+        - 损益及其他全面收益表
+        - 綜合收益表
+        - 综合收益表
+      title_hints:
+        - 綜合損益表
+        - 综合损益表
+        - 合併損益表
+        - 合并损益表
+        - 損益及其他全面收益表
+        - 綜合損益及其他全面收益表
+        - 综合损益及其他全面收益表
+      row_labels:
+        - 收入
+        - 營業收入
+        - 收益
+        - 其他收入及收益
+        - 銷售成本
+        - 毛利
+        - 研發成本
+        - 研发成本
+        - 年度／期間內利潤
+        - 年／期內利潤
+        - 年內溢利
+        - 期内溢利
+        - 年度／期間(虧損)／利潤
+        - 年度／期間（虧損）／利潤
+        - 年／期內虧損
+        - 年內虧損
+        - 期内虧損
+        - 除税前虧損
+        - 除稅前虧損
+        - 除税前溢利
+        - 除稅前溢利
+      # 组1：收入类（含 18A 无产品收入时的「其他收入及收益」）
+      # 组2：成本/毛利/期间损益（含「年／期内亏损」「研发成本」）
+      must_have_groups:
+        - [收入, 營業收入, 營業額, 收益, 其他收入及收益]
+        - [銷售成本, 毛利, 年度／期間內利潤, 年／期內利潤, 年內溢利, 期内溢利, 年度／期間(虧損)／利潤, 年度／期間（虧損）／利潤, 年／期內虧損, 年內虧損, 期内虧損, 除税前虧損, 除稅前虧損, 除税前溢利, 除稅前溢利, 研發成本, 研发成本]
+      min_row_label_hits: 2
+      require_title_hint: true
+      # 解析偶发把附录主表标成 text（如 18A 无收入损益表）；与 BS/CF 一致放开
+      allow_text_as_table: true
+      cross_page_continue: true
+      max_continue_pages: 2
+      prefer_categories: [table, title, text]
+
+    - name: TBL_BS
+      section: "2.2"
+      field_code: TBL_BS
+      table_type: balance_sheet
+      recall_unit: table
+      appendix_only: true
+      label: "综合财务状况表（资产负债表）"
+      covers_fields:
+        - TOTAL_ASSETS
+        - TOTAL_LIAB
+        - NET_ASSETS
+        - CASH_EQ
+        - CV_PREF
+        - TRADE_REC
+        - TRADE_PAY
+      query: "綜合財務狀況表 合併財務狀況表 合併資產負債表 資產負債表"
+      grep_terms:
+        - 綜合財務狀況表
+        - 综合财务状况表
+        - 合併財務狀況表
+        - 合并财务状况表
+        - 合併資產負債表
+        - 合并资产负债表
+        - 財務狀況表
+        - 财务状况表
+        - 資產負債表
+        - 资产负债表
+      title_hints:
+        - 綜合財務狀況表
+        - 综合财务状况表
+        - 合併財務狀況表
+        - 合并财务状况表
+        - 合併資產負債表
+        - 合并资产负债表
+        - 財務狀況表
+        - 财务状况表
+      # 2.2 核心指标行名：压税项表等附注噪声；解析侧可能把主表落成 text
+      row_labels:
+        - 總資產
+        - 总资产
+        - 資產總額
+        - 资产总额
+        - 總負債
+        - 总负债
+        - 負債總額
+        - 负债总额
+        - 資產淨值
+        - 资产净值
+        - 淨資產
+        - 净资产
+        - 權益總額
+        - 权益总额
+        - 現金及現金等價物
+        - 现金及现金等价物
+        - 貿易應收款項
+        - 贸易应收款项
+        - 貿易應付款項
+        - 贸易应付款项
+        - 非流動資產
+        - 非流动资产
+        - 流動資產
+        - 流动资产
+        - 非流動負債
+        - 非流动负债
+        - 非流動資產總值
+        - 非流动资产总值
+        - 流動資產總值
+        - 流动资产总值
+        - 流動負債總額
+        - 流动负债总额
+        - 資產總值減流動負債
+        - 资产总值减流动负债
+      # 组间 AND：总资产类（含分项合计）∧ 净值/负债类；吸收 18A 无单独「总资产」行写法
+      must_have_groups:
+        - [總資產, 总资产, 資產總額, 资产总额, 非流動資產總值, 非流动资产总值, 流動資產總值, 流动资产总值, 資產總值減流動負債, 资产总值减流动负债]
+        - [資產淨值, 资产净值, 淨資產, 净资产, 權益總額, 权益总额, 總負債, 总负债, 負債總額, 负债总额, 流動負債總額, 流动负债总额]
+      min_row_label_hits: 3
+      require_title_hint: true
+      allow_text_as_table: true
+      cross_page_continue: true
+      max_continue_pages: 2
+      prefer_categories: [table, title, text]
+
+    # 贵公司（母公司）财务状况表：独立召回，不并入 TBL_BS 跨页 pack；不写入 covers_fields，避免覆盖集团抽数
+    - name: TBL_BS_COMPANY
+      section: "2.2"
+      field_code: TBL_BS_COMPANY
+      table_type: company_balance_sheet
+      recall_unit: table
+      appendix_only: true
+      label: "贵公司财务状况表（母公司资产负债表）"
+      covers_fields: []
+      query: "貴公司財務狀況表 貴公司資產負債表 公司財務狀況表"
+      grep_terms:
+        - 貴公司財務狀況表
+        - 贵公司财务状况表
+        - 貴公司資產負債表
+        - 贵公司资产负债表
+        - 公司財務狀況表
+        - 公司财务状况表
+      title_hints:
+        - 貴公司財務狀況表
+        - 贵公司财务状况表
+        - 貴公司資產負債表
+        - 贵公司资产负债表
+        - 公司財務狀況表
+        - 公司财务状况表
+      row_labels:
+        - 總資產
+        - 总资产
+        - 資產總額
+        - 资产总额
+        - 非流動資產總值
+        - 非流动资产总值
+        - 流動資產總值
+        - 流动资产总值
+        - 資產淨值
+        - 资产净值
+        - 淨資產
+        - 净资产
+        - 權益總額
+        - 权益总额
+        - 現金及現金等價物
+        - 现金及现金等价物
+        - 非流動資產
+        - 非流动资产
+        - 流動資產
+        - 流动资产
+        - 於附屬公司的投資
+        - 于附属公司的投资
+      must_have_groups:
+        - [非流動資產, 非流动资产, 流動資產, 流动资产, 總資產, 总资产, 資產總額, 资产总额, 非流動資產總值, 非流动资产总值]
+        - [資產淨值, 资产净值, 淨資產, 净资产, 權益總額, 权益总额, 於附屬公司的投資, 于附属公司的投资]
+      min_row_label_hits: 2
+      require_title_hint: true
+      allow_text_as_table: true
+      cross_page_continue: false
+      prefer_categories: [table, title, text]
+
+    - name: TBL_CF
+      section: "2.3"
+      field_code: TBL_CF
+      table_type: cash_flow
+      recall_unit: table
+      appendix_only: true
+      label: "综合现金流量表"
+      covers_fields:
+        - CFO
+        - CFI
+        - CFF
+        - END_CASH
+      query: "綜合現金流量表 合併現金流量表 現金流量表"
+      grep_terms:
+        - 綜合現金流量表
+        - 综合现金流量表
+        - 合併現金流量表
+        - 合并现金流量表
+        - 現金流量表
+        - 现金流量表
+      title_hints:
+        - 綜合現金流量表
+        - 综合现金流量表
+        - 合併現金流量表
+        - 合并现金流量表
+        - 現金流量表
+        - 现金流量表
+      row_labels:
+        # --- 蜜雪等「淨額」口径 ---
+        - 經營活動所得現金流量淨額
+        - 經營活動所用現金流量淨額
+        # --- 小米口径 ---
+        - 經營活動現金流量
+        - 經營(所用)／所得現金
+        - 經營（所用）／所得現金
+        - 經營活動(所用)／所得現金淨額
+        - 經營活動（所用）／所得現金淨額
+        - 經營活動(所用)／所得
+        # --- 快手等口径 ---
+        - 經營活動所得現金流量
+        - 經營活動所用現金流量
+        - 經營所得／(所用)現金
+        - 經營所得／（所用）現金
+        - 經營活動所得／(所用)現金淨額
+        - 經營活動所得／（所用）現金淨額
+        # --- 建中等：产生/拆格口径 ---
+        - 經營活動產生／(所用)的現金淨額
+        - 經營活動產生／（所用）的現金淨額
+        - 經營活動產生／(所用)
+        - 經營活動產生／（所用）
+        - 經營產生／(所用)的現金
+        - 經營產生／（所用）的現金
+        - 經營活動所得／（所用）
+        - 經營活動所得／(所用)
+        - 投資活動所用現金流量淨額
+        - 投資活動所得現金流量淨額
+        - 投資活動現金流量
+        - 投資活動所得現金流量
+        - 投資活動所用現金淨額
+        - 投資活動所得／(所用)現金淨額
+        - 融資活動所得現金流量淨額
+        - 融資活動所用現金流量淨額
+        - 融資活動現金流量
+        - 融資活動所得／(所用)現金淨額
+        - 現金及現金等價物
+        - 年末現金及現金等價物
+        - 期末現金及現金等價物
+        - 年末／期末現金及現金等價物
+      must_have_groups:
+        - [
+            經營活動所得現金流量淨額,
+            經營活動所用現金流量淨額,
+            經營活動所得的現金流量淨額,
+            經營活動所用的現金流量淨額,
+            經營活動現金流量,
+            經營活動所得現金流量,
+            經營活動所用現金流量,
+            經營(所用)／所得現金,
+            經營（所用）／所得現金,
+            經營所得／(所用)現金,
+            經營所得／（所用）現金,
+            經營活動(所用)／所得現金淨額,
+            經營活動（所用）／所得現金淨額,
+            經營活動所得／(所用)現金淨額,
+            經營活動所得／（所用）現金淨額,
+            經營活動(所用)／所得,
+            經營活動產生／(所用)的現金淨額,
+            經營活動產生／（所用）的現金淨額,
+            經營活動產生／(所用),
+            經營活動產生／（所用）,
+            經營產生／(所用)的現金,
+            經營產生／（所用）的現金,
+            經營活動所得／（所用）,
+            經營活動所得／(所用),
+          ]
+        - [
+            投資活動所用現金流量淨額,
+            投資活動所得現金流量淨額,
+            投資活動現金流量,
+            投資活動所得現金流量,
+            投資活動所用現金淨額,
+            投資活動所得／(所用)現金淨額,
+            投資活動所得／（所用）現金淨額,
+            融資活動所得現金流量淨額,
+            融資活動所用現金流量淨額,
+            融資活動現金流量,
+            融資活動所得／(所用)現金淨額,
+            融資活動所得／（所用）現金淨額,
+          ]
+      min_row_label_hits: 2
+      require_title_hint: true
+      allow_text_as_table: true
+      cross_page_continue: true
+      max_continue_pages: 4
+      prefer_categories: [table, title, text]
+
+    # ---------- 2.4 18A/18C章专项（仍按字段召回）----------
+    - name: CORE_PROD_CNT
+      section: "2.4"
+      field_code: CORE_PROD_CNT
+      label: "核心产品数量"
+      query: "核心產品 核心產品候選 第18A章"
+      grep_terms:
+        - 核心產品
+        - 核心产品
+        - 核心產品候選
+        - 核心产品候选
+        - 第18A章
+        - 18A
+      prefer_categories: [text, title, table]
+    - name: PROD_STAGE
+      section: "2.4"
+      field_code: PROD_STAGE
+      label: "各核心产品研发阶段"
+      query: "臨床前 臨床I期 臨床II期 臨床III期 註冊 商業化"
+      grep_terms:
+        - 臨床前
+        - 临床前
+        - 臨床I期
+        - 臨床II期
+        - 臨床III期
+        - Ⅰ期
+        - Ⅱ期
+        - Ⅲ期
+        - 註冊申請
+        - 注册申请
+        - 商業化
+        - 商业化
+      prefer_categories: [text, title, table]
+    - name: PROD_IND
+      section: "2.4"
+      field_code: PROD_IND
+      label: "各核心产品适应症"
+      query: "適應症 目標患者 適應症人群"
+      grep_terms:
+        - 適應症
+        - 适应症
+        - 目標患者
+        - 目标患者
+        - 適應症人群
+      prefer_categories: [text, title, table]
+    - name: PROD_MILESTONE
+      section: "2.4"
+      field_code: PROD_MILESTONE
+      label: "核心产品预计里程碑"
+      query: "里程碑 NDA BLA 監管批准 預計獲批"
+      grep_terms:
+        - 里程碑
+        - NDA
+        - BLA
+        - 監管批准
+        - 监管批准
+        - 預計獲批
+        - 预计获批
+      prefer_categories: [text, title, table]
+    - name: PROD_RD
+      section: "2.4"
+      field_code: PROD_R&D
+      label: "各核心产品研发开支"
+      query: "各核心產品研發開支 產品研發投入"
+      grep_terms:
+        - 核心產品研發
+        - 核心产品研发
+        - 產品研發開支
+        - 产品研发开支
+      prefer_categories: [table, text, title]
+    - name: BURN_RATE
+      section: "2.4"
+      field_code: BURN_RATE
+      label: "现金消耗率"
+      query: "現金消耗 現金燒盡率 月均現金流出 burn rate"
+      grep_terms:
+        - 現金消耗
+        - 现金消耗
+        - 現金燒盡
+        - 现金烧尽
+        - 月均現金
+        - burn rate
+        - Burn rate
+      prefer_categories: [text, title, table]
+    - name: CASH_RUNWAY
+      section: "2.4"
+      field_code: CASH_RUNWAY
+      label: "现金跑道"
+      query: "現金跑道 現金可支持 營運資金充足 runway"
+      grep_terms:
+        - 現金跑道
+        - 现金跑道
+        - 營運資金
+        - 营运资金
+        - runway
+        - Runway
+      prefer_categories: [text, title, table]
+    - name: PRE_IPO_FIN
+      section: "2.4"
+      field_code: PRE_IPO_FIN
+      label: "首次公开招股前投资者融资总额及轮数"
+      query: "首輪融資 A輪 B輪 Pre-IPO 融資輪次 投前融資"
+      grep_terms:
+        - Pre-IPO
+        - 首輪
+        - A輪
+        - B輪
+        - C輪
+        - 融資輪次
+        - 融资轮次
+        - 投前融資
+        - 首次公開發售前
+      prefer_categories: [text, title, table]
+
+legal:
+  description: "法务合规Agent — 对应文档第三章（3.1对赌赎回 / 3.2关联交易 / 3.3集中度 / 3.4现金流消耗 / 3.5管线 / 3.6 Pre-IPO估值）"
+  doc_chapter: "三、非标隐性风险特征抽取清单"
+  top_k_per_field: 5
+  top_k_per_query: 5
+  non_biotech_gate: skip
+  weights:
+    grep: 0.50
+    bm25: 0.20
+    vector: 0.30
+  grep_boost_rank: 3
+  queries:
+    # ---------- 3.1 对赌or赎回条款 ----------
+    - name: REDEMPTION_CLAUSE
+      section: "3.1"
+      field_code: REDEMPTION_CLAUSE
+      label: "对赌or赎回条款"
+      extract_fields:
+        - 是否存在对赌/赎回条款
+        - 触发条件
+        - 赎回价格/利率
+        - 涉及金额
+        - 剩余期限
+        - 条款原文切片
+      query: "优先股股东有权要求公司赎回股份 未能如期上市 撤资权益 赎回权 回购义务 业绩承诺 领售权"
+      grep_terms:
+        - 对赌
+        - 對賭
+        - 对赌协议
+        - 對賭協議
+        - 赎回权
+        - 贖回權
+        - 赎回条款
+        - 贖回條款
+        - 要求公司赎回
+        - 要求本公司贖回
+        - 有權要求公司贖回
+        - 有权要求公司赎回
+        - 未能如期上市
+        - 撤資權益
+        - 撤资权益
+        - 回購義務
+        - 回购义务
+        - 股权回购
+        - 股權回購
+        - 业绩承诺
+        - 業績承諾
+        - 优先认购权
+        - 優先認購權
+        - 优先购买权
+        - 優先購買權
+        - 共同出售权
+        - 共同出售權
+        - 领售权
+        - 領售權
+        - 可轉換可贖回優先股
+        - 可转换可赎回优先股
+        - redemption right
+        - Redemption Right
+        - put option
+      prefer_categories: [text, title, table]
+
+    # ---------- 3.2 关联交易 ----------
+    - name: RELATED_PARTY
+      section: "3.2"
+      field_code: RELATED_PARTY
+      label: "关联交易"
+      extract_fields:
+        - 关联方名称及关系
+        - 交易类型
+        - 交易金额
+        - 占同类交易比例
+        - 是否已获豁免
+        - 条款原文切片
+      query: "持续关联交易 关连交易 关连人士 控股股东订立协议 第十四A章"
+      grep_terms:
+        - 關聯交易
+        - 关联交易
+        - 關連交易
+        - 关连交易
+        - 持續關聯交易
+        - 持续关联交易
+        - 關連人士
+        - 关连人士
+        - 關聯方
+        - 关联方
+        - 關聯附屬公司
+        - 关联附属公司
+        - 第十四A章
+        - 第14A章
+        - 控股股東
+        - 控股股东
+      prefer_categories: [text, title, table]
+
+    # ---------- 3.3 客户/供应商集中度 ----------
+    - name: CONCENTRATION
+      section: "3.3"
+      field_code: CONCENTRATION
+      label: "客户/供应商集中度"
+      extract_fields:
+        - 最大客户收入占比
+        - 前五大客户合计占比
+        - 最大供应商采购占比
+        - 前五大供应商合计占比
+        - 是否存在单一依赖
+        - 条款原文切片
+      query: "前五大客户 最大客户占总收入 前五大供应商 单一供应商 客户集中"
+      grep_terms:
+        - 前五大客戶
+        - 前五大客户
+        - 最大客戶
+        - 最大客户
+        - 客戶集中
+        - 客户集中
+        - 前五大供應商
+        - 前五大供应商
+        - 最大供應商
+        - 最大供应商
+        - 單一供應商
+        - 单一供应商
+        - 佔總收入
+        - 占总收入
+        - 佔總採購
+        - 占总采购
+      prefer_categories: [text, title, table]
+
+    # ---------- 3.4 现金流消耗压力 ----------
+    - name: CASH_BURN_PRESSURE
+      section: "3.4"
+      field_code: CASH_BURN_PRESSURE
+      label: "现金流消耗压力"
+      extract_fields:
+        - 期末现金余额
+        - 月均消耗率
+        - 现金跑道
+        - 预计下一轮融资时间
+      query: "现金消耗 现金跑道 营运资金 月均现金净流出 下一轮融资"
+      grep_terms:
+        - 現金消耗
+        - 现金消耗
+        - 現金跑道
+        - 现金跑道
+        - 營運資金
+        - 营运资金
+        - 月均
+        - 下一輪融資
+        - 下一轮融资
+        - 現金淨流出
+        - 现金净流出
+        - burn rate
+        - runway
+      prefer_categories: [text, title, table]
+
+    # ---------- 3.5 核心产品/管线进度风险 ----------
+    - name: PIPELINE_RISK
+      section: "3.5"
+      field_code: PIPELINE_RISK
+      label: "核心产品/管线进度风险"
+      extract_fields:
+        - 核心产品研发阶段
+        - 预计监管批准时间
+        - 是否存在临床搁置
+        - 核心产品授权来源
+        - 知识产权权属
+      query: "核心产品 临床试验 临床搁置 引进授权 知识产权 NDA BLA"
+      grep_terms:
+        - 核心產品
+        - 核心产品
+        - 臨床試驗
+        - 临床试验
+        - 臨床擱置
+        - 临床搁置
+        - 暫停臨床
+        - 暂停临床
+        - 引進授權
+        - 引进授权
+        - 授權引進
+        - license-in
+        - 知識產權
+        - 知识产权
+        - NDA
+        - BLA
+        - 監管批准
+        - 监管批准
+      prefer_categories: [text, title, table]
+
+    # ---------- 3.6 首次公开招股前投资者及估值 ----------
+    - name: PRE_IPO_VALUATION
+      section: "3.6"
+      field_code: PRE_IPO_VALUATION
+      label: "首次公开招股前投资者及估值"
+      extract_fields:
+        - 融资轮数及总额
+        - 资深投资者身份
+        - 最近一轮投后估值
+        - IPO估值与Pre-IPO估值差异
+        - 是否存在估值倒挂
+      query: "投后估值 Pre-IPO估值 估值倒挂 资深投资者 融资轮次"
+      grep_terms:
+        - 投後估值
+        - 投后估值
+        - Pre-IPO
+        - 估值倒掛
+        - 估值倒挂
+        - 資深投資者
+        - 资深投资者
+        - 融資輪次
+        - 融资轮次
+        - 發行估值
+        - 发行估值
+        - 上市估值
+      prefer_categories: [text, title, table]

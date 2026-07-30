@@ -1,0 +1,60 @@
+- dataset:
+    id: llamaindex/ParseBench
+    task_id: mean
+  value: 73.25
+  date: '2026-05-15'
+  source:
+    url: https://huggingface.co/datasets/llamaindex/ParseBench
+    name: ParseBench
+    user: boyang-runllama
+  notes: "Pipeline name: infinity_parser2_flash"
+- dataset:
+    id: llamaindex/ParseBench
+    task_id: text_content
+  value: 89.52
+  date: '2026-05-15'
+  source:
+    url: https://huggingface.co/datasets/llamaindex/ParseBench
+    name: ParseBench
+    user: boyang-runllama
+  notes: "Pipeline name: infinity_parser2_flash"
+- dataset:
+    id: llamaindex/ParseBench
+    task_id: text_formatting
+  value: 57.7
+  date: '2026-05-15'
+  source:
+    url: https://huggingface.co/datasets/llamaindex/ParseBench
+    name: ParseBench
+    user: boyang-runllama
+  notes: "Pipeline name: infinity_parser2_flash"
+- dataset:
+    id: llamaindex/ParseBench
+    task_id: layout
+  value: 80.61
+  date: '2026-05-15'
+  source:
+    url: https://huggingface.co/datasets/llamaindex/ParseBench
+    name: ParseBench
+    user: boyang-runllama
+  notes: "Pipeline name: infinity_parser2_flash"
+- dataset:
+    id: llamaindex/ParseBench
+    task_id: chart
+  value: 55.56
+  date: '2026-05-15'
+  source:
+    url: https://huggingface.co/datasets/llamaindex/ParseBench
+    name: ParseBench
+    user: boyang-runllama
+  notes: "Pipeline name: infinity_parser2_flash"
+- dataset:
+    id: llamaindex/ParseBench
+    task_id: table
+  value: 82.88
+  date: '2026-05-15'
+  source:
+    url: https://huggingface.co/datasets/llamaindex/ParseBench
+    name: ParseBench
+    user: boyang-runllama
+  notes: "Pipeline name: infinity_parser2_flash"

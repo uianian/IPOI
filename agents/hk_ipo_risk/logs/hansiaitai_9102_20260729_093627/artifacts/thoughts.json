@@ -1,0 +1,458 @@
+[
+  {
+    "id": "th_f985ff30cd85",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "正在執行 `retrieve_legal`…",
+    "timestamp": 1785289027598,
+    "meta": {
+      "kind": "tool_call",
+      "toolName": "retrieve_legal",
+      "toolArgs": {
+        "doc_id": "task_expert_20260728_000008",
+        "issuer_type": "biotech"
+      },
+      "toolStatus": "running"
+    }
+  },
+  {
+    "id": "th_00c05f44e7d6",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "`retrieve_legal` 完成（ok）",
+    "timestamp": 1785289027610,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "retrieve_legal",
+      "toolArgs": null,
+      "toolStatus": "ok"
+    }
+  },
+  {
+    "id": "th_b2107f76a976",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "正在執行 `parse_grep`…",
+    "timestamp": 1785289027612,
+    "meta": {
+      "kind": "tool_call",
+      "toolName": "parse_grep",
+      "toolArgs": {
+        "path": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json"
+      },
+      "toolStatus": "running"
+    }
+  },
+  {
+    "id": "th_51c952cb5d0e",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "`parse_grep` 完成，命中 0 條",
+    "timestamp": 1785289027694,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "parse_grep",
+      "toolArgs": null,
+      "toolStatus": "ok"
+    }
+  },
+  {
+    "id": "th_56584b8fc1fb",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "正在執行 `retrieve_section_evidence`…",
+    "timestamp": 1785289027696,
+    "meta": {
+      "kind": "tool_call",
+      "toolName": "retrieve_section_evidence",
+      "toolArgs": null,
+      "toolStatus": "running"
+    }
+  },
+  {
+    "id": "th_3195bd7515b6",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "`retrieve_section_evidence` 完成（ok）",
+    "timestamp": 1785289032601,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "retrieve_section_evidence",
+      "toolArgs": null,
+      "toolStatus": "ok"
+    }
+  },
+  {
+    "id": "th_31ce73b9e8f6",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "正在執行 `extract_legal`…",
+    "timestamp": 1785289032604,
+    "meta": {
+      "kind": "tool_call",
+      "toolName": "extract_legal",
+      "toolArgs": null,
+      "toolStatus": "running"
+    }
+  },
+  {
+    "id": "th_9feae1f56f5a",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "`extract_legal` 完成（ok）",
+    "timestamp": 1785289032611,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "extract_legal",
+      "toolArgs": null,
+      "toolStatus": "ok"
+    }
+  },
+  {
+    "id": "th_3ff5af05dbd1",
+    "agentId": "legal",
+    "type": "thinking",
+    "content": "正在執行 `score_legal`…",
+    "timestamp": 1785289032613,
+    "meta": {
+      "kind": "tool_call",
+      "toolName": "score_legal",
+      "toolArgs": null,
+      "toolStatus": "running"
+    }
+  },
+  {
+    "id": "th_295008adf6c2",
+    "agentId": "legal",
+    "type": "conclusion",
+    "content": "法務 3.1/3.2/3.3 抽取完成；3.5=啓用；風險分 51.0 (medium)",
+    "timestamp": 1785289032624,
+    "meta": {
+      "kind": "model_think",
+      "toolName": "score_legal",
+      "toolArgs": null,
+      "toolStatus": "ok"
+    }
+  },
+  {
+    "id": "th_aa1b93d273d4",
+    "agentId": "legal",
+    "type": "finding",
+    "content": "REDEMPTION_MEDIUM",
+    "timestamp": 1785289032624,
+    "ref": "p.605",
+    "meta": {
+      "kind": "risk_point",
+      "evidence": [
+        {
+          "page": 605,
+          "excerpt": "根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售，",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "REDEMPTION_CLAUSE",
+          "sectionId": null,
+          "confidence": 0.080638
+        },
+        {
+          "page": 605,
+          "excerpt": "倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "REDEMPTION_CLAUSE",
+          "sectionId": null,
+          "confidence": 0.073964
+        },
+        {
+          "page": 574,
+          "excerpt": "儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "REDEMPTION_CLAUSE",
+          "sectionId": null,
+          "confidence": 0.073692
+        },
+        {
+          "page": 582,
+          "excerpt": "對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "REDEMPTION_CLAUSE",
+          "sectionId": null,
+          "confidence": 0.073576
+        },
+        {
+          "page": 604,
+          "excerpt": "2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。",
+          "sourceType": "table",
+          "category": null,
+          "fieldCode": "REDEMPTION_CLAUSE",
+          "sectionId": null,
+          "confidence": 0.073463
+        }
+      ]
+    }
+  },
+  {
+    "id": "th_b2324e19317c",
+    "agentId": "legal",
+    "type": "finding",
+    "content": "存在關聯交易披露",
+    "timestamp": 1785289032624,
+    "ref": "p.30",
+    "meta": {
+      "kind": "risk_point",
+      "evidence": [
+        {
+          "page": 30,
+          "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "RELATED_PARTY",
+          "sectionId": null,
+          "confidence": 0.050298
+        },
+        {
+          "page": 415,
+          "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "RELATED_PARTY",
+          "sectionId": null,
+          "confidence": 0.038787
+        },
+        {
+          "page": 30,
+          "excerpt": "我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "RELATED_PARTY",
+          "sectionId": null,
+          "confidence": 0.050298
+        },
+        {
+          "page": 415,
+          "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "RELATED_PARTY",
+          "sectionId": null,
+          "confidence": 0.038787
+        },
+        {
+          "page": 415,
+          "excerpt": "於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "RELATED_PARTY",
+          "sectionId": null,
+          "confidence": 5.355
+        }
+      ]
+    }
+  },
+  {
+    "id": "th_40fea220c2af",
+    "agentId": "legal",
+    "type": "finding",
+    "content": "存在客戶/供應商集中度披露",
+    "timestamp": 1785289032624,
+    "ref": "p.28",
+    "meta": {
+      "kind": "risk_point",
+      "evidence": [
+        {
+          "page": 28,
+          "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+          "sourceType": "table",
+          "category": null,
+          "fieldCode": "CONCENTRATION",
+          "sectionId": null,
+          "confidence": 0.073236
+        },
+        {
+          "page": 28,
+          "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。",
+          "sourceType": "table",
+          "category": null,
+          "fieldCode": "CONCENTRATION",
+          "sectionId": null,
+          "confidence": 0.073236
+        },
+        {
+          "page": 387,
+          "excerpt": "截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。",
+          "sourceType": "table",
+          "category": null,
+          "fieldCode": "CONCENTRATION",
+          "sectionId": null,
+          "confidence": 2.3748
+        },
+        {
+          "page": 29,
+          "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+          "sourceType": "table",
+          "category": null,
+          "fieldCode": "CONCENTRATION",
+          "sectionId": null,
+          "confidence": 0.048537
+        },
+        {
+          "page": 29,
+          "excerpt": "於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。",
+          "sourceType": "table",
+          "category": null,
+          "fieldCode": "CONCENTRATION",
+          "sectionId": null,
+          "confidence": 0.048042
+        }
+      ]
+    }
+  },
+  {
+    "id": "th_c94ce85c1917",
+    "agentId": "legal",
+    "type": "finding",
+    "content": "存在核心產品/管線進度披露",
+    "timestamp": 1785289032624,
+    "ref": "p.16",
+    "meta": {
+      "kind": "risk_point",
+      "evidence": [
+        {
+          "page": 16,
+          "excerpt": "除HX301乃自Onconova Therapeutics, Inc.授權引進外，我們的管線候選產品全部由我們自主研發。我們構建產品管線，旨在利用先天及適應性免疫實現潛在協同效應。我們的產品管線旨在解決現有檢查點抑制劑免疫療法的局限性，包括免疫抑制性腫瘤微環境致使「冷腫瘤」響應有限以及其他未獲滿足的醫療需求，從而為各種癌症患者及其他疾病適應症患者帶來臨床裨益。截至最後實際可行日期，我們已建立由10",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "PIPELINE_RISK",
+          "sectionId": null,
+          "confidence": 0.065458
+        },
+        {
+          "page": 17,
+          "excerpt": "我們根據相關方案及批准進行HX009的臨床研究。於2024年9月，我們的中國法律顧問連同獨家保薦人及其法律顧問在北京與國家藥監局藥審中心臨床試驗管理辦公室的審查員進行了面對面訪談，期間已確認（其中包括）我們已完成一項常規I期臨床研究，且HX009的國家藥監局一次性傘式批准允許本公司在III期研究之前進行HX009-I-01中國研究下的臨床研究，而無需再次獲得國家藥監局的監管批准。有關詳情請參閱本招",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "PIPELINE_RISK",
+          "sectionId": null,
+          "confidence": 0.06533
+        },
+        {
+          "page": 20,
+          "excerpt": "我們的核心產品HX009是一種同時靶向CD47及PD-1的雙特異性抗體融合蛋白。根據弗若斯特沙利文報告，截至最後實際可行日期，HX009的臨床試驗進展在同類CD47靶向雙特異性抗體／雙功能融合蛋白產品中處於全球領先地位。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "PIPELINE_RISK",
+          "sectionId": null,
+          "confidence": 0.051811
+        },
+        {
+          "page": 27,
+          "excerpt": "我們的研發團隊通常負責核心產品及其他管線產品的全球開發。我們的研發團隊有能力在中國及其他司法權區同時開展不同開發階段的臨床項目。彼等平均擁有10年左右的行業工作經驗，且幾乎全部擁有本科或以上學歷。就自主發現及開發的候選藥物而言，我們與臨床開發團隊共同開展藥物發現、質量保證及臨床活動，其中包括：(i)協調所有臨床開發工作；(ii)制定臨床試驗的關鍵要素；(iii)安排及協調合適的CRO參與臨床試驗，",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "PIPELINE_RISK",
+          "sectionId": null,
+          "confidence": 0.050864
+        },
+        {
+          "page": 14,
+          "excerpt": "截至最後實際可行日期，我們已開發十種候選藥物組成的管線，包括我們的核心產品HX009及兩種主要產品HX044及HX301，其中有八種針對腫瘤科的候選藥物及兩種針對自身免疫疾病的候選藥物。截至最後實際可行日期，我們的核心產品以及主要產品分別在中國及澳大利亞進行臨床試驗。下圖概述截至最後實際可行日期我們管線產品的開發狀態。",
+          "sourceType": "text",
+          "category": null,
+          "fieldCode": "PIPELINE_RISK",
+          "sectionId": null,
+          "confidence": 0.05027
+        }
+      ]
+    }
+  },
+  {
+    "id": "th_38c2cd4e90fc",
+    "agentId": "financial",
+    "type": "thinking",
+    "content": "工具 `react_loop` 完成（error）",
+    "timestamp": 1785289047525,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "react_loop",
+      "toolArgs": null,
+      "toolStatus": "error",
+      "durationMs": null
+    }
+  },
+  {
+    "id": "th_37cff011b8a1",
+    "agentId": "financial",
+    "type": "thinking",
+    "content": "工具 `retrieve_finance` 完成（ok）",
+    "timestamp": 1785289047562,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "retrieve_finance",
+      "toolArgs": {
+        "doc_id": "task_expert_20260728_000008",
+        "mode": "pipeline"
+      },
+      "toolStatus": "ok",
+      "durationMs": 35
+    }
+  },
+  {
+    "id": "th_a15298056380",
+    "agentId": "financial",
+    "type": "thinking",
+    "content": "工具 `extract_metrics` 完成（ok）",
+    "timestamp": 1785289047597,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "extract_metrics",
+      "toolArgs": null,
+      "toolStatus": "ok",
+      "durationMs": 35
+    }
+  },
+  {
+    "id": "th_7dc979d03514",
+    "agentId": "financial",
+    "type": "thinking",
+    "content": "工具 `gates_and_cash_burn` 完成（ok）",
+    "timestamp": 1785289047599,
+    "meta": {
+      "kind": "tool_result",
+      "toolName": "gates_and_cash_burn",
+      "toolArgs": null,
+      "toolStatus": "ok",
+      "durationMs": 1
+    }
+  },
+  {
+    "id": "th_eb606626dd37",
+    "agentId": "financial",
+    "type": "conclusion",
+    "content": "財務指標13項；風險分 50.0 (medium) [rules]",
+    "timestamp": 1785289062224,
+    "meta": {
+      "kind": "model_think"
+    }
+  },
+  {
+    "id": "th_41ceab8bc227",
+    "agentId": "market",
+    "type": "thinking",
+    "content": "市場情緒 Agent 本輪跳過（未啓用）",
+    "timestamp": 1785289062252,
+    "meta": {
+      "kind": "model_think"
+    }
+  },
+  {
+    "id": "th_71085e6465aa",
+    "agentId": "orchestrator",
+    "type": "conclusion",
+    "content": "綜合參考基本面分 50（MEDIUM）。法務：法務 3.1/3.2/3.3 抽取完成；3.5=啓用；風險分 51.0 (medium)；財務：財務指標13項；風險分 50.0 (medium) [rules]",
+    "timestamp": 1785289062259,
+    "meta": {
+      "kind": "model_think"
+    }
+  }
+]

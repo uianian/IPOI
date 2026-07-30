@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-07-18T17:49:13",
+  "n_docs": 1,
+  "ok": 0,
+  "failed": 1,
+  "records": [
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/pdf_parsing/pdf/xiaomi.pdf",
+      "stem": "xiaomi",
+      "gpu_ids": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "status": "failed",
+      "error": "'/nfs/users/wuqianqian/IPOI/pdf_parsing/output/xiaomi/xiaomi/figures/p0159_fig001.png' is not in the subpath of '/nfs/users/wuqianqian/IPOI/pdf_parsing/output/xiaomi/xiaomi/_shard6_gpu2'",
+      "finished_at": "2026-07-18T17:49:13"
+    }
+  ]
+}

@@ -1,0 +1,642 @@
+"""内部 Agent 事件 → 契约 Thought（繁体 content + 双语 reasoning + meta）。"""
+
+from __future__ import annotations
+
+import re
+import time
+import uuid
+from typing import Any
+
+try:
+    import zhconv
+except ImportError:  # pragma: no cover
+    zhconv = None  # type: ignore
+
+_CJK_RE = re.compile(r"[\u4e00-\u9fff]")
+_LATIN_RE = re.compile(r"[A-Za-z]")
+
+
+def to_zh_hant(text: str) -> str:
+    if not text:
+        return ""
+    if zhconv is None:
+        return text
+    try:
+        return zhconv.convert(text, "zh-hant")
+    except Exception:
+        return text
+
+
+def _mostly_english(text: str) -> bool:
+    if not text or not text.strip():
+        return False
+    cjk = len(_CJK_RE.findall(text))
+    latin = len(_LATIN_RE.findall(text))
+    if latin == 0:
+        return False
+    return latin >= max(12, cjk * 2)
+
+
+def _norm_cmp(a: str | None, b: str | None) -> bool:
+    """比较两段文案是否实质相同（忽略空白与简繁）。"""
+    if not a or not b:
+        return False
+    sa = re.sub(r"\s+", "", to_zh_hant(a.strip()))
+    sb = re.sub(r"\s+", "", to_zh_hant(b.strip()))
+    return bool(sa) and sa == sb
+
+
+def _agent_id(raw: str | None) -> str:
+    a = (raw or "").lower()
+    if a in {"finance", "financial"}:
+        return "financial"
+    if a == "legal":
+        return "legal"
+    if a == "market":
+        return "market"
+    if a == "orchestrator":
+        return "orchestrator"
+    return a or "financial"
+
+
+def _labels():
+    """延迟导入，避免 service 启动时 path 未就绪。"""
+    try:
+        from src.skills.finance_labels import (
+            format_metrics_block,
+            format_tables_block,
+            metrics_to_display,
+            tables_to_display,
+        )
+
+        return format_metrics_block, format_tables_block, metrics_to_display, tables_to_display
+    except Exception:
+        return None, None, None, None
+
+
+def _snip_evidence(items: list[dict[str, Any]] | None, limit: int = 12) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for it in items or []:
+        if not isinstance(it, dict):
+            continue
+        st = it.get("sourceType") or it.get("source_type") or "unknown"
+        if st not in {"table", "text", "title", "unknown"}:
+            st = "unknown"
+        out.append(
+            {
+                "page": it.get("page"),
+                "excerpt": it.get("excerpt") or it.get("content") or "",
+                "sourceType": st,
+                "category": it.get("category"),
+                "fieldCode": it.get("fieldCode") or it.get("field_code"),
+                "sectionId": it.get("sectionId") or it.get("section_id") or it.get("section"),
+                "confidence": it.get("confidence") or it.get("score"),
+            }
+        )
+        if len(out) >= limit:
+            break
+    return out
+
+
+def new_thought(
+    *,
+    agent_id: str,
+    typ: str,
+    content: str,
+    ref: str | None = None,
+    meta: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    t: dict[str, Any] = {
+        "id": f"th_{uuid.uuid4().hex[:12]}",
+        "agentId": agent_id,
+        "type": typ,
+        "content": to_zh_hant(content),
+        "timestamp": int(time.time() * 1000),
+    }
+    if ref:
+        t["ref"] = ref
+    if meta:
+        t["meta"] = meta
+    return t
+
+
+# 兼容旧名
+_new_thought = new_thought
+
+
+def _tool_reason(args: Any) -> str | None:
+    if isinstance(args, dict):
+        for k in ("reason", "query", "intent"):
+            v = args.get(k)
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+    return None
+
+
+def _bilingual_think(
+    *,
+    turn: Any,
+    tool_names: list[str],
+    reasoning: str,
+    reason_zh: str | None,
+    reasoning_display: str | None = None,
+) -> tuple[str, dict[str, Any]]:
+    """
+    模型内部 reasoning → 前端 Thought.content：
+
+    - content = rawThink 展示版（英翻中：繁体为主 + 英文术语保留）
+    - meta.rawThink = 英文/原文
+    - 不再用「第 N 輪 / tool reason」模板顶替思考内容
+    """
+    meta: dict[str, Any] = {"kind": "model_think"}
+    raw = (reasoning or "").strip()
+    display = (reasoning_display or "").strip()
+
+    if raw:
+        meta["rawThink"] = raw
+
+    # 优先：ReAct 已完成的英翻中混合文案
+    if display:
+        return to_zh_hant(display), meta
+
+    # 中文思考：转繁体即可
+    if raw and not _mostly_english(raw):
+        return to_zh_hant(raw), meta
+
+    # 英文但翻译失败：兜底「繁体意图 + 英文原文」
+    if raw and _mostly_english(raw):
+        reason_hant = to_zh_hant(reason_zh) if reason_zh else None
+        if reason_hant and not _norm_cmp(reason_hant, raw):
+            return f"{reason_hant}\n\n{raw}", meta
+        return raw, meta
+
+    tools_s = "、".join(tool_names) if tool_names else "後續工具"
+    reason_hant = to_zh_hant(reason_zh) if reason_zh else None
+    if reason_hant:
+        return reason_hant, meta
+    return f"第 {turn} 輪推理：計劃調用 {tools_s}", meta
+
+
+def _format_gates_block(gates: dict[str, Any] | None) -> str:
+    if not isinstance(gates, dict) or not gates:
+        return ""
+    labels = {
+        "is_unprofitable": "是否未盈利",
+        "continuous_net_loss": "是否連續虧損",
+        "latest_full_year_loss": "最近完整年度是否虧損",
+        "skip_3_4": "是否跳過現金跑道評估",
+        "skip_3_4_reason": "跳過原因",
+        "issuer_type": "發行人類型",
+        "is_biotech_18a": "是否18A生物科技",
+        "profitability_status": "盈利狀態",
+        "profitability_basis": "盈利判定依據",
+    }
+    lines = ["【門控結果】"]
+    for k, lab in labels.items():
+        if k not in gates:
+            continue
+        v = gates[k]
+        if isinstance(v, bool):
+            v = "是" if v else "否"
+        lines.append(f"- {lab}（{k}）：{v}")
+    return "\n".join(lines) if len(lines) > 1 else ""
+
+
+def _format_cash_runway(out: dict[str, Any]) -> str:
+    lines = ["【現金跑道】"]
+    cb = out.get("cash_burn") if isinstance(out.get("cash_burn"), dict) else out
+    mapping = [
+        ("CASH_RUNWAY_MONTHS", "現金跑道（月）"),
+        ("runway_months", "現金跑道（月）"),
+        ("BURN_RATE_MONTHLY", "月均現金消耗"),
+        ("burn_rate_monthly", "月均現金消耗"),
+        ("END_CASH", "期末現金"),
+        ("cash_eq", "現金及現金等價物"),
+        ("skipped", "是否跳過"),
+        ("reason", "說明"),
+        ("method", "測算方法"),
+    ]
+    seen_labs: set[str] = set()
+    for key, lab in mapping:
+        if key not in cb or cb[key] is None:
+            continue
+        if lab in seen_labs:
+            continue
+        seen_labs.add(lab)
+        val = cb[key]
+        if key == "skipped" and isinstance(val, bool):
+            val = "是" if val else "否"
+        lines.append(f"- {lab}：{val}")
+    return "\n".join(lines) if len(lines) > 1 else "現金跑道計算完成"
+
+
+def _finance_tool_content(
+    name: str,
+    status: str,
+    out: Any,
+    reason: str | None,
+) -> tuple[str, dict[str, Any]]:
+    """
+    工具步骤 content：动作摘要 + 结构化结果（不把 reason 再写一遍）。
+    额外字段放入 extra_meta（tables/metrics）。
+    """
+    extra: dict[str, Any] = {}
+    fmt_metrics, fmt_tables, metrics_to_disp, tables_to_disp = _labels()
+
+    if status == "running":
+        # reason 只放 toolArgs，不进 content，避免与 model_think 重复
+        return f"正在調用工具 `{name}`…", extra
+
+    if not isinstance(out, dict):
+        return f"工具 `{name}` 完成（{status}）", extra
+
+    if name == "retrieve_finance":
+        detail = out.get("tables_detail") or []
+        if tables_to_disp:
+            extra["tables"] = tables_to_disp(detail)
+        if fmt_tables:
+            block = fmt_tables(detail)
+        else:
+            codes = out.get("tables") or [t.get("code") for t in detail]
+            block = "定位主表：" + "、".join(str(c) for c in codes if c)
+        return f"`retrieve_finance` 完成\n{block}", extra
+
+    if name == "extract_metrics":
+        raw = out.get("metrics_summary") if isinstance(out.get("metrics_summary"), dict) else {}
+        # 兼容旧字段 / 别名
+        if "NET_PROFIT_OR_LOSS" in raw and "NET_LOSS" not in raw:
+            raw = {**raw, "NET_LOSS": raw["NET_PROFIT_OR_LOSS"]}
+        if metrics_to_disp and raw:
+            extra["metrics"] = metrics_to_disp(raw)
+        detail = out.get("tables_detail")
+        if detail and tables_to_disp:
+            extra["tables"] = tables_to_disp(detail)
+        if fmt_metrics and raw:
+            block = fmt_metrics(raw)
+        else:
+            keys = out.get("metric_keys_zh") or out.get("metric_keys") or []
+            if isinstance(keys, list) and keys and isinstance(keys[0], dict):
+                block = "已抽取：" + "、".join(
+                    f"{k.get('nameZh')}({k.get('code')})" for k in keys[:16]
+                )
+            else:
+                block = f"已抽取 {len(keys)} 項指標"
+        note = out.get("metric_note")
+        if note:
+            block = f"{block}\n（{to_zh_hant(str(note))}）"
+        return f"`extract_metrics` 完成\n{block}", extra
+
+    if name == "derive_gates":
+        gates = out.get("gates") if isinstance(out.get("gates"), dict) else out
+        block = _format_gates_block(gates if isinstance(gates, dict) else {})
+        extra["gates"] = gates if isinstance(gates, dict) else None
+        fp = out.get("fast_path") if isinstance(out.get("fast_path"), dict) else None
+        if fp:
+            elig = fp.get("eligible")
+            block = (block + "\n" if block else "") + (
+                f"【快捷路徑】eligible={'是' if elig else '否'}"
+                + (f"：{fp.get('reason')}" if fp.get("reason") else "")
+            )
+        return f"`derive_gates` 完成\n{block or '門控已計算'}", extra
+
+    if name == "calc_cash_runway":
+        block = _format_cash_runway(out)
+        cb = out.get("cash_burn") if isinstance(out.get("cash_burn"), dict) else out
+        extra["cashRunway"] = cb
+        return f"`calc_cash_runway` 完成\n{block}", extra
+
+    if name == "submit_finance_report":
+        score = out.get("risk_score")
+        level = out.get("risk_level")
+        summary = out.get("summary")
+        parts = [f"`submit_finance_report` 完成"]
+        if score is not None:
+            parts.append(f"風險分 {score}" + (f"（{level}）" if level else ""))
+        if summary:
+            parts.append(to_zh_hant(str(summary)))
+        return "\n".join(parts), extra
+
+    hint = out.get("hint") or out.get("summary")
+    if hint and not (reason and _norm_cmp(str(hint), reason)):
+        return f"工具 `{name}` 完成（{status}）\n{to_zh_hant(str(hint))}", extra
+    return f"工具 `{name}` 完成（{status}）", extra
+
+
+def map_finance_event(event: dict[str, Any]) -> list[dict[str, Any]]:
+    """财务 AgentRunLogger jsonl 事件 → Thought[]。"""
+    thoughts: list[dict[str, Any]] = []
+    agent_id = "financial"
+    ev = event.get("event")
+
+    if ev == "react_turn":
+        turn = event.get("turn") or event.get("step_index") or "?"
+        reasoning = (event.get("reasoning") or "").strip()
+        reasoning_display = (event.get("reasoning_display") or "").strip() or None
+        tool_calls = event.get("tool_calls") or []
+        tool_names = [
+            (tc.get("name") if isinstance(tc, dict) else None) for tc in tool_calls
+        ]
+        tool_names = [n for n in tool_names if n]
+        reason_zh = None
+        for tc in tool_calls:
+            if isinstance(tc, dict):
+                reason_zh = _tool_reason(tc.get("arguments"))
+                if reason_zh:
+                    break
+        content, meta = _bilingual_think(
+            turn=turn,
+            tool_names=tool_names,
+            reasoning=reasoning,
+            reason_zh=reason_zh,
+            reasoning_display=reasoning_display,
+        )
+        thoughts.append(
+            _new_thought(agent_id=agent_id, typ="thinking", content=content, meta=meta)
+        )
+        return thoughts
+
+    if ev == "step":
+        name = event.get("name") or "tool"
+        status = event.get("status") or "ok"
+        kind = "tool_result" if status != "running" else "tool_call"
+        inp = event.get("input_summary")
+        reason = _tool_reason(inp) if isinstance(inp, dict) else None
+        out = event.get("output")
+        content, extra = _finance_tool_content(name, status, out, reason)
+        meta: dict[str, Any] = {
+            "kind": kind,
+            "toolName": name,
+            "toolArgs": inp if isinstance(inp, dict) else None,
+            "toolStatus": "ok" if status in {"ok", "success"} else (
+                "error" if status in {"error", "failed"} else status
+            ),
+            "durationMs": event.get("duration_ms"),
+        }
+        meta.update({k: v for k, v in extra.items() if v is not None})
+        thoughts.append(
+            _new_thought(
+                agent_id=agent_id,
+                typ="thinking",
+                content=str(content),
+                meta=meta,
+            )
+        )
+
+        # 主表 / 指标：额外 finding，方便前端单独渲染卡片
+        if status != "running" and isinstance(out, dict):
+            if name == "retrieve_finance" and (out.get("tables_detail") or out.get("tables")):
+                fmt_metrics, fmt_tables, _, tables_to_disp = _labels()
+                detail = out.get("tables_detail") or []
+                block = fmt_tables(detail) if fmt_tables else None
+                pages = [t.get("page") for t in detail if isinstance(t, dict) and t.get("page") is not None]
+                thoughts.append(
+                    _new_thought(
+                        agent_id=agent_id,
+                        typ="finding",
+                        content=block or f"已定位 {len(out.get('tables') or detail)} 張財務主表",
+                        ref=f"p.{pages[0]}" if pages else (
+                            (detail[0].get("code") if detail else None)
+                        ),
+                        meta={
+                            "kind": "finance_tables",
+                            "tables": tables_to_disp(detail) if tables_to_disp else detail,
+                            "toolName": name,
+                        },
+                    )
+                )
+            if name == "extract_metrics":
+                fmt_metrics, _, metrics_to_disp, tables_to_disp = _labels()
+                raw = out.get("metrics_summary") if isinstance(out.get("metrics_summary"), dict) else {}
+                if "NET_PROFIT_OR_LOSS" in raw and "NET_LOSS" not in raw:
+                    raw = {**raw, "NET_LOSS": raw["NET_PROFIT_OR_LOSS"]}
+                metrics_list = metrics_to_disp(raw) if metrics_to_disp and raw else []
+                block = fmt_metrics(raw) if fmt_metrics and raw else None
+                thoughts.append(
+                    _new_thought(
+                        agent_id=agent_id,
+                        typ="finding",
+                        content=block or f"已抽取 {len(out.get('metric_keys') or [])} 項財務指標",
+                        meta={
+                            "kind": "finance_metrics",
+                            "metrics": metrics_list,
+                            "tables": tables_to_disp(out.get("tables_detail"))
+                            if tables_to_disp and out.get("tables_detail")
+                            else None,
+                            "toolName": name,
+                        },
+                    )
+                )
+
+        # 从 output 抽证据
+        evidence_src: list[dict[str, Any]] = []
+        if isinstance(out, dict):
+            for key in ("hits", "section_evidence_hits", "evidence", "snippets"):
+                val = out.get(key)
+                if isinstance(val, list):
+                    evidence_src.extend([x for x in val if isinstance(x, dict)])
+        if evidence_src:
+            snips = _snip_evidence(evidence_src)
+            if snips:
+                pages = [s["page"] for s in snips if s.get("page") is not None]
+                ref = f"p.{pages[0]}" if pages else None
+                thoughts.append(
+                    _new_thought(
+                        agent_id=agent_id,
+                        typ="finding",
+                        content=f"檢索到 {len(snips)} 條原文證據"
+                        + (f"（頁碼 {', '.join(str(p) for p in pages[:5])}）" if pages else ""),
+                        ref=ref,
+                        meta={"kind": "evidence", "evidence": snips, "toolName": name},
+                    )
+                )
+        return thoughts
+
+    if ev == "result":
+        payload = event.get("payload") or {}
+        summary = payload.get("summary")
+        score = payload.get("risk_score")
+        level = payload.get("risk_level")
+        if summary or score is not None:
+            parts = []
+            if score is not None:
+                parts.append(f"財務風險分 {score}" + (f"（{level}）" if level else ""))
+            if summary:
+                parts.append(str(summary))
+            thoughts.append(
+                _new_thought(
+                    agent_id=agent_id,
+                    typ="conclusion",
+                    content="\n".join(parts),
+                    meta={"kind": "model_think"},
+                )
+            )
+        for rp in payload.get("risk_points") or []:
+            if not isinstance(rp, dict):
+                continue
+            evs = _snip_evidence(rp.get("evidence") or [])
+            page = None
+            if evs and evs[0].get("page") is not None:
+                page = evs[0]["page"]
+            thoughts.append(
+                _new_thought(
+                    agent_id=agent_id,
+                    typ="finding",
+                    content=str(rp.get("description") or rp.get("code") or "風險點"),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={"kind": "risk_point", "evidence": evs or None},
+                )
+            )
+        return thoughts
+
+    return thoughts
+
+
+def map_legal_event(event: dict[str, Any]) -> list[dict[str, Any]]:
+    """法务 on_progress 事件 → Thought[]。"""
+    thoughts: list[dict[str, Any]] = []
+    agent_id = "legal"
+    ev = event.get("event")
+    if ev != "step":
+        return thoughts
+
+    name = event.get("name") or "tool"
+    status = event.get("status") or "ok"
+    kind = "tool_call" if status == "running" else "tool_result"
+    inp = event.get("input_summary")
+    reason = _tool_reason(inp) if isinstance(inp, dict) else None
+    if status == "running":
+        # 不把 reason 塞进 content，避免与后续 result 重复
+        content = f"正在執行 `{name}`…"
+    else:
+        out = event.get("output") or {}
+        if name == "score_legal" and event.get("summary"):
+            content = str(event["summary"])
+        elif isinstance(out, dict) and out.get("hits") is not None:
+            content = f"`{name}` 完成，命中 {out.get('hits')} 條"
+        elif reason and not _norm_cmp(reason, f"`{name}` 完成（{status}）"):
+            # 仅当没有更好摘要时才用 reason，且不与空模板重复
+            content = f"`{name}` 完成（{status}）"
+        else:
+            content = f"`{name}` 完成（{status}）"
+
+    thoughts.append(
+        _new_thought(
+            agent_id=agent_id,
+            typ="thinking" if name != "score_legal" or status == "running" else "conclusion",
+            content=content,
+            meta={
+                "kind": kind if name != "score_legal" or status == "running" else "model_think",
+                "toolName": name,
+                "toolArgs": inp if isinstance(inp, dict) else None,
+                "toolStatus": "ok" if status in {"ok", "success"} else (
+                    "error" if status in {"error", "failed"} else status
+                ),
+            },
+        )
+    )
+
+    evidence = event.get("evidence")
+    if evidence and status != "running":
+        snips = _snip_evidence(list(evidence))
+        if snips:
+            pages = [s["page"] for s in snips if s.get("page") is not None]
+            thoughts.append(
+                _new_thought(
+                    agent_id=agent_id,
+                    typ="finding",
+                    content=f"法務證據 {len(snips)} 條"
+                    + (f"（頁碼 {', '.join(str(p) for p in pages[:8])}）" if pages else ""),
+                    ref=f"p.{pages[0]}" if pages else None,
+                    meta={"kind": "evidence", "evidence": snips, "toolName": name},
+                )
+            )
+
+    for rp in event.get("risk_points") or []:
+        if not isinstance(rp, dict):
+            continue
+        evs = _snip_evidence(rp.get("evidence") or [])
+        page = evs[0]["page"] if evs and evs[0].get("page") is not None else None
+        thoughts.append(
+            _new_thought(
+                agent_id=agent_id,
+                typ="finding",
+                content=str(rp.get("description") or rp.get("code") or "風險點"),
+                ref=f"p.{page}" if page is not None else None,
+                meta={"kind": "risk_point", "evidence": evs or None},
+            )
+        )
+    return thoughts
+
+
+def score_to_risk_level(score: float) -> str:
+    s = float(score)
+    if s >= 60:
+        return "HIGH"
+    if s >= 30:
+        return "MEDIUM"
+    return "LOW"
+
+
+def _finance_detail_from_agent_result(agent_result: dict[str, Any]) -> dict[str, Any]:
+    """从 AgentResult 抽出前端可直接渲染的三表 + 指标。"""
+    fmt_metrics, fmt_tables, metrics_to_disp, tables_to_disp = _labels()
+    metrics = agent_result.get("metrics") or {}
+    # cash_burn 可能嵌在 metrics 里
+    metrics_only = {k: v for k, v in metrics.items() if k != "cash_burn" and isinstance(v, dict)}
+    evidence = agent_result.get("evidence_summary") or {}
+    table_meta = evidence.get("table_meta") or {}
+    tables_detail = []
+    try:
+        from src.skills.finance_labels import table_name_zh
+
+        for code, info in table_meta.items():
+            if not isinstance(info, dict):
+                continue
+            tables_detail.append(
+                {
+                    "code": code,
+                    "nameZh": table_name_zh(code),
+                    "page": info.get("page"),
+                    "sourceType": info.get("source_type") or info.get("category"),
+                    "excerpt": (info.get("excerpt") or "")[:200],
+                }
+            )
+    except Exception:
+        tables_detail = [
+            {"code": c, "page": (i or {}).get("page") if isinstance(i, dict) else None}
+            for c, i in table_meta.items()
+        ]
+
+    metrics_list = metrics_to_disp(metrics_only) if metrics_to_disp else []
+    tables_list = tables_to_disp(tables_detail) if tables_to_disp else tables_detail
+    return {
+        "tables": tables_list,
+        "tablesText": fmt_tables(tables_detail) if fmt_tables else None,
+        "metrics": metrics_list,
+        "metricsText": fmt_metrics(metrics_only) if fmt_metrics else None,
+        "gates": agent_result.get("gates"),
+        "cashBurn": metrics.get("cash_burn"),
+    }
+
+
+def agent_bundle_from_result(
+    *,
+    agent_key: str,
+    agent_result: dict[str, Any],
+    report_markdown: str,
+    log_text: str,
+    log_events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    bundle: dict[str, Any] = {
+        "agentId": "financial" if agent_key == "finance" else "legal",
+        "riskScore": agent_result.get("risk_score"),
+        "riskLevel": agent_result.get("risk_level"),
+        "summary": to_zh_hant(str(agent_result.get("summary") or "")),
+        "reportMarkdown": report_markdown,
+        "logText": log_text,
+        "logEvents": log_events,
+        "agentResult": agent_result,
+    }
+    if agent_key == "finance":
+        bundle["financeDetail"] = _finance_detail_from_agent_result(agent_result)
+    return bundle

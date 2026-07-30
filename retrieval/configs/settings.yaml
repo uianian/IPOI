@@ -1,0 +1,34 @@
+system:
+  app_name: "ipo-retrieval"
+  debug: true
+  log_level: "INFO"
+
+llm:
+  # provider: "vllm" | "openai" | "openrouter"
+  provider: "openrouter"
+  # Prefer env: IPO_LLM_API_KEY or OPENAI_API_KEY — do not commit real keys
+  api_key: ""
+  api_base: "https://openrouter.ai/api/v1"
+  vllm_base_url: "http://localhost:8000/v1"
+  embedding_model: "text-embedding-3-large"
+  chat_model: "google/gemma-4-31b-it:free"
+  fallback_embedding_model: "BAAI/bge-small-zh-v1.5"
+  fallback_embedding_cache: "~/.cache/ipo_risk/embedding_fallback"
+  fallback_embedding_mirror: "https://hf-mirror.com"
+  max_retries: 3
+  timeout_seconds: 60
+  max_tokens: 4096
+  temperature: 0.1
+
+retrieval:
+  chunk_size: 512
+  chunk_overlap: 64
+  faiss_index_type: "IndexFlatIP"
+  top_k: 10
+  # 本项目私有索引目录（相对 retrieval/ 包根），不与 agents 共用
+  index_root: ".runtime/indexes"
+  bm25_weight: 0.3
+  vector_weight: 0.5
+  grep_weight: 0.2
+  rrf_k: 60
+  grep_boost_rank: 3

@@ -1,0 +1,81 @@
+{
+  "base": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01024_26-01-2021_快手－Ｗ_全球發售/full_parse.json",
+  "patch": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01024_26-01-2021_快手－Ｗ_全球發售-reparse/01024_26-01-2021_快手－Ｗ_全球發售/full_parse.json",
+  "pages": [
+    44,
+    171,
+    326,
+    412,
+    583,
+    627,
+    642,
+    666,
+    673,
+    686,
+    687,
+    840
+  ],
+  "prefer_higher_table_score": true,
+  "changelog": [
+    {
+      "page": 44,
+      "action": "keep_base",
+      "detail": "score patch=424 <= base=424"
+    },
+    {
+      "page": 171,
+      "action": "keep_base",
+      "detail": "score patch=326 <= base=326"
+    },
+    {
+      "page": 326,
+      "action": "keep_base",
+      "detail": "score patch=221 <= base=221"
+    },
+    {
+      "page": 412,
+      "action": "keep_base",
+      "detail": "score patch=323 <= base=323"
+    },
+    {
+      "page": 583,
+      "action": "keep_base",
+      "detail": "score patch=0 <= base=0"
+    },
+    {
+      "page": 627,
+      "action": "keep_base",
+      "detail": "score patch=0 <= base=0"
+    },
+    {
+      "page": 642,
+      "action": "keep_base",
+      "detail": "score patch=2154 <= base=2154"
+    },
+    {
+      "page": 666,
+      "action": "keep_base",
+      "detail": "score patch=0 <= base=0"
+    },
+    {
+      "page": 673,
+      "action": "keep_base",
+      "detail": "score patch=0 <= base=0"
+    },
+    {
+      "page": 686,
+      "action": "keep_base",
+      "detail": "score patch=0 <= base=0"
+    },
+    {
+      "page": 687,
+      "action": "keep_base",
+      "detail": "score patch=0 <= base=0"
+    },
+    {
+      "page": 840,
+      "action": "keep_base",
+      "detail": "score patch=314 <= base=314"
+    }
+  ]
+}

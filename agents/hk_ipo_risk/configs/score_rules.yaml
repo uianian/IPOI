@@ -1,0 +1,81 @@
+# 0-100，越高风险越大。参考 agents/ipo fusion + 特征文档阈值。
+score_scale: { min: 0, max: 100, higher_means: risk }
+levels:
+  - { max: 20, level: very_low }
+  - { max: 40, level: low }
+  - { max: 60, level: medium }
+  - { max: 80, level: high }
+  - { max: 100, level: very_high }
+
+finance:
+  rules:
+    - code: CONTINUOUS_LOSS
+      delta: 25
+      rule_ref: "doc§2.1"
+      when: continuous_net_loss
+    - code: SINGLE_YEAR_LOSS
+      delta: 15
+      rule_ref: "doc§2.1"
+      when: latest_full_year_loss
+    - code: CFO_NEGATIVE
+      delta: 15
+      rule_ref: "doc§2.3"
+      when: cfo_persistently_negative
+    - code: GP_MARGIN_DROP
+      delta: 10
+      rule_ref: "doc§2.1"
+      when: gp_margin_drop_gt_5pp
+    - code: CASH_RUNWAY_LT_12
+      delta: 20
+      rule_ref: "doc§3.4"
+      when: runway_lt_12
+      require_gate: unprofitable
+    - code: CASH_RUNWAY_12_24
+      delta: 10
+      rule_ref: "doc§3.4"
+      when: runway_12_24
+      require_gate: unprofitable
+    - code: BURN_YOY_UP_30
+      delta: 15
+      rule_ref: "doc§3.4"
+      when: burn_yoy_up_gt_30
+      require_gate: unprofitable
+  base_if_any_medium_signal: 0
+
+legal:
+  rules:
+    - code: REDEMPTION_HIGH
+      delta: 25
+      rule_ref: "doc§3.1"
+      when: redemption_high
+    - code: REDEMPTION_MEDIUM
+      delta: 12
+      rule_ref: "doc§3.1"
+      when: redemption_medium
+    - code: RELATED_PARTY_HIGH
+      delta: 25
+      rule_ref: "doc§3.2"
+      when: related_party_ratio_gt_30
+    - code: RELATED_PARTY_TREND
+      delta: 10
+      rule_ref: "doc§3.2"
+      when: related_party_rising
+    - code: CONCENTRATION_HIGH
+      delta: 25
+      rule_ref: "doc§3.3"
+      when: concentration_high
+    - code: PIPELINE_HIGH
+      delta: 20
+      rule_ref: "doc§3.5"
+      when: pipeline_high
+      require_gate: biotech
+    - code: VALUATION_INVERSION
+      delta: 25
+      rule_ref: "doc§3.6"
+      when: valuation_inversion
+  # 有披露但未达高危时给基础分，避免全 0
+  disclosure_base:
+    exists_redemption: 18
+    exists_related_party: 15
+    exists_concentration_disclosure: 12
+    exists_pipeline: 12

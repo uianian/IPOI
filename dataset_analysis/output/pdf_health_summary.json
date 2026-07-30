@@ -1,0 +1,35 @@
+{
+  "total_pdfs_checked": 565,
+  "openable_count": 565,
+  "encrypted_count": 0,
+  "open_error_count": 0,
+  "likely_scanned_count": 92,
+  "text_layer_count": 471,
+  "page_count_stats": {
+    "count": 565.0,
+    "mean": 627.4283185840708,
+    "std": 160.17112052151654,
+    "min": 122.0,
+    "25%": 551.0,
+    "50%": 614.0,
+    "75%": 694.0,
+    "max": 2834.0
+  },
+  "file_size_mb_stats": {
+    "count": 565.0,
+    "mean": 13.125592920353993,
+    "std": 11.428043794798661,
+    "min": 2.27,
+    "25%": 6.82,
+    "50%": 9.04,
+    "75%": 13.42,
+    "max": 63.44
+  },
+  "page_length_distribution": {
+    "超长篇(≥500页)": 492,
+    "长篇(300-499页)": 69,
+    "中篇(100-299页)": 4
+  },
+  "filename_parse_fail_count": 0,
+  "estimated_parse_hours_1min_per_page": 5908.3
+}

@@ -1,0 +1,18 @@
+{
+  "analysisId": "analysis_20260729_000011",
+  "clientProjectId": "proj-19fa6ad4a0b",
+  "taskId": "task_expert_20260728_000008",
+  "status": "completed",
+  "createdAt": "2026-07-29T01:37:06Z",
+  "completedAt": "2026-07-29T01:37:42Z",
+  "overallScore": 50,
+  "riskLevel": "MEDIUM",
+  "parseMeta": {
+    "companyName": "翰思艾泰生物医药科技(武汉)股份有限公司",
+    "issuerType": "biotech",
+    "ticker": "3378.HK",
+    "fileName": "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf",
+    "parseJsonPath": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json"
+  },
+  "error": null
+}

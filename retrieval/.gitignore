@@ -1,0 +1,15 @@
+.runtime/reports/*.html
+.runtime/reports/*.pdf
+.runtime/*.json
+.runtime/indexes/
+!configs/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+# never commit secrets
+configs/settings.local.yaml
+.env

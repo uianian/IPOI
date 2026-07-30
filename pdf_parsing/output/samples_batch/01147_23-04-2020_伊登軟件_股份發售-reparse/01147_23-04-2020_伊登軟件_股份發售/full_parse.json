@@ -1,0 +1,1852 @@
+[
+  {
+    "page": 30,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          1143,
+          115,
+          1329,
+          178
+        ],
+        "category": "title",
+        "text": "釋義"
+      },
+      {
+        "bbox": [
+          195,
+          297,
+          2277,
+          1243
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「副牽頭經辦人」</td><td>指</td><td>順安證券資產管理有限公司（根據證券及期貨條例可從事第1類（證券交易）、第2類（期貨合約交易）、第4類（就證券提供意見）及第9類（提供資產管理）受規管活動的持牌法團）；恆聖中國證券有限公司（根據證券及期貨條例可從事第1類（證券交易）受規管活動的持牌法團）；一盈證券有限公司（根據證券及期貨條例可從事第1類（證券交易）受規管活動的持牌法團）；海盈證券有限公司（根據證券及期貨條例可從事第1類（證券交易）及第4類（就證券提供意見）受規管活動的持牌法團）；東方滙財證券有限公司（根據證券及期貨條例可從事第1類（證券交易）、第4類（就證券提供意見）及第9類（提供資產管理）受規管活動的持牌法團）；瑞邦證券有限公司（根據證券及期貨條例可從事第1類（證券交易）及第4類（就證券提供意見）受規管活動的持牌法團）；及尊嘉證券國際有限公司（根據證券及期貨條例可從事第1類（證券交易）、第2類（期貨合約交易）、第4類（就證券提供意見）及第5類（就期貨合約提供意見）受規管活動的持牌法團）</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 124,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          195,
+          1296,
+          2270,
+          1369
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「公司法」</td><td>指</td><td>開曼群島公司法（經修訂），經不時修訂、補充或以其他方式修改</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 104,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          1419,
+          2270,
+          1544
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「公司條例」</td><td>指</td><td>香港法例第622章《公司條例》（經不時修訂、補充或以其他方式修改）</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 104,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          1604,
+          2257,
+          1733
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「公司（清盤及雜項條文）條例」</td><td>指</td><td>香港法例第32章《公司（清盤及雜項條文）條例》（經不時修訂、補充或以其他方式修改）</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 105,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          1789,
+          2272,
+          1915
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「本公司」或「我們」</td><td>指</td><td>伊登軟件控股有限公司，一家於2018年9月4日在開曼群島註冊成立的獲豁免有限公司</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 110,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          1971,
+          1510,
+          2037
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「關連人士」</td><td>指</td><td>具有上市規則所賦予的涵義</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 103,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          2093,
+          1510,
+          2156
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「關連交易」</td><td>指</td><td>具有上市規則所賦予的涵義</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 103,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          2213,
+          2272,
+          2467
+        ],
+        "category": "table",
+        "text": "<table><tr><td>「控股股東」</td><td>指</td><td>具有上市規則所賦予的涵義，及除文義另有所指外，指Aztec Pearl及（透過家族信託）Tricor Equity Trustee、丁女士、Green Leaf及Cai先生（更多詳情見本招股章程「與控股股東的關係」一節）；而「控股股東」則指其中任何一方</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 109,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          1208,
+          3135,
+          1270,
+          3182
+        ],
+        "category": "footer",
+        "text": "23"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 124,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 120,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          403,
+          205,
+          1938,
+          265
+        ],
+        "category": "text",
+        "text": "下表載列於所示年度我們各業務分部自新客戶及現有客戶所得收益明細："
+      },
+      {
+        "bbox": [
+          281,
+          347,
+          3010,
+          873
+        ],
+        "category": "table",
+        "text": "<table><tr><td>各業務分部自新客戶及現有客戶所得收益(附註)</td><td colspan=\"4\">2016年</td><td colspan=\"4\">2017年</td><td colspan=\"4\">截至12月31日止年度</td><td colspan=\"4\">2018年</td><td colspan=\"4\">2019年</td></tr><tr><td></td><td>客戶數目</td><td>人民幣千元</td><td>佔各業務分部百分比</td><td>客戶數目</td><td>人民幣千元</td><td>佔各業務分部百分比</td><td>客戶數目</td><td>人民幣千元</td><td>佔各業務分部百分比</td><td>客戶數目</td><td>人民幣千元</td><td>佔各業務分部百分比</td><td>客戶數目</td><td>人民幣千元</td><td>佔各業務分部百分比</td></tr><tr><td>IT基礎設施服務</td><td>613</td><td>57,679</td><td>29.0</td><td>142</td><td>141,175</td><td>71.0</td><td>300</td><td>39,300</td><td>15.7</td><td>278</td><td>211,698</td><td>84.3</td><td>215</td><td>35,326</td><td>12.8</td><td>205</td><td>240,925</td><td>87.2</td><td>213</td><td>68,728</td><td>17.1</td><td>394</td><td>126,509</td><td>82.9</td></tr><tr><td>IT實施及支持服務</td><td>98</td><td>35,094</td><td>43.9</td><td>44</td><td>44,762</td><td>56.1</td><td>53</td><td>8,536</td><td>10.6</td><td>85</td><td>71,860</td><td>89.4</td><td>63</td><td>52,561</td><td>36.0</td><td>84</td><td>93,265</td><td>64.0</td><td>56</td><td>15,054</td><td>10.6</td><td>121</td><td>333,048</td><td>89.4</td></tr><tr><td>雲服務</td><td>99</td><td>14,537</td><td>29.9</td><td>75</td><td>34,046</td><td>70.1</td><td>175</td><td>18,574</td><td>13.6</td><td>188</td><td>118,471</td><td>86.4</td><td>112</td><td>42,315</td><td>22.3</td><td>135</td><td>147,700</td><td>77.7</td><td>118</td><td>41,466</td><td>16.7</td><td>231</td><td>207,084</td><td>83.3</td></tr><tr><td>總計：</td><td></td><td>107,310</td><td></td><td></td><td>219,983</td><td></td><td></td><td>66,410</td><td></td><td></td><td>402,029</td><td></td><td></td><td>130,202</td><td></td><td></td><td></td><td>481,890</td><td></td><td></td><td>125,248</td><td></td><td></td><td>666,641</td><td></td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 868,
+        "table_quality_notes": [
+          "rotated_table_structure_unstable"
+        ]
+      },
+      {
+        "bbox": [
+          396,
+          922,
+          522,
+          975
+        ],
+        "category": "text",
+        "text": "附註："
+      },
+      {
+        "bbox": [
+          393,
+          1034,
+          3016,
+          1148
+        ],
+        "category": "text",
+        "text": "於往績記錄期，若干現有或新客戶委聘本集團提供不同業務分部的服務及／或產品，因此，我們自該等客戶所得收益經參照上述本集團相應業務分部單獨計算。"
+      },
+      {
+        "bbox": [
+          3122,
+          1151,
+          3192,
+          1327
+        ],
+        "category": "text",
+        "text": "業務"
+      },
+      {
+        "bbox": [
+          125,
+          1161,
+          172,
+          1312
+        ],
+        "category": "footer",
+        "text": "-113-"
+      }
+    ],
+    "rotation_applied": 90,
+    "table_structure_confidence": "low",
+    "table_quality_score": 868,
+    "table_quality_notes": [
+      "rotated_table_structure_unstable"
+    ]
+  },
+  {
+    "page": 131,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          1148,
+          115,
+          1327,
+          178
+        ],
+        "category": "title",
+        "text": "業務"
+      },
+      {
+        "bbox": [
+          312,
+          291,
+          2262,
+          1002
+        ],
+        "category": "table",
+        "text": "<table><tr><td colspan=\"6\">各項目將支出的股份發售所得款項淨額</td></tr><tr><td>項目名稱（僅供識別）</td><td>項目性質</td><td>員工成本（百萬港元）</td><td>與研發有關的其他開支（附註1）（百萬港元）</td><td>向第三方IT服務提供商支付的服務費（附註2）（百萬港元）</td><td>小計（百萬港元）</td><td>當前狀況</td></tr><tr><td>項目L</td><td>該項目的性質為在我們於往績記錄期開發的軟件基礎上進行有關雲平台管理的基於雲計算的軟件開發，目標雲平台將用於增強我們的雲服務。</td><td>0.7</td><td>0.1</td><td>0.2</td><td>1.0</td><td>於2019年12月31日，我們並無就該項目產生任何開支，該項目預期將於2021年6月之前完成。</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 330,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          1272,
+          1111,
+          1563,
+          1161
+        ],
+        "category": "text",
+        "text": "所得款項淨額總額："
+      },
+      {
+        "bbox": [
+          1838,
+          1111,
+          1910,
+          1157
+        ],
+        "category": "text",
+        "text": "13.7"
+      },
+      {
+        "bbox": [
+          310,
+          1210,
+          1830,
+          1266
+        ],
+        "category": "text",
+        "text": "附註1：與我們的研發團隊有關的其他開支主要包括租賃開支、辦公開支及差旅開支。"
+      },
+      {
+        "bbox": [
+          312,
+          1319,
+          2193,
+          1376
+        ],
+        "category": "text",
+        "text": "附註2：經弗若斯特沙利文確認，IT服務提供商向其他第三方IT服務提供商分包若干研發工作為行業慣例。"
+      },
+      {
+        "bbox": [
+          312,
+          1435,
+          2049,
+          1495
+        ],
+        "category": "text",
+        "text": "董事認為研發項目將在以下方面為我們的業務帶來增值及有助於本集團產生收益："
+      },
+      {
+        "bbox": [
+          312,
+          1554,
+          2272,
+          2001
+        ],
+        "category": "text",
+        "text": "(i) 於往績記錄期，我們定期與客戶討論以取得彼等根據用戶體驗對我們的IT產品及／或服務的反饋，包括但不限於(i)我們提供的IT產品及服務的合適性及質量；(ii)彼等對IT產品及／或服務的需求及要求；及(iii)我們的IT產品及／或服務的功能及應用的有效性。我們的研發項目的性質乃經考慮客戶提出的反饋及意見後釐定。因此，我們研發項目的範圍乃專門為提供可更好地迎合客戶的需求及業務環境的IT服務及／或產品，並將我們提供的IT服務與最新市場趨勢保持一致。因此，董事認為研發項目可提高客戶使用我們的IT服務的體驗，因此透過增強我們IT服務的競爭力來為本集團的業務帶來增值；"
+      },
+      {
+        "bbox": [
+          312,
+          2057,
+          2275,
+          2242
+        ],
+        "category": "text",
+        "text": "(ii) 於往績記錄期，我們自主研發基於雲計算的軟件開發於截至2019年12月31日止四個年度所貢獻的收益分別約為人民幣3.6百萬元、人民幣3.7百萬元、人民幣3.2百萬元及人民幣4.5百萬元；"
+      },
+      {
+        "bbox": [
+          1200,
+          3135,
+          1280,
+          3182
+        ],
+        "category": "footer",
+        "text": "124"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 330,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 160,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          403,
+          203,
+          3003,
+          267
+        ],
+        "category": "text",
+        "text": "下表載列於所示年度按業務分部劃分的源自供應商A、其他美國產品／服務及非美國產品／服務的收益、毛利及毛利率明細："
+      },
+      {
+        "bbox": [
+          393,
+          332,
+          3010,
+          1262
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td colspan=\"12\">截至12月31日止年度</td></tr><tr><td></td><td colspan=\"3\">2016年</td><td colspan=\"3\">2017年</td><td colspan=\"3\">2018年</td><td colspan=\"3\">2019年</td></tr><tr><td></td><td>收益人民幣千元</td><td>%</td><td>毛利人民幣千元</td><td>毛利率%</td><td>收益人民幣千元</td><td>%</td><td>毛利人民幣千元</td><td>毛利率%</td><td>收益人民幣千元</td><td>%</td><td>毛利人民幣千元</td><td>毛利率%</td></tr><tr><td>IT基礎設施服務</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>i)源自供應商A的產品／服務</td><td>15,683</td><td>11.2</td><td>1,468</td><td>9.4</td><td>56,742</td><td>24.4</td><td>5,056</td><td>8.9</td><td>76,751</td><td>29.7</td><td>6,859</td><td>8.9</td><td>61,330</td><td>19.2</td><td>3,472</td><td>5.7</td></tr><tr><td>ii)源自其他美國產品／服務</td><td>23,527</td><td>16.8</td><td>1,979</td><td>8.4</td><td>13,043</td><td>5.6</td><td>1,032</td><td>7.9</td><td>37,504</td><td>14.5</td><td>2,731</td><td>7.3</td><td>52,060</td><td>16.3</td><td>2,844</td><td>5.5</td></tr><tr><td>iii)源自非美國產品／服務</td><td>55,915</td><td>40.0</td><td>3,484</td><td>6.2</td><td>67,920</td><td>29.2</td><td>4,425</td><td>6.5</td><td>41,612</td><td>16.1</td><td>3,282</td><td>7.9</td><td>64,815</td><td>20.3</td><td>6,313</td><td>9.7</td></tr><tr><td>小計：</td><td>95,125</td><td>68.0</td><td>6,931</td><td>7.3</td><td>137,705</td><td>59.2</td><td>10,513</td><td>7.6</td><td>155,867</td><td>60.3</td><td>12,872</td><td>8.3</td><td>178,205</td><td>55.8</td><td>12,629</td><td>7.1</td></tr><tr><td>IT實施及支持服務</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>i)源自供應商A的產品／服務</td><td>7,018</td><td>5.0</td><td>1,145</td><td>16.3</td><td>2,586</td><td>1.1</td><td>104</td><td>4.1</td><td>3,968</td><td>1.5</td><td>256</td><td>6.4</td><td>425</td><td>0.1</td><td>25</td><td>5.9</td></tr><tr><td>ii)源自其他美國產品／服務</td><td>4,041</td><td>2.9</td><td>494</td><td>12.2</td><td>5,545</td><td>2.4</td><td>441</td><td>7.9</td><td>5,964</td><td>2.3</td><td>538</td><td>9.0</td><td>2,444</td><td>0.8</td><td>194</td><td>7.9</td></tr><tr><td>iii)源自非美國產品／服務</td><td>10,234</td><td>7.3</td><td>1,106</td><td>10.8</td><td>10,468</td><td>4.5</td><td>451</td><td>4.3</td><td>12,820</td><td>5.0</td><td>798</td><td>6.2</td><td>36,534</td><td>11.4</td><td>2,555</td><td>7.0</td></tr><tr><td>小計：</td><td>21,293</td><td>15.2</td><td>2,745</td><td>12.9</td><td>18,599</td><td>8.0</td><td>996</td><td>5.4</td><td>22,752</td><td>8.8</td><td>1,592</td><td>7.0</td><td>39,403</td><td>12.3</td><td>2,774</td><td>7.0</td></tr><tr><td>雲服務</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>i)源自供應商A的產品／服務</td><td>328</td><td>0.2</td><td>26</td><td>8.1</td><td>53,057</td><td>22.8</td><td>3,849</td><td>7.3</td><td>63,237</td><td>24.4</td><td>3,322</td><td>5.3</td><td>68,528</td><td>21.4</td><td>2,517</td><td>3.7</td></tr><tr><td>ii)源自其他美國產品／服務</td><td>18,646</td><td>13.3</td><td>1,010</td><td>5.4</td><td>12,808</td><td>5.5</td><td>1,122</td><td>8.8</td><td>5,012</td><td>1.9</td><td>272</td><td>5.4</td><td>1,241</td><td>0.4</td><td>57</td><td>4.6</td></tr><tr><td>iii)源自非美國產品／服務</td><td>4,561</td><td>3.3</td><td>370</td><td>8.1</td><td>10,297</td><td>4.5</td><td>638</td><td>6.2</td><td>11,984</td><td>4.6</td><td>727</td><td>6.1</td><td>32,266</td><td>10.1</td><td>1,650</td><td>5.1</td></tr><tr><td>小計：</td><td>23,535</td><td>16.8</td><td>1,406</td><td>6.0</td><td>76,162</td><td>32.8</td><td>5,609</td><td>7.4</td><td>80,233</td><td>30.9</td><td>4,321</td><td>5.4</td><td>102,035</td><td>31.9</td><td>4,224</td><td>4.1</td></tr><tr><td>總計：</td><td>139,953</td><td>100.0</td><td>11,082</td><td>7.9</td><td>232,466</td><td>100.0</td><td>17,118</td><td>7.4</td><td>258,852</td><td>100.0</td><td>18,785</td><td>7.3</td><td>319,643</td><td>100.0</td><td>19,627</td><td>6.1</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 2549,
+        "table_quality_notes": [
+          "rotated_table_structure_unstable"
+        ]
+      },
+      {
+        "bbox": [
+          3122,
+          1148,
+          3192,
+          1327
+        ],
+        "category": "text",
+        "text": "業務"
+      },
+      {
+        "bbox": [
+          125,
+          1161,
+          172,
+          1309
+        ],
+        "category": "footer",
+        "text": "153"
+      }
+    ],
+    "rotation_applied": 90,
+    "table_structure_confidence": "low",
+    "table_quality_score": 2549,
+    "table_quality_notes": [
+      "rotated_table_structure_unstable"
+    ]
+  },
+  {
+    "page": 185,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          1148,
+          115,
+          1327,
+          178
+        ],
+        "category": "header",
+        "text": "業務"
+      },
+      {
+        "bbox": [
+          195,
+          284,
+          2275,
+          790
+        ],
+        "category": "text",
+        "text": "遵照市場內其他主要IT產品供應商採用的行業慣例，供應商A主要通過委任地方授權服務提供商（例如本集團）銷售其產品及服務，而非直接向中國的客戶銷售。為向終端用戶提供更佳用戶體驗及定制服務，供應商A已委任本集團為其業務合作夥伴，使用我們完善的銷售網絡及就供應商A的多類產品及服務的使用及功能提供意見的技術專長推廣及銷售其IT產品及服務。此外，本集團可根據終端用戶的具體要求，通過制定涉及使用供應商A的產品及服務的IT解決方案向終端用戶提供增值服務（例如IT解決方案服務）。由於我們具備提供增值服務以滿足客戶需求的技術實力及於中國推廣供應商A的產品及服務的完善銷售網絡，我們獲供應商A授予若干最高商業合夥等級（包括硬件的授權設備經銷商以及軟件及雲的金牌認證合作夥伴及LSP）。"
+      },
+      {
+        "bbox": [
+          198,
+          846,
+          555,
+          906
+        ],
+        "category": "title",
+        "text": "授權設備經銷商"
+      },
+      {
+        "bbox": [
+          195,
+          969,
+          2275,
+          1468
+        ],
+        "category": "text",
+        "text": "我們自2016年起透過供應商H（為供應商A品牌在中國的設備分銷商）被評為供應商A品牌的授權設備經銷商，銷售手提電腦設備及配件。我們獲授的供應商A品牌的授權設備經銷商的認可須於2020年8月續新，但我們自首次獲授供應商A品牌的授權設備經銷商起及直至本集團於2019年9月最近一次成功續新止持續滿足有關要求（如表現要求及財務狀況）。由於我們於往續記錄期與供應商A的交易金額不斷增加，並計及我們與供應商A的長期業務關係以及我們自首次獲認可起成功續新的良好往續記錄，經審慎及周詳考慮後，董事認為我們於2020年8月以及可預見未來續新該等認可應無重大障礙。由於被認可為供應商A品牌的授權設備經銷商，董事認為本集團在向客戶提供IT服務過程中就推廣使用供應商A品牌的硬件產品及就此提供建議方面處於有利地位。"
+      },
+      {
+        "bbox": [
+          200,
+          1528,
+          605,
+          1587
+        ],
+        "category": "title",
+        "text": "金牌認證合作夥伴"
+      },
+      {
+        "bbox": [
+          195,
+          1650,
+          2275,
+          2150
+        ],
+        "category": "text",
+        "text": "於往績記錄期，我們被評為金牌認證合作夥伴，並被認可於11個IT能力領域（包括但不限於雲生產力、數據平台及信息傳送）具備技術專長。於最後實際可行日期，我們於11個IT能力領域的金牌認證合作夥伴認可中有10個屬有效。儘管本集團於該等11個IT能力領域其中1個的金牌認證合作夥伴認可仍在續新，但由於我們自首次獲授該等領域的金牌認證合作夥伴起持續滿足11個IT能力領域的要求（如表現要求、測試要求及付款要求），董事認為我們在續新該等11個IT能力領域的金牌認證合作夥伴認可方面並無重大障礙。經董事審慎及周詳考慮後，基於我們的往績記錄、於相關IT能力領域的實力及技術專長，我們認為我們於各自的下一個續新日期前續新該等認可方面並無重大障礙。下表載列於上述領域獲取擔任供應商A的金牌認證合作夥伴的資格所須達成的主要要求。"
+      },
+      {
+        "bbox": [
+          312,
+          2206,
+          2183,
+          2576
+        ],
+        "category": "table",
+        "text": "<table><tr><td>表現要求</td><td>合作夥伴須應供應商A要求於目標領域賺取若干金額的收益。</td><td>第一步</td></tr><tr><td>測試要求</td><td>合作夥伴的若干僱員須達成供應商A提出的測試要求。</td><td>第二步</td></tr><tr><td>付款要求</td><td>合作夥伴須應供應商A要求支付若干金額的年費。</td><td>第三步</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 310,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          1200,
+          3135,
+          1280,
+          3182
+        ],
+        "category": "footer",
+        "text": "178"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 310,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 216,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          994,
+          115,
+          1478,
+          178
+        ],
+        "category": "header",
+        "text": "董事及高級管理層"
+      },
+      {
+        "bbox": [
+          203,
+          287,
+          483,
+          350
+        ],
+        "category": "title",
+        "text": "高級管理層"
+      },
+      {
+        "bbox": [
+          317,
+          413,
+          1131,
+          473
+        ],
+        "category": "text",
+        "text": "下表載列有關我們高級管理層的資料："
+      },
+      {
+        "bbox": [
+          312,
+          529,
+          2210,
+          1151
+        ],
+        "category": "table",
+        "text": "<table><tr><td>姓名</td><td>年齡</td><td>現任職位</td><td>加入本集團的日期</td><td>職責</td><td>與其他董事及／或高級管理層的關係</td></tr><tr><td>徐慶堂</td><td>39</td><td>技術部經理</td><td>2010年7月23日</td><td>技術設計規劃、項目實施管理、PPE項目成本評估、資源協調</td><td>無</td></tr><tr><td>陳軍民</td><td>40</td><td>研發總監</td><td>2016年7月1日</td><td>產品開發、流程制定、設備操作及技術改進</td><td>無</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 326,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          1204,
+          2255,
+          1333
+        ],
+        "category": "text",
+        "text": "徐慶堂先生（「徐先生」），39歲，為本集團的技術部經理，負責技術設計規劃、項目實施管理、PPE項目成本評估及資源協調。"
+      },
+      {
+        "bbox": [
+          198,
+          1392,
+          2272,
+          1640
+        ],
+        "category": "text",
+        "text": "徐先生於技術開發及IT服務行業擁有逾12年經驗。彼於2010年7月加入本集團，擔任深圳伊登軟件技術部經理。於加入本集團前，徐先生於2006年6月至2010年7月擔任深圳市日訊互聯網有限公司的系統管理員。徐先生於2005年7月通過陝西省高等教育自學考試獲得中國陝西電子信息職業技術學院計算機信息管理文憑。"
+      },
+      {
+        "bbox": [
+          198,
+          1703,
+          2270,
+          1822
+        ],
+        "category": "text",
+        "text": "陳軍民先生（「陳先生」），40歲，為本集團的研發總監，負責產品開發、流程制定、設備操作及技術改進。"
+      },
+      {
+        "bbox": [
+          198,
+          1882,
+          2275,
+          2325
+        ],
+        "category": "text",
+        "text": "陳先生於技術開發及IT服務行業擁有逾14年經驗。彼於2016年7月加入本集團，擔任深圳伊登軟件的研發總監。於加入本集團前，陳先生於2015年11月至2016年5月在深圳市共進電子股份有限公司（一間於上海證券交易所上市的公司（股份代號：603118））的工程技術中心的產品測試部門任產品測試專家。彼亦於2004年7月至2011年10月在鴻富錦精密工業（深圳）有限公司（富士康科技集團的附屬公司）擔任電子軟件設計工程職位及軟件管理及開發專家，其後於2011年10月至2015年10月在Tianjin Foxconn Technology Group擔任同一職位。陳先生於2004年6月獲得中國中南民族大學計算機科學與技術學士學位，並於2010年6月獲得中國西安交通大學軟件工程碩士學位。"
+      },
+      {
+        "bbox": [
+          198,
+          2381,
+          2272,
+          2567
+        ],
+        "category": "text",
+        "text": "據董事經作出一切合理查詢後所深知、盡悉及確信，除上文所披露者外，上述高級管理層成員於緊接本招股章程日期前三年概無於證券在香港或海外任何證券市場上市的任何上市公司中擔任董事職務。"
+      },
+      {
+        "bbox": [
+          1198,
+          3135,
+          1277,
+          3182
+        ],
+        "category": "footer",
+        "text": "209"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 326,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 222,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          1148,
+          115,
+          1329,
+          178
+        ],
+        "category": "header",
+        "text": "股本"
+      },
+      {
+        "bbox": [
+          200,
+          284,
+          325,
+          350
+        ],
+        "category": "title",
+        "text": "股本"
+      },
+      {
+        "bbox": [
+          198,
+          413,
+          2272,
+          535
+        ],
+        "category": "text",
+        "text": "本公司緊隨資本化發行及股份發售後的股本（不計及因超額配股權及根據購股權計劃可能授出的任何購股權獲行使而可能發行的任何股份）將載列如下："
+      },
+      {
+        "bbox": [
+          312,
+          592,
+          533,
+          651
+        ],
+        "category": "text",
+        "text": "法定股本"
+      },
+      {
+        "bbox": [
+          327,
+          704,
+          2272,
+          893
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td></td><td>港元</td></tr><tr><td>5,000,000,000</td><td>股每股面值0.01港元的股份</td><td>50,000,000</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 216,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          312,
+          952,
+          1890,
+          1015
+        ],
+        "category": "text",
+        "text": "於資本化發行及股份發售完成後已發行及將予發行、繳足或入賬列作繳足："
+      },
+      {
+        "bbox": [
+          332,
+          1065,
+          2272,
+          1551
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td></td><td>港元</td></tr><tr><td>2</td><td>股於本招股章程日期已發行的股份</td><td>0.02</td></tr><tr><td>1,499,999,998</td><td>股根據資本化發行將予發行的股份</td><td>14,999,999.98</td></tr><tr><td>500,000,000</td><td>股根據股份發售將予發行的股份</td><td>5,000,000</td></tr><tr><td>2,000,000,000</td><td>總計</td><td>20,000,000</td></tr></table>",
+        "table_structure_confidence": "medium",
+        "table_quality_score": 545,
+        "table_quality_notes": [
+          "sparse_table"
+        ]
+      },
+      {
+        "bbox": [
+          198,
+          1610,
+          2270,
+          1740
+        ],
+        "category": "text",
+        "text": "假設超額配股權獲悉數行使（不計及因根據購股權計劃授出的任何購股權獲行使而可能發行的任何股份），我們緊隨資本化發行及股份發售後的已發行股本將載列如下："
+      },
+      {
+        "bbox": [
+          312,
+          1796,
+          2255,
+          1855
+        ],
+        "category": "text",
+        "text": "資本化發行及股份發售完成後且超額配股權獲行使時已發行及將予發行、繳足或入賬列作繳足："
+      },
+      {
+        "bbox": [
+          332,
+          1905,
+          2272,
+          2414
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td></td><td>港元</td></tr><tr><td>2</td><td>股於本招股章程日期已發行股份</td><td>0.02</td></tr><tr><td>1,499,999,998</td><td>股根據資本化發行將予發行的股份</td><td>14,999,999.98</td></tr><tr><td>500,000,000</td><td>股根據股份發售將予發行的股份</td><td>5,000,000</td></tr><tr><td>75,000,000</td><td>股因超額配股權獲悉數行使而將予發行的股份</td><td>750,000</td></tr><tr><td>2,075,000,000</td><td>總計</td><td>20,750,000</td></tr></table>",
+        "table_structure_confidence": "high",
+        "table_quality_score": 659
+      },
+      {
+        "bbox": [
+          1198,
+          3135,
+          1277,
+          3182
+        ],
+        "category": "footer",
+        "text": "215"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 659,
+    "table_quality_notes": [
+      "truncated_or_header_only",
+      "sparse_table"
+    ]
+  },
+  {
+    "page": 281,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          1113,
+          119,
+          1359,
+          178
+        ],
+        "category": "title",
+        "text": "財務資料"
+      },
+      {
+        "bbox": [
+          312,
+          284,
+          436,
+          337
+        ],
+        "category": "text",
+        "text": "附註："
+      },
+      {
+        "bbox": [
+          312,
+          380,
+          1305,
+          430
+        ],
+        "category": "text",
+        "text": "1. 流動比率按流動資產總值除以流動負債總額計算。"
+      },
+      {
+        "bbox": [
+          312,
+          466,
+          1436,
+          516
+        ],
+        "category": "text",
+        "text": "2. 速動比率按流動資產（扣除存貨）除以流動負債總額計算。"
+      },
+      {
+        "bbox": [
+          312,
+          555,
+          1689,
+          608
+        ],
+        "category": "text",
+        "text": "3. 資產負債比率按債務總額除以總權益計算。債務總額包括計息銀行借款。"
+      },
+      {
+        "bbox": [
+          312,
+          645,
+          2270,
+          744
+        ],
+        "category": "text",
+        "text": "4. 淨債務權益比率按債務淨額除以總權益計算。債務淨額界定為包括債務總額扣除現金及現金等價物以及已抵押銀行存款。"
+      },
+      {
+        "bbox": [
+          312,
+          780,
+          1518,
+          833
+        ],
+        "category": "text",
+        "text": "5. 股本回報率按年內溢利除以總權益再將所得值乘以100%計算。"
+      },
+      {
+        "bbox": [
+          312,
+          870,
+          1555,
+          922
+        ],
+        "category": "text",
+        "text": "6. 資產回報率按年內溢利除以資產總值再將所得值乘以100%計算。"
+      },
+      {
+        "bbox": [
+          312,
+          959,
+          1384,
+          1012
+        ],
+        "category": "text",
+        "text": "7. 利息償付率按除利息及稅項前溢利除以融資成本計算。"
+      },
+      {
+        "bbox": [
+          312,
+          1051,
+          1396,
+          1101
+        ],
+        "category": "text",
+        "text": "8. 純利率按年內溢利除以收益再將所得值乘以100%計算。"
+      },
+      {
+        "bbox": [
+          200,
+          1151,
+          654,
+          1207
+        ],
+        "category": "title",
+        "text": "流動比率及速動比率"
+      },
+      {
+        "bbox": [
+          198,
+          1270,
+          2272,
+          1518
+        ],
+        "category": "text",
+        "text": "於2016年12月31日、2017年12月31日、2018年12月31日及2019年12月31日，我們的流動比率分別為1.1、1.4、1.5及1.8。於2016年、2017年、2018年及2019年12月31日，我們的速動比率分別為1.0、1.0、1.1及1.5。流動比率的上升主要是由於計息銀行借款減少。速動比率於截至2018年12月31日止三個年度保持穩定。"
+      },
+      {
+        "bbox": [
+          198,
+          1577,
+          2270,
+          1706
+        ],
+        "category": "text",
+        "text": "2019年12月31日的流動比率及速動比率上升主要由於相較2018年12月31日，2019年12月31日的現金及現金等價物增加及貿易應付款項減少。"
+      },
+      {
+        "bbox": [
+          200,
+          1766,
+          898,
+          1819
+        ],
+        "category": "title",
+        "text": "資產負債比率及淨債務權益比率"
+      },
+      {
+        "bbox": [
+          198,
+          1885,
+          2272,
+          2196
+        ],
+        "category": "text",
+        "text": "於2016年12月31日、2017年12月31日、2018年12月31日及2019年12月31日，我們的資產負債比率分別為212.9%、26.3%、9.1%及5.9%。我們的淨債務權益比率於2016年12月31日、2017年12月31日、2018年12月31日及2019年12月31日則分別維持現金淨額狀況。於截至2018年12月31日止三個年度的資產負債比率下降主要是由於計息銀行借款減少。資本負債比率於2019年12月31日進一步下降主要由於權益因儲備增加而增加，而計息銀行借款相較2018年12月31日於2019年12月31日保持相對一致。"
+      },
+      {
+        "bbox": [
+          203,
+          2256,
+          461,
+          2312
+        ],
+        "category": "title",
+        "text": "股本回報率"
+      },
+      {
+        "bbox": [
+          198,
+          2378,
+          2270,
+          2563
+        ],
+        "category": "text",
+        "text": "股本回報率由截至2016年12月31日止年度的約45.5%上升至截至2017年12月31日止年度的約50.6%。有關上升主要是由於截至2017年12月31日止年度的純利增加。截至2018年12月31日止年度，股本回報率因年內權益總額增幅大於溢利增幅而下降至41.6%。"
+      },
+      {
+        "bbox": [
+          198,
+          2626,
+          2272,
+          2745
+        ],
+        "category": "text",
+        "text": "我們截至2019年12月31日止年度的股本回報率進一步下降至25.5%，主要由於2019年的純利減少以及2019年12月31日的股本增加。"
+      },
+      {
+        "bbox": [
+          1198,
+          3135,
+          1277,
+          3182
+        ],
+        "category": "footer",
+        "text": "274"
+      }
+    ]
+  },
+  {
+    "page": 306,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          880,
+          115,
+          1595,
+          178
+        ],
+        "category": "header",
+        "text": "如何申請香港公開發售股份"
+      },
+      {
+        "bbox": [
+          550,
+          284,
+          1059,
+          347
+        ],
+        "category": "text",
+        "text": "首盛資本集團有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          410,
+          1431,
+          469
+        ],
+        "category": "text",
+        "text": "香港中環干諾道中61號福興大廈17樓A室"
+      },
+      {
+        "bbox": [
+          550,
+          529,
+          1153,
+          588
+        ],
+        "category": "text",
+        "text": "順安證券資產管理有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          651,
+          1543,
+          714
+        ],
+        "category": "text",
+        "text": "香港灣仔告士打道181-185號中怡商業大廈21樓"
+      },
+      {
+        "bbox": [
+          550,
+          774,
+          1056,
+          833
+        ],
+        "category": "text",
+        "text": "恆聖中國證券有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          893,
+          1662,
+          952
+        ],
+        "category": "text",
+        "text": "香港新界荃灣沙咀道289號恒生荃灣大廈12樓C&D室"
+      },
+      {
+        "bbox": [
+          555,
+          1018,
+          962,
+          1075
+        ],
+        "category": "text",
+        "text": "一盈證券有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          1137,
+          1503,
+          1197
+        ],
+        "category": "text",
+        "text": "香港西環干諾道西188號香港商業中心1916室"
+      },
+      {
+        "bbox": [
+          550,
+          1260,
+          962,
+          1319
+        ],
+        "category": "text",
+        "text": "海盈證券有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          1382,
+          1682,
+          1442
+        ],
+        "category": "text",
+        "text": "香港灣仔告士打道109-111號東惠商業大廈13樓1301室"
+      },
+      {
+        "bbox": [
+          550,
+          1501,
+          1056,
+          1561
+        ],
+        "category": "text",
+        "text": "東方滙財證券有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          1624,
+          1726,
+          1687
+        ],
+        "category": "text",
+        "text": "香港干諾道中168-200號信德中心招商局大廈31樓3101室"
+      },
+      {
+        "bbox": [
+          550,
+          1746,
+          962,
+          1806
+        ],
+        "category": "text",
+        "text": "瑞邦證券有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          1869,
+          1424,
+          1928
+        ],
+        "category": "text",
+        "text": "香港灣仔告士打道227-228號生和大廈9樓"
+      },
+      {
+        "bbox": [
+          550,
+          1991,
+          1056,
+          2050
+        ],
+        "category": "text",
+        "text": "尊嘉證券國際有限公司"
+      },
+      {
+        "bbox": [
+          550,
+          2110,
+          1436,
+          2170
+        ],
+        "category": "text",
+        "text": "香港金鐘道89號力寶中心2座17樓1702室B"
+      },
+      {
+        "bbox": [
+          436,
+          2232,
+          1481,
+          2292
+        ],
+        "category": "text",
+        "text": "(2) 星展銀行（香港）有限公司的下列任何分行："
+      },
+      {
+        "bbox": [
+          545,
+          2348,
+          2213,
+          2914
+        ],
+        "category": "table",
+        "text": "<table><tr><td>地區</td><td>分行名稱</td><td>地址</td></tr><tr><td>香港島</td><td>總行<br>北角分行</td><td>中環皇后大道中99號中環中心地下<br>北角英皇道391號地下</td></tr><tr><td>九龍</td><td>油麻地分行</td><td>油麻地吳松街131-137號地下及1樓</td></tr><tr><td>新界</td><td>屯門市廣場<br>－中小企業銀行</td><td>屯門屯隆街3號屯門市廣場第2期地下23號舖</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 413,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          1200,
+          3135,
+          1277,
+          3182
+        ],
+        "category": "footer",
+        "text": "299"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 413,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 336,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          203,
+          115,
+          389,
+          178
+        ],
+        "category": "header",
+        "text": "附錄一"
+      },
+      {
+        "bbox": [
+          1969,
+          115,
+          2270,
+          181
+        ],
+        "category": "header",
+        "text": "會計師報告"
+      },
+      {
+        "bbox": [
+          312,
+          284,
+          2272,
+          413
+        ],
+        "category": "text",
+        "text": "於2018年1月1日，香港會計準則第39號項下的賬面值與香港財務報告準則第9號所呈報的結餘之對賬如下："
+      },
+      {
+        "bbox": [
+          434,
+          436,
+          2277,
+          2805
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td colspan=\"3\">香港會計準則第39號計量</td><td colspan=\"2\">香港財務報告準則第9號計量</td></tr><tr><td></td><td>類別</td><td>金額人民幣千元</td><td>預期信貸虧損人民幣千元</td><td>金額人民幣千元</td><td>類別</td></tr><tr><td>金融資產</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>按公允價值計入損益的金融資產</td><td>FVPL<sup>1</sup></td><td>100</td><td>–</td><td>100</td><td>FVPL</td></tr><tr><td>貿易應收款項及應收票據</td><td>L&R<sup>2</sup></td><td>57,574</td><td>(197)</td><td>57,377</td><td>AC<sup>3</sup></td></tr><tr><td>計入預付款項、按金及</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>其他應收款項的金融資產</td><td>L&R</td><td>915</td><td>–</td><td>915</td><td>AC</td></tr><tr><td>已抵押存款</td><td>L&R</td><td>9,877</td><td>–</td><td>9,877</td><td>AC</td></tr><tr><td>現金及現金等價物</td><td>L&R</td><td>13,997</td><td>–</td><td>13,997</td><td>AC</td></tr><tr><td></td><td></td><td>82,463</td><td>(197)</td><td>82,266</td><td></td></tr><tr><td>其他資產</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>合約資產</td><td></td><td>6,364</td><td>(32)</td><td>6,332</td><td></td></tr><tr><td>遞延稅項資產</td><td></td><td>110</td><td>33</td><td>143</td><td></td></tr><tr><td></td><td></td><td>6,474</td><td>1</td><td>6,475</td><td></td></tr><tr><td>資產總值</td><td></td><td>88,937</td><td>(196)</td><td>88,741</td><td></td></tr><tr><td></td><td colspan=\"3\">香港會計準則第39號計量</td><td colspan=\"2\">香港財務報告準則第9號計量</td></tr><tr><td></td><td>類別</td><td>金額人民幣千元</td><td>重新分類人民幣千元</td><td>金額人民幣千元</td><td>類別</td></tr><tr><td>金融負債</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>貿易應付款項</td><td>AC</td><td>61,746</td><td>–</td><td>61,746</td><td>AC</td></tr><tr><td>計入其他應付款項及應計費用</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>的金融負債</td><td>AC</td><td>2,012</td><td>–</td><td>2,012</td><td>AC</td></tr><tr><td>計息銀行借款</td><td>AC</td><td>11,605</td><td>–</td><td>11,605</td><td>AC</td></tr><tr><td>租賃負債</td><td>AC</td><td>3,186</td><td>–</td><td>3,186</td><td>AC</td></tr><tr><td></td><td></td><td>78,549</td><td>–</td><td>78,549</td><td></td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 2620,
+        "table_quality_notes": [
+          "colspan_year_mismatch"
+        ]
+      },
+      {
+        "bbox": [
+          434,
+          2831,
+          1252,
+          2884
+        ],
+        "category": "table_footnote",
+        "text": "1 FVPL：按公允價值計入損益的金融資產"
+      },
+      {
+        "bbox": [
+          434,
+          2884,
+          967,
+          2934
+        ],
+        "category": "table_footnote",
+        "text": "2 L&R：貸款及應收款項"
+      },
+      {
+        "bbox": [
+          434,
+          2934,
+          1349,
+          2987
+        ],
+        "category": "table_footnote",
+        "text": "3 AC：按攤銷成本計量的金融資產或金融負債。"
+      },
+      {
+        "bbox": [
+          1190,
+          3135,
+          1282,
+          3185
+        ],
+        "category": "footer",
+        "text": "I-13"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 2620,
+    "table_quality_notes": [
+      "colspan_year_mismatch"
+    ]
+  },
+  {
+    "page": 337,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          203,
+          115,
+          389,
+          178
+        ],
+        "category": "header",
+        "text": "附錄一"
+      },
+      {
+        "bbox": [
+          1969,
+          115,
+          2270,
+          181
+        ],
+        "category": "header",
+        "text": "會計師報告"
+      },
+      {
+        "bbox": [
+          312,
+          284,
+          436,
+          347
+        ],
+        "category": "title",
+        "text": "減值"
+      },
+      {
+        "bbox": [
+          312,
+          390,
+          2270,
+          509
+        ],
+        "category": "text",
+        "text": "下表為香港會計準則第39號項下之期初減值撥備總額與香港財務報告準則第9號項下之預期信貸虧損撥備對賬。進一步詳情披露於歷史財務資料附註20及22。"
+      },
+      {
+        "bbox": [
+          434,
+          545,
+          2275,
+          1167
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td>根據香港會計準則第39號於2017年12月31日之減值撥備人民幣千元</td><td>重新計量人民幣千元</td><td>根據香港財務報告準則第9號於2018年1月1日之預期信貸虧損撥備人民幣千元</td></tr><tr><td>貿易應收款項及應收票據</td><td>473</td><td>197</td><td>670</td></tr><tr><td>合約資產</td><td>–</td><td>32</td><td>32</td></tr><tr><td></td><td>473</td><td>229</td><td>702</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 425,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          312,
+          1207,
+          729,
+          1270
+        ],
+        "category": "title",
+        "text": "對保留溢利的影響"
+      },
+      {
+        "bbox": [
+          312,
+          1313,
+          2267,
+          1432
+        ],
+        "category": "text",
+        "text": "貴集團的保留溢利因於2018年1月1日（貴集團首次應用香港財務報告準則第9號的日期）重新計量金融工具所受影響如下："
+      },
+      {
+        "bbox": [
+          434,
+          1468,
+          2282,
+          2143
+        ],
+        "category": "table",
+        "text": "<table><tr><td></td><td>保留溢利人民幣千元</td></tr><tr><td>根據香港會計準則第39號於2017年12月31日的結餘</td><td>28,612</td></tr><tr><td>根據香港財務報告準則第9號確認貿易應收款項及應收票據的預期信貸虧損</td><td>(197)</td></tr><tr><td>根據香港財務報告準則第9號確認合約資產的預期信貸虧損有關以上各項的遞延稅項</td><td>(32) 33</td></tr><tr><td>根據香港財務報告準則第9號於2018年1月1日的結餘</td><td>28,416</td></tr></table>",
+        "table_structure_confidence": "medium",
+        "table_quality_score": 535,
+        "table_quality_notes": [
+          "sparse_table"
+        ]
+      },
+      {
+        "bbox": [
+          434,
+          2199,
+          2185,
+          2265
+        ],
+        "category": "text",
+        "text": "應用香港財務報告準則第9號對貴集團的財務狀況及／或財務表現並無重大影響。"
+      },
+      {
+        "bbox": [
+          317,
+          2305,
+          965,
+          2368
+        ],
+        "category": "title",
+        "text": "香港財務報告準則第16號租賃"
+      },
+      {
+        "bbox": [
+          310,
+          2408,
+          2275,
+          2765
+        ],
+        "category": "text",
+        "text": "香港財務報告準則第16號取代香港會計準則第17號租賃、香港（國際財務報告詮釋委員會）－詮釋第4號釐定安排是否包括租賃、香港（常務詮釋委員會）詮釋第15號經營租賃－獎勵及香港（常務詮釋委員會）詮釋第27號評估涉及租賃法律形式交易的內容。該準則載有租賃確認、計量、呈列和披露原則，並要求承租人在單一資產負債表內模型中將所有租賃入賬。香港財務報告準則第16號大致沿用香港會計準則第17號內出租人的會計處理方式。出租人將繼續使用與香港會計準則第17號類似的原則將租賃分類為經營租賃或融資租賃。"
+      },
+      {
+        "bbox": [
+          434,
+          2801,
+          1731,
+          2864
+        ],
+        "category": "text",
+        "text": "貴集團已於整個有關期間貫徹應用香港財務報告準則第16號。"
+      },
+      {
+        "bbox": [
+          436,
+          2904,
+          1523,
+          2967
+        ],
+        "category": "text",
+        "text": "貴集團租賃的會計政策呈列於歷史財務資料附註5。"
+      },
+      {
+        "bbox": [
+          1193,
+          3135,
+          1285,
+          3182
+        ],
+        "category": "footer",
+        "text": "I-14"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 535,
+    "table_quality_notes": [
+      "truncated_or_header_only",
+      "sparse_table"
+    ]
+  },
+  {
+    "page": 392,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          203,
+          115,
+          391,
+          178
+        ],
+        "category": "header",
+        "text": "附錄一"
+      },
+      {
+        "bbox": [
+          1969,
+          115,
+          2270,
+          181
+        ],
+        "category": "header",
+        "text": "會計師報告"
+      },
+      {
+        "bbox": [
+          317,
+          284,
+          625,
+          347
+        ],
+        "category": "text",
+        "text": "公允價值層級"
+      },
+      {
+        "bbox": [
+          436,
+          410,
+          1582,
+          469
+        ],
+        "category": "text",
+        "text": "以下表格說明 貴集團金融工具的公允價值計量層級："
+      },
+      {
+        "bbox": [
+          436,
+          529,
+          962,
+          588
+        ],
+        "category": "text",
+        "text": "按公允價值計量的資產："
+      },
+      {
+        "bbox": [
+          439,
+          651,
+          821,
+          714
+        ],
+        "category": "text",
+        "text": "於2016年12月31日"
+      },
+      {
+        "bbox": [
+          1434,
+          774,
+          1754,
+          830
+        ],
+        "category": "table_caption",
+        "text": "公允價值計量採用"
+      },
+      {
+        "bbox": [
+          1171,
+          820,
+          2275,
+          1243
+        ],
+        "category": "table",
+        "text": "<table><tr><td>活躍市場報價（第一層級）人民幣千元</td><td>重大可觀察輸入數據（第二層級）人民幣千元</td><td>重大不可觀察輸入數據（第三層級）人民幣千元</td><td>總計人民幣千元</td></tr><tr><td>按公允價值計入損益的金融資產</td><td>–</td><td>3,000</td><td>–</td><td>3,000</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 220,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          439,
+          1300,
+          821,
+          1362
+        ],
+        "category": "text",
+        "text": "於2017年12月31日"
+      },
+      {
+        "bbox": [
+          1434,
+          1422,
+          1754,
+          1478
+        ],
+        "category": "table_caption",
+        "text": "公允價值計量採用"
+      },
+      {
+        "bbox": [
+          1171,
+          1475,
+          2275,
+          1892
+        ],
+        "category": "table",
+        "text": "<table><tr><td>活躍市場報價（第一層級）人民幣千元</td><td>重大可觀察輸入數據（第二層級）人民幣千元</td><td>重大不可觀察輸入數據（第三層級）人民幣千元</td><td>總計人民幣千元</td></tr><tr><td>按公允價值計入損益的金融資產</td><td>–</td><td>100</td><td>–</td><td>100</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 210,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          312,
+          1951,
+          2275,
+          2074
+        ],
+        "category": "text",
+        "text": "於有關期間，第一層級與第二層級之間的公允價值計量均無轉撥，金融資產及金融負債亦無從第三層級轉入或轉出。"
+      },
+      {
+        "bbox": [
+          1195,
+          3135,
+          1285,
+          3182
+        ],
+        "category": "footer",
+        "text": "I-69"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 220,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 393,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          203,
+          115,
+          391,
+          178
+        ],
+        "category": "header",
+        "text": "附錄一"
+      },
+      {
+        "bbox": [
+          1969,
+          115,
+          2270,
+          181
+        ],
+        "category": "header",
+        "text": "會計師報告"
+      },
+      {
+        "bbox": [
+          436,
+          284,
+          962,
+          350
+        ],
+        "category": "text",
+        "text": "已披露公允價值的負債："
+      },
+      {
+        "bbox": [
+          436,
+          410,
+          823,
+          469
+        ],
+        "category": "text",
+        "text": "於2016年12月31日"
+      },
+      {
+        "bbox": [
+          434,
+          522,
+          2275,
+          1005
+        ],
+        "category": "table",
+        "text": "<table><tr><td colspan=\"4\">公允價值計量採用</td></tr><tr><td>活躍市場報價（第一層級）人民幣千元</td><td>重大可觀察輸入數據（第二層級）人民幣千元</td><td>重大不可觀察輸入數據（第三層級）人民幣千元</td><td>總計人民幣千元</td></tr><tr><td>計息銀行借款</td><td>–</td><td>59,621</td><td>–</td><td>59,621</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 321,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          436,
+          1055,
+          823,
+          1121
+        ],
+        "category": "text",
+        "text": "於2017年12月31日"
+      },
+      {
+        "bbox": [
+          1171,
+          1177,
+          2275,
+          1650
+        ],
+        "category": "table",
+        "text": "<table><tr><td colspan=\"4\">公允價值計量採用</td></tr><tr><td>活躍市場報價（第一層級）人民幣千元</td><td>重大可觀察輸入數據（第二層級）人民幣千元</td><td>重大不可觀察輸入數據（第三層級）人民幣千元</td><td>總計人民幣千元</td></tr><tr><td>計息銀行借款</td><td>–</td><td>11,605</td><td>–</td><td>11,605</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 321,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          436,
+          1706,
+          823,
+          1769
+        ],
+        "category": "text",
+        "text": "於2018年12月31日"
+      },
+      {
+        "bbox": [
+          1171,
+          1826,
+          2275,
+          2299
+        ],
+        "category": "table",
+        "text": "<table><tr><td colspan=\"4\">公允價值計量採用</td></tr><tr><td>活躍市場報價（第一層級）人民幣千元</td><td>重大可觀察輸入數據（第二層級）人民幣千元</td><td>重大不可觀察輸入數據（第三層級）人民幣千元</td><td>總計人民幣千元</td></tr><tr><td>計息銀行借款</td><td>–</td><td>5,951</td><td>–</td><td>5,951</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 321,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          436,
+          2355,
+          823,
+          2418
+        ],
+        "category": "text",
+        "text": "於2019年12月31日"
+      },
+      {
+        "bbox": [
+          1171,
+          2474,
+          2275,
+          2950
+        ],
+        "category": "table",
+        "text": "<table><tr><td colspan=\"4\">公允價值計量採用</td></tr><tr><td>活躍市場報價（第一層級）人民幣千元</td><td>重大可觀察輸入數據（第二層級）人民幣千元</td><td>重大不可觀察輸入數據（第三層級）人民幣千元</td><td>總計人民幣千元</td></tr><tr><td>計息銀行借款</td><td>–</td><td>5,652</td><td>–</td><td>5,652</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 321,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          1195,
+          3135,
+          1285,
+          3185
+        ],
+        "category": "footer",
+        "text": "I-70"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 321,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  },
+  {
+    "page": 439,
+    "parse_status": "ok",
+    "elements": [
+      {
+        "bbox": [
+          205,
+          119,
+          391,
+          178
+        ],
+        "category": "header",
+        "text": "附錄四"
+      },
+      {
+        "bbox": [
+          1850,
+          115,
+          2270,
+          181
+        ],
+        "category": "header",
+        "text": "法定及一般資料"
+      },
+      {
+        "bbox": [
+          198,
+          287,
+          1215,
+          353
+        ],
+        "category": "title",
+        "text": "C. 有關主要股東、董事及專家的其他資料"
+      },
+      {
+        "bbox": [
+          312,
+          413,
+          650,
+          473
+        ],
+        "category": "title",
+        "text": "1. 權益披露"
+      },
+      {
+        "bbox": [
+          434,
+          532,
+          2275,
+          1094
+        ],
+        "category": "text",
+        "text": "(a) 緊隨資本化發行及股份發售完成後，若不計及因超額配股權及根據購股權計劃可能授出的任何購股權獲行使而可能發行的任何股份，於股份在聯交所上市後，董事或本公司最高行政人員於本公司或任何相聯法團（定義見證券及期貨條例第XV部）的股份、相關股份及債權證中，擁有股份在聯交所上市後將須根據證券及期貨條例第XV部第7及第8分部知會本公司及聯交所的權益及淡倉（包括根據證券及期貨條例的相關條文彼等被當作或被視為擁有的任何權益或淡倉），或將須根據證券及期貨條例第352條登記於該條所指登記冊內的權益及淡倉，或將須根據上市規則所載上市公司董事進行證券交易的標準守則知會本公司及聯交所的權益及淡倉如下："
+      },
+      {
+        "bbox": [
+          545,
+          1157,
+          979,
+          1217
+        ],
+        "category": "text",
+        "text": "(i) 於股份的好倉"
+      },
+      {
+        "bbox": [
+          667,
+          1263,
+          2270,
+          1740
+        ],
+        "category": "table",
+        "text": "<table><tr><td>董事姓名</td><td>身份／性質</td><td>持有／擁有權益股份數目</td><td>緊隨股份發售及資本化發行完成後於本公司的權益百分比</td></tr><tr><td>丁女士 (附註)</td><td>家族信託的委託人及實益權益</td><td>1,500,000,000</td><td>75%</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 214,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          669,
+          1792,
+          2275,
+          2050
+        ],
+        "category": "text",
+        "text": "附註：家族信託為丁女士（作為委託人及保護人）以Green Leaf及丁女士之子為受益人而設立的一項可撤銷全權信託，Tricor Equity Trustee為其受託人，該信託持有Aztec Pearl全部已發行股本。丁女士實益擁有Green Leaf全部已發行股本。因此，就證券及期貨條例而言，丁女士被視為於Aztec Pearl所持有的1,500,000,000股股份中擁有權益。丁女士為Green Leaf的唯一董事。"
+      },
+      {
+        "bbox": [
+          548,
+          2110,
+          1223,
+          2170
+        ],
+        "category": "text",
+        "text": "(ii) 於相聯法團普通股的好倉"
+      },
+      {
+        "bbox": [
+          667,
+          2222,
+          2270,
+          2464
+        ],
+        "category": "table",
+        "text": "<table><tr><td>董事姓名</td><td>相聯法團名稱</td><td>身份／性質</td><td>持有／擁有權益股份數目</td><td>權益百分比</td></tr><tr><td>丁女士</td><td>Green Leaf</td><td>實益擁有人</td><td>1</td><td>100%</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 208,
+        "table_quality_notes": [
+          "truncated_or_header_only"
+        ]
+      },
+      {
+        "bbox": [
+          1180,
+          3135,
+          1295,
+          3182
+        ],
+        "category": "footer",
+        "text": "IV-15"
+      }
+    ],
+    "table_structure_confidence": "low",
+    "table_quality_score": 214,
+    "table_quality_notes": [
+      "truncated_or_header_only"
+    ]
+  }
+]

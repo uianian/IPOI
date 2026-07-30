@@ -1,0 +1,10 @@
+# 默认路径（相对 IPOI 仓库根 或 本包）
+ipo_settings: "../ipo/configs/settings.yaml"
+retrieval_root: "../../retrieval"
+feature_doc: "../../dataset/招股书关键信息抽取与风险特征定义.md"
+mixue:
+  pdf: "../../pdf_parsing/pdf/02097_21-02-2025_蜜雪集團_全球發售.pdf"
+  parse_json: "../../pdf_parsing/output/mixue/full_parse.json"
+  doc_id: "136ee620-0473-450b-a566-72172824cdec"
+  retrieval_finance_json: "../../retrieval/.runtime/agent_retrieval_mixue.json"
+  retrieval_legal_json: "../ipo/.runtime/agent_retrieval_mixue_legal.json"

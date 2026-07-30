@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-07-11T18:19:34",
+  "join_path": "B: PDF stock_code -> S_INFO_WINDCODE -> hkshareeodprices",
+  "pdf_total": 565,
+  "matched_count": 555,
+  "unmatched_count": 10,
+  "match_rate_pct": 98.23,
+  "windcode_rule_distribution": {
+    "pad4": 20,
+    "strip_zero": 535
+  },
+  "conversion_rules": [
+    "1. strip_zero: int(code5) + '.HK'  e.g. 02097 -> 2097.HK",
+    "2. pad4: str(int(code5)).zfill(4) + '.HK'  e.g. 00300 -> 0300.HK",
+    "3. pad5: code5.zfill(5) + '.HK'  e.g. 00300 -> 00300.HK (兜底)"
+  ],
+  "company_name_note": "匹配仅依赖股票代码，公司名称差异不影响关联；名称仅用于人工抽检",
+  "by_year": {
+    "2020": {
+      "total": 138,
+      "matched": 135,
+      "rate_pct": 97.8
+    },
+    "2021": {
+      "total": 88,
+      "matched": 87,
+      "rate_pct": 98.9
+    },
+    "2022": {
+      "total": 87,
+      "matched": 83,
+      "rate_pct": 95.4
+    },
+    "2023": {
+      "total": 63,
+      "matched": 63,
+      "rate_pct": 100.0
+    },
+    "2024": {
+      "total": 73,
+      "matched": 73,
+      "rate_pct": 100.0
+    },
+    "2025": {
+      "total": 116,
+      "matched": 114,
+      "rate_pct": 98.3
+    }
+  }
+}
