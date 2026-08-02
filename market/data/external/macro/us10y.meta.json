@@ -1,0 +1,13 @@
+{
+  "file": "us10y.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/wind/美国10年期国债收益率20160801-20260801.csv",
+  "fetched_at": "2026-08-02T15:05:58",
+  "rows": 1686,
+  "columns": [
+    "date",
+    "us10y"
+  ],
+  "date_min": "2019-10-01",
+  "date_max": "2026-06-30",
+  "note": "US 10Y Treasury yield (%), Wind G0000891"
+}

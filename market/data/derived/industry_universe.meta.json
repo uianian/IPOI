@@ -1,0 +1,23 @@
+{
+  "file": "industry_universe.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/market/data/external/wind/hsics_security_industry.csv + /nfs/users/wuqianqian/IPOI/dataset_analysis/output/wind_ede20260715_slim.csv",
+  "fetched_at": "2026-08-02T15:08:24",
+  "rows": 2819,
+  "columns": [
+    "wind_norm",
+    "name",
+    "ede_list_date",
+    "board",
+    "industry_concept",
+    "concepts",
+    "industry_hsics",
+    "hsics_l1_name",
+    "hsics_index_code",
+    "hsics_index_name",
+    "industry",
+    "industry_source"
+  ],
+  "date_min": null,
+  "date_max": null,
+  "note": "HSICS L1 preferred; EDE concept rules as fallback"
+}

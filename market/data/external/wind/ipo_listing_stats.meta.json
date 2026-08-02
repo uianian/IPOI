@@ -1,0 +1,23 @@
+{
+  "file": "ipo_listing_stats.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/wind/股票上市首日表现.xlsx",
+  "fetched_at": "2026-08-02T15:08:06",
+  "rows": 2818,
+  "columns": [
+    "stock_code",
+    "windcode",
+    "name",
+    "issue_price",
+    "ipo_list_date",
+    "day1_open",
+    "day1_close",
+    "day1_pct_wind",
+    "public_offer_multiple",
+    "international_placing_multiple",
+    "public_offer_subscribers",
+    "one_lot_odds_pct"
+  ],
+  "date_min": null,
+  "date_max": null,
+  "note": "Wind IPO issue price + online/offline subscription multiples"
+}

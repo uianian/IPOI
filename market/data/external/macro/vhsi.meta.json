@@ -1,0 +1,18 @@
+{
+  "file": "vhsi.csv",
+  "source": "akshare.stock_hk_index_daily_sina(VHSI)",
+  "fetched_at": "2026-07-31T23:36:47",
+  "rows": 1296,
+  "columns": [
+    "date",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "source"
+  ],
+  "date_min": "2021-03-18",
+  "date_max": "2026-06-30",
+  "note": "Sina coverage starts ~2021-03; for earlier dates use HSI 20d rolling std as volatility proxy (see research report)."
+}

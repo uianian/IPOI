@@ -1,0 +1,24 @@
+{
+  "file": "ipo_events.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset_analysis/output/ipo_catalog_with_metrics.csv + EDE + EOD",
+  "fetched_at": "2026-08-02T15:08:38",
+  "rows": 565,
+  "columns": [
+    "stock_code",
+    "windcode",
+    "company_display",
+    "listing_date",
+    "industry",
+    "day1_return",
+    "day5_return",
+    "day20_return",
+    "day60_return",
+    "is_break",
+    "mdd20",
+    "listboard",
+    "performance_class"
+  ],
+  "date_min": null,
+  "date_max": null,
+  "note": "565 prospectus IPOs; returns based on day0 open (no issue price); mdd20 = max drawdown of adjclose over first 20 trading days"
+}

@@ -1,0 +1,14 @@
+{
+  "file": "hs_sector_net_inflow_daily.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/wind/港股板块净流入（港交所分类、2021年及之前无数据）.xlsx",
+  "fetched_at": "2026-08-02T15:08:09",
+  "rows": 21216,
+  "columns": [
+    "date",
+    "hs_sector",
+    "net_inflow"
+  ],
+  "date_min": "2019-10-08",
+  "date_max": "2026-06-30",
+  "note": "HS board net inflow (HKEX); nonzero from ~2022-01-24; pre-2022 mostly 0 — treat as missing in features"
+}

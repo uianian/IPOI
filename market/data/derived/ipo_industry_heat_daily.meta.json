@@ -1,0 +1,16 @@
+{
+  "file": "ipo_industry_heat_daily.csv",
+  "source": "ipo_events.csv",
+  "fetched_at": "2026-08-02T15:08:39",
+  "rows": 18984,
+  "columns": [
+    "date",
+    "industry",
+    "ipo_count_365d",
+    "avg_day1_return_365d",
+    "break_rate_365d"
+  ],
+  "date_min": "2020-01-01",
+  "date_max": "2026-06-30",
+  "note": "per-industry 365d rolling IPO count / day1 return / break rate"
+}

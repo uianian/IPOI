@@ -94,8 +94,33 @@ python scripts/simulate_agent_retrieval.py --doc-id dehe --agent legal --issuer-
 | 配置 | `agent_retrieval_profiles.yaml` / `grep_lexicon.yaml` 已复制，可在本目录自由改 |
 | Skill | 工作区 skill：`IPOI/.cursor/skills/ipo-risk-rag-retrieval` |
 
+## 与 market（市场情绪）联调
+
+检索负责招股书**证据定位**；结构化情绪特征在兄弟目录 [`../market/`](../market/README.md)。
+端到端演示/评测时，优先选「检索可解析 + 情绪特征可行」的抽样公司。
+
+- 抽样清单：`../dataset/samples/sample_manifest.csv`（54 家）
+- 情绪完整度核验：[`../market/data/derived/sample_sentiment_completeness_report.md`](../market/data/derived/sample_sentiment_completeness_report.md)
+- 推荐优先（严格完整，或 MVP 且行业已映射）：**49 / 54** → `sample_feasible_recommended.csv`
+- 最大可行（无硬缺口）：**49 / 54** → `sample_feasible_companies.csv`
+- 全量宽表：`../market/data/derived/ipo_sentiment_features.csv`（565 家；日历至 **2026-06-30**）
+
+联调示例（蜜雪冰城 `02097`，情绪档位为严格完整）：
+
+```bash
+# 检索侧（本目录）
+python scripts/build_index_from_parse.py ... --stock-code 02097 ...
+python scripts/simulate_agent_retrieval.py --doc-id ... --agent all ...
+
+# 情绪特征侧（只读宽表，无需再抓外网）
+# ../market/data/derived/ipo_sentiment_features.csv 中 stock_code=02097 一行
+```
+
+核心缺口 5 家（蚂蚁/建中/濠江机电/富石金融/澳达等）不宜作情绪主评测；检索仍可单独跑。
+
 ## 架构要点
 
 - 财务 2.1/2.2/2.3：`recall_unit: table`，按 `TBL_IS` / `TBL_BS` / `TBL_CF` 整表 Top-K
 - 法务：按字段 Grep∪BM25∪Vector Top-K
 - 融合：加权 RRF；详见 `src/retrieval/hybrid.py`
+- 市场情绪 Agent **不**走本检索包取宏观/认购等结构化字段（那些在 `market/`）；本包只服务招股书原文证据

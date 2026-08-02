@@ -1,0 +1,10 @@
+# market 数据工程依赖（Python >= 3.9；本项目用 conda env ipo-risk, Python 3.10）
+# 只有 fetch_* 脚本需要联网库；build_* 只需 pandas。
+pandas>=1.5
+numpy
+requests
+akshare>=1.14      # 港股指数/南向资金/美元指数/个股新闻（东财、新浪上游）
+yfinance>=0.2      # 备用源：^HSI / HSTECH.HK
+openpyxl           # 读 EDE20260715.xlsx（如损坏则用 dataset_analysis 的 slim CSV）
+python-calamine    # 读万得导出中 openpyxl 命名样式损坏的 xlsx
+tqdm

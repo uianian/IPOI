@@ -1,0 +1,18 @@
+{
+  "file": "hstech.csv",
+  "source": "akshare.stock_hk_index_daily_sina(HSTECH)",
+  "fetched_at": "2026-07-31T23:36:47",
+  "rows": 1440,
+  "columns": [
+    "date",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "source"
+  ],
+  "date_min": "2020-08-17",
+  "date_max": "2026-06-30",
+  "note": "HSTECH index launched 2020-07-27; no data before launch. IPO features prior to launch must be NaN (use HSI instead)."
+}

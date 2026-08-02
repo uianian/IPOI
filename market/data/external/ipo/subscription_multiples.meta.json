@@ -1,0 +1,22 @@
+{
+  "file": "subscription_multiples.csv",
+  "source": "chiefgroup detail pages + xinguyufu /api/ipo (public recent)",
+  "fetched_at": "2026-07-31T22:52:57",
+  "rows": 567,
+  "columns": [
+    "stock_code",
+    "public_subscription_multiple",
+    "international_placing_multiple",
+    "offer_price",
+    "list_date_src",
+    "source",
+    "source_url",
+    "name"
+  ],
+  "date_min": null,
+  "date_max": null,
+  "note": "public_subscription_multiple ≈ 公开发售超额认购倍数; international_placing_multiple only from xinguyufu when available; HKEX allotment PDFs not parsed in this pass",
+  "n_universe": 565,
+  "n_with_public_multiple": 539,
+  "coverage": 0.954
+}

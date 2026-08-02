@@ -1,0 +1,17 @@
+{
+  "file": "industry_basket_daily.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/hkshareeodprices.csv + industry_universe.csv",
+  "fetched_at": "2026-08-02T15:08:32",
+  "rows": 12560,
+  "columns": [
+    "date",
+    "industry",
+    "n_members",
+    "eq_return",
+    "total_amount",
+    "newhigh_ratio"
+  ],
+  "date_min": "2020-01-02",
+  "date_max": "2026-05-22",
+  "note": "equal-weighted concept-basket daily aggregates; newhigh = adjclose at 60-trading-day rolling max (min_periods=20); amount unit = thousand HKD"
+}

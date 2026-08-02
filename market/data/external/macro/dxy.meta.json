@@ -1,0 +1,14 @@
+{
+  "file": "dxy.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/wind/美元指数十年日行情.xlsx",
+  "fetched_at": "2026-08-02T15:05:58",
+  "rows": 1632,
+  "columns": [
+    "date",
+    "open",
+    "close"
+  ],
+  "date_min": "2019-10-08",
+  "date_max": "2026-06-30",
+  "note": "ICE US Dollar Index USDX.FX from Wind — replaces FRED DTWEXBGS proxy"
+}

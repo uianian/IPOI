@@ -1,0 +1,24 @@
+{
+  "file": "southbound.csv",
+  "source": "akshare.stock_hsgt_hist_em(南向资金)",
+  "fetched_at": "2026-07-31T23:36:51",
+  "rows": 1552,
+  "columns": [
+    "date",
+    "当日成交净买额",
+    "买入成交额",
+    "卖出成交额",
+    "历史累计净买额",
+    "当日资金流入",
+    "当日余额",
+    "持股市值",
+    "领涨股",
+    "领涨股-涨跌幅",
+    "沪深300",
+    "沪深300-涨跌幅",
+    "领涨股-代码"
+  ],
+  "date_min": "2019-10-08",
+  "date_max": "2026-06-30",
+  "note": "southbound (HK Stock Connect) daily flows; amounts in 亿元 per Eastmoney convention"
+}

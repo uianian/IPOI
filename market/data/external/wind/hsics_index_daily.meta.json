@@ -1,0 +1,16 @@
+{
+  "file": "hsics_index_daily.csv",
+  "source": "dataset/wind/恒生行业分类指数十年开盘价|收盘价.csv",
+  "fetched_at": "2026-08-02T15:08:05",
+  "rows": 97776,
+  "columns": [
+    "date",
+    "index_code",
+    "index_name",
+    "close",
+    "open"
+  ],
+  "date_min": "2019-10-08",
+  "date_max": "2026-06-30",
+  "note": "long-form HSICS / HS theme index daily; 0-close rows dropped as unpublished"
+}

@@ -1,0 +1,25 @@
+{
+  "file": "ipo_industry_map.csv",
+  "source": "HSICS + EDE + /nfs/users/wuqianqian/IPOI/dataset_analysis/output/ipo_catalog_with_metrics.csv",
+  "fetched_at": "2026-08-02T15:08:24",
+  "rows": 565,
+  "columns": [
+    "stock_code",
+    "windcode",
+    "wind_norm",
+    "company_display",
+    "list_date",
+    "first_trade_date",
+    "ede_list_date",
+    "industry",
+    "industry_source",
+    "hsics_l1_name",
+    "hsics_index_code",
+    "hsics_index_name",
+    "concepts",
+    "needs_manual_label"
+  ],
+  "date_min": null,
+  "date_max": null,
+  "note": "565 IPOs; hsics_index_code used for official industry returns"
+}

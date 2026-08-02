@@ -1,0 +1,15 @@
+{
+  "file": "market_turnover_daily.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/hkshareeodprices.csv",
+  "fetched_at": "2026-07-31T22:05:37",
+  "rows": 1570,
+  "columns": [
+    "date",
+    "total_amount_thousand_hkd",
+    "total_volume",
+    "n_stocks_traded"
+  ],
+  "date_min": "2020-01-02",
+  "date_max": "2026-05-22",
+  "note": "daily sum over all HK stocks in contest EOD table; amount unit = thousand HKD (Wind convention)"
+}

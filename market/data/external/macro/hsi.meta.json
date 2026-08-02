@@ -1,0 +1,15 @@
+{
+  "file": "hsi.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/wind/恒生指数十年日行情20160801-20260801.xlsx",
+  "fetched_at": "2026-08-02T15:05:59",
+  "rows": 1632,
+  "columns": [
+    "date",
+    "open",
+    "close",
+    "source"
+  ],
+  "date_min": "2019-10-08",
+  "date_max": "2026-06-30",
+  "note": "HSI.HI daily OHLC from Wind — replaces AKShare sina"
+}

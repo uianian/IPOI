@@ -1,0 +1,20 @@
+{
+  "file": "hsics_security_industry.csv",
+  "source": "/nfs/users/wuqianqian/IPOI/dataset/wind/恒生行业分类.xlsx",
+  "fetched_at": "2026-08-02T15:08:05",
+  "rows": 2818,
+  "columns": [
+    "stock_code",
+    "windcode",
+    "name",
+    "hsics_l1_name",
+    "hsics_l1_code",
+    "hsics_l2_code",
+    "hsics_l3_code",
+    "hsics_path",
+    "hsics_composite_index_name"
+  ],
+  "date_min": null,
+  "date_max": null,
+  "note": "HSICS classification per HK security from Wind"
+}

@@ -1,0 +1,19 @@
+{
+  "file": "ipo_market_heat_daily.csv",
+  "source": "ipo_events.csv",
+  "fetched_at": "2026-08-02T15:08:38",
+  "rows": 2373,
+  "columns": [
+    "date",
+    "ipo_count_30d",
+    "ipo_count_90d",
+    "avg_day1_return_60d",
+    "avg_day5_return_60d",
+    "avg_day20_return_60d",
+    "break_rate_60d",
+    "avg_mdd20_60d"
+  ],
+  "date_min": "2020-01-01",
+  "date_max": "2026-06-30",
+  "note": "calendar-day rolling windows (30/90 counts, 60d averages); NaN when no IPO in window — do not fill 0"
+}

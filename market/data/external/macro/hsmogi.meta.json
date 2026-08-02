@@ -1,0 +1,18 @@
+{
+  "file": "hsmogi.csv",
+  "source": "akshare.stock_hk_index_daily_sina(HSMOGI)",
+  "fetched_at": "2026-07-31T23:36:49",
+  "rows": 1656,
+  "columns": [
+    "date",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "source"
+  ],
+  "date_min": "2019-10-02",
+  "date_max": "2026-06-30",
+  "note": "Hang Seng official sector index: 恒生中国内地石油及天然气指数 (HSMOGI); mapped from config.HS_SECTOR_INDEX"
+}
