@@ -1,5 +1,7 @@
 # Default Grep lexicon — aligned with 招股书关键信息抽取与风险特征定义.md Ch2/Ch3
+# + hk_ipo_risk Legal 5 Skill（治理/合同监管等）
 # Used only when retrieve() has no explicit grep_terms.
+# 注：§3.4 现金消耗归财务 Agent，不作法务主主题。
 terms:
   # 2.1 损益表
   - 綜合損益表
@@ -26,28 +28,46 @@ terms:
   - 經營活動所得現金流量淨額
   - 投資活動所用現金流量淨額
   - 融資活動所得現金流量淨額
-  # 3.1 对赌/赎回
+  # legal_governance
+  - 控股股東
+  - 實際控制人
+  - 一致行動
+  - 不同投票權
+  - 雙重股權
+  # 3.1 对赌/赎回（shareholder_rights）
   - 對賭
   - 贖回權
   - 贖回條款
   - 業績承諾
   - 領售權
   - 可轉換可贖回優先股
+  - 特別權利
   # 3.2 关联交易
   - 關聯交易
   - 關連交易
   - 關連人士
+  - 百分比率
+  - 獨立股東
   # 3.3 集中度
   - 前五大客戶
   - 前五大供應商
   - 最大客戶
-  # 3.4 现金消耗
-  - 現金消耗
-  - 現金跑道
-  # 3.5 管线
+  # 3.5 管线（18A / contracts_and_ip 叠）
   - 核心產品
   - 臨床試驗
-  # 3.6 Pre-IPO
+  # 3.6 Pre-IPO / 权利清理
   - Pre-IPO
   - 投後估值
   - 估值倒掛
+  # contracts_and_ip
+  - 重大合約
+  - 獨家
+  - 特許經營
+  - 知識產權
+  - 授權引進
+  # regulatory_litigation
+  - 行政處罰
+  - 監管調查
+  - 訴訟
+  - 仲裁
+  - 牌照

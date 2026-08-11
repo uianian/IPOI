@@ -14,7 +14,9 @@ import httpx
 
 from service.analysis_store import AnalysisStore
 from service.config import (
+    DEBATE_DIR,
     FINANCE_RULES_ONLY,
+    LEGAL_RULES_ONLY,
     PKG_ROOT,
     RETRIEVAL_BASE_URL,
     RETRIEVAL_RUNTIME,
@@ -243,9 +245,11 @@ class AnalysisRunner:
         doc_name = parse_meta.get("companyName") or parse_meta.get("fileName") or task_id
         pdf_name = parse_meta.get("fileName") or ""
 
-        # LLM：前端 llmConfig 优先（apiKey/apiBaseUrl/model），缺省用后端默认 google/gemma-4-31b-it
-        finance_llm = None
-        if not rules_only:
+        # LLM：前端 llmConfig 优先（apiKey/apiBaseUrl/model），缺省用后端默认
+        # 财务/法务共用同一 client；任一方 RULES_ONLY 时该侧不注入 LLM
+        shared_llm = None
+        need_llm = (not rules_only) or (not LEGAL_RULES_ONLY)
+        if need_llm:
             try:
                 cfg = llm_config or {}
 
@@ -268,15 +272,19 @@ class AnalysisRunner:
                     "frontend" if _nonempty("apiKey") else "backend_default",
                 )
                 if not settings.get("api_key"):
-                    logger.warning("No API key — finance rules_only fallback")
+                    logger.warning("No API key — finance/legal rules_only fallback")
                     rules_only = True
                 else:
-                    finance_llm = LLMClient(settings)
-                    await finance_llm.init()
+                    shared_llm = LLMClient(settings)
+                    await shared_llm.init()
             except Exception as exc:
                 logger.warning("LLM init failed, rules_only fallback: %s", exc)
                 rules_only = True
-                finance_llm = None
+                shared_llm = None
+
+        finance_llm = None if rules_only else shared_llm
+        legal_react = (not LEGAL_RULES_ONLY) and shared_llm is not None
+        legal_llm = shared_llm if legal_react else None
 
         legal_events: list[dict[str, Any]] = []
 
@@ -284,10 +292,14 @@ class AnalysisRunner:
             for th in map_finance_event(ev):
                 emitter.emit("thought", {"thought": th})
 
-        def on_legal_progress(ev: dict[str, Any]) -> None:
+        def on_legal_event(ev: dict[str, Any]) -> None:
             legal_events.append(ev)
             for th in map_legal_event(ev):
                 emitter.emit("thought", {"thought": th})
+
+        def on_legal_progress(ev: dict[str, Any]) -> None:
+            # 规则流水线 on_progress；ReAct 主要走 legal_run_logger
+            on_legal_event(ev)
 
         run_logger = AgentRunLogger(
             agent="finance",
@@ -298,6 +310,20 @@ class AnalysisRunner:
             pdf_name=pdf_name,
             on_event=on_finance_event,
         )
+        legal_run_logger = None
+        if legal_react:
+            legal_run_logger = AgentRunLogger(
+                agent="legal",
+                doc_id=task_id,
+                log_dir=log_dir,
+                issuer_type=issuer_type,
+                doc_name=doc_name,
+                pdf_name=pdf_name,
+                on_event=on_legal_event,
+            )
+
+        client_project_id = parse_meta.get("clientProjectId")
+        DEBATE_DIR.mkdir(parents=True, exist_ok=True)
 
         merged = await run_finance_legal_parallel(
             task_id,
@@ -306,13 +332,24 @@ class AnalysisRunner:
             legal_retrieval_json=leg_path,
             parse_json=parse_path,
             finance_llm=finance_llm,
+            legal_llm=legal_llm,
             finance_run_logger=run_logger,
+            legal_run_logger=legal_run_logger,
             legal_on_progress=on_legal_progress,
             finance_rules_only=rules_only,
+            legal_react=legal_react,
+            debate_dir=DEBATE_DIR,
+            client_project_id=str(client_project_id) if client_project_id else None,
+            task_id=task_id,
+            analysis_id=analysis_id,
             doc_name=doc_name,
             pdf_name=pdf_name,
         )
         run_logger.close(final_summary=(merged.get("finance") or {}).get("summary"))
+        if legal_run_logger is not None:
+            legal_run_logger.close(
+                final_summary=(merged.get("legal") or {}).get("summary")
+            )
 
         emitter.emit("agent_status", {"agentId": "legal", "status": "completed"})
         # legal completed 会触发 flush financial buffer
@@ -363,23 +400,48 @@ class AnalysisRunner:
             encoding="utf-8",
         )
 
-        # 法务合成日志
-        legal_log_lines = ["# Agent Run Log — legal", ""]
-        for ev in legal_events:
-            legal_log_lines.append(
-                f"- [{ev.get('status')}] {ev.get('name')}: "
-                f"{json.dumps(ev.get('output') or {}, ensure_ascii=False, default=str)[:500]}"
-            )
-        legal_log_text = "\n".join(legal_log_lines) + "\n"
-        (ad / "logs" / "legal_run.log").write_text(legal_log_text, encoding="utf-8")
-        (ad / "logs" / "legal_events.jsonl").write_text(
-            "\n".join(json.dumps(e, ensure_ascii=False, default=str) for e in legal_events)
-            + ("\n" if legal_events else ""),
-            encoding="utf-8",
+        # 法务日志：优先 ReAct run_logger，否则合成 on_progress 事件
+        leg_log = (
+            Path(legal_run_logger.log_path)
+            if legal_run_logger is not None and legal_run_logger.log_path
+            else None
         )
+        leg_jsonl = (
+            Path(legal_run_logger.jsonl_path)
+            if legal_run_logger is not None and legal_run_logger.jsonl_path
+            else None
+        )
+        if leg_log and leg_log.is_file():
+            legal_log_text = _read_text(leg_log)
+            legal_log_events = _read_jsonl(leg_jsonl) or legal_events
+        else:
+            legal_log_lines = ["# Agent Run Log — legal", ""]
+            for ev in legal_events:
+                legal_log_lines.append(
+                    f"- [{ev.get('status')}] {ev.get('name')}: "
+                    f"{json.dumps(ev.get('output') or {}, ensure_ascii=False, default=str)[:500]}"
+                )
+            legal_log_text = "\n".join(legal_log_lines) + "\n"
+            legal_log_events = legal_events
+            (ad / "logs" / "legal_run.log").write_text(legal_log_text, encoding="utf-8")
+            (ad / "logs" / "legal_events.jsonl").write_text(
+                "\n".join(json.dumps(e, ensure_ascii=False, default=str) for e in legal_events)
+                + ("\n" if legal_events else ""),
+                encoding="utf-8",
+            )
 
         fin_log = Path(run_logger.log_path) if run_logger.log_path else None
         fin_jsonl = Path(run_logger.jsonl_path) if run_logger.jsonl_path else None
+
+        fin_dossier = (
+            ((merged.get("finance") or {}).get("features") or {}).get("debate_dossier_path")
+            or ((merged.get("finance") or {}).get("trace") or {}).get("debate_dossier_path")
+        )
+        leg_dossier = (
+            ((merged.get("legal") or {}).get("features") or {}).get("debate_dossier_path")
+            or ((merged.get("legal") or {}).get("trace") or {}).get("debate_dossier_path")
+        )
+        dossier_paths = {"finance": fin_dossier, "legal": leg_dossier}
 
         # 分拆报告：整份报告两边各一份（前端按 agent 展示）
         agents = {
@@ -388,7 +450,7 @@ class AnalysisRunner:
                 agent_result=merged.get("legal") or {},
                 report_markdown=report_md,
                 log_text=legal_log_text,
-                log_events=legal_events,
+                log_events=legal_log_events,
             ),
             "financial": agent_bundle_from_result(
                 agent_key="finance",
@@ -397,6 +459,18 @@ class AnalysisRunner:
                 log_text=_read_text(fin_log),
                 log_events=_read_jsonl(fin_jsonl),
             ),
+            "market": {
+                "agentId": "market",
+                "status": "skipped",
+                "reason": "not_implemented",
+            },
+            "orchestrator": {
+                "agentId": "orchestrator",
+                "status": "placeholder",
+                "overallScore": overall,
+                "riskLevel": risk_level,
+                "note": "weighted_reference_score",
+            },
         }
 
         thoughts = self.store.read_thoughts(analysis_id)
@@ -407,6 +481,7 @@ class AnalysisRunner:
             "riskLevel": risk_level,
             "thoughts": thoughts,
             "agents": agents,
+            "dossierPaths": dossier_paths,
             "completedAt": self.store.read_meta(analysis_id).get("createdAt"),
         }
         from datetime import datetime, timezone
@@ -419,6 +494,7 @@ class AnalysisRunner:
             overallScore=overall,
             riskLevel=risk_level,
             completedAt=result["completedAt"],
+            dossierPaths=dossier_paths,
         )
         emitter.emit(
             "analysis_complete",

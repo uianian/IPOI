@@ -47,7 +47,8 @@ _PROFILES_PATH = (
     Path(__file__).resolve().parent.parent.parent / "configs" / "agent_retrieval_profiles.yaml"
 )
 
-# Sections gated for non-biotech / non-18A issuers
+# Sections gated for non-biotech issuers.
+# issuer_type biotech / 18a / 18c 门控等价（对应前端 isBiotech=true）。
 _BIOTECH_SECTIONS = {"2.4", "3.5"}
 
 # Whole-table recall: keep full HTML/text (downstream extraction needs rows intact)
@@ -141,7 +142,11 @@ def _excerpt_for_chunk(chunk: DocumentChunk, *, whole_table: bool) -> str:
 
 
 def _title_hint_bonus(text: str, title_hints: list[str]) -> float:
-    """单条标题是否命中表名白名单（允许 —續/(續) 后缀）。"""
+    """单条标题是否命中表名白名单。
+
+    匹配顺序：精确相等 → 前缀（允许 —續/(續)）→ 包含 hint → 去「表」词干前缀
+    （「綜合損益表」可命中「綜合損益及其他全面開支表」）。
+    """
     if not title_hints or not text:
         return 0.0
     blob = re.sub(r"\s+", "", text)
@@ -158,6 +163,14 @@ def _title_hint_bonus(text: str, title_hints: list[str]) -> float:
             or blob[len(h) :].startswith("续")
         ):
             return 0.04
+        if len(h) >= 5 and h in blob:
+            return 0.04
+        # 词干：去掉末尾「表」后，标题以词干起头且后续为表/及/其他…
+        stem = h[:-1] if h.endswith("表") and len(h) >= 5 else ""
+        if stem and blob.startswith(stem):
+            rest = blob[len(stem) :]
+            if (not rest) or rest.startswith(("表", "及", "和其他", "其他", "—", "－", "(")):
+                return 0.04
     return 0.0
 
 
@@ -426,6 +439,7 @@ def _gate_queries(
     biotech_mode: str,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Return (active_queries, skipped_meta)."""
+    # biotech ≡ 18a ≡ 18c（前端 isBiotech=true 通常写入 biotech）
     is_biotech = str(issuer_type).strip().lower() in {"biotech", "18a", "18c"}
     active: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []

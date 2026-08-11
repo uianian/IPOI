@@ -40,6 +40,35 @@ def _cfo_persistently_negative(metrics: dict[str, dict[str, float | None]]) -> b
     return all(v < 0 for _, v in tail)
 
 
+def _latest_metric_value(series: dict[str, float | None] | None) -> float | None:
+    """Prefer latest period (incl. interim) then full-year."""
+    from src.skills.gates import _period_values
+
+    periods = _period_values(series)
+    if periods:
+        return periods[-1][1]
+    full = _series_values(series)
+    if full:
+        return full[-1][1]
+    return None
+
+
+def cv_pref_material(metrics: dict[str, dict[str, float | None]]) -> bool:
+    """CV_PREF>0 且相对总资产≥10% 或相对现金≥50% → 表内优先股/赎回负债压力。"""
+    pref = _latest_metric_value(metrics.get("CV_PREF"))
+    if pref is None or pref <= 0:
+        return False
+    assets = _latest_metric_value(metrics.get("TOTAL_ASSETS"))
+    cash = _latest_metric_value(
+        metrics.get("CASH_EQ") or metrics.get("END_CASH")
+    )
+    if assets is not None and assets > 0 and (pref / assets) >= 0.10:
+        return True
+    if cash is not None and cash > 0 and (pref / cash) >= 0.50:
+        return True
+    return False
+
+
 def _build_negative_findings(
     metrics: dict[str, dict[str, float | None]],
     gates: dict[str, Any],
@@ -111,6 +140,7 @@ def score_finance(
         "runway_lt_12": (cash_burn.get("CASH_RUNWAY_MONTHS") or 999) < 12 and not cash_burn.get("skipped"),
         "runway_12_24": 12 <= (cash_burn.get("CASH_RUNWAY_MONTHS") or -1) < 24 and not cash_burn.get("skipped"),
         "burn_yoy_up_gt_30": bool(cash_burn.get("burn_yoy_up_gt_30")) and not cash_burn.get("skipped"),
+        "cv_pref_material": cv_pref_material(metrics),
     }
 
     breakdown: list[ScoreBreakdownItem] = []
@@ -130,17 +160,30 @@ def score_finance(
         code = str(rule.get("code"))
         rule_ref = str(rule.get("rule_ref") or "")
         ev_field = "TBL_IS"
-        if "CFO" in code or "CASH" in code or "BURN" in code or "RUNWAY" in code:
-            ev_field = "TBL_CF" if "CFO" in code else "TBL_BS"
+        if "CFO" in code:
+            ev_field = "TBL_CF"
+        elif "CV_PREF" in code or "SOLVENCY" in code:
+            ev_field = "TBL_BS"
+        elif "CASH" in code or "BURN" in code or "RUNWAY" in code:
+            ev_field = "TBL_BS" if cash_burn.get("END_CASH") is not None else "TBL_CF"
         if code.startswith("CASH") or code.startswith("BURN"):
             ev_field = "TBL_BS" if cash_burn.get("END_CASH") is not None else "TBL_CF"
         evid = evidence_refs_for(ev_field, extracted)
         if not evid and when in {"continuous_net_loss", "latest_full_year_loss", "gp_margin_drop_gt_5pp"}:
             evid = evidence_refs_for("TBL_IS", extracted)
+        if not evid and when == "cv_pref_material":
+            evid = evidence_refs_for("TBL_BS", extracted) or evidence_refs_for(
+                "TBL_BS_COMPANY", extracted
+            )
         if not evid:
             continue
         total += delta
         item = ScoreBreakdownItem(code=code, delta=delta, rule_ref=rule_ref, evidence=evid)
+        if when == "cv_pref_material":
+            pref = _latest_metric_value(metrics.get("CV_PREF"))
+            item.note = (
+                f"CV_PREF≈{pref}；表内优先股/赎回负债压力（cross_ref=legal:REDEMPTION）"
+            )
         breakdown.append(item)
         level = "high" if delta >= 20 else "medium"
         risk_points.append(

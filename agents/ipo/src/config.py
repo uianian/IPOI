@@ -37,20 +37,22 @@ class LLMConfig(BaseSettings):
     timeout_seconds: int = 60
     max_tokens: int = 4096
     temperature: float = 0.1
+    reasoning_effort: str = "high"
 
     model_config = {"env_prefix": "IPO_LLM_", "extra": "ignore"}
 
     @property
     def base_url(self) -> str:
-        if self.provider in ("openai", "openrouter"):
+        if self.provider in ("openai", "openrouter", "deepseek"):
             return self.api_base
         return self.vllm_base_url
 
     @property
     def resolved_api_key(self) -> str:
-        if self.provider in ("openai", "openrouter"):
+        if self.provider in ("openai", "openrouter", "deepseek"):
             return (
                 self.api_key
+                or os.environ.get("DEEPSEEK_API_KEY", "")
                 or os.environ.get("OPENROUTER_API_KEY", "")
                 or os.environ.get("OPENAI_API_KEY", "")
             )
@@ -133,8 +135,26 @@ class Settings(BaseSettings):
     api: APIConfig = Field(default_factory=APIConfig)
 
 
+def _flatten_llm_provider(llm_cfg: dict[str, Any]) -> dict[str, Any]:
+    """把 llm.providers[<provider>] 合并进扁平字段，兼容旧 LLMConfig。"""
+    out = {**llm_cfg}
+    providers = out.pop("providers", None)
+    if not isinstance(providers, dict):
+        return out
+    active = str(out.get("provider") or "").strip()
+    block = providers.get(active)
+    if isinstance(block, dict):
+        for k, v in block.items():
+            if v is None:
+                continue
+            if isinstance(v, str) and not v.strip():
+                continue
+            out[k] = v
+    return out
+
+
 def load_settings() -> Settings:
-    llm_cfg = {**_raw.get("llm", {})}
+    llm_cfg = _flatten_llm_provider({**_raw.get("llm", {})})
     retrieval_cfg = {**_raw.get("retrieval", {})}
     debate_cfg = {**_raw.get("debate", {})}
     fusion_cfg = {**_raw.get("fusion", {})}

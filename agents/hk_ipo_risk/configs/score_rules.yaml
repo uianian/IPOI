@@ -40,6 +40,10 @@ finance:
       rule_ref: "doc§3.4"
       when: burn_yoy_up_gt_30
       require_gate: unprofitable
+    - code: CV_PREF_LIABILITY
+      delta: 10
+      rule_ref: "doc§solvency/CV_PREF"
+      when: cv_pref_material
   base_if_any_medium_signal: 0
 
 legal:
@@ -79,3 +83,38 @@ legal:
     exists_related_party: 15
     exists_concentration_disclosure: 12
     exists_pipeline: 12
+  # ---- 法务 ReAct：LLM 风险点 → 参考分贡献 ----
+  # 分型计分 + 披露隔离 + 主题 max + 饱和聚合；参考分仅供总控，法务重点是风险点+证据
+  llm_point_deltas: { high: 18, medium: 8, low: 3 }
+  structural_weight: 0.6
+  # 仅填补空主题时的披露基线折减（实质规则/LLM 不受影响）
+  disclosure_weight: 0.5
+  score_aggregate: saturating
+  llm_code_deltas:
+    GOVERNANCE_CONTROL_GT_50: 10
+    GOVERNANCE_AB_SHARES: 6
+    GOVERNANCE_CONCERT_PARTY: 6
+    RIGHTS_CLEANUP_INCOMPLETE: 20
+    RELATED_PARTY_UNFAIR: 15
+    CONTRACT_TERMINATION_RISK: 15
+    CONTRACT_EXCLUSIVE_DEPENDENCY: 10
+    IP_NOT_SELF_OWNED: 18
+    IP_LICENSE_IN_TERMINATION: 18
+    REGULATORY_PENALTY: 15
+    REGULATORY_INVESTIGATION: 18
+    LICENSE_MISSING: 18
+    LITIGATION_MAJOR: 20
+    LITIGATION_PENDING: 8
+  # 同主题归并（规则码与 LLM 码都会先映射到主题，同主题取最大 delta）
+  themes:
+    redemption: [REDEMPTION]
+    related_party: [RELATED_PARTY]
+    concentration: [CONCENTRATION]
+    pipeline: [PIPELINE]
+    governance: [GOVERNANCE]
+    rights_cleanup: [RIGHTS_CLEANUP]
+    contracts: [CONTRACT]
+    ip: [IP_]
+    regulatory: [REGULATORY, LICENSE, HEALTHCARE, HUMAN_GENETIC, INVESTIGATION, FDA]
+    litigation: [LITIGATION]
+    valuation: [VALUATION]

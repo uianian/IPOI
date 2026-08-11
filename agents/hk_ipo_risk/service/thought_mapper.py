@@ -316,6 +316,28 @@ def _finance_tool_content(
             parts.append(to_zh_hant(str(summary)))
         return "\n".join(parts), extra
 
+    if name == "run_finance_skill":
+        skill = out.get("skill") or ""
+        n = out.get("risk_point_count")
+        parts = ["`run_finance_skill` 完成"]
+        if skill:
+            parts.append(f"skill=`{skill}`")
+        if n is not None:
+            parts.append(f"風險點 {n}")
+        return "\n".join(parts), extra
+
+    if name == "run_finance_rule_checks":
+        score = out.get("risk_score")
+        hints = out.get("coverage_hints") or []
+        parts = ["`run_finance_rule_checks` 完成"]
+        if score is not None:
+            parts.append(f"參考分 {score}")
+        if hints:
+            parts.append(f"覆蓋缺口 {len(hints)}")
+        elif out.get("ready_to_submit") or out.get("finished"):
+            parts.append("無缺口／可交卷")
+        return "\n".join(parts), extra
+
     hint = out.get("hint") or out.get("summary")
     if hint and not (reason and _norm_cmp(str(hint), reason)):
         return f"工具 `{name}` 完成（{status}）\n{to_zh_hant(str(hint))}", extra
@@ -491,80 +513,236 @@ def map_finance_event(event: dict[str, Any]) -> list[dict[str, Any]]:
     return thoughts
 
 
+def _legal_tool_content(
+    name: str,
+    status: str,
+    out: Any,
+    reason: str | None,
+) -> tuple[str, dict[str, Any]]:
+    """法务工具步骤 content（ReAct + 规则流水线共用）。"""
+    extra: dict[str, Any] = {}
+    if status == "running":
+        return f"正在執行 `{name}`…", extra
+    if not isinstance(out, dict):
+        return f"`{name}` 完成（{status}）", extra
+
+    if name == "score_legal" or name == "run_rule_checks":
+        score = out.get("risk_score")
+        level = out.get("risk_level")
+        if score is not None:
+            return (
+                f"`{name}` 完成：參考分 {score}"
+                + (f"（{level}）" if level else ""),
+                extra,
+            )
+        hints = out.get("coverage_hints") or []
+        if hints:
+            return f"`{name}` 完成，覆蓋缺口 {len(hints)} 項", extra
+
+    if name == "run_legal_skill":
+        skill = out.get("skill") or (reason or "")
+        n = out.get("risk_point_count")
+        if n is None and isinstance(out.get("risk_points"), list):
+            n = len(out["risk_points"])
+        return f"`run_legal_skill` 完成（{skill or 'skill'}，風險點 {n or 0}）", extra
+
+    if name == "retrieve_legal":
+        n = out.get("grep_hits")
+        if n is None:
+            hits = out.get("hits")
+            n = len(hits) if isinstance(hits, list) else hits
+        return f"`retrieve_legal` 完成，基線命中 {n or 0} 條", extra
+
+    if name == "submit_legal_report":
+        score = out.get("risk_score")
+        level = out.get("risk_level")
+        summary = out.get("summary")
+        parts = ["`submit_legal_report` 完成"]
+        if score is not None:
+            parts.append(f"風險分 {score}" + (f"（{level}）" if level else ""))
+        if summary:
+            parts.append(to_zh_hant(str(summary)))
+        return "\n".join(parts), extra
+
+    hits_val = out.get("hits")
+    if hits_val is not None:
+        n = len(hits_val) if isinstance(hits_val, list) else hits_val
+        return f"`{name}` 完成，命中 {n} 條", extra
+
+    hint = out.get("hint") or out.get("summary")
+    if hint:
+        return f"`{name}` 完成（{status}）\n{to_zh_hant(str(hint))}", extra
+    return f"`{name}` 完成（{status}）", extra
+
+
 def map_legal_event(event: dict[str, Any]) -> list[dict[str, Any]]:
-    """法务 on_progress 事件 → Thought[]。"""
+    """法务 AgentRunLogger / on_progress 事件 → Thought[]（含 ReAct react_turn）。"""
     thoughts: list[dict[str, Any]] = []
     agent_id = "legal"
     ev = event.get("event")
-    if ev != "step":
+
+    if ev == "react_turn":
+        turn = event.get("turn") or event.get("step_index") or "?"
+        reasoning = (event.get("reasoning") or "").strip()
+        reasoning_display = (event.get("reasoning_display") or "").strip() or None
+        tool_calls = event.get("tool_calls") or []
+        tool_names = [
+            (tc.get("name") if isinstance(tc, dict) else None) for tc in tool_calls
+        ]
+        tool_names = [n for n in tool_names if n]
+        reason_zh = None
+        for tc in tool_calls:
+            if isinstance(tc, dict):
+                reason_zh = _tool_reason(tc.get("arguments"))
+                if reason_zh:
+                    break
+        content, meta = _bilingual_think(
+            turn=turn,
+            tool_names=tool_names,
+            reasoning=reasoning,
+            reason_zh=reason_zh,
+            reasoning_display=reasoning_display,
+        )
+        thoughts.append(
+            _new_thought(agent_id=agent_id, typ="thinking", content=content, meta=meta)
+        )
         return thoughts
 
-    name = event.get("name") or "tool"
-    status = event.get("status") or "ok"
-    kind = "tool_call" if status == "running" else "tool_result"
-    inp = event.get("input_summary")
-    reason = _tool_reason(inp) if isinstance(inp, dict) else None
-    if status == "running":
-        # 不把 reason 塞进 content，避免与后续 result 重复
-        content = f"正在執行 `{name}`…"
-    else:
-        out = event.get("output") or {}
-        if name == "score_legal" and event.get("summary"):
+    if ev == "step":
+        name = event.get("name") or "tool"
+        status = event.get("status") or "ok"
+        kind = "tool_call" if status == "running" else "tool_result"
+        inp = event.get("input_summary")
+        reason = _tool_reason(inp) if isinstance(inp, dict) else None
+        out = event.get("output")
+        if name == "score_legal" and event.get("summary") and status != "running":
             content = str(event["summary"])
-        elif isinstance(out, dict) and out.get("hits") is not None:
-            content = f"`{name}` 完成，命中 {out.get('hits')} 條"
-        elif reason and not _norm_cmp(reason, f"`{name}` 完成（{status}）"):
-            # 仅当没有更好摘要时才用 reason，且不与空模板重复
-            content = f"`{name}` 完成（{status}）"
+            extra: dict[str, Any] = {}
         else:
-            content = f"`{name}` 完成（{status}）"
-
-    thoughts.append(
-        _new_thought(
-            agent_id=agent_id,
-            typ="thinking" if name != "score_legal" or status == "running" else "conclusion",
-            content=content,
-            meta={
-                "kind": kind if name != "score_legal" or status == "running" else "model_think",
-                "toolName": name,
-                "toolArgs": inp if isinstance(inp, dict) else None,
-                "toolStatus": "ok" if status in {"ok", "success"} else (
-                    "error" if status in {"error", "failed"} else status
-                ),
-            },
+            content, extra = _legal_tool_content(name, status, out, reason)
+        thoughts.append(
+            _new_thought(
+                agent_id=agent_id,
+                typ="thinking" if name != "score_legal" or status == "running" else "conclusion",
+                content=content,
+                meta={
+                    "kind": kind if name != "score_legal" or status == "running" else "model_think",
+                    "toolName": name,
+                    "toolArgs": inp if isinstance(inp, dict) else None,
+                    "toolStatus": "ok" if status in {"ok", "success"} else (
+                        "error" if status in {"error", "failed"} else status
+                    ),
+                    **{k: v for k, v in extra.items() if v is not None},
+                },
+            )
         )
-    )
 
-    evidence = event.get("evidence")
-    if evidence and status != "running":
-        snips = _snip_evidence(list(evidence))
-        if snips:
-            pages = [s["page"] for s in snips if s.get("page") is not None]
+        # 证据：pipeline 顶层 evidence_hits；ReAct 则在 output.hits/evidence 等
+        evidence_src: list[dict[str, Any]] = []
+        if status != "running":
+            for key in ("evidence_hits", "evidence"):
+                val = event.get(key)
+                if isinstance(val, list):
+                    evidence_src.extend([x for x in val if isinstance(x, dict)])
+            if isinstance(out, dict):
+                for key in (
+                    "hits",
+                    "evidence",
+                    "snippets",
+                    "section_evidence_hits",
+                ):
+                    val = out.get(key)
+                    # pipeline 常把 hits 写成计数 int，仅接受 list[dict]
+                    if isinstance(val, list):
+                        evidence_src.extend([x for x in val if isinstance(x, dict)])
+        if evidence_src:
+            snips = _snip_evidence(evidence_src)
+            if snips:
+                pages = [s["page"] for s in snips if s.get("page") is not None]
+                thoughts.append(
+                    _new_thought(
+                        agent_id=agent_id,
+                        typ="finding",
+                        content=f"法務證據 {len(snips)} 條"
+                        + (f"（頁碼 {', '.join(str(p) for p in pages[:8])}）" if pages else ""),
+                        ref=f"p.{pages[0]}" if pages else None,
+                        meta={"kind": "evidence", "evidence": snips, "toolName": name},
+                    )
+                )
+
+        # 风险点：顶层 event.risk_points + output.risk_points（ReAct skill 观察）
+        risk_points: list[dict[str, Any]] = []
+        for src in (event.get("risk_points"), (out or {}).get("risk_points") if isinstance(out, dict) else None):
+            if isinstance(src, list):
+                risk_points.extend([x for x in src if isinstance(x, dict)])
+        seen_rp: set[str] = set()
+        for rp in risk_points:
+            key = str(rp.get("code") or rp.get("description") or id(rp))
+            if key in seen_rp:
+                continue
+            seen_rp.add(key)
+            evs = _snip_evidence(rp.get("evidence") or [])
+            if not evs and rp.get("evidence_page") is not None:
+                evs = _snip_evidence(
+                    [
+                        {
+                            "page": rp.get("evidence_page"),
+                            "excerpt": str(rp.get("description") or "")[:120],
+                            "source_type": "text",
+                        }
+                    ]
+                )
+            page = evs[0]["page"] if evs and evs[0].get("page") is not None else None
+            if page is None and rp.get("evidence_page") is not None:
+                page = rp.get("evidence_page")
             thoughts.append(
                 _new_thought(
                     agent_id=agent_id,
                     typ="finding",
-                    content=f"法務證據 {len(snips)} 條"
-                    + (f"（頁碼 {', '.join(str(p) for p in pages[:8])}）" if pages else ""),
-                    ref=f"p.{pages[0]}" if pages else None,
-                    meta={"kind": "evidence", "evidence": snips, "toolName": name},
+                    content=str(rp.get("description") or rp.get("code") or "風險點"),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={"kind": "risk_point", "evidence": evs or None},
                 )
             )
+        return thoughts
 
-    for rp in event.get("risk_points") or []:
-        if not isinstance(rp, dict):
-            continue
-        evs = _snip_evidence(rp.get("evidence") or [])
-        page = evs[0]["page"] if evs and evs[0].get("page") is not None else None
-        thoughts.append(
-            _new_thought(
-                agent_id=agent_id,
-                typ="finding",
-                content=str(rp.get("description") or rp.get("code") or "風險點"),
-                ref=f"p.{page}" if page is not None else None,
-                meta={"kind": "risk_point", "evidence": evs or None},
+    if ev == "result":
+        payload = event.get("payload") or {}
+        summary = payload.get("summary")
+        score = payload.get("risk_score")
+        level = payload.get("risk_level")
+        if summary or score is not None:
+            parts = []
+            if score is not None:
+                parts.append(f"法務風險分 {score}" + (f"（{level}）" if level else ""))
+            if summary:
+                parts.append(str(summary))
+            thoughts.append(
+                _new_thought(
+                    agent_id=agent_id,
+                    typ="conclusion",
+                    content="\n".join(parts),
+                    meta={"kind": "model_think"},
+                )
             )
-        )
+        for rp in payload.get("risk_points") or []:
+            if not isinstance(rp, dict):
+                continue
+            evs = _snip_evidence(rp.get("evidence") or [])
+            page = None
+            if evs and evs[0].get("page") is not None:
+                page = evs[0]["page"]
+            thoughts.append(
+                _new_thought(
+                    agent_id=agent_id,
+                    typ="finding",
+                    content=str(rp.get("description") or rp.get("code") or "風險點"),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={"kind": "risk_point", "evidence": evs or None},
+                )
+            )
+        return thoughts
+
     return thoughts
 
 
@@ -619,6 +797,62 @@ def _finance_detail_from_agent_result(agent_result: dict[str, Any]) -> dict[str,
     }
 
 
+_LEGAL_SKILL_ORDER = (
+    "legal_governance",
+    "legal_shareholder_rights",
+    "legal_related_party",
+    "legal_contracts_and_ip",
+    "legal_regulatory_litigation",
+)
+
+
+def _rules_floor_shell(features: dict[str, Any] | None) -> dict[str, Any] | None:
+    """前端外壳摘要：财务/法务 rules_floor 字段不对称，一律可选。"""
+    rf = (features or {}).get("rules_floor")
+    if not isinstance(rf, dict) or not rf:
+        return None
+    out: dict[str, Any] = {}
+    for src, dst in (
+        ("final_score", "finalScore"),
+        ("rules_score", "rulesScore"),
+        ("llm_score", "llmScore"),
+        ("saturated_score", "saturatedScore"),
+        ("rules_substantive_score", "rulesSubstantiveScore"),
+        ("flags", "flags"),
+    ):
+        if src in rf and rf[src] is not None:
+            out[dst] = rf[src]
+    return out or None
+
+
+def _legal_detail_from_agent_result(agent_result: dict[str, Any]) -> dict[str, Any]:
+    """5 Skill 压缩摘要，供前端无需深挖 agentResult.features.skill_results。"""
+    features = agent_result.get("features") or {}
+    skill_results = features.get("skill_results") or {}
+    skills: list[dict[str, Any]] = []
+    for name in _LEGAL_SKILL_ORDER:
+        data = skill_results.get(name) if isinstance(skill_results, dict) else None
+        if not isinstance(data, dict):
+            skills.append({"name": name, "nRiskPoints": 0, "confidence": None, "exists": None})
+            continue
+        points = data.get("risk_points") or []
+        skills.append(
+            {
+                "name": name,
+                "nRiskPoints": len(points) if isinstance(points, list) else int(
+                    data.get("risk_point_count") or 0
+                ),
+                "confidence": data.get("confidence"),
+                "exists": data.get("exists"),
+            }
+        )
+    risk_points = agent_result.get("risk_points") or []
+    return {
+        "skills": skills,
+        "riskPointCount": len(risk_points) if isinstance(risk_points, list) else 0,
+    }
+
+
 def agent_bundle_from_result(
     *,
     agent_key: str,
@@ -627,6 +861,12 @@ def agent_bundle_from_result(
     log_text: str,
     log_events: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    features = agent_result.get("features") or {}
+    if not isinstance(features, dict):
+        features = {}
+    scoring_mode = features.get("scoring_mode") or (agent_result.get("trace") or {}).get(
+        "scoring_mode"
+    )
     bundle: dict[str, Any] = {
         "agentId": "financial" if agent_key == "finance" else "legal",
         "riskScore": agent_result.get("risk_score"),
@@ -635,8 +875,12 @@ def agent_bundle_from_result(
         "reportMarkdown": report_markdown,
         "logText": log_text,
         "logEvents": log_events,
+        "scoringMode": scoring_mode,
+        "rulesFloor": _rules_floor_shell(features),
         "agentResult": agent_result,
     }
     if agent_key == "finance":
         bundle["financeDetail"] = _finance_detail_from_agent_result(agent_result)
+    elif agent_key == "legal":
+        bundle["legalDetail"] = _legal_detail_from_agent_result(agent_result)
     return bundle

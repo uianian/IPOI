@@ -51,17 +51,56 @@ sections:
     extract_fields: [rounds, post_money, ipo_vs_preipo_discount, valuation_inversion]
 
 # 扩展 Skill 预设（GPT 合并后）
+# intents 对应 src/tools/retrieval_tool.INTENT_SECTION_ROUTES 的章节路由；
+# queries 为定向补证据检索词；keywords 用于候选证据过滤。
 skills:
   legal_governance:
-    extract_fields: [controlling_shareholder, actual_controller, concert_party, ab_shares, board_structure, control_gt_50]
-    keywords: ["控股股东", "控股股東", "实际控制人", "實際控制人", "一致行动", "AB股", "双重股权", "董事会"]
+    extract_fields: [controlling_shareholder, control_pct, actual_controller, concert_party, ab_shares, board_note]
+    keywords: ["控股股东", "控股股東", "实际控制人", "實際控制人", "一致行动", "一致行動", "AB股", "双重股权", "雙重股權", "不同投票权", "不同投票權", "董事会", "董事會", "单一最大股东", "單一最大股東"]
+    intents: ["financing_dependency"]
+    section_hints: ["history_and_corporate_structure", "summary", "risk_factors"]
+    queries:
+      - "控股股東 實際控制人 一致行動 持股比例"
+      - "不同投票權 AB股 雙重股權 董事會"
+    risk_codes: [GOVERNANCE_CONTROL_GT_50, GOVERNANCE_AB_SHARES, GOVERNANCE_CONCERT_PARTY]
   legal_shareholder_rights:
-    maps_to: ["3.1"]
+    maps_to: ["3.1", "3.6"]
+    extract_fields: [exists_redemption, trigger_condition, redemption_price_or_rate, amount, remaining_months, rights_cleared_pre_ipo, pre_ipo_rounds]
+    keywords: ["赎回", "贖回", "对赌", "對賭", "回购", "回購", "优先股", "優先股", "领售", "領售", "撤资", "撤資", "特别权利", "特別權利", "股东协议", "股東協議", "可转换可赎回", "可轉換可贖回", "清理", "終止"]
+    intents: ["redemption"]
+    section_hints: ["history_and_corporate_structure", "risk_factors", "financial_information"]
+    queries:
+      - "贖回權 對賭 優先股 特別權利 終止"
+      - "上市前投資者 特殊權利 解除 清理"
+    risk_codes: [REDEMPTION_HIGH, REDEMPTION_MEDIUM, RIGHTS_CLEANUP_INCOMPLETE]
   legal_related_party:
     maps_to: ["3.2"]
+    extract_fields: [parties, txn_types, max_ratio_pct, ratio_rising, waiver, fair_price, dependency]
+    keywords: ["关联交易", "關連交易", "关联方", "關連方", "持续关连", "持續關連", "公允", "豁免", "独立股东", "獨立股東", "百分比率", "年度上限", "關連人士"]
+    intents: ["related_party"]
+    section_hints: ["connected_transactions", "business", "financial_information"]
+    queries:
+      - "關連交易 持續關連交易 豁免 獨立股東批准 百分比率"
+      - "關連人士 年度上限 歷史交易總額 佔收入 佔採購"
+      - "關連方 定價 公允"
+    risk_codes: [RELATED_PARTY_HIGH, RELATED_PARTY_UNFAIR, RELATED_PARTY_TREND]
   legal_contracts_and_ip:
-    extract_fields: [contract_type, counterparty, term, termination_risk, patent, trademark, copyright, self_owned_core_tech]
-    keywords: ["重大合同", "独家", "獨家", "供应协议", "供應協議", "特许经营", "加盟", "专利", "商標", "商标", "著作权", "授权"]
+    extract_fields: [material_contracts, exclusive_deals, termination_risk, core_tech_self_owned, license_in, ip_note]
+    keywords: ["重大合同", "重大合約", "独家", "獨家", "供应协议", "供應協議", "特许经营", "特許經營", "加盟", "专利", "專利", "商標", "商标", "著作权", "著作權", "授权", "授權", "许可协议", "許可協議", "license", "知识产权", "知識產權", "終止"]
+    intents: ["ip"]
+    section_hints: ["business", "regulatory_overview", "risk_factors"]
+    queries:
+      - "獨家協議 供應協議 特許經營 終止條款"
+      - "專利 商標 知識產權 授權引進 license-in"
+    risk_codes: [CONTRACT_TERMINATION_RISK, CONTRACT_EXCLUSIVE_DEPENDENCY, IP_NOT_SELF_OWNED, IP_LICENSE_IN_TERMINATION]
+    biotech_extra_queries:
+      - "核心產品 授權引進 終止 知識產權 權屬"
   legal_regulatory_litigation:
-    extract_fields: [penalty, investigation, license, case_name, claim_amount, stage, impact]
-    keywords: ["处罚", "處罰", "调查", "調查", "违规", "整改", "许可证", "诉讼", "訴訟", "仲裁", "食品安全", "数据安全", "环保"]
+    extract_fields: [penalties, investigations, licenses_missing, litigation_cases, major_litigation]
+    keywords: ["处罚", "處罰", "罚款", "罰款", "调查", "調查", "违规", "違規", "整改", "许可证", "許可證", "牌照", "诉讼", "訴訟", "仲裁", "法律程序", "食品安全", "数据安全", "數據安全", "环保", "環保", "行政措施"]
+    intents: ["regulatory", "litigation"]
+    section_hints: ["regulatory_overview", "business", "risk_factors"]
+    queries:
+      - "行政處罰 罰款 監管調查 整改 牌照"
+      - "訴訟 仲裁 未決法律程序 涉案金額"
+    risk_codes: [REGULATORY_PENALTY, REGULATORY_INVESTIGATION, LICENSE_MISSING, LITIGATION_MAJOR, LITIGATION_PENDING]

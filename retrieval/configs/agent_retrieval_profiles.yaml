@@ -36,7 +36,7 @@ finance:
         - SG&A
         - NET_LOSS
         - ADJ_NET
-      query: "綜合損益表 合併損益表 綜合全面收益表 合併綜合收益表 損益及其他全面收益表"
+      query: "綜合損益表 合併損益表 綜合全面收益表 合併綜合收益表 損益及其他全面收益表 綜合損益及其他全面開支表 綜合全面開支表"
       grep_terms:
         - 綜合損益表
         - 综合损益表
@@ -50,6 +50,14 @@ finance:
         - 损益及其他全面收益表
         - 綜合收益表
         - 综合收益表
+        - 綜合損益及其他全面開支表
+        - 综合损益及其他全面开支表
+        - 損益及其他全面開支表
+        - 损益及其他全面开支表
+        - 綜合全面開支表
+        - 综合全面开支表
+        - 合併綜合全面收益表
+        - 合并综合全面收益表
       title_hints:
         - 綜合損益表
         - 综合损益表
@@ -58,6 +66,18 @@ finance:
         - 損益及其他全面收益表
         - 綜合損益及其他全面收益表
         - 综合损益及其他全面收益表
+        - 綜合全面收益表
+        - 综合全面收益表
+        - 合併綜合全面收益表
+        - 合并综合全面收益表
+        - 綜合損益及其他全面開支表
+        - 综合损益及其他全面开支表
+        - 損益及其他全面開支表
+        - 损益及其他全面开支表
+        - 綜合全面開支表
+        - 综合全面开支表
+        - 合併綜合損益及其他全面開支表
+        - 合并综合损益及其他全面开支表
       row_labels:
         - 收入
         - 營業收入
@@ -463,8 +483,9 @@ finance:
       prefer_categories: [text, title, table]
 
 legal:
-  description: "法务合规Agent — 对应文档第三章（3.1对赌赎回 / 3.2关联交易 / 3.3集中度 / 3.4现金流消耗 / 3.5管线 / 3.6 Pre-IPO估值）"
-  doc_chapter: "三、非标隐性风险特征抽取清单"
+  # 对齐 hk_ipo_risk 5 Skill；§3.4 现金消耗归财务，不进本包
+  description: "法务合规Agent — 5 Skill：governance / shareholder_rights(3.1+3.6) / related_party(3.2) / contracts_and_ip(+18A 3.5) / regulatory_litigation；另保留 CONCENTRATION 供规则链"
+  doc_chapter: "三、非标隐性风险特征抽取清单 + GPT Legal 5 Skill"
   top_k_per_field: 5
   top_k_per_query: 5
   non_biotech_gate: skip
@@ -474,7 +495,37 @@ legal:
     vector: 0.30
   grep_boost_rank: 3
   queries:
-    # ---------- 3.1 对赌or赎回条款 ----------
+    # ---------- legal_governance ----------
+    - name: GOVERNANCE
+      section: "gov"
+      field_code: GOVERNANCE
+      label: "股权结构与治理"
+      extract_fields:
+        - 控股股东/实控人
+        - 持股比例
+        - 一致行动
+        - AB股/不同投票权
+        - 董事会独立性
+      query: "控股股東 實際控制人 一致行動 持股比例 不同投票權 AB股 雙重股權 董事會"
+      grep_terms:
+        - 控股股東
+        - 控股股东
+        - 實際控制人
+        - 实际控制人
+        - 一致行動
+        - 一致行动
+        - 不同投票權
+        - 不同投票权
+        - AB股
+        - 雙重股權
+        - 双重股权
+        - 董事會
+        - 董事会
+        - 單一最大股東
+        - 单一最大股东
+      prefer_categories: [text, title, table]
+
+    # ---------- legal_shareholder_rights §3.1 ----------
     - name: REDEMPTION_CLAUSE
       section: "3.1"
       field_code: REDEMPTION_CLAUSE
@@ -486,7 +537,7 @@ legal:
         - 涉及金额
         - 剩余期限
         - 条款原文切片
-      query: "优先股股东有权要求公司赎回股份 未能如期上市 撤资权益 赎回权 回购义务 业绩承诺 领售权"
+      query: "贖回權 對賭 優先股 特別權利 終止 要求公司贖回 撤資權益 領售權"
       grep_terms:
         - 对赌
         - 對賭
@@ -509,14 +560,12 @@ legal:
         - 股權回購
         - 业绩承诺
         - 業績承諾
-        - 优先认购权
-        - 優先認購權
-        - 优先购买权
-        - 優先購買權
-        - 共同出售权
-        - 共同出售權
         - 领售权
         - 領售權
+        - 特別權利
+        - 特别权利
+        - 股東協議
+        - 股东协议
         - 可轉換可贖回優先股
         - 可转换可赎回优先股
         - redemption right
@@ -524,7 +573,37 @@ legal:
         - put option
       prefer_categories: [text, title, table]
 
-    # ---------- 3.2 关联交易 ----------
+    # ---------- legal_shareholder_rights §3.6 ----------
+    - name: PRE_IPO_VALUATION
+      section: "3.6"
+      field_code: PRE_IPO_VALUATION
+      label: "上市前投资者权利与估值"
+      extract_fields:
+        - 融资轮数及总额
+        - 资深投资者身份
+        - 最近一轮投后估值
+        - 特殊权利是否清理
+        - 是否存在估值倒挂
+      query: "上市前投資者 特殊權利 解除 清理 投後估值 Pre-IPO 估值倒掛"
+      grep_terms:
+        - 投後估值
+        - 投后估值
+        - Pre-IPO
+        - 估值倒掛
+        - 估值倒挂
+        - 資深投資者
+        - 资深投资者
+        - 融資輪次
+        - 融资轮次
+        - 特別權利終止
+        - 特殊权利
+        - 權利清理
+        - 权利清理
+        - 發行估值
+        - 发行估值
+      prefer_categories: [text, title, table]
+
+    # ---------- legal_related_party §3.2（含关连专章/百分比率）----------
     - name: RELATED_PARTY
       section: "3.2"
       field_code: RELATED_PARTY
@@ -534,9 +613,10 @@ legal:
         - 交易类型
         - 交易金额
         - 占同类交易比例
+        - 上市规则百分比率
         - 是否已获豁免
         - 条款原文切片
-      query: "持续关联交易 关连交易 关连人士 控股股东订立协议 第十四A章"
+      query: "關連交易 持續關連交易 豁免 獨立股東批准 百分比率 年度上限 佔收入 佔採購"
       grep_terms:
         - 關聯交易
         - 关联交易
@@ -544,19 +624,24 @@ legal:
         - 关连交易
         - 持續關聯交易
         - 持续关联交易
+        - 持續關連
+        - 持续关连
         - 關連人士
         - 关连人士
         - 關聯方
         - 关联方
-        - 關聯附屬公司
-        - 关联附属公司
+        - 百分比率
+        - 最高適用百分比率
+        - 年度上限
+        - 獨立股東
+        - 独立股东
         - 第十四A章
         - 第14A章
         - 控股股東
         - 控股股东
       prefer_categories: [text, title, table]
 
-    # ---------- 3.3 客户/供应商集中度 ----------
+    # ---------- §3.3 集中度（规则链，非独立 Skill）----------
     - name: CONCENTRATION
       section: "3.3"
       field_code: CONCENTRATION
@@ -588,34 +673,41 @@ legal:
         - 占总采购
       prefer_categories: [text, title, table]
 
-    # ---------- 3.4 现金流消耗压力 ----------
-    - name: CASH_BURN_PRESSURE
-      section: "3.4"
-      field_code: CASH_BURN_PRESSURE
-      label: "现金流消耗压力"
+    # ---------- legal_contracts_and_ip（通用合同/IP）----------
+    - name: CONTRACTS_AND_IP
+      section: "contracts"
+      field_code: CONTRACTS_AND_IP
+      label: "重大合同与知识产权"
       extract_fields:
-        - 期末现金余额
-        - 月均消耗率
-        - 现金跑道
-        - 预计下一轮融资时间
-      query: "现金消耗 现金跑道 营运资金 月均现金净流出 下一轮融资"
+        - 重大合同/独家协议
+        - 终止风险
+        - 核心技术权属
+        - 授权引进
+      query: "獨家協議 供應協議 特許經營 終止條款 專利 商標 知識產權 授權引進"
       grep_terms:
-        - 現金消耗
-        - 现金消耗
-        - 現金跑道
-        - 现金跑道
-        - 營運資金
-        - 营运资金
-        - 月均
-        - 下一輪融資
-        - 下一轮融资
-        - 現金淨流出
-        - 现金净流出
-        - burn rate
-        - runway
+        - 重大合同
+        - 重大合約
+        - 獨家
+        - 独家
+        - 供應協議
+        - 供应协议
+        - 特許經營
+        - 特许经营
+        - 終止條款
+        - 专利
+        - 專利
+        - 商標
+        - 商标
+        - 知識產權
+        - 知识产权
+        - 授權引進
+        - 引进授权
+        - license-in
+        - 許可協議
+        - 许可协议
       prefer_categories: [text, title, table]
 
-    # ---------- 3.5 核心产品/管线进度风险 ----------
+    # ---------- 18A 叠 §3.5 管线（biotech/18a/18c 才召回）----------
     - name: PIPELINE_RISK
       section: "3.5"
       field_code: PIPELINE_RISK
@@ -626,7 +718,7 @@ legal:
         - 是否存在临床搁置
         - 核心产品授权来源
         - 知识产权权属
-      query: "核心产品 临床试验 临床搁置 引进授权 知识产权 NDA BLA"
+      query: "核心產品 授權引進 終止 知識產權 權屬 臨床試驗 臨床擱置 NDA BLA"
       grep_terms:
         - 核心產品
         - 核心产品
@@ -648,29 +740,38 @@ legal:
         - 监管批准
       prefer_categories: [text, title, table]
 
-    # ---------- 3.6 首次公开招股前投资者及估值 ----------
-    - name: PRE_IPO_VALUATION
-      section: "3.6"
-      field_code: PRE_IPO_VALUATION
-      label: "首次公开招股前投资者及估值"
+    # ---------- legal_regulatory_litigation ----------
+    - name: REGULATORY_LITIGATION
+      section: "reg"
+      field_code: REGULATORY_LITIGATION
+      label: "监管合规与诉讼仲裁"
       extract_fields:
-        - 融资轮数及总额
-        - 资深投资者身份
-        - 最近一轮投后估值
-        - IPO估值与Pre-IPO估值差异
-        - 是否存在估值倒挂
-      query: "投后估值 Pre-IPO估值 估值倒挂 资深投资者 融资轮次"
+        - 行政处罚/罚款
+        - 监管调查
+        - 许可证/牌照缺口
+        - 重大诉讼/仲裁
+      query: "行政處罰 罰款 監管調查 整改 牌照 訴訟 仲裁 未決法律程序"
       grep_terms:
-        - 投後估值
-        - 投后估值
-        - Pre-IPO
-        - 估值倒掛
-        - 估值倒挂
-        - 資深投資者
-        - 资深投资者
-        - 融資輪次
-        - 融资轮次
-        - 發行估值
-        - 发行估值
-        - 上市估值
+        - 處罰
+        - 处罚
+        - 罰款
+        - 罚款
+        - 調查
+        - 调查
+        - 違規
+        - 违规
+        - 整改
+        - 許可證
+        - 许可证
+        - 牌照
+        - 訴訟
+        - 诉讼
+        - 仲裁
+        - 法律程序
+        - 未決
+        - 食品安全
+        - 數據安全
+        - 数据安全
+        - 環保
+        - 环保
       prefer_categories: [text, title, table]

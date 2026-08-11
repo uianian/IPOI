@@ -24,10 +24,23 @@ async def run_finance_legal_parallel(
     legal_on_progress: Any | None = None,
     finance_rules_only: bool = False,
     finance_pipeline: bool = False,
+    legal_react: bool = False,
+    legal_run_logger: Any | None = None,
+    legal_max_turns: int = 10,
+    finance_max_turns: int = 10,
+    debate_dir: Path | str | None = None,
+    client_project_id: str | None = None,
+    task_id: str | None = None,
+    analysis_id: str | None = None,
     doc_name: str | None = None,
     pdf_name: str | None = None,
+    legal_reasoning_effort: str | None = "high",
+    finance_reasoning_effort: str | None = "low",
 ) -> dict[str, Any]:
-    """财务 ‖ 法务 并行；财务/法务 LLM 可分别注入。"""
+    """财务 ‖ 法务 并行；财务/法务 LLM 可分别注入。
+
+    legal_react：service 默认由调用方开启；无 LLM 时 LegalAgent 自行回退规则链。
+    """
     fin_llm = finance_llm if finance_llm is not None else llm
     leg_llm = legal_llm if legal_llm is not None else None
     finance_agent = FinanceAgent(
@@ -35,8 +48,19 @@ async def run_finance_legal_parallel(
         run_logger=finance_run_logger,
         rules_only=finance_rules_only,
         pipeline=finance_pipeline,
+        max_turns=finance_max_turns,
+        debate_dir=debate_dir,
+        reasoning_effort=finance_reasoning_effort,
     )
-    legal_agent = LegalAgent(llm=leg_llm, on_progress=legal_on_progress)
+    legal_agent = LegalAgent(
+        llm=leg_llm,
+        on_progress=legal_on_progress,
+        react=legal_react,
+        run_logger=legal_run_logger,
+        max_turns=legal_max_turns,
+        debate_dir=debate_dir,
+        reasoning_effort=legal_reasoning_effort,
+    )
 
     fin_task = asyncio.create_task(
         finance_agent.run(
@@ -47,6 +71,9 @@ async def run_finance_legal_parallel(
             top_k=top_k,
             doc_name=doc_name,
             pdf_name=pdf_name,
+            client_project_id=client_project_id,
+            task_id=task_id or doc_id,
+            analysis_id=analysis_id,
         )
     )
     provisional_gates = {
@@ -63,6 +90,11 @@ async def run_finance_legal_parallel(
             retrieval_json=legal_retrieval_json,
             parse_json=parse_json,
             top_k=top_k,
+            doc_name=doc_name,
+            pdf_name=pdf_name,
+            client_project_id=client_project_id,
+            task_id=task_id or doc_id,
+            analysis_id=analysis_id,
         )
     )
     finance_result, legal_result = await asyncio.gather(fin_task, leg_task)

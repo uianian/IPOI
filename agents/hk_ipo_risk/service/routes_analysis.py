@@ -80,6 +80,7 @@ async def analysis_start(
     analysis_id = store.next_analysis_id()
 
     # body.isBiotech 可覆盖（解析任务未存时由前端补传）
+    # true → issuerType=biotech；与 CLI 的 18a/18c 门控等价（2.4/3.5）
     if body.isBiotech is not None:
         parse_meta = {
             **parse_meta,

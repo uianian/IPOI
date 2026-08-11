@@ -31,9 +31,20 @@ HOST = os.getenv("ANALYSIS_HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", os.getenv("ANALYSIS_PORT", "9102")))
 SERVICE_VERSION = "0.1.0"
 
-# 分析默认：财务走 ReAct；可通过环境变量强制规则兜底（冒烟）
+# 分析默认：财务/法务均走 ReAct；可通过环境变量强制规则兜底（冒烟）
 FINANCE_RULES_ONLY = os.getenv("ANALYSIS_FINANCE_RULES_ONLY", "0").strip() in (
     "1",
     "true",
     "True",
+)
+LEGAL_RULES_ONLY = os.getenv("ANALYSIS_LEGAL_RULES_ONLY", "0").strip() in (
+    "1",
+    "true",
+    "True",
+)
+DEBATE_DIR = Path(
+    os.getenv(
+        "ANALYSIS_DEBATE_DIR",
+        str(PKG_ROOT / ".runtime" / "debate"),
+    )
 )

@@ -178,10 +178,26 @@ class AgentRunLogger:
         duration_ms: int | None = None,
         usage: dict[str, Any] | None = None,
         model: str | None = None,
+        think_status: str | None = None,
     ) -> None:
         """记录 ReAct 一轮：thought + 拟调用工具。"""
         idx = len(self._steps) + 1
-        think_status = "ok" if reasoning else "reasoning_missing"
+        if think_status is None:
+            if reasoning:
+                think_status = "ok"
+            elif content and str(content).strip():
+                think_status = "think_from_content"
+            else:
+                # tool.reason 兜底
+                has_reason = False
+                for tc in tool_calls or []:
+                    args = (tc or {}).get("arguments") if isinstance(tc, dict) else None
+                    if isinstance(args, dict) and any(
+                        str(args.get(k) or "").strip() for k in ("reason", "thinking", "rationale")
+                    ):
+                        has_reason = True
+                        break
+                think_status = "think_from_content" if has_reason else "reasoning_missing"
         rec = {
             "event": "react_turn",
             "step_index": idx,
@@ -212,6 +228,8 @@ class AgentRunLogger:
             block.append("```")
             block.append(reasoning)
             block.append("```")
+        elif think_status == "think_from_content":
+            block.append("_think_from_content（无 message.reasoning，见 content / tool.reason）_")
         else:
             block.append("_reasoning_missing_")
         if reasoning_display:

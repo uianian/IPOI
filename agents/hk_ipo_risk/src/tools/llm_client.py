@@ -11,8 +11,14 @@ import httpx
 logger = logging.getLogger(__name__)
 
 
+def _is_deepseek(settings: dict[str, Any]) -> bool:
+    provider = str(settings.get("provider") or "").lower()
+    base = str(settings.get("api_base") or "").lower()
+    return provider == "deepseek" or "deepseek.com" in base
+
+
 class LLMClient:
-    """轻量 OpenAI/OpenRouter 兼容客户端；支持 Gemma4 reasoning tokens。"""
+    """轻量 OpenAI 兼容客户端；支持 OpenRouter/Gemma reasoning 与 DeepSeek thinking。"""
 
     def __init__(self, settings: dict[str, Any]) -> None:
         self.settings = settings
@@ -44,25 +50,18 @@ class LLMClient:
     def available(self) -> bool:
         return bool(self.settings.get("api_key"))
 
-    async def chat_completion(
+    def _build_payload(
         self,
         messages: list[dict[str, Any]],
         *,
-        temperature: float | None = None,
-        enable_reasoning: bool = True,
-        reasoning_effort: str | None = None,
-        max_tokens: int | None = None,
-        reasoning_max_tokens: int | None = None,
-        tools: list[dict[str, Any]] | None = None,
-        tool_choice: str | dict[str, Any] | None = None,
+        temperature: float | None,
+        enable_reasoning: bool,
+        reasoning_effort: str | None,
+        max_tokens: int | None,
+        reasoning_max_tokens: int | None,
+        tools: list[dict[str, Any]] | None,
+        tool_choice: str | dict[str, Any] | None,
     ) -> dict[str, Any]:
-        """返回 content + reasoning + tool_calls（Gemma4/OpenRouter）。"""
-        if not self._client:
-            raise RuntimeError("LLMClient not initialized")
-        if not self.available:
-            raise RuntimeError("No API key configured")
-
-        # 财务 JSON 需要足够 completion 空间；reasoning 必须单独限预算，否则会吃光 max_tokens
         out_tokens = int(max_tokens if max_tokens is not None else self.settings.get("max_tokens") or 8192)
         payload: dict[str, Any] = {
             "model": self.settings["chat_model"],
@@ -73,8 +72,27 @@ class LLMClient:
         if tools:
             payload["tools"] = tools
             payload["tool_choice"] = tool_choice if tool_choice is not None else "auto"
+
+        if _is_deepseek(self.settings):
+            # DeepSeek 官方：thinking + reasoning_effort；思维链在 reasoning_content。
+            # reasoning_max_tokens 仅 OpenRouter 有效，此处忽略。
+            # reasoning tokens 计入 max_tokens 并计费，故默认 effort=low。
+            # https://api-docs.deepseek.com/zh-cn/guides/thinking_mode
+            if enable_reasoning:
+                payload["thinking"] = {"type": "enabled"}
+                effort = (
+                    reasoning_effort
+                    or self.settings.get("reasoning_effort")
+                    or "low"
+                )
+                payload["reasoning_effort"] = effort
+            else:
+                payload["thinking"] = {"type": "disabled"}
+            return payload
+
         if enable_reasoning:
             # OpenRouter：effort 与 max_tokens 互斥，优先用 max_tokens 限制 think 预算
+            # （reasoning_max_tokens 仅此路径生效，DeepSeek 不用）
             rmax = reasoning_max_tokens
             if rmax is None:
                 rmax = self.settings.get("reasoning_max_tokens", 1024)
@@ -88,6 +106,62 @@ class LLMClient:
                 effort = reasoning_effort or self.settings.get("reasoning_effort") or "low"
                 reasoning_cfg["effort"] = effort
             payload["reasoning"] = reasoning_cfg
+        return payload
+
+    @staticmethod
+    def _extract_reasoning(msg: dict[str, Any]) -> str | None:
+        reasoning = msg.get("reasoning") or msg.get("reasoning_content")
+        if reasoning:
+            return str(reasoning)
+        if isinstance(msg.get("reasoning_details"), list):
+            parts = []
+            for d in msg["reasoning_details"]:
+                if isinstance(d, dict):
+                    parts.append(str(d.get("text") or d.get("content") or d.get("summary") or ""))
+                else:
+                    parts.append(str(d))
+            joined = "\n".join(p for p in parts if p)
+            return joined or None
+        return None
+
+    @staticmethod
+    def _normalize_raw_message(msg: dict[str, Any], reasoning: str | None) -> dict[str, Any]:
+        """保证 tool 多轮回传带 reasoning_content（DeepSeek 硬性要求）。"""
+        raw = dict(msg)
+        if reasoning and not raw.get("reasoning_content"):
+            raw["reasoning_content"] = reasoning
+        if reasoning and not raw.get("reasoning"):
+            raw["reasoning"] = reasoning
+        return raw
+
+    async def chat_completion(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        temperature: float | None = None,
+        enable_reasoning: bool = True,
+        reasoning_effort: str | None = None,
+        max_tokens: int | None = None,
+        reasoning_max_tokens: int | None = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_choice: str | dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """返回 content + reasoning + tool_calls。"""
+        if not self._client:
+            raise RuntimeError("LLMClient not initialized")
+        if not self.available:
+            raise RuntimeError("No API key configured")
+
+        payload = self._build_payload(
+            messages,
+            temperature=temperature,
+            enable_reasoning=enable_reasoning,
+            reasoning_effort=reasoning_effort,
+            max_tokens=max_tokens,
+            reasoning_max_tokens=reasoning_max_tokens,
+            tools=tools,
+            tool_choice=tool_choice,
+        )
 
         last_err: Exception | None = None
         max_retries = int(self.settings.get("max_retries", 5))
@@ -106,24 +180,19 @@ class LLMClient:
                     await asyncio.sleep(1)
                     continue
                 data = resp.json()
-                msg = (data.get("choices") or [{}])[0].get("message") or {}
-                reasoning = msg.get("reasoning")
-                if not reasoning and isinstance(msg.get("reasoning_details"), list):
-                    parts = []
-                    for d in msg["reasoning_details"]:
-                        if isinstance(d, dict):
-                            parts.append(str(d.get("text") or d.get("content") or d.get("summary") or ""))
-                        else:
-                            parts.append(str(d))
-                    reasoning = "\n".join(p for p in parts if p) or None
+                choice = (data.get("choices") or [{}])[0] or {}
+                msg = choice.get("message") or {}
+                reasoning = self._extract_reasoning(msg)
                 tool_calls = normalize_tool_calls(msg)
+                raw_message = self._normalize_raw_message(msg, reasoning)
                 return {
                     "content": msg.get("content") or "",
                     "reasoning": reasoning,
                     "reasoning_details": msg.get("reasoning_details") or [],
                     "tool_calls": tool_calls,
                     "usage": data.get("usage"),
-                    "raw_message": msg,
+                    "raw_message": raw_message,
+                    "finish_reason": choice.get("finish_reason"),
                 }
             except Exception as e:
                 last_err = e
@@ -203,14 +272,18 @@ def normalize_tool_calls(msg: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
-def parse_json_action_fallback(content: str) -> list[dict[str, Any]]:
+def parse_json_action_fallback(
+    content: str,
+    *,
+    submit_tool: str = "submit_finance_report",
+) -> list[dict[str, Any]]:
     """当模型不返回 tool_calls 时，尝试解析 JSON action。"""
     obj = parse_json_object(content or "")
     if not obj:
         return []
-    # submit 整包
-    if "risk_score" in obj and "summary" in obj:
-        return [{"id": "fallback_submit", "name": "submit_finance_report", "arguments": obj}]
+    # submit 整包（finance: risk_score；legal: risk_points）
+    if ("risk_score" in obj or "risk_points" in obj) and "summary" in obj:
+        return [{"id": "fallback_submit", "name": submit_tool, "arguments": obj}]
     name = obj.get("tool") or obj.get("action") or obj.get("name")
     if not name:
         return []

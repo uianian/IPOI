@@ -1,19 +1,105 @@
 # 翰思艾泰 — 财务/法务 Agent 结果分析报告
 
-- 生成时间：2026-07-25 19:14:26
-- 招股书：`03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf`
+- 生成时间：2026-08-05 00:42:22（DeepSeek 联合跑分 + 事后解读）
+- 招股书：`03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf`（03378，18A）
 - doc_id：`hansiaitai`
-- 参考基本面融合分：`53.2` （legal×0.45 + finance×0.55；总控未启用）
-- 财务评分模式：`react+rules_floor`
-- 推理日志：`/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/logs/翰思艾泰_finance_20260725_191330.log`
-- 说明：reference_fundamental_score = legal*0.45 + finance*0.55; master/cross_agent_features 为本轮占位，总控辩论未启用
+- 结果 JSON：`.runtime/hansiaitai_finance_legal.json`
+- 参考基本面融合分：`57.45`（legal×0.45 + finance×0.55；总控未启用）
+- 财务/法务评分模式：均为 `react+rules_floor`
+- 推理日志：
+  - 财务：`logs/翰思艾泰_finance_20260805_003602.log`
+  - 法务：`logs/翰思艾泰_legal_20260805_003602.log`
+- 辩论素材：`.runtime/debate/hansiaitai_legal_dossier_20260805_003736.json`
+
+---
+
+## 0. 联合分析结论（解读）
+
+### 0.1 一句话结论
+
+财务侧为典型 **18A 未盈利 + 连续亏损 + CFO 为负、跑道约 20 个月**，参考分 **50 / medium**，归因清晰、过程完整。  
+法务侧完成 5 个 Skill、汇总约 19–22 个风险点，参考分 **66.5 / high**；相对「结构关注、无重大诉讼、保发预期」的经验中位（约 40–60），**偏高约一档**，主因是赎回/权利清理与 IP 驳回被标 high 全额进分，且治理/关连被模型标成 `issuer_specific` 未走 structural 折减；另 **8 轮未主动 submit，依赖 auto-submit**。
+
+融合参考分 **57.45** ≈ 财务中位与法务偏高的加权，总控辩论仍为空。
+
+### 0.2 分数对照
+
+| 口径 | 分数 | 等级 | 说明 |
+|------|-----:|------|------|
+| 财务 ReAct+规则托底 | 50.0 | medium | = 规则实质分（LLM 初始分 0，全靠托底） |
+| 法务 ReAct+分型饱和 | 66.55 | high | 饱和聚合；`rules_score=51`，实质规则托底仅 12 |
+| 融合 `0.55×财+0.45×法` | 57.45 | （参考） | 非总控裁决 |
+| 计分校准离线重放（旧 points，IP=medium） | ~59 | medium | 见 README；本跑 IP 升为 high(+18) 是抬分关键差 |
+
+### 0.3 财务侧读法
+
+| 信号 | 证据要点 | 贡献 |
+|------|----------|-----:|
+| 连续亏损 | NET_LOSS：2023=-85.2m、2024=-116.9m（人民币千元） | +25 |
+| CFO 持续为负 | 2023/2024 及中期均为负 | +15 |
+| 现金跑道 12–24 月 | runway≈**20.2** 月（END_CASH 150m / 月烧约 7.4m） | +10 |
+| 优先股负债 | CV_PREF≈138.5m（与法务赎回金额同量级） | 未单独加分，与法务赎回主题交叉 |
+
+过程质量：**6 轮正常 submit**，主表定位完整（IS/BS/CF/BS_COMPANY）。弱点：`retrieve_context_evidence` 对业务/商业模式 **0 hit**（章节检索缺口），四维叙述偏弱，但不影响规则托底分。
+
+对 18A 生物科技：中位财务风险合理——烧钱与未盈利是行业常态，跑道未跌破 12 个月，故未到 high。
+
+### 0.4 法务侧读法
+
+**进分主题（饱和后合计 66.5）**
+
+| 主题/代码 | delta | 性质 | 点评 |
+|-----------|------:|------|------|
+| 权利清理未完成 | 20 | 发行人特异 | 上市失败则特别权利恢复——真实结构风险，权重合理偏高 |
+| 赎回期限&金额 | 18 | 发行人特异 | 覆盖规则 `REDEMPTION_MEDIUM(12)`；金额与 BS 的 CV_PREF 一致 |
+| FcRn 专利驳回 | 18 | 发行人特异、**level=high** | 有「驳回」事实，但法律顾问认为未必无效；标 high 使 IP 桶与赎回同级，是相对校准样本抬分主因之一 |
+| 社保公积金补缴 | 15 | 被标 issuer_specific | 叙述含「风险相对较小 / 已承诺补缴」，实质偏常规合规瑕疵，15 分偏重 |
+| 控股>50% | 10 | 模型标 `issuer_specific` | 计划默认应 ×0.6→6；因带 55.89% 被当成特异事实保留全额 |
+| 关连协议超三年 | 8 | 同上，未 structural 折减 | 预期约 4.8 |
+| 集中度/管线披露 | 6+6 | 空主题披露×0.5 | 披露隔离生效，但仍有基线贡献 |
+
+**未进分但仍留在列表（正确行为）**：约 7 条 boilerplate（FDA 套话、专利维护套话等）、`LITIGATION_ABSENT` 类阴性、部分 disclosure_only。风险点展示与参考分已分离。
+
+**过程问题**
+
+1. `max_turns=8` 耗尽仍未调用 `submit_legal_report` → `auto_submit:max_turns_exceeded_without_submit`  
+2. 理想路径需 retrieve+5 skill+rule_checks+submit；本跑 skill 已齐，但收束靠系统，过程可追踪性在末轮打折  
+3. 耗时约 **94s**（财务约 55s）；并行总墙钟约 1.5 分钟量级
+
+### 0.5 财务×法务交叉
+
+- **赎回/优先股**：财务 `CV_PREF≈138.5m` ↔ 法务 `REDEMPTION_HIGH` 同金额——交叉一致，可信度高。  
+- **流动性叙事**：财务跑道 20 月 vs 法务「赎回触发不足 12 个月」——若未能上市触发赎回，短债压力会突然显性化，这是联合解读的关键张力，而非矛盾。  
+- **无重大诉讼**：法务阴性点支持「非事件驱动高风险」；抬分主要来自条款结构 + IP 程序结果，而非诉讼败诉。  
+- 总控/跨 Agent：`master=null`，`cross_agent_features=[]`，尚未做加盟/供应链等主题辩论。
+
+### 0.6 与「保发 / medium」预期的差距
+
+校准目标曾希望翰思类样本法务落在 **40–60 medium**。本跑 **66.5 high**，差距来源（按影响大致排序）：
+
+1. `IP_PATENT_REJECTION_RISK` 标 **high→+18**（旧重放多为 medium→+8）  
+2. `GOVERNANCE_*` / `RELATED_PARTY_TERM` 被模型标 `issuer_specific` 且文本含比例/日期 → 分类器未收紧为 structural  
+3. `REGULATORY_PENALTY`（社保公积金）全额 15  
+4. Auto-submit 未改变合并公式，但暴露 ReAct 收束不稳  
+
+若仅将治理/关连按 structural 折减、IP 维持 medium，参考分会更接近 medium 带（与离线 ~59 同量级）。**不建议**用上市涨跌幅事后改分；应继续收紧 `point_kind` / level 校准。
+
+### 0.7 建议后续动作
+
+1. 分类器：对 `GOVERNANCE_CONTROL_GT_50` **强制 structural**（忽略模型 issuer_specific），与计划「默认至少 structural」完全对齐  
+2. Skill prompt：社保公积金「已承诺补缴且影响有限」→ `structural` 或 medium/low，避免 `REGULATORY_PENALTY` 高码  
+3. IP 驳回：有顾问「未必无效」时默认 medium，除非有产品商业化直接受阻证据  
+4. ReAct：rule_checks 后强制下一轮只能 submit；或 auto-submit 前提前 1 轮注入 submit nudge（已有部分逻辑，本跑仍未吃到）  
+5. 补市场验证：用行情表核对 03378 首日/5日是否破发，作预警效力反验（本环境未挂载 `hksharedescription` 数据文件，报告未写死涨跌幅）
+
+---
 
 ## 1. 总览
 
 | Agent | 风险分 (0-100↑风险) | 等级 | 摘要 |
 |-------|---------------------|------|------|
-| 财务穿透 | **55.0** | medium | 翰思艾泰为典型18A生物科技公司，虽持续亏损且CFO为负，但现金跑道充足（约20个月），整体财务风险可控（注：规则托底后综合评分 55，等级 medium，叙述以该等级为准。） |
-| 法务合规 | **51.0** | medium | 法务 3.1/3.2/3.3 抽取完成；3.5=启用；风险分 51.0 (medium) |
+| 财务穿透 | **50.0** | medium | ReAct 财务风险分 50.0 (medium)；6 轮正常 submit |
+| 法务合规 | **66.55** | high | 自动收束（max_turns 未 submit）；5 skill / ~22 风险点 |
 
 ## 2. 财务穿透 Agent
 
@@ -21,43 +107,19 @@
 
 | 代码 | 加分 | 规则 | 指标值 | 说明 | 证据页 |
 |------|------|------|--------|------|--------|
-| CONTINUOUS_LOSS | +25.0 | doc§2.1 | — | （规则托底上调） | 562 |
-| CFO_NEGATIVE | +15.0 | doc§2.3 | — | （规则托底上调） | 569 |
-| NET_ASSETS_DECLINE | +5.0 | SOLVENCY-01 | 319.58M -> 144.79M | 净资产规模持续下降 | 0 |
+| CONTINUOUS_LOSS | +25.0 | doc§2.1 | — | （规则托底） | 562 |
+| CFO_NEGATIVE | +15.0 | doc§2.3 | — | （规则托底） | 569 |
 | CASH_RUNWAY_12_24 | +10.0 | doc§3.4 | — | （规则托底） | 563 |
 
 ### 2.2 四维分析（LLM）
 
-#### `profitability_growth` — status=`analyzed`
-
-公司处于典型的18A生物科技研发阶段，尚未实现盈利。2023年及2024年分别录得净亏损8516.0万及1.17亿元，亏损规模呈扩大趋势。
-
-
-#### `cash_flow` — status=`analyzed`
-
-经营活动现金流（CFO）持续为负且流出量增加（2024年为-1.05亿元），依赖融资维持运营。但现金储备充足，截至2025年一季度末现金及等价物约1.5亿元，测算现金跑道约为20.2个月，短期生存压力较低。
-
-
-#### `solvency` — status=`analyzed`
-
-资产负债表整体稳健，净资产虽从2023年的3.20亿元下降至2025年一季度的1.45亿元，但仍保持正值，偿债能力尚可。
-
-
-#### `business_context` — status=`analyzed`
-
-核心业务聚焦免疫肿瘤学，通过自主研发及外部许可（如与Onconova就narazaciclib的许可协议）构建管线。商业化能力依赖于后续临床研究的进展及监管审批。
-
-
+_无四维分析输出（可能为规则兜底路径）_
 
 ### 2.3 推理链
 
-**[structured_reasoning]**
-
-发行人为18A生物科技公司，处于研发高投入期，连续两年亏损且CFO为负，符合行业特征。虽然现金跑道（20.2个月）充足，但由于持续亏损且净资产呈下降趋势，判定为中低风险（注：规则托底后综合评分 55，等级 medium，叙述以该等级为准。）
-
 **[model_think 摘录]**（全文见 logs）
 
-> I have enough information to construct the report.  **Summary of Findings:** 1. **Profitability & Growth**: Unprofitable. Net losses increased from 85.16M in 2023 to 116.92M in 2024. This is typical for 18A biotech companies but still a risk. 2. **Cash Flow**: CFO is negative and worsening (-51.99M in 2023 to -104.89M in 2024). 3. **Solvency**: Net assets are positive but decreasing (319.58M in 2023 -> 216.60M in 2024 -> 144.79M in 2025_i1). 4. **Cash Runway**: ~20.2 months, which is generally a
+> Context evidence retrieval returned 0 hits for business_context and business_model. So business_context dimension has weak/no evidence. Per constraint 6: business_context 无强证据则标 skipped/证据较弱.  Let me also consider checking franchise/supply chain? Not needed for an 18A biotech. The evidence retrieval returned no hits, so I'll mark business_context as 证据较弱/skipped.  Now let me compose the final report.  Financial data summary (人民币千元): - Revenue: none (18A, no product revenue). OTHER_INCOME 6,664 (
 
 ### 2.4 门控
 
@@ -111,59 +173,51 @@
 
 #### 2.6.1 章节化上下文证据
 
-- intent=`business_model` query=`翰思艾泰的商业模式、核心产品管线及研发进度` → business@p277-414, risk_factors@p73-126, summary@p12-54
+- intent=`business_context` query=`翰思艾泰主营业务、核心在研管线、临床阶段、商业化进展及收入来源` → 无可用章节
+- intent=`business_model` query=`公司业务模式、是否有产品销售收入、合作授权里程碑收入` → 无可用章节
 
-| 意图章节 | 页码 | 类型 | 分数 | 匹配词 | 摘录 |
-|---|---:|---|---:|---|---|
-| business | 315 | text | 1.5334 | — | 核心產品及主要產品準備中的臨床研究摘要 |
-| business | 376 | text | 1.4 | — | 許可及開發：(i) Onconova向杭州翰思授予在大中華區開發及商業化narazaciclib的獨家許可，而杭州翰思向Onconova授予在大中華區以外地區開發及製造narazaciclib的權利。(ii)根據Onconova共同開發協議，杭州翰思負責所有開發活動，包括在大中華區開展臨床試驗及取得監管批准，而Onconova有權就HX301的任何臨床試驗的設計及實施進行審查並發表意見。(iii)臨床前研究的設計、臨床試驗方案及終點的設計將交由雙方成立的聯合指導委員會（「聯合 |
-| business | 380 | text | 1.3877 | — | 終止：倘另一方嚴重不履行其義務，或另一方申請破產、重整、清算或接管，或倘其將大部分資產轉讓予債權人，則該協議授予雙方終止權。根據該協議，倘杭州翰思未作出商業上合理的努力以將HX301商業化，或杭州翰思或其聯屬公司對任何Onconova專利的有效性提出質疑、啟動異議程序或反對任何專利延期，則Onconova可終止協議。杭州翰思亦可透過向Onconova提供45天事先書面通知終止協議。終止協議將導致(i)即時終止授予杭州翰思的權利及許可；(ii)向Onconova免費轉讓與HX3 |
-| summary | 27 | text | 1.382 | — | 我們的研發團隊由高水平專業人士組成，彼等對腫瘤免疫學、癌症生物學、自身免疫疾病以及轉化醫學及臨床科學擁有廣泛知識及深刻理解。彼等一直引領疾病相關各種通路的調節化合物發現工作，令我們在滿足複雜疾病的臨床需求方面具有獨特優勢。我們的研發團隊由數位知名科學家領導，彼等擁有豐富的藥物開發經驗。截至最後實際可行日期，在我們的董事長兼執行董事張博士及首席商務官唐博士的監督下及在我們的首席執行官兼首席科學家李博士的領導下，我們的研發團隊由20名成員組成，涵蓋生物化學、生物學、藥理學及臨床科 |
-| summary | 16 | text | 1.38 | — | 我們的核心業務模式涉及開發強大的免疫腫瘤項目。我們開發了HX008，一種經證實具有較長半衰期靶向PD-1的單克隆抗體，其於往績記錄期間前轉讓且其後於2022年商業化。於往績記錄期間，我們主要通過在免疫腫瘤學管線中創造雙功能或多功能分子進行創新，包括「PD-1 plus」分子HX009（我們的核心產品）及HX016-9；「CTLA-4 plus」分子HX044（我們的一種主要產品）；及「PD-L1 plus」分子HX016-7。我們使用我們的專有VersatiBody平台（一種 |
+_本次未调用章节化上下文检索，或未命中证据。_
 
 ### 2.7 工具调用链
 
-- 耗时：`39.399s`
+- 耗时：`54.539s`
 
 1. **`retrieve_finance`**
    ```json
-   {"turn": 1, "arguments": {"reason": "开始财务穿透分析，首先需要检索三张财务主表以获取基础数据。"}, "observation": {"ok": true, "source": "offline:/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_finance.json", "tables": ["TBL_IS", "TBL_BS", "TBL_BS_COMPANY", "TBL_CF"], "skipped_fields": 0, "hint": "下一步可调用 extract_metrics"}, "duration_ms": 6342}
+   {"turn": 1, "arguments": {"reason": "获取翰思艾泰（18A生物科技公司）三张财务主表，用于后续指标抽取与门控判断。"}, "observation": {"ok": true, "source": "offline:/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_finance.json", "tables": ["TBL_IS", "TBL_BS", "TBL_CF", "TBL_BS_COMPANY"], "tables_detail": [{"code": "TBL_IS", "nameZh": "合併損益表", "page": 562, "sourceType": "text", "excerpt": "截至12月31日止年度 截至8月31日止八個月\n\n附註 2023年 2024年 2024年 2025年\n人民幣千元 人民幣千元 人民幣千元 人民幣千元\n\n其他收入及收益 5 6,664 7,681 12,313 2,626\n研發成本 5 (46,663) (74,721) (50,523) (56,178)\n行政開支 6 (17,220) (46,192) (16,116) (27,436)\n其他", "nHits": 1}, {"code": "TBL_BS", "nameZh": "合併資產負債表", "page": 563, "sourceType": "text", "excerpt": "附註 於12月31日 於8月31日\n2023年 2024年 2025年\n人民幣千元 人民幣千元 人民幣千元\n\n非流動資產\n物業、廠房及設備 14 8,340 11,820 11,907\n使用權資產 15 15,661 12,309 10,525\n其他無形資產 16 558 447 587\n預付款項、其他應收款項及其他資產 18 531 330 330\n按公允價值計入損益（「按公允價值計入損益」）的", "nHits": 1}, {"code": "TBL_CF", "nameZh": "合併現金流量表", "page": 569, "sourceType": "table", "excerpt": "<table><tr><td rowspan=\"3\"></td><td colspan=\"2\">截至12月31日止年度</td><td colspan=\"2\">截至8月31日止八個月</td></tr><tr><td>2023年</td><td>2024年</td><td>2024年</td><td>2025年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><t", "nHits": 1}, {"code": "TBL_BS_COMPANY", "nameZh": "公司層面資產負債表", "page": 572, "sourceType": "text", "excerpt": "附註 於12月31日 於8月31日\n2023年 2024年 2025年\n人民幣千元 人民幣千元 人民幣千元\n\n非流動資產\n物業、廠房及設備 14 6,405 10,099 10,393\n使用權資產 15 15,452 12,309 10,214\n於附屬公司的投資 17 78,438 78,438 78,438\n其他無形資產 18 - - 214\n預付款項、其他應收款項及其他資產 18 531 - ", "nHits": 1}], "skipped_fields": 0, "hint": "下一步可调用 extract_metrics"}, "duration_ms": 2733}
    ```
 2. **`extract_metrics`**
    ```json
-   {"turn": 2, "arguments": {"reason": "从检索到的财务主表中抽取标准指标，用于后续的门控计算和风险评估。"}, "observation": {"ok": true, "metric_keys": ["OTHER_INCOME", "RD_EXP", "SGA", "NET_LOSS", "NET_ASSETS", "CASH_EQ", "CV_PREF", "TOTAL_ASSETS", "TOTAL_LIAB", "CFO", "CFI", "CFF", "END_CASH"], "years": ["2023", "2024"], "metrics_summary": {"OTHER_INCOME": {"2023": 6664.0, "2024": 7681.0, "2024_i1": 12313.0, "2025_i1": 2626.0}, "NET_PROFIT_OR_LOSS": {"2023": -85160.0, "2024": -116922.0, "2024_i1": -48420.0, "2025_i1": -87438.0}, "CFO": {"2023": -51994.0, "2024": -104894.0, "2024_i1": -67918.0, "2025_i1": -59390.0}, "CASH_EQ": {"2023": 162000.0, "2024": 161214.0, "2025_i1": 150000.0}, "END_CASH": {"2023": 162000.0, "2024": 161214.0, "2024_i1": 181346.0, "2025_i1": 150000.0}, "TOTAL_ASSETS": {"2023": 586240.0, "2024": 501471.0, "2025_i1": 444298.0}, "TOTAL_LIAB": {"2023": 266659.0, "2024": 284867.0, "2025_i1": 299507.0}, "NET_ASSETS": {"2023": 319581.0, "2024": 216604.0, "2025_i1": 144791.0}}, "metric_note": "NET_PROFIT_OR_LOSS 为底线利润/亏损字段；正数=盈利，负数=亏损。", "bs_reconcile": {"changed": false, "note": null}, "hint": "下一步可调用 derive_gates"}, "duration_ms": 3168}
+   {"turn": 2, "arguments": {"reason": "从翰思艾泰主表抽取标准化财务指标（收入、净亏损、现金流、现金及等价物、负债等）。"}, "observation": {"ok": true, "metric_keys": ["OTHER_INCOME", "RD_EXP", "SGA", "NET_LOSS", "NET_ASSETS", "CASH_EQ", "CV_PREF", "TOTAL_ASSETS", "TOTAL_LIAB", "CFO", "CFI", "CFF", "END_CASH"], "metric_keys_zh": [{"code": "OTHER_INCOME", "nameZh": "其他收入及收益"}, {"code": "RD_EXP", "nameZh": "研發費用"}, {"code": "SGA", "nameZh": "銷售及行政費用"}, {"code": "NET_LOSS", "nameZh": "期內虧損/利潤"}, {"code": "NET_ASSETS", "nameZh": "淨資產"}, {"code": "CASH_EQ", "nameZh": "現金及現金等價物"}, {"code": "CV_PREF", "nameZh": "可轉換可贖回優先股"}, {"code": "TOTAL_ASSETS", "nameZh": "總資產"}, {"code": "TOTAL_LIAB", "nameZh": "總負債"}, {"code": "CFO", "nameZh": "經營活動現金流淨額"}, {"code": "CFI", "nameZh": "投資活動現金流淨額"}, {"code": "CFF", "nameZh": "融資活動現金流淨額"}, {"code": "END_CASH", "nameZh": "年末現金餘額"}], "years": ["2023", "2024"], "metrics_summary": {"OTHER_INCOME": {"2023": 6664.0, "2024": 7681.0, "2024_i1": 12313.0, "2025_i1": 2626.0}, "NET_PROFIT_OR_LOSS": {"2023": -85160.0, "2024": -116922.0, "2024_i1": -48420.0, "2025_i1": -87438.0}, "CFO": {"2023": -51994.0, "2024": -104894.0, "2024_i1": -67918.0, "2025_i1": -59390.0}, "CASH_EQ": {"2023": 162000.0, "2024": 161214.0, "2025_i1": 150000.0}, "END_CASH": {"2023": 162000.0, "2024": 161214.0, "2024_i1": 181346.0, "2025_i1": 150000.0}, "TOTAL_ASSETS": {"2023": 586240.0, "2024": 501471.0, "2025_i1": 444298.0}, "TOTAL_LIAB": {"2023": 266659.0, "2024": 284867.0, "2025_i1": 299507.0}, "NET_ASSETS": {"2023": 319581.0, "2024": 216604.0, "2025_i1": 144791.0}}, "tables_detail": [{"code": "TBL_IS", "nameZh": "合併損益表", "page": 562, "sourceType": "text", "excerpt": "截至12月31日止年度 截至8月31日止八個月 附註 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 其他收入及收益 5 6,664 7,681 12,313 2,626 研發成本 5 (46,663) (74,721) (50,523) (56,178) 行政開支 6 "}, {"code": "TBL_BS", "nameZh": "合併資產負債表", "page": 563, "sourceType": "text", "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 8,340 11,820 11,907 使用權資產 15 15,661 12,309 10,525 其他無形資產 16 558 447 587 預付款項、其他應收款項及其他資產"}, {"code": "TBL_CF", "nameZh": "合併現金流量表", "page": 569, "sourceType": "table", "excerpt": "截至12月31日止年度 截至8月31日止八個月 2023年 2024年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 人民幣千元 經營活動所得現金流量 除税前虧損 (93,423) (122,820) (60,417) (99,933) 就下列各項作出調整： 利息開支 8 2,280 9,379 5,85"}, {"code": "TBL_BS_COMPANY", "nameZh": "公司層面資產負債表", "page": 572, "sourceType": "text", "excerpt": "附註 於12月31日 於8月31日 2023年 2024年 2025年 人民幣千元 人民幣千元 人民幣千元 非流動資產 物業、廠房及設備 14 6,405 10,099 10,393 使用權資產 15 15,452 12,309 10,214 於附屬公司的投資 17 78,438 78,438 78,438 其他無形資"}], "metric_note": "期內虧損/利潤(NET_LOSS/NET_PROFIT_OR_LOSS)：正數=盈利，負數=虧損。", "bs_reconcile": {"changed": false, "note": null}, "hint": "下一步可调用 derive_gates"}, "duration_ms": 2252}
    ```
 3. **`derive_gates`**
    ```json
-   {"turn": 3, "arguments": {"reason": "根据提取的指标计算盈利状态和现金跑道门控，决定是否需要执行 calc_cash_runway。"}, "observation": {"ok": true, "gates": {"is_unprofitable": true, "continuous_net_loss": true, "latest_full_year_loss": true, "skip_3_4": false, "skip_3_4_reason": null, "skip_2_4": false, "issuer_type": "18a", "is_biotech_18a": true, "net_series": {"2023": -85160.0, "2024": -116922.0}, "profitability_basis": "NET_LOSS/年內利潤 series; positive=profit", "profitability_known": true, "profitability_status": "unprofitable"}, "fast_path": {"eligible": false, "reason": null}, "hint": "若未盈利可 calc_cash_runway；非主表主题可 retrieve_context_evidence；否则 submit"}, "duration_ms": 1772}
+   {"turn": 3, "arguments": {"reason": "计算翰思艾泰的盈利门控、现金跑道门控及18A生物科技门控。"}, "observation": {"ok": true, "gates": {"is_unprofitable": true, "continuous_net_loss": true, "latest_full_year_loss": true, "skip_3_4": false, "skip_3_4_reason": null, "skip_2_4": false, "issuer_type": "18a", "is_biotech_18a": true, "net_series": {"2023": -85160.0, "2024": -116922.0}, "profitability_basis": "NET_LOSS/年內利潤 series; positive=profit", "profitability_known": true, "profitability_status": "unprofitable"}, "fast_path": {"eligible": false, "reason": null}, "hint": "若未盈利可 calc_cash_runway；非主表主题可 retrieve_context_evidence；否则 submit"}, "duration_ms": 4220}
    ```
 4. **`calc_cash_runway`**
    ```json
-   {"turn": 4, "arguments": {"reason": "公司处于未盈利状态且为18A生物科技公司，需测算现金跑道以评估生存风险。"}, "observation": {"ok": true, "cash_burn": {"skipped": false, "reason": null, "CASH_RUNWAY_MONTHS": 20.21, "BURN_RATE_MONTHLY": 7423.75, "END_CASH": 150000.0}}, "duration_ms": 1716}
+   {"turn": 4, "arguments": {"reason": "翰思艾泰未盈利且连续亏损，测算现有现金及现金等价物的现金跑道。"}, "observation": {"ok": true, "cash_burn": {"skipped": false, "reason": null, "CASH_RUNWAY_MONTHS": 20.21, "BURN_RATE_MONTHLY": 7423.75, "END_CASH": 150000.0}}, "duration_ms": 1708}
    ```
 5. **`retrieve_context_evidence`**
    ```json
-   {"turn": 5, "arguments": {"intent": "business_model", "query": "翰思艾泰的商业模式、核心产品管线及研发进度", "reason": "作为18A公司，其风险核心在于研发管线的进度和商业化潜力，需补充非财务证据。"}, "observation": {"ok": true, "doc_id": "hansiaitai", "intent": "business_model", "query": "翰思艾泰的商业模式、核心产品管线及研发进度", "n": 5, "route": [{"section_id": "business", "section_title": "業務", "start_page": 277, "end_page": 414, "confidence": 0.95}, {"section_id": "risk_factors", "section_title": "風險因素", "start_page": 73, "end_page": 126, "confidence": 0.95}, {"section_id": "summary", "section_title": "概要", "start_page": 12, "end_page": 54, "confidence": 0.95}], "hits": [{"page": 315, "section_id": "business", "source_type": "text", "score": 1.5334, "matched_terms": [], "excerpt": "核心產品及主要產品準備中的臨床研究摘要"}, {"page": 376, "section_id": "business", "source_type": "text", "score": 1.4, "matched_terms": [], "excerpt": "許可及開發：(i) Onconova向杭州翰思授予在大中華區開發及商業化narazaciclib的獨家許可，而杭州翰思向Onconova授予在大中華區以外地區開發及製造narazaciclib的權利。(ii)根據Onconova共同開發協議"}, {"page": 380, "section_id": "business", "source_type": "text", "score": 1.3877, "matched_terms": [], "excerpt": "終止：倘另一方嚴重不履行其義務，或另一方申請破產、重整、清算或接管，或倘其將大部分資產轉讓予債權人，則該協議授予雙方終止權。根據該協議，倘杭州翰思未作出商業上合理的努力以將HX301商業化，或杭州翰思或其聯屬公司對任何Onconova專利的"}, {"page": 27, "section_id": "summary", "source_type": "text", "score": 1.382, "matched_terms": [], "excerpt": "我們的研發團隊由高水平專業人士組成，彼等對腫瘤免疫學、癌症生物學、自身免疫疾病以及轉化醫學及臨床科學擁有廣泛知識及深刻理解。彼等一直引領疾病相關各種通路的調節化合物發現工作，令我們在滿足複雜疾病的臨床需求方面具有獨特優勢。我們的研發團隊由數"}, {"page": 16, "section_id": "summary", "source_type": "text", "score": 1.38, "matched_terms": [], "excerpt": "我們的核心業務模式涉及開發強大的免疫腫瘤項目。我們開發了HX008，一種經證實具有較長半衰期靶向PD-1的單克隆抗體，其於往績記錄期間前轉讓且其後於2022年商業化。於往績記錄期間，我們主要通過在免疫腫瘤學管線中創造雙功能或多功能分子進行創"}], "hint": "完整证据已保存到 state；submit 时引用 page/section/excerpt 即可"}, "duration_ms": 3982}
+   {"turn": 5, "arguments": {"intent": "business_context", "query": "翰思艾泰主营业务、核心在研管线、临床阶段、商业化进展及收入来源", "section_hint": "業務、概覽、風險因素", "top_k": 5}, "observation": {"ok": true, "doc_id": "hansiaitai", "intent": "business_context", "query": "翰思艾泰主营业务、核心在研管线、临床阶段、商业化进展及收入来源", "n": 0, "route": [], "hits": [], "hint": "完整证据已保存到 state；submit 时引用 page/section/excerpt 即可"}, "duration_ms": 4645}
    ```
-6. **`submit_finance_report`**
+6. **`retrieve_context_evidence`**
    ```json
-   {"turn": 6, "arguments": {"dimensions": [{"analysis": "公司处于典型的18A生物科技研发阶段，尚未实现盈利。2023年及2024年分别录得净亏损8516.0万及1.17亿元，亏损规模呈扩大趋势。", "dimension": "profitability_growth"}, {"analysis": "经营活动现金流（CFO）持续为负且流出量增加（2024年为-1.05亿元），依赖融资维持运营。但现金储备充足，截至2025年一季度末现金及等价物约1.5亿元，测算现金跑道约为20.2个月，短期生存压力较低。", "dimension": "cash_flow"}, {"analysis": "资产负债表整体稳健，净资产虽从2023年的3.20亿元下降至2025年一季度的1.45亿元，但仍保持正值，偿债能力尚可。", "dimension": "solvency"}, {"analysis": "核心业务聚焦免疫肿瘤学，通过自主研发及外部许可（如与Onconova就narazaciclib的许可协议）构建管线。商业化能力依赖于后续临床研究的进展及监管审批。", "dimension": "business_context"}], "negative_findings": [{"code": "CONTINUOUS_NET_LOSS", "rule_ref": "18A-PROFIT-01"}, {"code": "NEGATIVE_CFO", "rule_ref": "CASH-FLOW-02"}], "reasoning": "发行人为18A生物科技公司，处于研发高投入期，连续两年亏损且CFO为负，符合行业特征。虽然现金跑道（20.2个月）充足，但由于持续亏损且净资产呈下降趋势，判定为中低风险。", "risk_level": "low", "risk_points": [{"code": "NET_LOSS_CONTINUOUS", "evidence_page": 0, "level": "medium", "metric_value": "-116.92M (2024)", "rule_ref": "18A-PROFIT-01"}, {"code": "CFO_NEGATIVE", "evidence_page": 0, "level": "low", "metric_value": "-104.89M (2024)", "rule_ref": "CASH-FLOW-02"}], "risk_score": 30, "score_breakdown": [{"code": "NET_LOSS_CONTINUOUS", "delta": 15, "evidence_page": 0, "metric_value": "-116.92M (2024)", "note": "连续两年净亏损且规模扩大", "rule_ref": "18A-PROFIT-01"}, {"code": "CFO_NEGATIVE", "delta": 10, "evidence_page": 0, "metric_value": "-104.89M (2024)", "note": "经营活动现金流持续流出", "rule_ref": "CASH-FLOW-02"}, {"code": "NET_ASSETS_DECLINE", "delta": 5, "evidence_page": 0, "metric_value": "319.58M -> 144.79M", "note": "净资产规模持续下降", "rule_ref": "SOLVENCY-01"}], "summary": "翰思艾泰为典型18A生物科技公司，虽持续亏损且CFO为负，但现金跑道充足（约20个月），整体财务风险可控。"}, "observation": {"ok": true, "finished": true, "risk_score": 55.0, "risk_level": "medium", "warnings": ["rules_floor_raised:CONTINUOUS_LOSS", "rules_floor_raised:CFO_NEGATIVE", "rules_floor_added:CASH_RUNWAY_12_24", "narrative_aligned:reasoning"], "summary": "翰思艾泰为典型18A生物科技公司，虽持续亏损且CFO为负，但现金跑道充足（约20个月），整体财务风险可控。", "rules_floor": {"rules_score": 50.0, "rules_score_deduped": 55.0, "llm_score": 30.0, "final_score": 55.0, "flags": {"continuous_net_loss": true, "latest_full_year_loss": true, "cfo_persistently_negative": true, "gp_margin_drop_gt_5pp": false, "runway_lt_12": false, "runway_12_24": true, "burn_yoy_up_gt_30": false}}}, "duration_ms": 21315}
+   {"turn": 5, "arguments": {"intent": "business_model", "query": "公司业务模式、是否有产品销售收入、合作授权里程碑收入", "section_hint": "財務資料、業務模式", "top_k": 5}, "observation": {"ok": true, "doc_id": "hansiaitai", "intent": "business_model", "query": "公司业务模式、是否有产品销售收入、合作授权里程碑收入", "n": 0, "route": [], "hits": [], "hint": "完整证据已保存到 state；submit 时引用 page/section/excerpt 即可"}, "duration_ms": 4645}
+   ```
+7. **`submit_finance_report`**
+   ```json
+   {"turn": 6, "arguments": {}, "observation": {"ok": true, "finished": true, "risk_score": 50.0, "risk_level": "medium", "warnings": ["rules_floor_added:CONTINUOUS_LOSS", "rules_floor_added:CFO_NEGATIVE", "rules_floor_added:CASH_RUNWAY_12_24"], "summary": "", "rules_floor": {"rules_score": 50.0, "rules_score_deduped": 50.0, "llm_score": 0.0, "final_score": 50.0, "flags": {"continuous_net_loss": true, "latest_full_year_loss": true, "cfo_persistently_negative": true, "gp_margin_drop_gt_5pp": false, "runway_lt_12": false, "runway_12_24": true, "burn_yoy_up_gt_30": false}}}, "duration_ms": 18726}
    ```
 
 ### 2.8 分析结论
 
-- 评分模式 **react+rules_floor**；风险分 **55.0**（medium）。门控：未盈利=`True`，跳过3.4=`False`（None），跳过2.4=`False`（None）。
+- 评分模式 **react+rules_floor**；风险分 **50.0**（medium）。门控：未盈利=`True`，跳过3.4=`False`（None），跳过2.4=`False`（None）。
 - 模型 think 状态：`ok`（全文见推理日志 `[model_think]`）。
-- 结构化推理摘要：发行人为18A生物科技公司，处于研发高投入期，连续两年亏损且CFO为负，符合行业特征。虽然现金跑道（20.2个月）充足，但由于持续亏损且净资产呈下降趋势，判定为中低风险（注：规则托底后综合评分 55，等级 medium，叙述以该等级为准。）
-- LLM 摘要：翰思艾泰为典型18A生物科技公司，虽持续亏损且CFO为负，但现金跑道充足（约20个月），整体财务风险可控。
 - 期内利润（NET_LOSS 字段存利润序列，正数=盈利）：2023=-85,160、2024=-116,922。
 - 主表证据定位：TBL_IS@p562, TBL_BS@p563, TBL_CF@p569, TBL_BS_COMPANY@p572。
-- 推理日志：`/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/logs/翰思艾泰_finance_20260725_191330.log`
-
-### 2.9 阴性发现（低风险说明）
-
-- **CONTINUOUS_NET_LOSS**（18A-PROFIT-01）：None
-- **NEGATIVE_CFO**（CASH-FLOW-02）：None
+- 推理日志：`/nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk/logs/翰思艾泰_finance_20260805_003602.log`
 
 ## 3. 法务合规 Agent
 
@@ -171,78 +225,72 @@
 
 | 代码 | 加分 | 规则 | 指标值 | 说明 | 证据页 |
 |------|------|------|--------|------|--------|
-| REDEMPTION_MEDIUM | +12.0 | doc§3.1 | — | — | 574, 582, 604, 605 |
-| RELATED_PARTY_DISCLOSURE | +15.0 | doc§3.2 | — | 存在关联交易披露 | 30, 415 |
-| CONCENTRATION_DISCLOSURE | +12.0 | doc§3.3 | — | 存在客户/供应商集中度披露 | 28, 29, 387 |
-| PIPELINE_DISCLOSURE | +12.0 | doc§3.5 | — | 存在核心产品/管线进度披露 | 14, 16, 17, 20, 27 |
+| RIGHTS_CLEANUP_INCOMPLETE | +20.0 | llm§legal_shareholder_rights | — | 特別權利（包括購回權）僅在上市申請提交時終止，但若上市失敗則自動恢復，未完全解除。 | 262 |
+| REDEMPTION_HIGH | +18.0 | llm§legal_shareholder_rights | 138.5百萬元人民幣 | 贖回權觸發期限不足12個月（2025年12月31日），且贖回負債金額人民幣138.5百萬元，可能導致流動性風險及上市受阻。（覆盖规则同主题项） | 262 |
+| IP_PATENT_REJECTION_RISK | +18.0 | llm§legal_contracts_and_ip | — | 核心產品相關的FcRn專利申請在中國被駁回，可能影響同族專利在其他司法權區的有效性，進而削弱核心技術的專利保護。 | 386 |
+| REGULATORY_PENALTY | +15.0 | llm§legal_regulatory_litigation | — | 公司可能因社会保险基金及住房公积金供款不足而面临滞纳金或罚款，但公司已承诺补缴并制定内部监控政策，风险相对较小。 | 403 |
+| GOVERNANCE_CONTROL_GT_50 | +10.0 | llm§legal_governance | 55.89 | 控股股東集團持股約55.89%，超過50%，對公司有重大影響力，可能阻礙控制權變更，損害少數股東利益。 | 115 |
+| RELATED_PARTY_TERM | +8.0 | llm§legal_related_party | 協議有效期至2029年12月31日 | 關連交易協議期限超過三年，需依賴特殊情況豁免，存在合規風險。 | 416 |
+| CONCENTRATION_DISCLOSURE | +6.0 | doc§3.3 | — | 存在客户/供应商集中度披露 | 28, 29 |
+| PIPELINE_DISCLOSURE | +6.0 | doc§3.5 | — | 存在核心产品/管线进度披露 | 14, 16, 17, 20, 27 |
 
 ### 3.2 章节特征摘要
 
 | 章节 | exists/skipped | 强度 | 关键字段 |
 |------|----------------|------|----------|
-| 3.1 | exists=True | high | — |
-| 3.2 | exists=True | high | ratio_pct=5.0 |
-| 3.3 | exists=True | high | — |
-| 3.4 | exists=None | — | owner=finance |
-| 3.5 | exists=True | high | — |
+| 3.1 | exists=None | — | — |
+| 3.2 | exists=None | — | — |
+| 3.3 | exists=None | — | — |
+| 3.4 | exists=None | — | — |
+| 3.5 | exists=None | — | — |
 | 3.6 | exists=None | — | — |
 
 ### 3.3 召回证据明细
 
-| 章节 | 页码 | 类型 | 置信度 | 摘录 |
-|------|------|------|--------|------|
-| 3.1 | 605 | text | 0.08 | 根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售， |
-| 3.1 | 605 | text | 0.07 | 倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。 |
-| 3.1 | 574 | text | 0.07 | 儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會 |
-| 3.1 | 582 | text | 0.07 | 對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。 |
-| 3.1 | 604 | table | 0.07 | 2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。 |
-| 3.2 | 30 | text | 0.05 | 我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。 |
-| 3.2 | 415 | text | 0.04 | 於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。 |
-| 3.2 | 30 | text | 0.05 | 我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。 |
-| 3.2 | 415 | text | 0.04 | 於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。 |
-| 3.2 | 415 | text | 5.36 | 於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。 |
-| 3.3 | 28 | table | 0.07 | 截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。 |
-| 3.3 | 28 | table | 0.07 | 截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。 |
-| 3.3 | 387 | table | 2.37 | 截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。 |
-| 3.3 | 29 | table | 0.05 | 於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。 |
-| 3.3 | 29 | table | 0.05 | 於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。 |
-| 3.5 | 16 | text | 0.07 | 除HX301乃自Onconova Therapeutics, Inc.授權引進外，我們的管線候選產品全部由我們自主研發。我們構建產品管線，旨在利用先天及適應性免疫實現潛在協同效應。我們的產品管線旨在解決現有檢查點抑制劑免疫療法的局限性，包括免疫抑制性腫瘤微環境致使「冷腫瘤」響應有限以及其他未獲滿足的醫療需求，從而為各種癌症患者及其他疾病適應症患者帶來臨床裨益。截至最後實際可行日期，我們已建立由10 |
-| 3.5 | 17 | text | 0.07 | 我們根據相關方案及批准進行HX009的臨床研究。於2024年9月，我們的中國法律顧問連同獨家保薦人及其法律顧問在北京與國家藥監局藥審中心臨床試驗管理辦公室的審查員進行了面對面訪談，期間已確認（其中包括）我們已完成一項常規I期臨床研究，且HX009的國家藥監局一次性傘式批准允許本公司在III期研究之前進行HX009-I-01中國研究下的臨床研究，而無需再次獲得國家藥監局的監管批准。有關詳情請參閱本招 |
-| 3.5 | 20 | text | 0.05 | 我們的核心產品HX009是一種同時靶向CD47及PD-1的雙特異性抗體融合蛋白。根據弗若斯特沙利文報告，截至最後實際可行日期，HX009的臨床試驗進展在同類CD47靶向雙特異性抗體／雙功能融合蛋白產品中處於全球領先地位。 |
-| 3.5 | 27 | text | 0.05 | 我們的研發團隊通常負責核心產品及其他管線產品的全球開發。我們的研發團隊有能力在中國及其他司法權區同時開展不同開發階段的臨床項目。彼等平均擁有10年左右的行業工作經驗，且幾乎全部擁有本科或以上學歷。就自主發現及開發的候選藥物而言，我們與臨床開發團隊共同開展藥物發現、質量保證及臨床活動，其中包括：(i)協調所有臨床開發工作；(ii)制定臨床試驗的關鍵要素；(iii)安排及協調合適的CRO參與臨床試驗， |
-| 3.5 | 14 | text | 0.05 | 截至最後實際可行日期，我們已開發十種候選藥物組成的管線，包括我們的核心產品HX009及兩種主要產品HX044及HX301，其中有八種針對腫瘤科的候選藥物及兩種針對自身免疫疾病的候選藥物。截至最後實際可行日期，我們的核心產品以及主要產品分別在中國及澳大利亞進行臨床試驗。下圖概述截至最後實際可行日期我們管線產品的開發狀態。 |
+_无法务证据_
 
 ### 3.4 计分证据（score_breakdown）
 
-#### `REDEMPTION_MEDIUM`（+12.0，doc§3.1）
+#### `RIGHTS_CLEANUP_INCOMPLETE`（+20.0，llm§legal_shareholder_rights）
 
-- p605（text）：根據股東及貴公司就該等特別權利訂立的日期為2024年11月22日的終止協議，贖回權自首次遞交上市的首次上市申請表格日期的前一日起失效，而所有其他特別權利於上市後失效，惟(i)貴公司撤回其公開發售申請；(ii)聯交所、證券及期貨事務監察委員會（證監會）或任何主管證券監管機構決定不批准或拒絕貴公司的上市申請或以其他方式終止上市申請審核程序；或(iii)貴公司未能於2025年12月31日前完成公開發售，
-- p605（text）：倘貴公司未能於2028年1月1日（「截止日期」）或之前完成合資格公開發售，則來自A、B及B+輪投資者的投資將有權但無責任透過向貴公司發出書面通知（「贖回通知」），要求貴公司贖回該優先股東持有的全部或部分當時已發行優先股（「贖回股份」）（每名該等提出請求的優先股股東，統稱「提出請求持有人」）。
-- p574（text）：儘管貴集團於2025年8月31日分別錄得流動負債淨額及資產淨值人民幣15,231,000元及人民幣144,791,000元，惟歷史財務資料乃按持續經營基準編製。於2025年8月31日，普通股贖回負債人民幣138,481,000元已入賬為流動負債，而其贖回權將於股份在聯交所完成首次上市前一日自動終止。貴公司董事認為，根據對貴集團預計現金流量的審閱，貴公司預期自2025年8月31日起未來十二個月內不會
-- p582（text）：對於附註24詳述的貴公司及貴公司附屬公司已發行的可贖回普通股，金融負債按贖回金額的攤銷成本確認並計入權益。有關期間的攤銷成本變動於損益確認。當與可贖回普通股相關的贖回權終止，則普通股贖回負債予以抵銷並計入權益。
-- p604（table）：2024年，揚子投資（香港）有限公司同意以總代價約人民幣10.65百萬元認購貴公司約人民幣0.78百萬元的註冊資本。翰思生物醫藥（香港）以總代價約人民幣10.65百萬元將其持有貴公司的0.87%的股權（註冊資本人民幣0.1百萬元）轉讓予海南揚子投資有限公司（「海南揚子」），此後，海南揚子與其他投資者擁有相同贖回權。
+特別權利（包括購回權）僅在上市申請提交時終止，但若上市失敗則自動恢復，未完全解除。
 
-#### `RELATED_PARTY_DISCLOSURE`（+15.0，doc§3.2）
 
-存在关联交易披露
+#### `REDEMPTION_HIGH`（+18.0，llm§legal_shareholder_rights）
 
-- p30（text）：我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。
-- p415（text）：於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。
-- p30（text）：我們已與中美華世通生物醫藥科技訂立若干交易，該等交易於上市後將構成持續關連交易。有關我們與中美華世通生物醫藥科技的持續關連交易的進一步詳情，請參閱本招股章程「關連交易」一節。
-- p415（text）：於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。
-- p415（text）：於上市後，本集團成員公司與我們關連人士之間達成的若干交易將構成上市規則第十四A章項下的持續關連交易。
+贖回權觸發期限不足12個月（2025年12月31日），且贖回負債金額人民幣138.5百萬元，可能導致流動性風險及上市受阻。（覆盖规则同主题项）
 
-#### `CONCENTRATION_DISCLOSURE`（+12.0，doc§3.3）
+
+#### `IP_PATENT_REJECTION_RISK`（+18.0，llm§legal_contracts_and_ip）
+
+核心產品相關的FcRn專利申請在中國被駁回，可能影響同族專利在其他司法權區的有效性，進而削弱核心技術的專利保護。
+
+
+#### `REGULATORY_PENALTY`（+15.0，llm§legal_regulatory_litigation）
+
+公司可能因社会保险基金及住房公积金供款不足而面临滞纳金或罚款，但公司已承诺补缴并制定内部监控政策，风险相对较小。
+
+
+#### `GOVERNANCE_CONTROL_GT_50`（+10.0，llm§legal_governance）
+
+控股股東集團持股約55.89%，超過50%，對公司有重大影響力，可能阻礙控制權變更，損害少數股東利益。
+
+
+#### `RELATED_PARTY_TERM`（+8.0，llm§legal_related_party）
+
+關連交易協議期限超過三年，需依賴特殊情況豁免，存在合規風險。
+
+
+#### `CONCENTRATION_DISCLOSURE`（+6.0，doc§3.3）
 
 存在客户/供应商集中度披露
 
 - p28（table）：截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。
 - p28（table）：截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。同期，單一最大供應商應佔採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別佔我們總採購額約20.4%、10.2%及12.4%。
-- p387（table）：截至2023年及2024年12月31日止年度及截至2025年8月31日止八個月，五大供應商應佔總採購額分別約為人民幣16.3百萬元、人民幣28.6百萬元及人民幣23.3百萬元，分別佔我們總採購額約51.8%、37.4%及45.5%。於該等期間，我們單一最大供應商應佔的採購額分別約為人民幣6.4百萬元、人民幣7.8百萬元及人民幣6.3百萬元，分別約佔我們採購總額的20.4%、10.2%及12.4%。
 - p29（table）：於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。
 - p29（table）：於往績記錄期間各期間，概無五大供應商為我們的關聯方。概無董事或其聯繫人或（據董事所知）任何擁有本公司股本5%以上的股東於截至2023年及2024年12月31日止年度以及截至2025年8月31日止八個月在任何五大供應商中擁有任何權益。
 
-#### `PIPELINE_DISCLOSURE`（+12.0，doc§3.5）
+#### `PIPELINE_DISCLOSURE`（+6.0，doc§3.5）
 
 存在核心产品/管线进度披露
 
@@ -254,35 +302,47 @@
 
 ### 3.5 工具调用链
 
-- 耗时：`3.158s`
+- 耗时：`94.161s`
 
 1. **`retrieve_legal`**
    ```json
-   {"source": "offline:/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_legal.json", "fields": ["REDEMPTION_CLAUSE", "RELATED_PARTY", "CONCENTRATION", "CASH_BURN_PRESSURE", "PIPELINE_RISK", "PRE_IPO_VALUATION"], "per_query": 6, "has_evidence_by_field": true, "hint": null}
+   {"turn": 1, "arguments": {"reason": "啟動翰思艾泰港股IPO法務穿透審查，初始化招股書證據包以進行後續五項專項合規審查。"}, "observation": {"ok": true, "source": "offline:/nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_legal.json", "fields": ["REDEMPTION_CLAUSE", "RELATED_PARTY", "CONCENTRATION", "CASH_BURN_PRESSURE", "PIPELINE_RISK", "PRE_IPO_VALUATION"], "grep_hits": 0, "grep_pages_sample": [], "has_evidence_by_field": true, "skills_available": ["legal_governance", "legal_shareholder_rights", "legal_related_party", "legal_contracts_and_ip", "legal_regulatory_litigation"], "search_quota": 2, "search_used": 0, "hint": "下一步逐个调用 run_legal_skill（共5个）；search_legal_evidence 全程配额≤2 次，证据不足时精选补检，rule_checks 后尽快 submit"}, "duration_ms": 2032}
    ```
-2. **`parse_grep`**
+2. **`run_legal_skill`**
    ```json
-   {"path": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json", "hits": 0, "pages": []}
+   {"turn": 2, "arguments": {"skill_name": "legal_governance", "reason": "審查翰思艾泰的股權結構、境內外架構重組、董事會與公司治理安排，識別紅籌架構及治理合規風險。", "focus_hint": "紅籌VIE架構/股權變動/董事會構成/表決權差異"}, "observation": {"ok": true, "skill": "legal_governance", "exists": true, "confidence": "high", "n_risk_points": 3, "risk_points": [{"code": "GOVERNANCE_CONTROL_GT_50", "level": "high", "confidence": "high", "evidence_page": 115, "description": "控股股東集團持股約55.89%，超過50%，對公司有重大影響力，可能阻礙控制權變更，損害少數股東利益。"}, {"code": "GOVERNANCE_CONCERT_PARTY", "level": "medium", "confidence": "high", "evidence_page": 254, "description": "與武漢瀚中及杭州甘明訂立一致行動協議，以維持對杭州翰思的控制權，協議尚未終止，可能影響公司治理的獨立性。"}, {"code": "GOVERNANCE_BOARD_INDEPENDENCE", "level": "medium", "confidence": "high", "evidence_page": 272, "description": "董事會結構中，執行董事肖女士持股極少，且控股股東影響力大，可能影響董事會獨立性。"}], "features": {"controlling_shareholder": "蔡張生物科技、翰思生物醫藥（香港）及武漢翰思", "control_pct": 55.89, "concert_party": true, "ab_shares": false, "board_note": "董事會結構未在原文中詳細描述，但存在執行董事肖女士持股0.01%。"}, "negative_findings_n": 1, "evidence_pages": [80, 81, 115, 254, 272], "search_quota": 2, "search_used": 0, "error": null, "hint": "证据充分，可继续下一个 skill"}, "duration_ms": 3176}
    ```
-3. **`retrieve_section_evidence`**
+3. **`run_legal_skill`**
    ```json
-   {"intents": {"redemption": {"hits": 3, "pages": [262, 271, 80], "route": [{"section_id": "history_and_corporate_structure", "section_title": "歷史、發展及公司架構", "start_page": 241, "end_page": 276, "confidence": 0.95}, {"section_id": "risk_factors", "section_title": "風險因素", "start_page": 73, "end_page": 126, "confidence": 0.95}]}, "related_party": {"hits": 8, "pages": [415, 415, 416, 425, 425, 424, 425, 424], "route": [{"section_id": "connected_transactions", "section_title": "關連交易", "start_page": 415, "end_page": 425, "confidence": 0.95}, {"section_id": "business", "section_title": "業務", "start_page": 277, "end_page": 414, "confidence": 0.95}, {"section_id": "financial_information", "section_title": "財務資料", "start_page": 474, "end_page": 507, "confidence": 0.95}]}, "concentration": {"hits": 1, "pages": [387], "route": [{"section_id": "business", "section_title": "業務", "start_page": 277, "end_page": 414, "confidence": 0.95}, {"section_id": "risk_factors", "section_title": "風險因素", "start_page": 73, "end_page": 126, "confidence": 0.95}, {"section_id": "financial_information", "section_title": "財務資料", "start_page": 474, "end_page": 507, "confidence": 0.95}]}}}
+   {"turn": 3, "arguments": {"focus_hint": "優先股/對賭贖回/投資者特殊權利/清算優先權", "reason": "審查翰思艾泰上市前的優先股、對賭贖回條款及投資者特殊權利的清理情況，識別上市後失效安排與剩餘義務風險。", "skill_name": "legal_shareholder_rights"}, "observation": {"ok": true, "skill": "legal_shareholder_rights", "exists": true, "confidence": "high", "n_risk_points": 3, "risk_points": [{"code": "REDEMPTION_HIGH", "level": "high", "confidence": "high", "evidence_page": 262, "description": "贖回權觸發期限不足12個月（2025年12月31日），且贖回負債金額人民幣138.5百萬元，可能導致流動性風險及上市受阻。"}, {"code": "REDEMPTION_MEDIUM", "level": "medium", "confidence": "high", "evidence_page": 497, "description": "贖回負債金額佔流動負債淨額比例高，且贖回權未完全終止，存在流動性不足風險。"}, {"code": "RIGHTS_CLEANUP_INCOMPLETE", "level": "high", "confidence": "high", "evidence_page": 262, "description": "特別權利（包括購回權）僅在上市申請提交時終止，但若上市失敗則自動恢復，未完全解除。"}], "features": {"exists_redemption": true, "trigger_condition": "上市申請被撤回或駁回、中國證監會備案被駁回、或未能於2025年12月31日前完成上市（以較早者為準）", "redemption_price_or_rate": "按贖回金額的攤銷成本確認，未明確利率", "amount": "人民幣138.5百萬元", "remaining_months": 4, "rights_cleared_pre_ipo": true, "pre_ipo_rounds": 3}, "negative_findings_n": 1, "evidence_pages": [80, 262, 271, 477, 497], "search_quota": 2, "search_used": 0, "error": null, "hint": "证据充分，可继续下一个 skill"}, "duration_ms": 2145}
    ```
-4. **`extract_legal`**
+4. **`run_legal_skill`**
    ```json
-   {"sections": {"3.1": {"exists": true, "skipped": null, "evidence_n": 5, "search_log": {"keywords_tried": ["赎回", "贖回", "对赌", "對賭", "回购", "回購", "优先股", "優先股", "领售", "領售", "撤资", "撤資", "贖回權", "可換股", "可转换可赎回", "可轉換可贖回", "股东协议", "股東協議", "特别权利", "特別權利", "赎回权终止", "特別權利終止"], "pages_scanned": [80, 262, 271, 574, 582, 604, 605], "raw_hits": 13, "filtered_noise": 0, "strong_hits": 13, "note": "命中对赌/赎回相关披露"}, "top1_supplier_pct": null, "top5_supplier_pct": null}, "3.2": {"exists": true, "skipped": null, "evidence_n": 5, "search_log": null, "top1_supplier_pct": null, "top5_supplier_pct": null}, "3.3": {"exists": true, "skipped": null, "evidence_n": 5, "search_log": null, "top1_supplier_pct": 20.4, "top5_supplier_pct": 20.4}, "3.5": {"exists": true, "skipped": false, "evidence_n": 5, "search_log": {"raw_hits": 10, "strong_hits": 10, "high_hits": 0, "pages_scanned": [14, 16, 17, 20, 27]}, "top1_supplier_pct": null, "top5_supplier_pct": null}}}
+   {"turn": 4, "arguments": {"focus_hint": "關連交易/持續關連交易/非豁免/獨立股東批准", "reason": "審查翰思艾泰的關連交易及持續關連交易安排，識別未獲豁免、定價不公允或未經獨立股東批准的風險。", "skill_name": "legal_related_party"}, "observation": {"ok": true, "skill": "legal_related_party", "exists": true, "confidence": "high", "n_risk_points": 3, "risk_points": [{"code": "RELATED_PARTY_EXEMPTION", "level": "low", "confidence": "high", "evidence_page": 424, "description": "關連交易獲完全豁免，但依賴豁免條件，若未來比例上升可能需重新合規。"}, {"code": "RELATED_PARTY_TERM", "level": "medium", "confidence": "high", "evidence_page": 416, "description": "關連交易協議期限超過三年，需依賴特殊情況豁免，存在合規風險。"}, {"code": "RELATED_PARTY_DEPENDENCE", "level": "low", "confidence": "high", "evidence_page": 416, "description": "發行人依賴關連方提供穩定性測試服務，因缺乏設備，存在潛在依賴風險。"}], "features": {"parties": ["中美華世通（關連方）", "發行人"], "txn_types": ["採購（原材料供應）", "服務（穩定性測試）"], "max_ratio_pct": 5, "ratio_rising": false, "waiver": "完全豁免（低於5%及300萬港元）", "fair_price": "董事及獨家保薦人認為公平合理", "dependency": false}, "negative_findings_n": 2, "evidence_pages": [415, 416, 424, 425], "search_quota": 2, "search_used": 0, "error": null, "hint": "证据充分，可继续下一个 skill"}, "duration_ms": 2012}
    ```
-5. **`score_legal`**
+5. **`run_legal_skill`**
    ```json
-   {"risk_score": 51.0, "breakdown_n": 4}
+   {"turn": 5, "arguments": {"focus_hint": "重大合約/依賴單一供應商或客戶/知識產權保護/許可安排", "reason": "審查翰思艾泰的重大合約、供應商與客戶集中度及知識產權保護情況，識別合同與IP風險。", "skill_name": "legal_contracts_and_ip"}, "observation": {"ok": true, "skill": "legal_contracts_and_ip", "exists": true, "confidence": "high", "n_risk_points": 5, "risk_points": [{"code": "IP_PATENT_REJECTION_RISK", "level": "high", "confidence": "high", "evidence_page": 386, "description": "核心產品相關的FcRn專利申請在中國被駁回，可能影響同族專利在其他司法權區的有效性，進而削弱核心技術的專利保護。"}, {"code": "IP_PATENT_MAINTENANCE_RISK", "level": "medium", "confidence": "high", "evidence_page": 93, "description": "專利維護需定期繳納費用並遵守程序，若未按時繳費或回應官方行動，可能導致專利失效，使競爭者進入市場。"}, {"code": "IP_THIRD_PARTY_INFRINGEMENT_RISK", "level": "medium", "confidence": "high", "evidence_page": 92, "description": "存在第三方侵犯或盜用知識產權的風險，且可能無法及時發現或採取行動，影響競爭優勢。"}, {"code": "IP_EMPLOYEE_DISPUTE_RISK", "level": "medium", "confidence": "high", "evidence_page": 98, "description": "前僱員席先生可能與公司就專利產生潛在糾紛，可能影響知識產權的穩定性。"}, {"code": "IP_FTO_SCOPE_LIMITATION", "level": "low", "confidence": "high", "evidence_page": 386, "description": "自由運營分析僅在中國進行，未覆蓋所有目標市場，且HX044尚無FTO分析，存在潛在侵權風險。"}], "features": {"material_contracts": ["HX008股權轉讓協議（與中山康方合作）", "專利轉讓（杭州翰思至泰州翰中）"], "exclusive_deals": false, "core_tech_self_owned": true, "license_in": false, "ip_note": "核心產品專利自主研發，但FcRn專利申請在中國被駁回，可能影響同族專利在其他國家的有效性。"}, "negative_findings_n": 2, "evidence_pages": [74, 92, 93, 98, 381, 386, 407], "search_quota": 2, "search_used": 0, "error": null, "hint": "证据充分，可继续下一个 skill"}, "duration_ms": 1856}
+   ```
+6. **`run_legal_skill`**
+   ```json
+   {"turn": 6, "arguments": {"focus_hint": "監管處罰/訴訟仲裁/醫療糾紛/產品責任", "reason": "審查翰思艾泰及其附屬公司的監管處罰、訴訟仲裁及潛在醫療產品責任風險。", "skill_name": "legal_regulatory_litigation"}, "observation": {"ok": true, "skill": "legal_regulatory_litigation", "exists": true, "confidence": "high", "n_risk_points": 5, "risk_points": [{"code": "REGULATORY_PENALTY", "level": "medium", "confidence": "high", "evidence_page": 403, "description": "公司可能因社会保险基金及住房公积金供款不足而面临滞纳金或罚款，但公司已承诺补缴并制定内部监控政策，风险相对较小。"}, {"code": "REGULATORY_COMPLIANCE_RISK", "level": "medium", "confidence": "high", "evidence_page": 237, "description": "公司面临美国FDA及中国监管机构的严格监管，若未能遵守相关法规，可能遭受行政处罚、产品召回等制裁。"}, {"code": "LICENSE_MISSING", "level": "low", "confidence": "high", "evidence_page": 406, "description": "未发现关键许可证缺失，公司已遵守相关法律法规。"}, {"code": "LITIGATION_MAJOR", "level": "low", "confidence": "high", "evidence_page": 406, "description": "未涉及重大诉讼、仲裁或行政程序，无重大未决诉讼。"}, {"code": "HUMAN_GENETIC_RESOURCE_COMPLIANCE", "level": "medium", "confidence": "high", "evidence_page": 86, "description": "公司面临中国人类遗传资源管理的合规风险，可能因违反相关法规而受到行政处罚。"}], "features": {"penalties": ["社会保险基金及住房公积金供款可能被征收滞纳金或罚款"], "investigations": ["无具体调查事项"], "licenses_missing": ["无关键许可证缺失"], "major_litigation": false}, "negative_findings_n": 2, "evidence_pages": [83, 85, 86, 87, 233, 237, 403, 406], "search_quota": 2, "search_used": 0, "error": null, "hint": "证据充分，可继续下一个 skill"}, "duration_ms": 1734}
+   ```
+7. **`run_rule_checks`**
+   ```json
+   {"turn": 7, "arguments": {"reason": "交叉核對五項專項審查的風險點與規則引擎命中，識別覆蓋缺口後決定是否需補充檢索。"}, "observation": {"ok": true, "rules_score": 51.0, "rules_level": "medium", "flags": {"redemption_high": false, "redemption_medium": true, "related_party_ratio_gt_30": false, "related_party_rising": false, "concentration_high": false, "pipeline_high": false, "valuation_inversion": false}, "breakdown": [{"code": "REDEMPTION_MEDIUM", "delta": 12.0, "rule_ref": "doc§3.1"}, {"code": "RELATED_PARTY_DISCLOSURE", "delta": 15.0, "rule_ref": "doc§3.2"}, {"code": "CONCENTRATION_DISCLOSURE", "delta": 12.0, "rule_ref": "doc§3.3"}, {"code": "PIPELINE_DISCLOSURE", "delta": 12.0, "rule_ref": "doc§3.5"}], "coverage_hints": [], "search_quota": 0, "search_used": 0, "hint": "无覆盖缺口。下一动作必须 submit_legal_report，禁止再 search。"}, "duration_ms": 10978}
+   ```
+8. **`None`**
+   ```json
+   {"turn": 8, "status": "no_tool_call", "content": ""}
    ```
 
 ### 3.6 分析结论
 
-- 风险分 **51.0**（medium）。打分来自披露基础分或规则命中（见 score_breakdown）。
-- 3.1 对赌/赎回：exists=`True`，证据强度=`high`
-- 3.2 关联交易：exists=`True`，占比=`5.0`。
-- 3.3 集中度：exists=`True`，证据页=[28, 28, 387, 29, 29]。
+- 风险分 **66.54795583744**（high）。打分来自披露基础分或规则命中（见 score_breakdown）。
+- 3.1 对赌/赎回：exists=`None`，证据强度=`None`
+- 3.2 关联交易：exists=`None`，占比=`None`。
+- 3.3 集中度：exists=`None`，证据页=None。
 
 ## 4. 改进建议
 

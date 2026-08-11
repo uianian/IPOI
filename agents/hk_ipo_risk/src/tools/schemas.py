@@ -56,7 +56,7 @@ FINANCE_TOOL_SCHEMAS: list[dict[str, Any]] = [
     ),
     _fn(
         "retrieve_context_evidence",
-        "章节化召回非主表证据。",
+        "章节化召回非主表证据（兼容旧路径；优先用 run_finance_skill）。",
         {
             "intent": {
                 "type": "string",
@@ -74,6 +74,56 @@ FINANCE_TOOL_SCHEMAS: list[dict[str, Any]] = [
             "reason": {"type": "string"},
         },
         required=["intent", "query"],
+    ),
+    _fn(
+        "run_finance_skill",
+        "执行一个专项财务审查 skill：规则指标打包或章节检索+LLM 抽取。",
+        {
+            "skill_name": {
+                "type": "string",
+                "enum": [
+                    "finance_profitability",
+                    "finance_cash_flow",
+                    "finance_solvency",
+                    "finance_business_context",
+                ],
+            },
+            "focus_hint": {"type": "string", "description": "可选：本次审查侧重点"},
+            "reason": {"type": "string"},
+        },
+        required=["skill_name"],
+    ),
+    _fn(
+        "search_finance_evidence",
+        "按 query 到指定章节补充召回带页码的财务/业务证据。",
+        {
+            "query": {
+                "type": "string",
+                "description": "繁體中文检索词，空格分隔",
+            },
+            "intent": {
+                "type": "string",
+                "enum": [
+                    "business_context",
+                    "business_model",
+                    "franchise",
+                    "supply_chain",
+                    "financing_dependency",
+                    "concentration",
+                ],
+            },
+            "section_hint": {"type": "string"},
+            "top_k": {"type": "integer", "description": "返回条数，默认6"},
+            "reason": {"type": "string"},
+        },
+        required=["query", "intent"],
+    ),
+    _fn(
+        "run_finance_rule_checks",
+        "运行财务规则引擎交叉核对，返回规则命中与覆盖缺口。submit 前建议调用。",
+        {
+            "reason": {"type": "string"},
+        },
     ),
     _fn(
         "submit_finance_report",
@@ -139,6 +189,111 @@ FINANCE_TOOL_SCHEMAS: list[dict[str, Any]] = [
             "summary": {"type": "string", "description": "一句话中文摘要"},
         },
         required=["risk_score", "risk_level", "reasoning", "summary"],
+    ),
+]
+
+
+LEGAL_TOOL_SCHEMAS: list[dict[str, Any]] = [
+    _fn(
+        "retrieve_legal",
+        "初始化法务证据包（检索包+全书grep基线）。第一步必调。",
+        {
+            "reason": {"type": "string", "description": "为何需要检索"},
+        },
+    ),
+    _fn(
+        "run_legal_skill",
+        "执行一个专项合规审查 skill：定向检索→LLM结构化抽取→阈值判定→置信度。",
+        {
+            "skill_name": {
+                "type": "string",
+                "enum": [
+                    "legal_governance",
+                    "legal_shareholder_rights",
+                    "legal_related_party",
+                    "legal_contracts_and_ip",
+                    "legal_regulatory_litigation",
+                ],
+            },
+            "focus_hint": {"type": "string", "description": "可选：本次审查侧重点"},
+            "reason": {"type": "string"},
+        },
+        required=["skill_name"],
+    ),
+    _fn(
+        "search_legal_evidence",
+        "按 query 到指定章节补充召回带页码的原文证据（证据不足/反思时用）。",
+        {
+            "query": {
+                "type": "string",
+                "description": "繁體中文检索词（招股书为繁体），空格分隔多个词",
+            },
+            "intent": {
+                "type": "string",
+                "enum": [
+                    "redemption",
+                    "related_party",
+                    "concentration",
+                    "regulatory",
+                    "litigation",
+                    "ip",
+                    "financing_dependency",
+                    "business_context",
+                ],
+            },
+            "section_hint": {"type": "string"},
+            "top_k": {"type": "integer", "description": "返回条数，默认6"},
+            "reason": {"type": "string"},
+        },
+        required=["query", "intent"],
+    ),
+    _fn(
+        "run_rule_checks",
+        "运行规则引擎（doc§3.1/3.2/3.3/3.5）交叉核对，返回规则命中与覆盖缺口。submit 前必调。",
+        {
+            "reason": {"type": "string"},
+        },
+    ),
+    _fn(
+        "submit_legal_report",
+        "提交法务终裁报告并结束。必须写非空 summary+reasoning；risk_points 可空（系统从 skill 填充）。",
+        {
+            "risk_points": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "code": {"type": "string"},
+                        "level": {"type": "string", "enum": ["high", "medium", "low"]},
+                        "description": {"type": "string"},
+                        "legal_basis": {"type": "string"},
+                        "metric_value": {"type": "string"},
+                        "evidence_page": {"type": "integer"},
+                        "evidence_excerpt": {"type": "string"},
+                        "skill": {"type": "string"},
+                    },
+                },
+            },
+            "negative_findings": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "code": {"type": "string"},
+                        "description": {"type": "string"},
+                    },
+                },
+            },
+            "reasoning": {
+                "type": "string",
+                "description": "必填：2-5句繁體中文风险归因与终裁说明，禁止空字符串",
+            },
+            "summary": {
+                "type": "string",
+                "description": "必填：一句繁體中文终裁摘要，禁止空字符串",
+            },
+        },
+        required=["reasoning", "summary"],
     ),
 ]
 

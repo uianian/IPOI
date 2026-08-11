@@ -150,6 +150,17 @@ def compute_cash_burn(
     runway = None
     burn_yoy_up_gt_30 = False
     burn_basis: str | None = None
+    burn_yoy_basis: str | None = None
+    burn_yoy_growth_full: float | None = None
+    burn_yoy_growth_interim: float | None = None
+
+    def _burn_growth(series: list[tuple[str, float]]) -> float | None:
+        if len(series) < 2:
+            return None
+        prev, cur = series[-2][1], series[-1][1]
+        if prev < 0 and cur < 0 and abs(prev) > 0:
+            return (abs(cur) - abs(prev)) / abs(prev)
+        return None
 
     if cfo_periods:
         last_y, last_v = cfo_periods[-1]
@@ -157,14 +168,21 @@ def compute_cash_burn(
         if last_v < 0:
             monthly_burn = abs(last_v) / float(months)
             burn_basis = f"{last_y}/{months}m"
-        # YoY：优先同口径中期（2024_i1 vs 2025_i1），否则完整年度
+        # YoY：全年与同口径中期分别计算，任一 >30% 即触发（避免中期略降掩盖全年加速）
         interim_tail = [p for p in cfo_periods if "_i" in p[0]]
-        cmp_series = interim_tail if len(interim_tail) >= 2 else cfo_full
-        if len(cmp_series) >= 2:
-            prev, cur = cmp_series[-2][1], cmp_series[-1][1]
-            if prev < 0 and cur < 0 and abs(prev) > 0:
-                growth = (abs(cur) - abs(prev)) / abs(prev)
-                burn_yoy_up_gt_30 = growth > 0.30
+        burn_yoy_growth_full = _burn_growth(cfo_full)
+        burn_yoy_growth_interim = _burn_growth(interim_tail)
+        full_hit = burn_yoy_growth_full is not None and burn_yoy_growth_full > 0.30
+        interim_hit = (
+            burn_yoy_growth_interim is not None and burn_yoy_growth_interim > 0.30
+        )
+        burn_yoy_up_gt_30 = full_hit or interim_hit
+        if full_hit and interim_hit:
+            burn_yoy_basis = "both"
+        elif full_hit:
+            burn_yoy_basis = "full"
+        elif interim_hit:
+            burn_yoy_basis = "interim"
 
     if end_cash is not None and monthly_burn and monthly_burn > 0:
         runway = round(end_cash / monthly_burn, 2)
@@ -177,4 +195,7 @@ def compute_cash_burn(
         "CASH_RUNWAY_MONTHS": runway,
         "burn_yoy_up_gt_30": burn_yoy_up_gt_30,
         "burn_basis": burn_basis,
+        "burn_yoy_basis": burn_yoy_basis,
+        "burn_yoy_growth_full": burn_yoy_growth_full,
+        "burn_yoy_growth_interim": burn_yoy_growth_interim,
     }

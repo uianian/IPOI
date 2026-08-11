@@ -72,9 +72,19 @@ def html_table_to_rows(html: str) -> list[list[str]]:
 
 
 _INTERIM_HINT_RE = re.compile(
-    r"個月|个月|中期|interim|截至|止\s*\d+\s*個?月|止\s*\d+\s*个?月",
+    r"個月|个月|中期|interim|止\s*\d+\s*個?月|止\s*\d+\s*个?月",
     re.I,
 )
+_YE_HINT_RE = re.compile(r"止年度|12\s*月\s*31|年末|年結", re.I)
+
+
+def _cell_interim_hint(text: str) -> bool:
+    """中期列提示；「截至12月31日止年度」等全年列不算中期。"""
+    if not text:
+        return False
+    if _YE_HINT_RE.search(text):
+        return False
+    return bool(_INTERIM_HINT_RE.search(text))
 
 
 def _mark_track_record_interim_tail(years: list[str]) -> list[str]:
@@ -119,32 +129,65 @@ def _mark_mixed_ye_interim_columns(years: list[str], header_blob: str) -> list[s
     return out
 
 
+def _years_from_found(found: list[tuple[str, bool]], header_blob: str) -> list[str]:
+    out: list[str] = []
+    seen: dict[str, int] = {}
+    for y, interim_hint in found:
+        if y not in seen:
+            seen[y] = 0
+            if interim_hint:
+                seen[y] = 1
+                out.append(f"{y}_i1")
+            else:
+                out.append(y)
+        else:
+            seen[y] += 1
+            out.append(f"{y}_i{seen[y]}")
+    out = _mark_track_record_interim_tail(out)
+    return _mark_mixed_ye_interim_columns(out, header_blob)
+
+
+_UNIT_ONLY_RE = re.compile(
+    r"^(人民幣|人民币|港元|千元|万元|千港元|百萬|百万).*$|^元$"
+)
+
+
 def extract_year_headers(rows: list[list[str]]) -> list[str]:
-    """Keep column order; duplicate years / interim hints get _i suffix."""
+    """Keep column order; duplicate years / interim hints get _i suffix.
+
+    - 单行 ≥2 个年份即可（港股两年往绩常见）
+    - 若单行不足，按列号跨行聚合（「2022年」与「人民幣千元」分行）
+    """
     header_blob = " ".join(c for row in rows[:8] for c in row)
+    # 1) 同行多列年份
     for row in rows[:8]:
         found: list[tuple[str, bool]] = []
         for cell in row:
             text = cell or ""
             m = re.search(r"(20\d{2})", text)
             if m:
-                found.append((m.group(1), bool(_INTERIM_HINT_RE.search(text))))
-        if len(found) >= 3:
-            out: list[str] = []
-            seen: dict[str, int] = {}
-            for y, interim_hint in found:
-                if y not in seen:
-                    seen[y] = 0
-                    if interim_hint:
-                        seen[y] = 1
-                        out.append(f"{y}_i1")
-                    else:
-                        out.append(y)
-                else:
-                    seen[y] += 1
-                    out.append(f"{y}_i{seen[y]}")
-            out = _mark_track_record_interim_tail(out)
-            return _mark_mixed_ye_interim_columns(out, header_blob)
+                found.append((m.group(1), _cell_interim_hint(text)))
+        if len(found) >= 2:
+            return _years_from_found(found, header_blob)
+
+    # 2) 跨行按列聚合：忽略纯单位行，按列下标收年
+    col_year: dict[int, tuple[str, bool]] = {}
+    for row in rows[:8]:
+        for col_i, cell in enumerate(row):
+            text = (cell or "").strip()
+            if not text or _UNIT_ONLY_RE.match(text):
+                continue
+            m = re.search(r"(20\d{2})", text)
+            if not m:
+                continue
+            # 同列已有年份时保留先出现的；附带中期提示可升级
+            interim = _cell_interim_hint(text)
+            prev = col_year.get(col_i)
+            if prev is None or (interim and not prev[1]):
+                col_year[col_i] = (m.group(1), interim)
+    if len(col_year) >= 2:
+        found = [col_year[i] for i in sorted(col_year)]
+        return _years_from_found(found, header_blob)
     return []
 
 
@@ -194,9 +237,34 @@ _LABEL_CONTINUATION = re.compile(
 )
 
 
-def _row_numeric_cells(row: list[str]) -> list[float | None]:
+def _row_numeric_cells(
+    row: list[str],
+    *,
+    n_years: int | None = None,
+) -> list[float | None]:
+    """Extract numeric cells after the label column.
+
+    When n_years is known, keep trailing data columns aligned (do not drop
+    mid-row blanks that would shift year zip). Footnote indices still skipped.
+    """
+    cells = row[1:]
+    if n_years and n_years > 0 and len(cells) >= n_years:
+        # Prefer rightmost n_years cells (label | 附註 | y1 | y2)
+        slice_cells = cells[-n_years:]
+        out: list[float | None] = []
+        for c in slice_cells:
+            s = (c or "").strip()
+            if not s or s in {"–", "-", "—", "—", "N/A", "n/a", "NA"}:
+                out.append(None)
+                continue
+            if s.isdigit() and len(s) <= 2:
+                out.append(None)
+                continue
+            out.append(parse_number(c))
+        return out
+
     numeric_cells: list[float | None] = []
-    for c in row[1:]:
+    for c in cells:
         s = (c or "").strip()
         # skip blank / footnote index; do not shift year alignment
         if not s or (s.isdigit() and len(s) <= 2):
@@ -223,6 +291,7 @@ def find_row_values(
     """
     best_score = 0
     best_vals: dict[str, float | None] = {}
+    n_years = len(years) if years else None
     for idx, row in enumerate(rows):
         if not row:
             continue
@@ -230,18 +299,28 @@ def find_row_values(
         score = _row_label_score(first, labels, field=field)
         if score < 50:
             continue
-        numeric_cells = _row_numeric_cells(row)
+        numeric_cells = _row_numeric_cells(row, n_years=n_years)
         # 标签命中但本行无数字：尝试下一行续行标签
-        if not numeric_cells and idx + 1 < len(rows):
+        if (not numeric_cells or all(v is None for v in numeric_cells)) and idx + 1 < len(
+            rows
+        ):
             nxt = rows[idx + 1]
             nxt_first = _normalize_row_label_cell((nxt[0] if nxt else "") or "")
             if _LABEL_CONTINUATION.match(nxt_first) or "淨額" in nxt_first or "净额" in nxt_first:
-                numeric_cells = _row_numeric_cells(nxt)
+                numeric_cells = _row_numeric_cells(nxt, n_years=n_years)
                 score = max(score, 85)
-        if not numeric_cells:
+        if not numeric_cells or all(v is None for v in numeric_cells):
             continue
+        # 年份数与数值列明显不符时不硬套，避免错年
+        if years and abs(len(numeric_cells) - len(years)) > 1 and len(years) >= 2:
+            if len(numeric_cells) < len(years):
+                # 仍按较短 zip，但不扩展假年
+                pass
+            elif len(numeric_cells) > len(years) + 1:
+                continue
+        use_years = list(years) if years else [f"p{i}" for i in range(len(numeric_cells))]
         out: dict[str, float | None] = {}
-        for i, y in enumerate(years):
+        for i, y in enumerate(use_years):
             out[y] = numeric_cells[i] if i < len(numeric_cells) else None
         if score > best_score:
             best_score = score
@@ -288,11 +367,12 @@ def plaintext_row_search(
     labels: list[str],
     *,
     field: str | None = None,
-    min_nums: int = 3,
+    min_nums: int = 2,
 ) -> dict[str, Any]:
     """When HTML missing, grab a line containing label + nearby numbers.
 
     与 HTML 路径一致：拒绝黑名单行；要求 label 在行首附近且不是长行名的真子串。
+    默认 min_nums=2（港股两年往绩）。
     """
     labels_sorted = sorted((lab for lab in labels if lab), key=len, reverse=True)
     best: dict[str, Any] = {}

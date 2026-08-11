@@ -82,9 +82,38 @@ async def _amain() -> int:
     parser.add_argument("--api-base", default=None)
     parser.add_argument("--chat-model", default=None)
     parser.add_argument(
+        "--provider",
+        default=None,
+        choices=["deepseek", "openrouter", "openai", "vllm"],
+        help="LLM 提供商；deepseek 时默认 api_base=https://api.deepseek.com、model=deepseek-v4-flash",
+    )
+    parser.add_argument(
+        "--reasoning-effort",
+        default=None,
+        choices=["low", "high", "max"],
+        help="全局默认思考强度（可被 --finance/--legal-reasoning-effort 覆盖）",
+    )
+    parser.add_argument(
+        "--finance-reasoning-effort",
+        default=None,
+        choices=["low", "high", "max"],
+        help="财务 ReAct reasoning_effort（默认 low）",
+    )
+    parser.add_argument(
+        "--legal-reasoning-effort",
+        default=None,
+        choices=["low", "high", "max"],
+        help="法务 ReAct reasoning_effort（默认 high）",
+    )
+    parser.add_argument(
         "--use-llm",
         action="store_true",
-        help="法务 LLM 增强：从候选证据抽取金额/占比等；失败则回退规则结果",
+        help="（旧开关）法务规则流水线的 LLM 增强；默认法务已走 ReAct，仅与 --legal-rules-only 联用有意义",
+    )
+    parser.add_argument(
+        "--legal-rules-only",
+        action="store_true",
+        help="法务强制规则流水线，不走 ReAct（对比/回归用）",
     )
     parser.add_argument(
         "--finance-rules-only",
@@ -104,8 +133,8 @@ async def _amain() -> int:
     parser.add_argument(
         "--max-turns",
         type=int,
-        default=8,
-        help="ReAct 最大轮次（默认 8）",
+        default=None,
+        help="ReAct 最大轮次（默认：财务 8 / 法务 8）",
     )
     parser.add_argument(
         "--log-dir",
@@ -135,27 +164,38 @@ async def _amain() -> int:
     if parse_json is None:
         logger.warning("parse-json missing or unset; legal grep fallback disabled")
 
-    # 财务默认启 LLM；法务仍需 --use-llm
-    need_llm = (args.agent in {"finance", "all"} and not finance_rules_only) or args.use_llm
+    # 财务默认启 LLM；法务默认 ReAct（--legal-rules-only 关闭）
+    legal_react = not args.legal_rules_only
+    need_llm = (
+        (args.agent in {"finance", "all"} and not finance_rules_only)
+        or (args.agent in {"legal", "all"} and legal_react)
+        or args.use_llm
+    )
     llm = None
     if need_llm:
         settings = resolve_api_settings(
             api_key=args.api_key,
             api_base=args.api_base,
             chat_model=args.chat_model,
+            provider=args.provider,
         )
+        if args.reasoning_effort:
+            settings["reasoning_effort"] = args.reasoning_effort
         llm = LLMClient(settings)
         await llm.init()
         logger.info(
-            "LLM ready provider=%s model=%s key=%s finance_llm=%s legal_llm=%s",
+            "LLM ready provider=%s model=%s key=%s finance_llm=%s legal_react=%s",
             settings["provider"],
             settings["chat_model"],
             "yes" if settings["api_key"] else "no",
             not finance_rules_only and args.agent in {"finance", "all"},
-            args.use_llm,
+            legal_react and args.agent in {"legal", "all"},
         )
-        if not settings["api_key"] and args.agent in {"finance", "all"} and not finance_rules_only:
-            logger.warning("No API key — finance will fall back to rules scoring")
+        if not settings["api_key"]:
+            if args.agent in {"finance", "all"} and not finance_rules_only:
+                logger.warning("No API key — finance will fall back to rules scoring")
+            if args.agent in {"legal", "all"} and legal_react:
+                logger.warning("No API key — legal will fall back to rules pipeline")
 
     finance_logger = None
     if not args.no_run_log and args.agent in {"finance", "all"}:
@@ -169,8 +209,26 @@ async def _amain() -> int:
         )
         logger.info("Finance run log → %s", finance_logger.log_path)
 
+    legal_logger = None
+    if not args.no_run_log and args.agent in {"legal", "all"} and legal_react:
+        legal_logger = AgentRunLogger(
+            agent="legal",
+            doc_id=args.doc_id,
+            log_dir=args.log_dir,
+            issuer_type=args.issuer_type,
+            doc_name=args.doc_name,
+            pdf_name=args.pdf_name,
+        )
+        logger.info("Legal run log → %s", legal_logger.log_path)
+
     finance_llm = None if finance_rules_only else llm
-    legal_llm = llm if args.use_llm else None
+    legal_llm = llm if (legal_react or args.use_llm) else None
+    finance_max_turns = args.max_turns if args.max_turns is not None else 10
+    legal_max_turns = args.max_turns if args.max_turns is not None else 10
+    finance_effort = args.finance_reasoning_effort or args.reasoning_effort or "low"
+    legal_effort = args.legal_reasoning_effort or args.reasoning_effort or "high"
+    debate_dir = Path(PKG_ROOT) / ".runtime" / "debate"
+    debate_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         if args.agent == "all":
@@ -186,8 +244,15 @@ async def _amain() -> int:
                 finance_run_logger=finance_logger,
                 finance_rules_only=finance_rules_only,
                 finance_pipeline=args.finance_pipeline,
+                legal_react=legal_react,
+                legal_run_logger=legal_logger,
+                legal_max_turns=legal_max_turns,
+                finance_max_turns=finance_max_turns,
+                debate_dir=debate_dir,
                 doc_name=args.doc_name,
                 pdf_name=args.pdf_name,
+                legal_reasoning_effort=legal_effort,
+                finance_reasoning_effort=finance_effort,
             )
         elif args.agent == "finance":
             fin = await FinanceAgent(
@@ -195,7 +260,9 @@ async def _amain() -> int:
                 run_logger=finance_logger,
                 rules_only=finance_rules_only,
                 pipeline=args.finance_pipeline,
-                max_turns=args.max_turns,
+                max_turns=finance_max_turns,
+                debate_dir=debate_dir,
+                reasoning_effort=finance_effort,
             ).run(
                 args.doc_id,
                 issuer_type=args.issuer_type,
@@ -212,12 +279,21 @@ async def _amain() -> int:
                 "master": None,
             }
         else:
-            leg = await LegalAgent(llm=legal_llm).run(
+            leg = await LegalAgent(
+                llm=legal_llm,
+                react=legal_react,
+                run_logger=legal_logger,
+                max_turns=legal_max_turns,
+                debate_dir=debate_dir,
+                reasoning_effort=legal_effort,
+            ).run(
                 args.doc_id,
                 issuer_type=args.issuer_type,
                 retrieval_json=leg_json,
                 parse_json=parse_json,
                 top_k=args.top_k,
+                doc_name=args.doc_name,
+                pdf_name=args.pdf_name,
             )
             result = {"doc_id": args.doc_id, "legal": leg.model_dump()}
     finally:
@@ -225,6 +301,8 @@ async def _amain() -> int:
             await llm.close()
         if finance_logger is not None and not finance_logger._closed:
             finance_logger.close(final_summary="aborted")
+        if legal_logger is not None and not legal_logger._closed:
+            legal_logger.close(final_summary="aborted")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as f:
@@ -258,10 +336,20 @@ async def _amain() -> int:
             print(f"  +{b.get('delta')} {b.get('code')} ({b.get('rule_ref')}) {b.get('note') or ''}")
     if "legal" in result:
         leg = result["legal"]
-        print(f"[legal] score={leg['risk_score']} level={leg['risk_level']}")
+        mode = (leg.get("features") or {}).get("scoring_mode") or (leg.get("trace") or {}).get("scoring_mode") or "rules"
+        print(f"[legal] score={leg['risk_score']} level={leg['risk_level']} mode={mode}")
         print(f"  summary: {leg.get('summary')}")
-        for b in (leg.get("score_breakdown") or [])[:8]:
-            print(f"  +{b.get('delta')} {b.get('code')} ({b.get('rule_ref')})")
+        n_turns = (leg.get("features") or {}).get("react_turns") or (leg.get("trace") or {}).get("n_turns")
+        if n_turns:
+            print(f"  react_turns: {n_turns}")
+        dossier = (leg.get("features") or {}).get("debate_dossier_path")
+        if dossier:
+            print(f"  debate_dossier: {dossier}")
+        logp = (leg.get("features") or {}).get("run_log") or {}
+        if logp:
+            print(f"  run_log: {logp.get('log')}")
+        for b in (leg.get("score_breakdown") or [])[:10]:
+            print(f"  +{b.get('delta')} {b.get('code')} ({b.get('rule_ref')}) {b.get('note') or ''}")
     if "reference_fundamental_score" in result:
         print(f"[ref] fundamental≈{result['reference_fundamental_score']}")
     if "master" in result:

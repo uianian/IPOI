@@ -117,6 +117,7 @@ class AnalysisStore:
             "parseMeta": {
                 "companyName": parse_meta.get("companyName"),
                 "issuerType": parse_meta.get("issuerType"),
+                "isBiotech": parse_meta.get("isBiotech"),
                 "ticker": parse_meta.get("ticker"),
                 "fileName": parse_meta.get("fileName"),
                 "parseJsonPath": parse_meta.get("parseJsonPath"),

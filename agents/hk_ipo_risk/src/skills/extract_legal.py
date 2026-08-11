@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import logging
 import re
+from pathlib import Path
 from typing import Any
 
 from src.models.evidence import EvidenceRef
@@ -147,6 +149,227 @@ def _parse_pct_from_table_blob(text: str) -> list[float]:
     return pcts
 
 
+def _is_buffer_pct_context(text: str, start: int, end: int) -> bool:
+    window = text[max(0, start - 24) : min(len(text), end + 24)]
+    return any(k in window for k in ("緩衝", "缓冲", "預留", "预留"))
+
+
+def parse_related_party_ratio_signals(text: str) -> dict[str, Any]:
+    """关连交易专章占比信号：收入/采购占比、上市规则百分比率、豁免阈值。
+
+    忽略「预留10%缓冲」等非交易占比。
+    """
+    out: dict[str, Any] = {
+        "share_pcts": [],
+        "listing_rule_pcts": [],
+        "waiver_pcts": [],
+    }
+    if not text:
+        return out
+
+    # 佔收入/採購/營業額 X%
+    for m in re.finditer(
+        r"(?:佔|占)[^。；;\n%]{0,40}?(?:收入|營業額|营业额|採購|采购|交易(?:額|额|總額|总额)?)"
+        r"[^。；;\n%]{0,20}?(约|約|大約|大约|分別|分别|合共)?"
+        r"[^。；;\n%]{0,12}?(\d{1,3}(?:\.\d+)?)\s*%",
+        text,
+    ):
+        if _is_buffer_pct_context(text, m.start(), m.end()):
+            continue
+        try:
+            v = float(m.group(2))
+        except (TypeError, ValueError):
+            continue
+        if 0 < v <= 100:
+            out["share_pcts"].append(v)
+
+    # 上市规则：最高適用百分比率…低於/少於 X%
+    for m in re.finditer(
+        r"(?:最高適用)?百分比率[^。；;\n%]{0,80}?(?:低於|少于|少於|低於約|不超过|不超過)\s*"
+        r"(\d{1,3}(?:\.\d+)?)\s*%",
+        text,
+    ):
+        if _is_buffer_pct_context(text, m.start(), m.end()):
+            continue
+        try:
+            v = float(m.group(1))
+        except (TypeError, ValueError):
+            continue
+        if 0 < v <= 100:
+            out["listing_rule_pcts"].append(v)
+
+    # 豁免口径：低於5%且…港元 / 低于5%及3,000,000港元
+    for m in re.finditer(
+        r"(?:完全豁免|獲豁免|获豁免|豁免)[^。；;\n%]{0,60}?(?:低於|少于|少於)\s*"
+        r"(\d{1,3}(?:\.\d+)?)\s*%",
+        text,
+    ):
+        try:
+            v = float(m.group(1))
+        except (TypeError, ValueError):
+            continue
+        if 0 < v <= 100:
+            out["waiver_pcts"].append(v)
+    for m in re.finditer(
+        r"(?:低於|少于|少於)\s*(\d{1,3}(?:\.\d+)?)\s*%\s*(?:且|及|並|并)"
+        r"[^。；;\n]{0,40}?(?:港元|港幣|港币|人民幣|人民币)",
+        text,
+    ):
+        try:
+            v = float(m.group(1))
+        except (TypeError, ValueError):
+            continue
+        if 0 < v <= 100:
+            out["waiver_pcts"].append(v)
+
+    return out
+
+
+def parse_related_party_amount_rows(text: str) -> list[dict[str, Any]]:
+    """从关连交易金额/上限表抽取「总計/总额」行。"""
+    if not text or "<table" not in text.lower():
+        return []
+    rows: list[dict[str, Any]] = []
+    # 总計：<td>總計</td><td>714,000</td>...
+    for m in re.finditer(
+        r"<tr[^>]*>\s*<td[^>]*>\s*(總計|总计|合計|合计|採購合約總額|采购合约总额|"
+        r"小分子採購合約總額|小分子采购合约总额)[^<]*</td>(.*?)</tr>",
+        text,
+        flags=re.I | re.S,
+    ):
+        label = m.group(1)
+        cells = re.findall(r"<td[^>]*>\s*([\d,]+(?:\.\d+)?)\s*</td>", m.group(2), flags=re.I)
+        vals: list[float] = []
+        for c in cells:
+            try:
+                vals.append(float(c.replace(",", "")))
+            except (TypeError, ValueError):
+                continue
+        if vals:
+            rows.append({"label": label, "values": vals, "max": max(vals)})
+    return rows
+
+
+def harvest_connected_transactions_from_parse(
+    parse_json: Path | str | None,
+    *,
+    max_pages: int = 24,
+    max_excerpt: int = 2500,
+) -> list[dict[str, Any]]:
+    """从 full_parse 专收「關連交易」章节页（含表格），补离线 RELATED_PARTY 召回缺口。"""
+    if not parse_json:
+        return []
+    path = Path(parse_json)
+    if not path.is_file():
+        return []
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as exc:
+        logger.warning("harvest connected_transactions failed to load parse: %s", exc)
+        return []
+
+    pages: list[dict[str, Any]] = []
+    if isinstance(data, list):
+        pages = [p for p in data if isinstance(p, dict)]
+    elif isinstance(data, dict):
+        raw = data.get("pages") or data.get("content") or []
+        if isinstance(raw, list):
+            pages = [p for p in raw if isinstance(p, dict)]
+
+    chapter_markers = ("關連交易", "关联交易", "持續關連交易", "持续关连交易")
+    hits: list[dict[str, Any]] = []
+    for p in pages:
+        page_no = p.get("page") or p.get("page_number") or p.get("page_idx")
+        elements = p.get("elements") or p.get("items") or []
+        headers: list[str] = []
+        blobs: list[tuple[str, str]] = []
+        for el in elements:
+            if not isinstance(el, dict):
+                continue
+            cat = str(el.get("category") or el.get("type") or "text")
+            text = el.get("text") or el.get("html") or el.get("content") or el.get("md") or ""
+            if not text:
+                continue
+            if cat in {"header", "title"} and any(m in text for m in chapter_markers):
+                headers.append(text.strip()[:80])
+            blobs.append((cat, text))
+        # 本章页：标题命中，或正文强相关且含金额/比率/上限
+        joined_head = " ".join(headers)
+        body = "\n".join(t for _, t in blobs)
+        is_chapter = bool(headers) or (
+            any(m in body for m in chapter_markers)
+            and any(k in body for k in ("年度上限", "百分比率", "關連人士", "关联人士", "歷史交易", "历史交易"))
+        )
+        if not is_chapter:
+            continue
+        # 优先表格 + 含比率/金额的段落
+        preferred = [
+            (cat, t)
+            for cat, t in blobs
+            if cat in {"table", "table_caption", "table_footnote"}
+            or any(k in t for k in ("%", "百分", "上限", "總額", "总额", "總計", "豁免", "佔", "占"))
+        ]
+        use = preferred or blobs
+        for cat, text in use[:8]:
+            excerpt = text[:max_excerpt]
+            hits.append(
+                {
+                    "page": page_no,
+                    "excerpt": excerpt,
+                    "content": excerpt,
+                    "category": cat,
+                    "source_type": "table" if "table" in cat else "text",
+                    "field_code": "RELATED_PARTY",
+                    "match_sources": ["connected_txn_harvest"],
+                    "matched_keywords": list(chapter_markers[:1]),
+                    "score": 3.0 if cat.startswith("table") else 2.0,
+                    "section_id": "connected_transactions",
+                }
+            )
+        if len({h.get("page") for h in hits}) >= max_pages:
+            break
+
+    from src.skills.evidence_utils import dedupe_hits
+
+    return dedupe_hits(hits)[: max_pages * 4]
+
+
+def resolve_related_party_ratio(
+    texts: list[str],
+) -> dict[str, Any]:
+    """汇总多段文本的关连交易占比，区分口径。"""
+    share: list[float] = []
+    listing: list[float] = []
+    waiver: list[float] = []
+    for t in texts:
+        sig = parse_related_party_ratio_signals(t)
+        share.extend(sig["share_pcts"])
+        listing.extend(sig["listing_rule_pcts"])
+        waiver.extend(sig["waiver_pcts"])
+
+    ratio_pct = None
+    ratio_source = None
+    if share:
+        ratio_pct = max(share)
+        ratio_source = "share_of_similar_txn"
+    elif listing:
+        ratio_pct = max(listing)
+        ratio_source = "listing_rule_pct_ratio"
+    elif waiver:
+        ratio_pct = max(waiver)
+        ratio_source = "waiver_threshold"
+
+    return {
+        "ratio_pct": ratio_pct,
+        "ratio_source": ratio_source,
+        "share_pcts": share,
+        "listing_rule_pcts": listing,
+        "waiver_pcts": waiver,
+        "related_party_ratio_gt_30": ratio_pct is not None and ratio_pct > 30,
+    }
+
+
 def extract_redemption(
     bundle: dict[str, Any],
     extra_hits: list[dict[str, Any]] | None = None,
@@ -209,41 +432,100 @@ def extract_redemption(
 def extract_related_party(
     bundle: dict[str, Any],
     extra_hits: list[dict[str, Any]] | None = None,
+    *,
+    parse_json: Path | str | None = None,
 ) -> dict[str, Any]:
-    keywords = _RELATED_PREFER + ["关联方", "關連方", "核心關連"]
+    keywords = _RELATED_PREFER + [
+        "关联方",
+        "關連方",
+        "核心關連",
+        "百分比率",
+        "年度上限",
+        "歷史交易總額",
+        "关连人士",
+        "關連人士",
+    ]
     hits = _collect_hits(bundle, ["RELATED_PARTY", "related_party"], keywords, extra_hits=extra_hits)
+    chapter_hits = harvest_connected_transactions_from_parse(parse_json)
+    if chapter_hits:
+        hits = list(hits) + chapter_hits
+
     prefer: list[dict[str, Any]] = []
     weak: list[dict[str, Any]] = []
     for h in hits:
         text = h.get("excerpt") or h.get("content") or ""
         if any(n in text for n in _RELATED_NOISE) and not any(p in text for p in _RELATED_PREFER):
-            continue
-        if any(p in text for p in _RELATED_PREFER):
+            # 专章表格/百分比率段落保留
+            if not (
+                h.get("section_id") == "connected_transactions"
+                or any(k in text for k in ("百分比率", "年度上限", "關連人士", "关联人士", "歷史交易"))
+            ):
+                continue
+        if (
+            any(p in text for p in _RELATED_PREFER)
+            or h.get("section_id") == "connected_transactions"
+            or any(k in text for k in ("百分比率", "年度上限", "關連人士", "关联人士"))
+        ):
             prefer.append(h)
         elif any(k in text for k in ["關連", "关联"]):
             weak.append(h)
+
+    # 专章优先排序：表格与含比率段落在前
+    def _rank(h: dict[str, Any]) -> tuple[int, float]:
+        t = h.get("excerpt") or h.get("content") or ""
+        cat = str(h.get("category") or "")
+        score = 0
+        if h.get("section_id") == "connected_transactions":
+            score += 5
+        if "table" in cat:
+            score += 3
+        if any(k in t for k in ("百分比率", "低於", "低于", "佔", "占", "總計", "总计")):
+            score += 2
+        return (score, float(h.get("score") or 0))
+
+    prefer.sort(key=_rank, reverse=True)
+    weak.sort(key=_rank, reverse=True)
     strong = prefer or weak
     exists = len(strong) > 0
-    ratios: list[float] = []
-    for h in strong[:10]:
-        text = h.get("excerpt") or ""
-        ratios.extend(_parse_pct_from_table_blob(text))
-    max_ratio = max(ratios) if ratios else None
-    high = max_ratio is not None and max_ratio > 30
-    evidences = [_hit_to_evidence(h, "RELATED_PARTY") for h in strong[:5]]
+
+    texts = [(h.get("excerpt") or h.get("content") or "") for h in strong[:20]]
+    ratio_info = resolve_related_party_ratio(texts)
+    amount_rows: list[dict[str, Any]] = []
+    for t in texts:
+        amount_rows.extend(parse_related_party_amount_rows(t))
+
+    evidences = [_hit_to_evidence(h, "RELATED_PARTY") for h in strong[:8]]
+    from src.skills.evidence_utils import dedupe_hits
+
+    evid_dicts = dedupe_hits([e.model_dump() for e in evidences])
+    max_ratio = ratio_info.get("ratio_pct")
+    high = bool(ratio_info.get("related_party_ratio_gt_30"))
     return {
         "exists": exists,
         "ratio_pct": max_ratio,
+        "ratio_source": ratio_info.get("ratio_source"),
+        "listing_rule_pct_max": max(ratio_info["listing_rule_pcts"])
+        if ratio_info["listing_rule_pcts"]
+        else None,
+        "waiver_pct_threshold": max(ratio_info["waiver_pcts"])
+        if ratio_info["waiver_pcts"]
+        else None,
+        "historical_amount_rows": amount_rows[:6],
         "related_party_ratio_gt_30": high,
         "related_party_rising": False,
-        "evidence": [e.model_dump() for e in evidences],
-        "evidence_strength": "high" if prefer and len(evidences) >= 2 else (
-            "medium" if evidences else "low"
-        ),
+        "evidence": evid_dicts,
+        "evidence_strength": "high"
+        if (prefer and len(evid_dicts) >= 2) or ratio_info.get("ratio_source")
+        else ("medium" if evid_dicts else "low"),
         "theme_filter": {
             "prefer_hits": len(prefer),
             "weak_hits": len(weak),
             "noise_excluded": True,
+            "chapter_hits": len(chapter_hits),
+            "ratio_candidates": len(ratio_info["share_pcts"])
+            + len(ratio_info["listing_rule_pcts"])
+            + len(ratio_info["waiver_pcts"]),
+            "ratio_source": ratio_info.get("ratio_source"),
         },
     }
 
@@ -516,10 +798,13 @@ def extract_legal_features(
     *,
     gates: dict[str, Any] | None = None,
     extra_hits: list[dict[str, Any]] | None = None,
+    parse_json: Path | str | None = None,
 ) -> dict[str, Any]:
     gates = gates or {}
     redemption = extract_redemption(bundle, extra_hits=extra_hits)
-    related = extract_related_party(bundle, extra_hits=extra_hits)
+    related = extract_related_party(
+        bundle, extra_hits=extra_hits, parse_json=parse_json
+    )
     concentration = extract_concentration(bundle, extra_hits=extra_hits)
     out: dict[str, Any] = {
         "3.1": redemption,
@@ -531,5 +816,55 @@ def extract_legal_features(
     else:
         out["3.5"] = extract_pipeline(bundle, extra_hits=extra_hits)
     out["3.4"] = {"owner": "finance", "skipped_by_legal": True}
-    out["3.6"] = {"valuation_inversion": False, "evidence": []}
+    out["3.6"] = {
+        "exists": False,
+        "skipped": True,
+        "reason": "本流水线未实现估值倒挂专项抽取（非本轮法务主责）",
+        "valuation_inversion": False,
+        "evidence": [],
+        "evidence_strength": "n/a",
+    }
+    # 各章节证据去重
+    from src.skills.evidence_utils import dedupe_hits
+
+    for sec, feat in list(out.items()):
+        if isinstance(feat, dict) and isinstance(feat.get("evidence"), list):
+            feat["evidence"] = dedupe_hits(feat["evidence"])
     return out
+
+
+def enrich_rule_features_from_skills(
+    features: dict[str, Any],
+    skill_results: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """用 skill 抽取结果回填规则特征（如关联交易占比）。"""
+    skill_results = skill_results or {}
+    related = (skill_results.get("legal_related_party") or {}).get("features") or {}
+    f32 = features.get("3.2") if isinstance(features.get("3.2"), dict) else {}
+    if not isinstance(f32, dict):
+        f32 = {}
+    f32 = dict(f32)
+
+    if f32.get("ratio_pct") is None:
+        ratio = related.get("max_ratio_pct")
+        if ratio is None:
+            ratio = related.get("ratio_pct")
+        # 从豁免叙述回填（如「低於5%及3,000,000港元上限」）
+        if ratio is None and related.get("waiver"):
+            sig = parse_related_party_ratio_signals(str(related.get("waiver")))
+            if sig["waiver_pcts"]:
+                ratio = max(sig["waiver_pcts"])
+                f32["ratio_source"] = f32.get("ratio_source") or "skill_waiver_text"
+            elif sig["listing_rule_pcts"]:
+                ratio = max(sig["listing_rule_pcts"])
+                f32["ratio_source"] = f32.get("ratio_source") or "skill_waiver_text"
+        try:
+            if ratio is not None:
+                f32["ratio_pct"] = float(ratio)
+                f32["related_party_ratio_gt_30"] = float(ratio) > 30
+                f32.setdefault("ratio_source", "skill_features")
+        except (TypeError, ValueError):
+            pass
+
+    features["3.2"] = f32
+    return features

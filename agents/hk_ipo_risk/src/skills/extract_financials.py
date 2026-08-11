@@ -173,13 +173,20 @@ def extract_financials_from_retrieval(bundle: dict[str, Any]) -> dict[str, Any]:
         years = extract_year_headers(rows)
         if not years:
             years = extract_year_headers([[line] for line in excerpt.splitlines()[:12]])
+        years_uncertain = False
         if not years:
-            years = ["2021", "2022", "2023", "2024"]
+            # 禁止硬编码真实会计年度（会把 2020 数据静默挂到 2021）
+            n_cols = max((len(r) for r in rows[:6]), default=0)
+            n_data = max(n_cols - 1, 2)
+            years = [f"p{i}" for i in range(min(n_data, 6))]
+            years_uncertain = True
+            extract_notes.append(f"{table_code}:years_uncertain")
         src = "table" if "<table" in excerpt.lower() else "text"
         short = _short_excerpt(excerpt)
         table_meta[table_code] = {
             "page": page,
             "years": years,
+            "years_uncertain": years_uncertain,
             "category": best.get("category") or src,
             "n_hits": len(hits),
             "excerpt": short,

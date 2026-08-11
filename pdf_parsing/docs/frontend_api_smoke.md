@@ -1,6 +1,6 @@
 # 前端联调 — 统一网关 9100
 
-> 契约：`dataset/interface_new.md` v3.2  
+> 契约：`dataset/interface_new.md` v3.3  
 > **前端只配一个 Base**：`http://223.3.95.129:9100`（本机 `http://127.0.0.1:9100`）  
 > 后端内部：9100 解析/索引 + 反代分析；9101 检索（内部）；9102 分析（被 9100 反代，前端不直连）  
 > 当前：**桩模式**解析；解析完成后自动调本机 9101 建索引
@@ -182,7 +182,24 @@ curl -N -s "$BASE/api/v1/projects/${PROJ}/analysis/stream?analysisId=${AID}"
 
 # result
 curl -s "$BASE/api/v1/projects/${PROJ}/analysis/result?analysisId=${AID}" -o /tmp/analysis_result.json
-python3 -c "import json;d=json.load(open('/tmp/analysis_result.json'))['data'];print(d['status'],d.get('overallScore'),d.get('riskLevel'),len(d.get('thoughts')or[]))"
+python3 <<'PY'
+import json
+d=json.load(open("/tmp/analysis_result.json"))["data"]
+ag=d.get("agents") or {}
+leg, fin = ag.get("legal") or {}, ag.get("financial") or {}
+print("status", d.get("status"), "overall", d.get("overallScore"), d.get("riskLevel"), "thoughts", len(d.get("thoughts") or []))
+print("scoringMode", leg.get("scoringMode"), fin.get("scoringMode"))
+print("legalDetail.skills", [s.get("name") for s in ((leg.get("legalDetail") or {}).get("skills") or [])])
+print("financeDetail", bool(fin.get("financeDetail")), "dossierPaths", d.get("dossierPaths"))
+print("market", (ag.get("market") or {}).get("status"), "orchestrator", (ag.get("orchestrator") or {}).get("status"))
+assert d.get("status")=="completed"
+assert leg.get("scoringMode") and fin.get("scoringMode")
+assert fin.get("financeDetail") is not None
+assert (leg.get("legalDetail") or {}).get("skills")
+assert (ag.get("market") or {}).get("status")=="skipped"
+assert (ag.get("orchestrator") or {}).get("status")=="placeholder"
+print("OK: v3.3 result shell")
+PY
 ```
 
 | 字段 | 说明 |
@@ -190,12 +207,12 @@ python3 -c "import json;d=json.load(open('/tmp/analysis_result.json'))['data'];p
 | `clientProjectId` | 与路径一致 |
 | `taskId` | 可选，关联解析任务 |
 | `llmConfig` | 可选；`apiBaseUrl` / `apiKey` / `model` 缺省则用后端默认 |
-| `isBiotech` | 可选；解析 meta 已有则可省略 |
+| `isBiotech` | 可选；`true`→`issuerType=biotech`（≡18a 门控）；解析 meta 已有则可省略 |
 
-期望：start **202**；stream 有 thought；result 含 agents；索引未 ready → **409** `INDEX_NOT_READY`。  
+期望：start **202**；stream 有 thought；result 含 `scoringMode` / `financeDetail` / `legalDetail` / `dossierPaths` / market+orchestrator stub；索引未 ready → **409** `INDEX_NOT_READY`。  
 若 9102 未启动：网关返回 **502** `ANALYSIS_UPSTREAM_DOWN`。
 
-RAG / report 页接口仍未实现。
+RAG / report 页接口仍未实现（契约 v3.3 已标注）。
 
 ---
 

@@ -16,6 +16,7 @@
 | 一键 prepare：建索引（含 section_map）+ finance/legal 检索包 | 不返回 markdown/报告给前端 |
 | 给分析服务 / Agent 返回**本地路径** | 不替代专家解析（9100） |
 | 幂等：已有产物且未 force → 秒级 READY | 不做 SSE 思考流 / 总控 / 前端 `rag/query` |
+| legal 包字段对齐 hk_ipo_risk **5 Skill**（§3.4 不进 legal） | 不在检索层做法务评分 |
 
 ```text
 前端 parse/expert/start（收齐 ticker/companyName/listDate/isBiotech/clientProjectId）
@@ -47,7 +48,7 @@
 | `clientProjectId` / `fileName` / `isBiotech` | 已有；`clientProjectId` 用于 index-status 路径 |
 | `companyName` | Form 可选 |
 | `listDate` | Form 可选；规范化为 `listingDate=YYYYMMDD` |
-| `issuerType` | 由 `isBiotech` 映射（true→biotech，false→general） |
+| `issuerType` | 由 `isBiotech` 映射（true→`biotech`，false→`general`）；与 CLI `18a`/`18c` **门控等价**（启用 2.4/3.5） |
 | `taskId` | 解析服务生成并返回；亦为检索 `doc_id` |
 
 ### 1.3 分析 `POST .../analysis/start`

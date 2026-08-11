@@ -114,7 +114,7 @@ def score_legal(features: dict[str, Any], gates: dict[str, Any] | None = None) -
             note="存在核心产品/管线进度披露",
         )
 
-    total = max(0.0, min(100.0, total))
+    total = round(max(0.0, min(100.0, total)), 1)
     return {
         "risk_score": total,
         "risk_level": score_to_level(total, rules_cfg),

@@ -12,7 +12,7 @@ sections:
       GP_MARGIN: { derive: "GP / REV * 100" }
       RD_EXP: { labels: ["研發開支", "研发开支", "研发费用", "研發成本", "研发成本"] }
       SGA: { labels: ["銷售及分銷開支", "行政開支", "销售及营销费用"] }
-      NET_LOSS: { labels: ["年度／期間內利潤", "年／期內利潤", "年內利潤", "年内利润", "期內利潤", "期内利润", "年內溢利", "年内溢利", "期内溢利", "期內溢利", "年度/期間內利潤", "年／期內虧損", "期内亏损", "期內虧損", "年內虧損", "期内虧損"], note: "正数=盈利" }
+      NET_LOSS: { labels: ["年度／期間內利潤", "年／期內利潤", "年內利潤", "年内利润", "期內利潤", "期内利润", "年內溢利", "年内溢利", "期内溢利", "期內溢利", "年度/期間內利潤", "期／年內虧損及全面開支總額", "期／年內虧損及全面收益總額", "年內／期內總全面虧損", "年內／期內虧損", "年／期內虧損", "期／年內虧損", "期内亏损", "期內虧損", "年內虧損", "期内虧損", "除税前虧損", "除稅前虧損"], note: "正数=盈利；含全面開支/除税前变体" }
   "2.2":
     table_code: TBL_BS
     fields:
@@ -38,3 +38,41 @@ gates:
     description: "仅未盈利企业评估现金跑道"
   section_2_4:
     require_biotech: true
+
+# 可移植 Finance Skill（与 legal_schema.skills 同构）
+skills:
+  finance_profitability:
+    maps_to: ["2.1"]
+    keywords: ["毛利", "虧損", "亏损", "溢利", "淨利潤", "净利润", "營業額", "营业收入"]
+    intents: ["business_context"]
+    section_hints: ["financial_information", "summary"]
+    queries:
+      - "毛利率 虧損 溢利 營業額"
+    risk_codes: [CONTINUOUS_LOSS, SINGLE_YEAR_LOSS, GP_MARGIN_DROP]
+  finance_cash_flow:
+    maps_to: ["2.3", "3.4"]
+    keywords: ["現金", "现金", "經營活動", "经营活动", "現金流量", "燒錢", "跑道"]
+    intents: ["financing_dependency"]
+    section_hints: ["financial_information", "risk_factors"]
+    queries:
+      - "經營活動現金流 現金及現金等價物 資金需求"
+    risk_codes: [CFO_NEGATIVE, CASH_RUNWAY_LT_12, CASH_RUNWAY_12_24, BURN_YOY_UP_30]
+  finance_solvency:
+    maps_to: ["2.2"]
+    keywords: ["總資產", "负债", "負債", "優先股", "优先股", "可轉換可贖回", "淨資產"]
+    intents: ["financing_dependency"]
+    section_hints: ["financial_information", "history_and_corporate_structure"]
+    queries:
+      - "可轉換可贖回優先股 普通股贖回負債 總負債"
+    risk_codes: [CV_PREF_LIABILITY]
+  finance_business_context:
+    maps_to: ["business"]
+    keywords: ["加盟", "供應商", "供应商", "客戶", "客户", "融資", "融资", "所得款項", "商業模式"]
+    intents: ["business_context", "franchise", "supply_chain", "financing_dependency"]
+    section_hints: ["business", "risk_factors", "summary", "financial_information"]
+    queries:
+      - "加盟 特許經營 供應商集中 客戶集中"
+      - "融資 資金需求 營運資金"
+    biotech_extra_queries:
+      - "融資 資金需求 營運資金 所得款項用途 現金消耗"
+    risk_codes: [FRANCHISE_DEPENDENCY, SUPPLY_CONCENTRATION, FINANCING_DEPENDENCY]

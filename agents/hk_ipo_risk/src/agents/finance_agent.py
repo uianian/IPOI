@@ -6,11 +6,23 @@ from pathlib import Path
 from typing import Any
 
 from src.agents.react_loop import run_react_loop
-from src.llm.prompts import FINANCE_REACT_SYSTEM, FINANCE_REACT_USER
+from src.llm.prompts import (
+    FINANCE_ISSUER_GUIDANCE,
+    FINANCE_REACT_SYSTEM,
+    FINANCE_REACT_USER,
+)
 from src.models.evidence import AgentResult
-from src.skills.analyze_finance import _normalize_risk_points, analyze_finance_llm
+from src.skills.analyze_finance import (
+    _normalize_breakdown,
+    _normalize_risk_points,
+    analyze_finance_llm,
+)
 from src.skills.extract_financials import extract_financials_from_retrieval
-from src.skills.finance_toolbox import build_finance_tool_registry
+from src.skills.finance_toolbox import (
+    _apply_18a_data_insufficient_guard,
+    _compose_finance_submit_payload,
+    build_finance_tool_registry,
+)
 from src.skills.gates import compute_cash_burn, resolve_issuer_gates
 from src.skills.score_finance import score_finance
 from src.tools.retrieval_tool import retrieve_agent
@@ -28,13 +40,17 @@ class FinanceAgent:
         run_logger: Any | None = None,
         rules_only: bool = False,
         pipeline: bool = False,
-        max_turns: int = 8,
+        max_turns: int = 10,
+        debate_dir: Path | str | None = None,
+        reasoning_effort: str | None = "low",
     ) -> None:
         self._llm = llm
         self._run_logger = run_logger
         self._rules_only = rules_only
         self._pipeline = pipeline
         self._max_turns = max_turns
+        self._debate_dir = debate_dir
+        self._reasoning_effort = reasoning_effort or "low"
 
     async def run(
         self,
@@ -46,6 +62,9 @@ class FinanceAgent:
         top_k: int | None = None,
         doc_name: str | None = None,
         pdf_name: str | None = None,
+        client_project_id: str | None = None,
+        task_id: str | None = None,
+        analysis_id: str | None = None,
     ) -> AgentResult:
         if self._rules_only or self._pipeline or not (
             self._llm is not None and getattr(self._llm, "available", False)
@@ -61,6 +80,9 @@ class FinanceAgent:
                 force_rules=self._rules_only or not (
                     self._llm is not None and getattr(self._llm, "available", False)
                 ),
+                client_project_id=client_project_id,
+                task_id=task_id,
+                analysis_id=analysis_id,
             )
         return await self._run_react(
             doc_id,
@@ -70,6 +92,9 @@ class FinanceAgent:
             top_k=top_k,
             doc_name=doc_name,
             pdf_name=pdf_name,
+            client_project_id=client_project_id,
+            task_id=task_id,
+            analysis_id=analysis_id,
         )
 
     async def _run_react(
@@ -82,6 +107,9 @@ class FinanceAgent:
         top_k: int | None,
         doc_name: str | None,
         pdf_name: str | None,
+        client_project_id: str | None = None,
+        task_id: str | None = None,
+        analysis_id: str | None = None,
     ) -> AgentResult:
         t0 = time.time()
         log = self._run_logger
@@ -94,12 +122,25 @@ class FinanceAgent:
             "top_k": top_k,
             "doc_name": doc_name,
             "pdf_name": pdf_name,
+            "client_project_id": client_project_id,
+            "task_id": task_id or doc_id,
+            "analysis_id": analysis_id,
             "finished": False,
+            "skill_results": {},
+            "queries_used": [],
+            "search_quota": 2,
+            "search_used": 0,
+            "_llm": self._llm,
         }
+        if self._debate_dir:
+            state["debate_dir"] = self._debate_dir
+        it = (issuer_type or "general").lower()
+        guidance = FINANCE_ISSUER_GUIDANCE.get(it) or FINANCE_ISSUER_GUIDANCE["general"]
         user = FINANCE_REACT_USER.format(
             doc_id=doc_id,
             issuer_type=issuer_type,
             doc_name=doc_name or doc_id,
+            issuer_guidance=guidance,
         )
         try:
             loop_out = await run_react_loop(
@@ -110,6 +151,7 @@ class FinanceAgent:
                 state=state,
                 run_logger=log,
                 max_turns=self._max_turns,
+                reasoning_effort=self._reasoning_effort,
             )
         except Exception as e:
             logger.warning("ReAct loop failed, fallback pipeline: %s", e)
@@ -127,17 +169,25 @@ class FinanceAgent:
             )
 
         if not loop_out.get("ok") or not state.get("final_report"):
-            logger.warning("ReAct未submit，fallback pipeline: %s", loop_out.get("error"))
-            return await self._run_pipeline(
-                doc_id,
-                issuer_type=issuer_type,
-                retrieval_json=retrieval_json,
-                parse_json=parse_json,
-                top_k=top_k,
-                doc_name=doc_name,
-                pdf_name=pdf_name,
-                force_rules=False,
+            auto_ok = await self._auto_submit_if_ready(
+                state, tools, reason=str(loop_out.get("error"))
             )
+            if not auto_ok:
+                logger.warning("ReAct未submit，fallback pipeline: %s", loop_out.get("error"))
+                return await self._run_pipeline(
+                    doc_id,
+                    issuer_type=issuer_type,
+                    retrieval_json=retrieval_json,
+                    parse_json=parse_json,
+                    top_k=top_k,
+                    doc_name=doc_name,
+                    pdf_name=pdf_name,
+                    force_rules=False,
+                    client_project_id=client_project_id,
+                    task_id=task_id,
+                    analysis_id=analysis_id,
+                )
+            loop_out = {**loop_out, "ok": True, "auto_submit": True}
 
         report = state["final_report"]
         metrics = state.get("metrics") or {}
@@ -159,6 +209,18 @@ class FinanceAgent:
         summary = report.get("summary") or f"ReAct 财务风险分 {risk_score:.1f} ({risk_level})"
         scoring_mode = str(report.get("scoring_mode") or "react+rules_floor")
         log_paths = log.paths if log else {}
+        turn_think = []
+        for t in loop_out.get("turns") or []:
+            if not isinstance(t, dict):
+                continue
+            if t.get("think_status") or t.get("status"):
+                turn_think.append(
+                    {
+                        "turn": t.get("turn"),
+                        "tool": t.get("tool"),
+                        "think_status": t.get("think_status") or t.get("status"),
+                    }
+                )
         features = {
             "scoring_mode": scoring_mode,
             "rules_floor": report.get("rules_floor"),
@@ -168,8 +230,33 @@ class FinanceAgent:
             "llm_analysis": report.get("llm_analysis"),
             "model_think_excerpt": (report.get("model_think") or "")[:500] or None,
             "think_status": report.get("think_status"),
+            "turn_think_status": turn_think,
             "submit_warnings": report.get("submit_warnings") or [],
+            "submit_recovered": bool(report.get("submit_recovered")),
+            "submit_composed_from_skills": bool(report.get("submit_composed_from_skills")),
             "react_turns": loop_out.get("n_turns"),
+            "cash_burn": cash_burn,
+            "risk_points": report.get("risk_points") or [],
+            "skill_results": {
+                k: {
+                    "risk_point_count": len((v or {}).get("risk_points") or []),
+                    "confidence": (v or {}).get("confidence"),
+                    "reasoning": ((v or {}).get("reasoning") or "")[:400] or None,
+                    "risk_points": [
+                        {
+                            "code": p.get("code"),
+                            "level": p.get("level"),
+                            "description": (p.get("description") or "")[:160],
+                            "evidence_page": p.get("evidence_page"),
+                        }
+                        for p in ((v or {}).get("risk_points") or [])[:6]
+                        if isinstance(p, dict)
+                    ],
+                }
+                for k, v in (state.get("skill_results") or {}).items()
+            },
+            "debate_dossier_path": report.get("debate_dossier_path")
+            or state.get("debate_dossier_path"),
             "run_log": log_paths,
         }
         if log:
@@ -182,12 +269,24 @@ class FinanceAgent:
             })
             log.close(final_summary=summary)
 
+        guard_warnings: list[str] = []
+        _apply_18a_data_insufficient_guard(report, state, guard_warnings)
+        if guard_warnings:
+            features.setdefault("submit_warnings", [])
+            if isinstance(features["submit_warnings"], list):
+                features["submit_warnings"] = list(features["submit_warnings"]) + guard_warnings
+            risk_score = float(report.get("risk_score") or risk_score)
+            risk_level = str(report.get("risk_level") or risk_level)
+            summary = report.get("summary") or summary
+
         return AgentResult(
             agent="finance",
             doc_id=doc_id,
             risk_score=risk_score,
             risk_level=risk_level,
-            score_breakdown=report.get("score_breakdown") or [],
+            score_breakdown=_normalize_breakdown(
+                report.get("score_breakdown") or [], extracted
+            ),
             risk_points=_normalize_risk_points(list(report.get("risk_points") or [])),
             metrics={**metrics, "cash_burn": cash_burn},
             features=features,
@@ -198,6 +297,7 @@ class FinanceAgent:
                 "snippets": snippets,
                 "section_evidence_hits": state.get("section_evidence_hits") or [],
                 "section_routes": state.get("section_routes") or [],
+                "queries_used": state.get("queries_used") or [],
                 "run_log": log_paths,
             },
             trace={
@@ -206,10 +306,33 @@ class FinanceAgent:
                 "scoring_mode": scoring_mode,
                 "structured_reasoning": report.get("reasoning"),
                 "n_turns": loop_out.get("n_turns"),
+                "debate_dossier_path": features.get("debate_dossier_path"),
                 "run_log": log_paths,
             },
             summary=summary,
         )
+
+    async def _auto_submit_if_ready(
+        self,
+        state: dict[str, Any],
+        tools: Any,
+        *,
+        reason: str | None,
+    ) -> bool:
+        """max_turns 耗尽但已有 metrics/skill 时强制 submit，保留 ReAct 成果。"""
+        if not state.get("metrics") or not state.get("gates"):
+            return False
+        skill_results = state.get("skill_results") or {}
+        pack = state.get("rule_pack") or {}
+        payload = _compose_finance_submit_payload(state, pack)
+        summary = (
+            f"財務 ReAct 自動收束（{reason or 'max_turns'}）："
+            f"已完成 {len(skill_results)} 個 skill"
+        )
+        payload["summary"] = summary
+        payload["reasoning"] = f"{summary}\n{payload.get('reasoning') or ''}".strip()
+        obs = await tools.execute("submit_finance_report", payload, state)
+        return bool(obs.get("ok") and state.get("final_report"))
 
     async def _run_pipeline(
         self,
@@ -222,6 +345,9 @@ class FinanceAgent:
         doc_name: str | None = None,
         pdf_name: str | None = None,
         force_rules: bool = False,
+        client_project_id: str | None = None,
+        task_id: str | None = None,
+        analysis_id: str | None = None,
     ) -> AgentResult:
         """旧流水线：retrieve→extract→gates→单次LLM/规则。"""
         t0 = time.time()
@@ -331,6 +457,23 @@ class FinanceAgent:
         summary = llm_pack.get("summary") or (
             f"财务指标{len(metrics)}项；风险分 {risk_score:.1f} ({risk_level}) [{scoring_mode}]"
         )
+        guard_warnings: list[str] = []
+        _apply_18a_data_insufficient_guard(
+            llm_pack,
+            {
+                "metrics": metrics,
+                "gates": gates,
+                "issuer_type": issuer_type,
+            },
+            guard_warnings,
+        )
+        if guard_warnings:
+            risk_score = float(llm_pack.get("risk_score") or risk_score)
+            risk_level = str(llm_pack.get("risk_level") or risk_level)
+            summary = llm_pack.get("summary") or (
+                f"财务指标{len(metrics)}项；风险分 {risk_score:.1f} ({risk_level}) "
+                f"[{scoring_mode}; data_insufficient]"
+            )
         log_paths = log.paths if log else {}
         if log:
             log.result({"risk_score": risk_score, "scoring_mode": scoring_mode, "summary": summary})
@@ -341,8 +484,10 @@ class FinanceAgent:
             doc_id=doc_id,
             risk_score=risk_score,
             risk_level=risk_level,
-            score_breakdown=llm_pack.get("score_breakdown") or [],
-            risk_points=llm_pack.get("risk_points") or [],
+            score_breakdown=_normalize_breakdown(
+                llm_pack.get("score_breakdown") or [], extracted
+            ),
+            risk_points=_normalize_risk_points(list(llm_pack.get("risk_points") or [])),
             metrics={**metrics, "cash_burn": cash_burn},
             features={
                 "scoring_mode": scoring_mode,
@@ -352,6 +497,7 @@ class FinanceAgent:
                 "llm_analysis": llm_pack.get("llm_analysis"),
                 "model_think_excerpt": (llm_pack.get("model_think") or "")[:500] or None,
                 "think_status": llm_pack.get("think_status"),
+                "submit_warnings": guard_warnings,
                 "run_log": log_paths,
             },
             gates=gates,

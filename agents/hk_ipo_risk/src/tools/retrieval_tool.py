@@ -36,7 +36,10 @@ INTENT_QUERY_TERMS: dict[str, list[str]] = {
     "business_context": ["商業模式", "商业模式", "收入模式", "依賴", "依赖"],
     "franchise": ["加盟", "加盟商", "特許經營", "特许经营", "加盟協議", "加盟协议"],
     "supply_chain": ["供應鏈", "供应链", "採購", "采购", "供應商", "供应商"],
-    "financing_dependency": ["融資", "融资", "Pre-IPO", "資金需求", "资金需求"],
+    "financing_dependency": [
+        "融資", "融资", "Pre-IPO", "資金需求", "资金需求",
+        "營運資金", "营运资金", "研發開支", "研发开支", "所得款項用途", "所得款项用途",
+    ],
     "related_party": ["關連交易", "关联交易", "持續關連", "持续关连", "關聯方"],
     "redemption": ["贖回", "赎回", "對賭", "对赌", "優先股", "优先股", "回購"],
     "concentration": ["前五大客戶", "前五大客户", "前五大供應商", "前五大供应商"],
@@ -69,36 +72,58 @@ def _load_full_parse_pages(path: Path | str) -> list[dict[str, Any]]:
     return data
 
 
+def _split_section_hints(section_hint: str | list[str] | None) -> list[str]:
+    """拆分 section_hint：支持 'business/industry/financing' 或逗号分隔，避免整串当一个 id。"""
+    if section_hint is None:
+        return []
+    if isinstance(section_hint, list):
+        raw_parts = [str(x) for x in section_hint]
+    else:
+        raw_parts = [str(section_hint)]
+    out: list[str] = []
+    for part in raw_parts:
+        for token in re.split(r"[/,\s;；|]+", part):
+            t = token.strip()
+            if t:
+                out.append(t)
+    return list(dict.fromkeys(out))
+
+
 def resolve_sections(
     *,
     intent: str,
     section_map: Any,
     section_hint: str | list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    hints = (
-        [section_hint]
-        if isinstance(section_hint, str)
-        else list(section_hint or [])
-    )
-    requested = hints or INTENT_SECTION_ROUTES.get(intent) or [
+    hints = _split_section_hints(section_hint)
+    fallback = INTENT_SECTION_ROUTES.get(intent) or [
         "business",
         "risk_factors",
         "summary",
     ]
-    resolved: list[dict[str, Any]] = []
-    for section_id in requested:
-        span = section_map.span_for(str(section_id))
-        if span is None:
-            continue
-        resolved.append(
-            {
-                "section_id": span.canonical_section,
-                "section_title": span.display_title,
-                "start_page": span.start_page,
-                "end_page": span.end_page,
-                "confidence": span.confidence,
-            }
-        )
+    requested = hints or list(fallback)
+
+    def _resolve(ids: list[str]) -> list[dict[str, Any]]:
+        resolved: list[dict[str, Any]] = []
+        for section_id in ids:
+            span = section_map.span_for(str(section_id))
+            if span is None:
+                continue
+            resolved.append(
+                {
+                    "section_id": span.canonical_section,
+                    "section_title": span.display_title,
+                    "start_page": span.start_page,
+                    "end_page": span.end_page,
+                    "confidence": span.confidence,
+                }
+            )
+        return resolved
+
+    resolved = _resolve(requested)
+    # hint 全无效时回退 intent 默认路由（修 business/industry/financing 整串废路由）
+    if not resolved and hints:
+        resolved = _resolve(list(fallback))
     return resolved
 
 
@@ -203,17 +228,69 @@ def _direct_section_search(
             }
         )
     candidates.sort(key=lambda item: (-float(item["score"]), int(item["page"])))
-    seen: set[tuple[int, str]] = set()
-    hits: list[dict[str, Any]] = []
-    for candidate in candidates:
-        key = (int(candidate["page"]), str(candidate["excerpt"])[:100])
-        if key in seen:
+    return diversify_section_hits(candidates, top_k=top_k)
+
+
+def _norm_excerpt_prefix(text: str, n: int = 80) -> str:
+    t = re.sub(r"\s+", "", str(text or ""))
+    return t[:n]
+
+
+def diversify_section_hits(
+    candidates: list[dict[str, Any]],
+    *,
+    top_k: int = 5,
+) -> list[dict[str, Any]]:
+    """页级去重 + excerpt 前缀去重 + 章节多样性，再裁到 top_k。"""
+    if not candidates:
+        return []
+    ordered = sorted(
+        candidates,
+        key=lambda item: (-float(item.get("score") or 0), int(item.get("page") or 0)),
+    )
+    page_best: dict[tuple[Any, str], dict[str, Any]] = {}
+    for c in ordered:
+        try:
+            page = int(c.get("page"))
+        except (TypeError, ValueError):
+            page = c.get("page")
+        key = (page, str(c.get("source_type") or "text"))
+        if key not in page_best:
+            page_best[key] = c
+    uniq = sorted(
+        page_best.values(),
+        key=lambda item: (-float(item.get("score") or 0), int(item.get("page") or 0)),
+    )
+    # excerpt 前缀二次去重
+    prefix_seen: set[str] = set()
+    after_prefix: list[dict[str, Any]] = []
+    for c in uniq:
+        pref = _norm_excerpt_prefix(c.get("excerpt") or "")
+        if pref and pref in prefix_seen:
             continue
-        seen.add(key)
-        hits.append(candidate)
+        if pref:
+            prefix_seen.add(pref)
+        after_prefix.append(c)
+    # 章节多样性：先各章节取最高分，再按分数补齐
+    by_section: dict[str, list[dict[str, Any]]] = {}
+    for c in after_prefix:
+        sid = str(c.get("section_id") or "_")
+        by_section.setdefault(sid, []).append(c)
+    hits: list[dict[str, Any]] = []
+    used: set[int] = set()
+    for sid, rows in by_section.items():
+        best = rows[0]
+        hits.append(best)
+        used.add(id(best))
+        if len(hits) >= top_k:
+            return hits[:top_k]
+    for c in after_prefix:
+        if id(c) in used:
+            continue
+        hits.append(c)
         if len(hits) >= top_k:
             break
-    return hits
+    return hits[:top_k]
 
 
 async def retrieve_section_evidence(

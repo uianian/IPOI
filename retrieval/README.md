@@ -121,6 +121,8 @@ python scripts/simulate_agent_retrieval.py --doc-id ... --agent all ...
 ## 架构要点
 
 - 财务 2.1/2.2/2.3：`recall_unit: table`，按 `TBL_IS` / `TBL_BS` / `TBL_CF` 整表 Top-K
-- 法务：按字段 Grep∪BM25∪Vector Top-K
+- 法务：按 **5 Skill** 字段 Grep∪BM25∪Vector Top-K（`GOVERNANCE` / `REDEMPTION_CLAUSE`+`PRE_IPO_VALUATION` / `RELATED_PARTY` / `CONTRACTS_AND_IP` / `REGULATORY_LITIGATION`；另保留 `CONCENTRATION`；18A 叠 `PIPELINE_RISK`）
+- §3.4 现金消耗**不进** legal 包（归财务）
+- `issuerType`：`biotech` ≡ `18a` ≡ `18c`（前端 `isBiotech=true`）
 - 融合：加权 RRF；详见 `src/retrieval/hybrid.py`
 - 市场情绪 Agent **不**走本检索包取宏观/认购等结构化字段（那些在 `market/`）；本包只服务招股书原文证据
