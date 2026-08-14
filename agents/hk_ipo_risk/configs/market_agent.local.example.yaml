@@ -1,0 +1,24 @@
+market_agent:
+  # 复制为 market_agent.local.yaml 后，可覆盖不同机器上的固定路径或模型。
+  data:
+    features_csv: "market/data/derived/ipo_sentiment_features.csv"
+    news_dir: "market/data/external/news"
+    postlisting_checkpoints_csv: "market/data/derived/ipo_postlisting_checkpoints.csv"
+
+  llm:
+    enabled: true
+    # 如需写入配置文件，请只写在 market_agent.local.yaml，禁止提交真实 Key。
+    api_key: ""
+    api_base: ""
+    chat_model: ""
+
+  output:
+    directory: "agents/hk_ipo_risk/.runtime/market"
+
+  database:
+    enabled: false
+    required: false
+    schema: "market_agent"
+    # 推荐留空并使用 MARKET_DATABASE_URL 环境变量。
+    postgres_url: ""
+

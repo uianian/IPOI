@@ -1,0 +1,555 @@
+version: 1
+description: 市场情绪 Agent 指标来源、口径和解释目录；路径均相对仓库根目录。
+
+aggregation:
+  qualitative_margin: 0.10
+  overall_module_weights_without_opinion:
+    macro: 0.3333333333
+    industry: 0.3333333333
+    ipo_market: 0.3333333333
+    public_opinion: 0.0
+  overall_module_weights_with_opinion:
+    macro: 0.25
+    industry: 0.25
+    ipo_market: 0.25
+    public_opinion: 0.25
+  module_methods:
+    macro: documented_indicator_weights
+    industry: equal_directional_evidence
+    ipo_market: equal_directional_evidence
+    public_opinion: equal_directional_evidence
+  macro_indicator_weights:
+    hsi_ret_5d: 0.05
+    hsi_ret_20d: 0.05
+    hsi_ret_60d: 0.05
+    hstech_ret_5d: 0.05
+    hstech_ret_20d: 0.05
+    hstech_ret_60d: 0.05
+    mkt_turnover_chg_20d: 0.20
+    southbound_net_20d: 0.20
+    vhsi_avg_5d: 0.20
+    hsi_vol_20d: 0.20
+    dff_chg_30cd: 0.0333333333
+    dxy_ret_20d: 0.0333333333
+    us10y_chg_20d: 0.0333333333
+  notes:
+    - 宏观权重按走势30%、流动性40%、波动率20%、外部环境10%；同组方向性指标平分组权重。
+    - VHSI有值时优先使用VHSI；缺失时才使用恒指20日实现波动率，避免重复计算波动率。
+    - 行业、IPO市场和舆情仅在已经形成自然方向的有效证据之间等权；上下文指标不强行定向。
+    - 模块净支持度=(支持权重-压制权重)/(支持权重+压制权重)，范围-1至+1。
+    - 综合净支持度按三模块各1/3或四模块各25%计算，不是0-100分数。
+
+indicators:
+  hsi_ret_5d:
+    direction_rule: positive_support
+    evidence_id: MACRO-HSI-5D
+    module: macro
+    label: 恒指5日收益
+    unit: ratio
+    display: percent
+    window: 截止日前5个交易日
+    formula: P(t) / P(t-5) - 1
+    upstream_files: [market/data/external/macro/hsi.csv]
+    upstream_fields: [date, close]
+    provider: 万得 HSI.HI
+    positive_meaning: 恒指短期上涨，对发行环境形成支持
+    negative_meaning: 恒指短期下跌，反映大市情绪承压
+  hsi_ret_20d:
+    direction_rule: positive_support
+    evidence_id: MACRO-HSI-20D
+    module: macro
+    label: 恒指20日收益
+    unit: ratio
+    display: percent
+    window: 截止日前20个交易日
+    formula: P(t) / P(t-20) - 1
+    upstream_files: [market/data/external/macro/hsi.csv]
+    upstream_fields: [date, close]
+    provider: 万得 HSI.HI
+    positive_meaning: 恒指中期上涨，对IPO发行环境形成支持
+    negative_meaning: 恒指中期下跌，说明整体市场环境偏弱
+  hsi_ret_60d:
+    direction_rule: positive_support
+    evidence_id: MACRO-HSI-60D
+    module: macro
+    label: 恒指60日收益
+    unit: ratio
+    display: percent
+    window: 截止日前60个交易日
+    formula: P(t) / P(t-60) - 1
+    upstream_files: [market/data/external/macro/hsi.csv]
+    upstream_fields: [date, close]
+    provider: 万得 HSI.HI
+    positive_meaning: 恒指中长期趋势向上
+    negative_meaning: 恒指中长期趋势向下
+  hstech_ret_5d:
+    direction_rule: positive_support
+    evidence_id: MACRO-HSTECH-5D
+    module: macro
+    label: 恒生科技5日收益
+    unit: ratio
+    display: percent
+    window: 截止日前5个交易日
+    formula: P(t) / P(t-5) - 1
+    upstream_files: [market/data/external/macro/hstech.csv]
+    upstream_fields: [date, close]
+    provider: AKShare/新浪
+    positive_meaning: 科技成长风格短期走强，风险偏好改善
+    negative_meaning: 科技成长风格短期走弱，风险偏好承压
+  hstech_ret_20d:
+    direction_rule: positive_support
+    evidence_id: MACRO-HSTECH-20D
+    module: macro
+    label: 恒生科技20日收益
+    unit: ratio
+    display: percent
+    window: 截止日前20个交易日
+    formula: P(t) / P(t-20) - 1
+    upstream_files: [market/data/external/macro/hstech.csv]
+    upstream_fields: [date, close]
+    provider: AKShare/新浪
+    positive_meaning: 科技成长风格中期走强，市场风险偏好改善
+    negative_meaning: 科技成长风格中期走弱，市场风险偏好下降
+  hstech_ret_60d:
+    direction_rule: positive_support
+    evidence_id: MACRO-HSTECH-60D
+    module: macro
+    label: 恒生科技60日收益
+    unit: ratio
+    display: percent
+    window: 截止日前60个交易日
+    formula: P(t) / P(t-60) - 1
+    upstream_files: [market/data/external/macro/hstech.csv]
+    upstream_fields: [date, close]
+    provider: AKShare/新浪
+    positive_meaning: 科技成长风格中长期走强
+    negative_meaning: 科技成长风格中长期走弱
+  hsi_vol_20d:
+    evidence_id: MACRO-HSI-VOL-20D
+    module: macro
+    label: 恒指20日实现波动率
+    unit: ratio
+    display: percent
+    window: 截止日前20个交易日
+    formula: std(daily_return, ddof=1)
+    upstream_files: [market/data/external/macro/hsi.csv]
+    upstream_fields: [date, close]
+    provider: 万得 HSI.HI
+    context_meaning: 记录恒指实现波动水平；高低等级需在历史样本中校准后判断
+    positive_meaning: 实现波动率较低，市场运行相对稳定
+    negative_meaning: 实现波动率较高，市场不确定性增加
+  vhsi_avg_5d:
+    evidence_id: MACRO-VHSI-5D
+    module: macro
+    label: VHSI五日均值
+    unit: index_point
+    display: decimal
+    window: 截止日前5个交易日
+    formula: mean(VHSI close, 5d)
+    upstream_files: [market/data/external/macro/vhsi.csv]
+    upstream_fields: [date, close]
+    provider: AKShare/新浪
+    context_meaning: 记录市场隐含波动预期；高低等级需在历史样本中校准后判断
+    positive_meaning: VHSI较低，市场隐含波动预期较低
+    negative_meaning: VHSI较高，市场隐含波动预期较高
+  mkt_turnover_avg_20d:
+    evidence_id: LIQUIDITY-TURNOVER-AVG-20D
+    module: macro
+    label: 港股20日平均成交额
+    unit: thousand_hkd
+    display: amount
+    window: 截止日前20个交易日
+    formula: mean(total_amount_thousand_hkd, 20d)
+    upstream_files: [market/data/derived/market_turnover_daily.csv, dataset/hkshareeodprices.csv]
+    upstream_fields: [date, total_amount_thousand_hkd]
+    provider: 赛题EOD汇总
+    context_meaning: 用于描述港股市场绝对成交活跃度，需结合历史变化判断
+  mkt_turnover_chg_20d:
+    direction_rule: positive_support
+    evidence_id: LIQUIDITY-TURNOVER-CHG-20D
+    module: macro
+    label: 港股成交额20日环比变化
+    unit: ratio
+    display: percent
+    window: 最近20个交易日相对此前20个交易日
+    formula: mean(turnover[t-19:t]) / mean(turnover[t-39:t-20]) - 1
+    upstream_files: [market/data/derived/market_turnover_daily.csv, dataset/hkshareeodprices.csv]
+    upstream_fields: [date, total_amount_thousand_hkd]
+    provider: 赛题EOD汇总
+    positive_meaning: 市场成交活跃度上升，流动性支持增强
+    negative_meaning: 市场成交活跃度下降，流动性支持减弱
+  southbound_net_20d:
+    direction_rule: positive_support
+    evidence_id: LIQUIDITY-SOUTHBOUND-20D
+    module: macro
+    label: 南向资金20日净额
+    unit: source_unit
+    display: decimal
+    window: 截止日前20个交易日
+    formula: sum(当日成交净买额, 20d)
+    upstream_files: [market/data/external/macro/southbound.csv]
+    upstream_fields: [date, 当日成交净买额]
+    provider: AKShare/东方财富
+    positive_meaning: 南向资金净流入，为港股流动性提供支持
+    negative_meaning: 南向资金净流出，对港股流动性形成压力
+    quality_note: 原始金额单位须以源文件说明为准，报告不得自行猜测
+  dff_level:
+    evidence_id: EXTERNAL-DFF-LEVEL
+    module: macro
+    label: 美联储有效联邦基金利率
+    unit: percentage_point
+    display: decimal
+    window: 截止日最新可用值
+    formula: asof(DFF)
+    upstream_files: [market/data/external/macro/fed_dff.csv]
+    upstream_fields: [date, dff]
+    provider: FRED DFF
+    context_meaning: 利率绝对水平用于描述外部融资环境
+  dff_chg_30cd:
+    direction_rule: negative_support
+    evidence_id: EXTERNAL-DFF-CHG-30D
+    module: macro
+    label: 联邦基金利率30日变化
+    unit: percentage_point
+    display: decimal
+    window: 截止日前30个自然日
+    formula: DFF(t) - DFF(t-30 calendar days)
+    upstream_files: [market/data/external/macro/fed_dff.csv]
+    upstream_fields: [date, dff]
+    provider: FRED DFF
+    positive_meaning: 利率下降，外部流动性压力缓和
+    negative_meaning: 利率上升，外部流动性压力增加
+  dxy_ret_20d:
+    direction_rule: negative_support
+    evidence_id: EXTERNAL-DXY-20D
+    module: macro
+    label: 美元指数20日收益
+    unit: ratio
+    display: percent
+    window: 截止日前20个交易日
+    formula: P(t) / P(t-20) - 1
+    upstream_files: [market/data/external/macro/dxy.csv]
+    upstream_fields: [date, close]
+    provider: 万得 USDX.FX
+    positive_meaning: 美元走弱，通常缓和港股外部资金压力
+    negative_meaning: 美元走强，通常增加港股外部资金压力
+  us10y_level:
+    evidence_id: EXTERNAL-US10Y-LEVEL
+    module: macro
+    label: 美国10年期国债收益率
+    unit: percentage_point
+    display: decimal
+    window: 截止日最新可用值
+    formula: asof(US10Y)
+    upstream_files: [market/data/external/macro/us10y.csv]
+    upstream_fields: [date, us10y]
+    provider: 万得 G0000891
+    context_meaning: 长端利率绝对水平用于描述全球估值与融资环境
+  us10y_chg_20d:
+    direction_rule: negative_support
+    evidence_id: EXTERNAL-US10Y-CHG-20D
+    module: macro
+    label: 美国10年期国债收益率20日变化
+    unit: percentage_point
+    display: decimal
+    window: 截止日前20个自然日
+    formula: US10Y(t) - US10Y(t-20 calendar days)
+    upstream_files: [market/data/external/macro/us10y.csv]
+    upstream_fields: [date, us10y]
+    provider: 万得 G0000891
+    positive_meaning: 长端利率下降，估值压力缓和
+    negative_meaning: 长端利率上升，估值压力增加
+
+  ind_ret_5d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-RETURN-5D
+    module: industry
+    label: 行业5日收益
+    unit: ratio
+    display: percent
+    window: 截止日前5个交易日
+    formula: IndustryIndex(t) / IndustryIndex(t-5) - 1
+    upstream_files: [market/data/external/wind/hsics_index_daily.csv, market/data/derived/industry_basket_daily.csv]
+    upstream_fields: [date, close, cum]
+    provider: HSICS优先，概念篮子回退
+    positive_meaning: 所属行业短期上涨
+    negative_meaning: 所属行业短期下跌
+  ind_ret_20d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-RETURN-20D
+    module: industry
+    label: 行业20日收益
+    unit: ratio
+    display: percent
+    window: 截止日前20个交易日
+    formula: IndustryIndex(t) / IndustryIndex(t-20) - 1
+    upstream_files: [market/data/external/wind/hsics_index_daily.csv, market/data/derived/industry_basket_daily.csv]
+    upstream_fields: [date, close, cum]
+    provider: HSICS优先，概念篮子回退
+    positive_meaning: 所属行业中期上涨，对发行形成支持
+    negative_meaning: 所属行业中期下跌，对发行形成压力
+  ind_ret_60d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-RETURN-60D
+    module: industry
+    label: 行业60日收益
+    unit: ratio
+    display: percent
+    window: 截止日前60个交易日
+    formula: IndustryIndex(t) / IndustryIndex(t-60) - 1
+    upstream_files: [market/data/external/wind/hsics_index_daily.csv, market/data/derived/industry_basket_daily.csv]
+    upstream_fields: [date, close, cum]
+    provider: HSICS优先，概念篮子回退
+    positive_meaning: 所属行业中长期上涨
+    negative_meaning: 所属行业中长期下跌
+  ind_excess_20d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-EXCESS-20D
+    module: industry
+    label: 行业相对恒指20日超额收益
+    unit: ratio
+    display: percentage_point
+    window: 截止日前20个交易日
+    formula: ind_ret_20d - hsi_ret_20d
+    upstream_files: [market/data/external/wind/hsics_index_daily.csv, market/data/external/macro/hsi.csv]
+    upstream_fields: [date, close]
+    provider: HSICS/概念篮子与万得HSI
+    positive_meaning: 所属行业跑赢恒指，是市场主线或相对强势板块
+    negative_meaning: 所属行业跑输恒指，行业相对吸引力偏弱
+  ind_amount_chg_20d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-TURNOVER-CHG-20D
+    module: industry
+    label: 行业成交额20日环比变化
+    unit: ratio
+    display: percent
+    window: 最近20个交易日相对此前20个交易日
+    formula: mean(industry_amount, recent20) / mean(industry_amount, previous20) - 1
+    upstream_files: [market/data/derived/industry_basket_daily.csv]
+    upstream_fields: [date, industry, total_amount]
+    provider: 赛题EOD行业篮子聚合
+    positive_meaning: 行业成交活跃度上升
+    negative_meaning: 行业成交活跃度下降
+  ind_newhigh_ratio:
+    evidence_id: INDUSTRY-NEWHIGH-RATIO
+    module: industry
+    label: 行业创新高比例
+    unit: ratio
+    display: percent
+    window: 截止日行业成分截面
+    formula: new_high_constituents / valid_constituents
+    upstream_files: [market/data/derived/industry_basket_daily.csv]
+    upstream_fields: [date, industry, newhigh_ratio]
+    provider: 赛题EOD行业篮子聚合
+    context_meaning: 记录行业上涨广度；高低等级需结合历史分布校准
+    positive_meaning: 创新高股票比例较高，行业上涨广度较好
+    negative_meaning: 创新高股票比例较低，行业上涨广度有限
+  ind_net_inflow_20d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-NET-INFLOW-20D
+    module: industry
+    label: 行业板块20日净流入
+    unit: source_unit
+    display: amount
+    window: 截止日前20个交易日
+    formula: sum(net_inflow, 20d)
+    upstream_files: [market/data/external/wind/hs_sector_net_inflow_daily.csv]
+    upstream_fields: [date, hs_sector, net_inflow]
+    provider: 万得港交所行业板块
+    positive_meaning: 行业资金净流入，为板块情绪提供支持
+    negative_meaning: 行业资金净流出，对板块情绪形成压力
+    quality_note: 2022年前通常缺失；金额单位须以万得导出说明为准
+  ind_ipo_count_365d:
+    evidence_id: INDUSTRY-IPO-COUNT-365D
+    module: industry
+    label: 同行业近365日IPO数量
+    unit: count
+    display: integer
+    window: 截止日前365个自然日
+    formula: count(industry IPOs)
+    upstream_files: [market/data/derived/ipo_industry_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, industry, ipo_count_365d]
+    provider: 本地IPO事件滚动聚合
+    context_meaning: 描述所属行业的IPO供给与可比样本数量
+  ind_avg_day1_return_365d:
+    direction_rule: positive_support
+    evidence_id: INDUSTRY-IPO-DAY1-365D
+    module: industry
+    label: 同行业IPO近365日平均首日收益
+    unit: ratio
+    display: percent
+    window: 截止日前365个自然日内的同行业IPO
+    formula: mean(day1_return)
+    upstream_files: [market/data/derived/ipo_industry_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, industry, avg_day1_return_365d]
+    provider: 本地IPO事件滚动聚合
+    positive_meaning: 同行业新股首日平均表现较好
+    negative_meaning: 同行业新股首日平均表现较弱
+  ind_break_rate_365d:
+    evidence_id: INDUSTRY-IPO-BREAK-365D
+    module: industry
+    label: 同行业IPO近365日破发率
+    unit: ratio
+    display: percent
+    window: 截止日前365个自然日内的同行业IPO
+    formula: broken IPO count / valid IPO count
+    upstream_files: [market/data/derived/ipo_industry_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, industry, break_rate_365d]
+    provider: 本地IPO事件滚动聚合
+    context_meaning: 记录同行业IPO历史破发比例；高低等级需结合历史样本校准
+    positive_meaning: 同行业IPO破发率较低
+    negative_meaning: 同行业IPO破发率较高
+
+  ipo_count_30d:
+    evidence_id: IPO-COUNT-30D
+    module: ipo_market
+    label: 近30日IPO数量
+    unit: count
+    display: integer
+    window: 截止日前30个自然日
+    formula: count(IPO events)
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, ipo_count_30d]
+    provider: 本地IPO事件滚动聚合
+    context_meaning: 记录短期IPO发行数量；活跃或拥挤的业务含义需结合历史分布判断
+    positive_meaning: 近期IPO发行活动较活跃
+    negative_meaning: 近期IPO发行活动较冷清
+  ipo_count_90d:
+    evidence_id: IPO-COUNT-90D
+    module: ipo_market
+    label: 近90日IPO数量
+    unit: count
+    display: integer
+    window: 截止日前90个自然日
+    formula: count(IPO events)
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, ipo_count_90d]
+    provider: 本地IPO事件滚动聚合
+    context_meaning: 记录中期IPO发行数量；活跃或拥挤的业务含义需结合历史分布判断
+    positive_meaning: 中期IPO发行活动较活跃
+    negative_meaning: 中期IPO发行活动较冷清
+  avg_day1_return_60d:
+    direction_rule: positive_support
+    evidence_id: IPO-DAY1-RETURN-60D
+    module: ipo_market
+    label: 近期IPO平均首日收益
+    unit: ratio
+    display: percent
+    window: 截止日前60个自然日内的IPO
+    formula: mean(day1_return)
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, avg_day1_return_60d]
+    provider: 本地IPO事件滚动聚合
+    positive_meaning: 近期新股首日平均表现较好
+    negative_meaning: 近期新股首日平均表现较弱
+  avg_day5_return_60d:
+    direction_rule: positive_support
+    evidence_id: IPO-DAY5-RETURN-60D
+    module: ipo_market
+    label: 近期IPO平均五日收益
+    unit: ratio
+    display: percent
+    window: 截止日前60个自然日内的IPO
+    formula: mean(day5_return)
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, avg_day5_return_60d]
+    provider: 本地IPO事件滚动聚合
+    positive_meaning: 近期新股五日平均表现较好
+    negative_meaning: 近期新股五日平均表现较弱
+  avg_day20_return_60d:
+    direction_rule: positive_support
+    evidence_id: IPO-DAY20-RETURN-60D
+    module: ipo_market
+    label: 近期IPO平均二十日收益
+    unit: ratio
+    display: percent
+    window: 截止日前60个自然日内的IPO
+    formula: mean(day20_return)
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, avg_day20_return_60d]
+    provider: 本地IPO事件滚动聚合
+    positive_meaning: 近期新股二十日平均表现较好
+    negative_meaning: 近期新股二十日平均表现较弱
+  break_rate_60d:
+    evidence_id: IPO-BREAK-RATE-60D
+    module: ipo_market
+    label: 近期IPO破发率
+    unit: ratio
+    display: percent
+    window: 截止日前60个自然日内的IPO
+    formula: broken IPO count / valid IPO count
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, break_rate_60d]
+    provider: 本地IPO事件滚动聚合
+    context_meaning: 记录近期IPO破发比例；高低等级需结合历史样本校准
+    positive_meaning: 近期IPO破发率较低，二级市场承接较好
+    negative_meaning: 近期IPO破发率较高，二级市场承接偏弱
+  avg_mdd20_60d:
+    evidence_id: IPO-MDD20-60D
+    module: ipo_market
+    label: 近期IPO二十日平均最大回撤
+    unit: ratio
+    display: percent
+    window: 截止日前60个自然日内的IPO
+    formula: mean(mdd20)
+    upstream_files: [market/data/derived/ipo_market_heat_daily.csv, market/data/derived/ipo_events.csv]
+    upstream_fields: [date, avg_mdd20_60d]
+    provider: 本地IPO事件滚动聚合
+    context_meaning: 记录近期IPO上市后二十日回撤幅度；强弱等级需结合历史样本校准
+    positive_meaning: 近期IPO上市后二十日回撤相对较小
+    negative_meaning: 近期IPO上市后二十日回撤较大
+  issue_price:
+    evidence_id: IPO-ISSUE-PRICE
+    module: ipo_market
+    label: 发行价
+    unit: hkd_per_share
+    display: decimal
+    window: 本次IPO发行
+    formula: source value
+    upstream_files: [market/data/external/wind/ipo_listing_stats.csv]
+    upstream_fields: [stock_code, issue_price]
+    provider: 万得IPO发行统计
+    context_meaning: 发行价用于描述发行信息，本身不直接代表市场情绪
+  subscription_multiple:
+    direction_rule: above_one_support
+    evidence_id: IPO-SUBSCRIPTION-MULTIPLE
+    module: ipo_market
+    label: 整体超额认购倍数
+    unit: times
+    display: multiple
+    window: 本次IPO认购期
+    formula: valid subscriptions / offered amount
+    upstream_files: [market/data/external/ipo/subscription_multiples.csv, market/data/external/wind/ipo_listing_stats.csv]
+    upstream_fields: [stock_code, subscription_multiple, public_offer_multiple]
+    provider: 致富证券优先，万得网上认购回退
+    positive_meaning: 认购倍数较高，显示本次发行需求较强
+    negative_meaning: 认购倍数较低，显示本次发行需求不足
+  public_offer_multiple:
+    direction_rule: above_one_support
+    evidence_id: IPO-PUBLIC-OFFER-MULTIPLE
+    module: ipo_market
+    label: 公开发售认购倍数
+    unit: times
+    display: multiple
+    window: 本次IPO认购期
+    formula: public valid subscriptions / public offered amount
+    upstream_files: [market/data/external/wind/ipo_listing_stats.csv]
+    upstream_fields: [stock_code, public_offer_multiple]
+    provider: 万得IPO发行统计
+    positive_meaning: 公开发售认购倍数较高，散户及公开市场需求较强
+    negative_meaning: 公开发售认购倍数较低，公开市场需求偏弱
+  international_placing_multiple:
+    direction_rule: above_one_support
+    evidence_id: IPO-INTERNATIONAL-PLACING-MULTIPLE
+    module: ipo_market
+    label: 国际配售认购倍数
+    unit: times
+    display: multiple
+    window: 本次IPO认购期
+    formula: placing valid subscriptions / placing offered amount
+    upstream_files: [market/data/external/wind/ipo_listing_stats.csv]
+    upstream_fields: [stock_code, international_placing_multiple]
+    provider: 万得IPO发行统计
+    positive_meaning: 国际配售倍数较高，机构及网下需求较强
+    negative_meaning: 国际配售倍数较低，机构及网下需求偏弱
+

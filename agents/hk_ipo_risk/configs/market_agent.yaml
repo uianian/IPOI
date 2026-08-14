@@ -1,0 +1,55 @@
+market_agent:
+  # stock_code 和 doc_id 不写在这里：它们是每次任务的动态输入。
+  data:
+    # 相对路径统一以 IPOI 仓库根目录为基准。
+    features_csv: "market/data/derived/ipo_sentiment_features.csv"
+    news_dir: "market/data/external/news"
+    postlisting_checkpoints_csv: "market/data/derived/ipo_postlisting_checkpoints.csv"
+
+  cutoff:
+    # 正式运行必须使用上市日前数据；仅诊断旧数据时才改为 false。
+    strict_prelisting: true
+
+  llm:
+    enabled: true
+    # false 表示没有 LLM Key 时仍输出确定性市场分析，但舆情不参与权重。
+    required: false
+    settings_path: "agents/ipo/configs/settings.yaml"
+    # 留空时读取 settings_path 以及 IPO_LLM_API_KEY / OPENAI_API_KEY。
+    api_key: ""
+    api_base: ""
+    chat_model: ""
+    # 市场ReAct最多工具轮次；失败或未submit时自动回退单次LLM/确定性分析。
+    max_turns: 10
+
+  firecrawl:
+    enabled: true
+    settings_path: "agents/hk_ipo_risk/configs/firecrawl.yaml"
+    local_settings_path: "agents/hk_ipo_risk/configs/firecrawl.local.yaml"
+
+  # 优先于 Firecrawl。当前为通用 JSON API 适配器，部署时按实际新浪接口文档填写字段映射。
+  sina_finance:
+    enabled: false
+    settings_path: "agents/hk_ipo_risk/configs/sina_finance.yaml"
+    local_settings_path: "agents/hk_ipo_risk/configs/sina_finance.local.yaml"
+
+  output:
+    directory: "agents/hk_ipo_risk/.runtime/market"
+    report_directory: "agents/hk_ipo_risk/reports"
+    json_filename: "{stock_code}_{company}_market.json"
+    report_filename: "{stock_code}_{company}_market_report.md"
+    postlisting_json_filename: "{doc_id}_postlisting.json"
+    postlisting_report_filename: "{doc_id}_postlisting_report.md"
+    write_markdown: true
+    debate_directory: "agents/hk_ipo_risk/.runtime/debate"
+
+  logging:
+    level: "INFO"
+
+  database:
+    enabled: false
+    required: false
+    schema: "market_agent"
+    # 推荐通过 MARKET_DATABASE_URL 提供，不要提交密码。
+    postgres_url: ""
+

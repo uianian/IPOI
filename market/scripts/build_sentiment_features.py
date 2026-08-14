@@ -164,31 +164,37 @@ def main():
             "stock_code": r["stock_code"], "windcode": r["windcode"],
             "company": r["company_display"],
             "listing_date": d.strftime("%Y-%m-%d"),
+            # 所有特征只能使用上市日前可得数据；TradingSeries 会自动回退到
+            # d_prev 当日或更早的最近观测日。
+            "as_of_date": d_prev.strftime("%Y-%m-%d"),
+            "market_observation_date": d_prev.strftime("%Y-%m-%d"),
             "industry": r.get("industry"),
             "hsics_l1_name": r.get("hsics_l1_name"),
             "industry_source": r.get("industry_source"),
-            "hsi_ret_5d": hsi.ret_n(d, 5), "hsi_ret_20d": hsi.ret_n(d, 20),
-            "hsi_ret_60d": hsi.ret_n(d, 60),
-            "hstech_ret_5d": hstech.ret_n(d, 5), "hstech_ret_20d": hstech.ret_n(d, 20),
-            "hstech_ret_60d": hstech.ret_n(d, 60),
-            "hsi_vol_20d": hsi.vol_n(d, 20),
-            "vhsi_avg_5d": vhsi.mean_n(d, 5) if vhsi else np.nan,
-            "mkt_turnover_avg_20d": turn.mean_n(d, 20),
-            "dff_level": dff.value_at(d),
-            "dff_chg_30cd": (dff.value_at(d) - dff.value_at(d - pd.Timedelta(days=30))),
-            "dxy_ret_20d": dxy.ret_n(d, 20),
-            "us10y_level": us10y.value_at(d) if us10y else np.nan,
+            "hsi_ret_5d": hsi.ret_n(d_prev, 5), "hsi_ret_20d": hsi.ret_n(d_prev, 20),
+            "hsi_ret_60d": hsi.ret_n(d_prev, 60),
+            "hstech_ret_5d": hstech.ret_n(d_prev, 5), "hstech_ret_20d": hstech.ret_n(d_prev, 20),
+            "hstech_ret_60d": hstech.ret_n(d_prev, 60),
+            "hsi_vol_20d": hsi.vol_n(d_prev, 20),
+            "vhsi_avg_5d": vhsi.mean_n(d_prev, 5) if vhsi else np.nan,
+            "mkt_turnover_avg_20d": turn.mean_n(d_prev, 20),
+            "dff_level": dff.value_at(d_prev),
+            "dff_chg_30cd": (
+                dff.value_at(d_prev) - dff.value_at(d_prev - pd.Timedelta(days=30))
+            ),
+            "dxy_ret_20d": dxy.ret_n(d_prev, 20),
+            "us10y_level": us10y.value_at(d_prev) if us10y else np.nan,
             "us10y_chg_20d": (
-                (us10y.value_at(d) - us10y.value_at(d - pd.Timedelta(days=20)))
+                (us10y.value_at(d_prev) - us10y.value_at(d_prev - pd.Timedelta(days=20)))
                 if us10y else np.nan),
         }
-        w40 = turn.window(d, 40)
+        w40 = turn.window(d_prev, 40)
         f["mkt_turnover_chg_20d"] = (
             float(np.nanmean(w40[20:]) / np.nanmean(w40[:20]) - 1)
             if w40 is not None else np.nan)
         if southbound:
-            f["southbound_net_20d"] = southbound.sum_n(d, 20)
-            w = southbound.window(d, 40)
+            f["southbound_net_20d"] = southbound.sum_n(d_prev, 20)
+            w = southbound.window(d_prev, 40)
             f["southbound_net_prev20d"] = float(np.nansum(w[:20])) if w is not None else np.nan
         else:
             f["southbound_net_20d"] = f["southbound_net_prev20d"] = np.nan
@@ -200,9 +206,9 @@ def main():
         f["hsics_index_name"] = r.get("hsics_index_name")
         used_hsics = False
         if hsics_ts is not None:
-            f["ind_ret_5d"] = hsics_ts.ret_n(d, 5)
-            f["ind_ret_20d"] = hsics_ts.ret_n(d, 20)
-            f["ind_ret_60d"] = hsics_ts.ret_n(d, 60)
+            f["ind_ret_5d"] = hsics_ts.ret_n(d_prev, 5)
+            f["ind_ret_20d"] = hsics_ts.ret_n(d_prev, 20)
+            f["ind_ret_60d"] = hsics_ts.ret_n(d_prev, 60)
             f["ind_excess_20d"] = (
                 f["ind_ret_20d"] - f["hsi_ret_20d"]
                 if not (pd.isna(f["ind_ret_20d"]) or pd.isna(f["hsi_ret_20d"])) else np.nan)
@@ -211,15 +217,15 @@ def main():
         # 概念篮子：金额/创新高；若无 HSICS 收益则用篮子收益
         s = ind_series.get(r.get("industry"))
         if s:
-            wa = s["amount"].window(d, 40)
+            wa = s["amount"].window(d_prev, 40)
             f["ind_amount_chg_20d"] = (
                 float(np.nanmean(wa[20:]) / np.nanmean(wa[:20]) - 1)
                 if wa is not None else np.nan)
-            f["ind_newhigh_ratio"] = s["newhigh"].value_at(d)
+            f["ind_newhigh_ratio"] = s["newhigh"].value_at(d_prev)
             if not used_hsics:
-                f["ind_ret_5d"] = s["level"].ret_n(d, 5)
-                f["ind_ret_20d"] = s["level"].ret_n(d, 20)
-                f["ind_ret_60d"] = s["level"].ret_n(d, 60)
+                f["ind_ret_5d"] = s["level"].ret_n(d_prev, 5)
+                f["ind_ret_20d"] = s["level"].ret_n(d_prev, 20)
+                f["ind_ret_60d"] = s["level"].ret_n(d_prev, 60)
                 f["ind_excess_20d"] = (
                     f["ind_ret_20d"] - f["hsi_ret_20d"]
                     if not (pd.isna(f["ind_ret_20d"]) or pd.isna(f["hsi_ret_20d"]))
@@ -246,9 +252,9 @@ def main():
             hs_ts = hs_sector_series.get(hs_key) if hs_key else None
             f["hs_sector_index"] = hs_key
             if hs_ts is not None:
-                f["hs_sector_ret_5d"] = hs_ts.ret_n(d, 5)
-                f["hs_sector_ret_20d"] = hs_ts.ret_n(d, 20)
-                f["hs_sector_ret_60d"] = hs_ts.ret_n(d, 60)
+                f["hs_sector_ret_5d"] = hs_ts.ret_n(d_prev, 5)
+                f["hs_sector_ret_20d"] = hs_ts.ret_n(d_prev, 20)
+                f["hs_sector_ret_60d"] = hs_ts.ret_n(d_prev, 60)
                 f["hs_sector_excess_20d"] = (
                     f["hs_sector_ret_20d"] - f["hsi_ret_20d"]
                     if not (pd.isna(f["hs_sector_ret_20d"]) or pd.isna(f["hsi_ret_20d"]))
@@ -268,8 +274,8 @@ def main():
             if flow_key is None:
                 flow_key = str(l1)
         fts = flow_series.get(flow_key) if flow_key else None
-        if fts is not None and pd.Timestamp(d) >= flow_valid_from:
-            s20 = fts.sum_n(d, 20)
+        if fts is not None and pd.Timestamp(d_prev) >= flow_valid_from:
+            s20 = fts.sum_n(d_prev, 20)
             f["ind_net_inflow_20d"] = s20 if (s20 is not None and s20 != 0) else np.nan
         else:
             f["ind_net_inflow_20d"] = np.nan
@@ -333,6 +339,7 @@ def main():
         out,
         source="Wind(HSICS/DXY/HSI/US10Y) + macro + derived + news log",
         note="ind_ret prefers HSICS composite index; DXY=USDX.FX; us10y from Wind; "
+             "all features cut off at listing_date-1 calendar day; "
              "NaN never filled with 0; outcome_* validation only")
     print(f"rows={meta['rows']} cols={len(meta['columns'])}")
     print("industry_return_source:\n", out_df["industry_return_source"].value_counts(dropna=False))

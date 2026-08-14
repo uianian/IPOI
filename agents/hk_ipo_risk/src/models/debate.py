@@ -33,6 +33,8 @@ class DebateClaim(BaseModel):
     metric_value: Any = None
     reasoning: str = ""
     evidence_refs: list[EvidenceRef] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     # 该主张相关的补证据检索方式（intent/query），辩论时可增量复用
     retrieval_queries: list[dict[str, Any]] = Field(default_factory=list)
 
@@ -62,6 +64,10 @@ class DebateDossier(BaseModel):
     # 全程检索记录：辩论阶段补证据时的起点
     retrieval_queries: list[dict[str, Any]] = Field(default_factory=list)
     run_log: dict[str, Any] = Field(default_factory=dict)
+    score_version: str = ""
+    scoring: dict[str, Any] = Field(default_factory=dict)
+    evidence_catalog: dict[str, Any] = Field(default_factory=dict)
+    limitations: list[str] = Field(default_factory=list)
 
 
 def save_dossier(dossier: DebateDossier, out_dir: Path | str) -> Path:

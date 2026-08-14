@@ -1,3 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
+
+# 本地构建的上市后检查点（由 build_postlisting_checkpoints.py 从 dataset/ 生成，不入库）
+data/derived/ipo_postlisting_checkpoints.csv
+data/derived/ipo_postlisting_checkpoints.meta.json
