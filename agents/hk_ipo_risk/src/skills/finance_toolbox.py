@@ -343,6 +343,7 @@ _CODE_THEME: dict[str, str] = {
     "GP_MARGIN_DROP": "gp_margin",
     "CASH_RUNWAY_LT_12": "runway",
     "CASH_RUNWAY_12_24": "runway",
+    "RUNWAY_UNCERTAIN": "runway",
     "BURN_YOY_UP_30": "burn_yoy",
     "CV_PREF_LIABILITY": "cv_pref",
 }
@@ -371,6 +372,9 @@ def _canonical_score_code(code: str, state: dict[str, Any] | None = None) -> str
         return ""
     if c in _CODE_ALIASES:
         c = _CODE_ALIASES[c]
+    # 跑道无法测算：保留 uncertainty，禁止发明 12_24
+    if c in {"RUNWAY_UNCERTAIN", "CASH_RUNWAY_UNCERTAIN", "RUNWAY_UNKNOWN"}:
+        return "RUNWAY_UNCERTAIN"
     # 跑道类：一律映射到规则档位（以 cash_burn 为准，防 LLM +20 再叠规则 +10）
     if (
         c.startswith("CASH_RUNWAY")
@@ -378,7 +382,9 @@ def _canonical_score_code(code: str, state: dict[str, Any] | None = None) -> str
         or ("RUNWAY" in c and "BURN" not in c)
     ):
         mapped = _runway_canonical_from_state(state or {})
-        return mapped or "CASH_RUNWAY_12_24"
+        if mapped:
+            return mapped
+        return "RUNWAY_UNCERTAIN"
     if c.startswith("PROFIT_") or (
         "LOSS" in c and "SINGLE" not in c and "GP" not in c
         and (c.startswith("PROFIT") or "CONTINUOUS" in c or c.startswith("CONT"))
@@ -601,47 +607,140 @@ def _merge_rules_floor(
         "flags": rules_pack.get("flags") or {},
         "theme_merge": True,
     }
-    _align_narrative_to_level(report, warnings)
+    # 叙事对齐改在 DATA_INSUFFICIENT 等最终抬分之后（见 finalize_finance_report）
     return report
 
 
 _UNDERSTATE_LOW_RE = re.compile(
     r"(财务|財務)?风险(较|很)?低|低风险|風險(較|很)?低|低風險|"
     r"风险处于可控的低|風險處於可控的低|中低风险|中低風險|"
-    r"整体财务风险可控|整體財務風險可控|财务风险可控|財務風險可控",
+    r"整体财务风险可控|整體財務風險可控|财务风险可控|財務風險可控|"
+    r"屬低[-–]?中風險|属低[-–]?中风险|屬低風險|属低风险|"
+    r"財務風險屬中低|财务风险属中低|風險屬中低|风险属中低|"
+    r"定為低|定为低|評為低|评为低",
+)
+_DINGWEI_LOW_RE = re.compile(r"(定為|定为|評為|评为|屬|属)低(?![-–]?中)")
+_PAREN_LABEL_LEVEL = (
+    ("极低", "very_low"),
+    ("極低", "very_low"),
+    ("中低", "low"),
+    ("低中", "low"),
+    ("中等", "medium"),
+    ("中级", "medium"),
+    ("中級", "medium"),
+    ("极高", "very_high"),
+    ("極高", "very_high"),
+    ("低", "low"),
+    ("中", "medium"),
+    ("高", "high"),
 )
 _UNDERSTATE_MED_RE = re.compile(
     r"风险中等|風險中等|风险评级为中等|风险评级定为中等|風險評級為中等|風險評級定為中等",
 )
+_SCORE_MENTION_RE = re.compile(
+    r"(綜合風險分|综合风险分|總風險分|总风险分|風險分數|风险分数|風險分|风险分|"
+    r"規則打分|规则打分|綜合風險等級為|综合风险等级为)"
+    r"\s*[為为:]?\s*(\d+(?:\.\d+)?)\s*(?:分)?"
+    r"(?:\s*[（(]\s*([^）)]*?)\s*[）)])?",
+)
+# 康灃/永泰：「中級（40分）」「綜合風險等級為中等（40分）」
+_PAREN_SCORE_RE = re.compile(
+    r"([中高高低极極]+[等級级]?)\s*[（(]\s*(\d+(?:\.\d+)?)\s*分\s*[）)]"
+)
+_LEVEL_ZH = {
+    "very_low": "极低",
+    "low": "低",
+    "medium": "中等",
+    "high": "高",
+    "very_high": "极高",
+}
 
 
 def _align_narrative_to_level(report: dict[str, Any], warnings: list[str]) -> None:
-    """规则托底后纠正 summary/reasoning 与最终等级明显不符的措辞。"""
+    """最终分确定后纠正 summary/reasoning 中残留的旧分数/等级措辞。"""
     level = str(report.get("risk_level") or "")
-    if level not in {"medium", "high", "very_high"}:
-        return
     try:
         score = float(report.get("risk_score") or 0)
     except (TypeError, ValueError):
         score = 0.0
+    level_zh = _LEVEL_ZH.get(level, level)
     note = (
         f"（注：规则托底后综合评分 {score:.0f}，等级 {level}，"
         f"叙述以该等级为准。）"
     )
+    score_token = f"{score:.0f}"
 
-    def _mismatch(text: str) -> bool:
-        if _UNDERSTATE_LOW_RE.search(text):
+    def _rewrite_score_mentions(text: str) -> tuple[str, bool]:
+        changed = False
+
+        def _repl(m: re.Match[str]) -> str:
+            nonlocal changed
+            label = m.group(1)
+            try:
+                old = float(m.group(2))
+            except (TypeError, ValueError):
+                return m.group(0)
+            paren = (m.group(3) or "").strip() if m.lastindex and m.lastindex >= 3 else ""
+            score_mismatch = abs(old - score) >= 0.5
+            level_mismatch = bool(paren) and paren not in {
+                level,
+                level_zh,
+                f"{level_zh}风险",
+                f"{level_zh}風險",
+            }
+            if not score_mismatch and not level_mismatch:
+                return m.group(0)
+            changed = True
+            return f"{label}{score_token}（{level_zh}）"
+
+        new = _SCORE_MENTION_RE.sub(_repl, text)
+
+        def _paren_label_level(label: str) -> str | None:
+            s = (label or "").strip()
+            for tok, lv in _PAREN_LABEL_LEVEL:
+                if tok in s:
+                    return lv
+            return None
+
+        def _paren_repl(m: re.Match[str]) -> str:
+            nonlocal changed
+            try:
+                old = float(m.group(2))
+            except (TypeError, ValueError):
+                return m.group(0)
+            mapped = _paren_label_level(m.group(1))
+            score_mismatch = abs(old - score) >= 0.5
+            level_mismatch = mapped is not None and mapped != level
+            if not score_mismatch and not level_mismatch:
+                return m.group(0)
+            changed = True
+            return f"{level_zh}（{score_token}分）"
+
+        new = _PAREN_SCORE_RE.sub(_paren_repl, new)
+        if level in {"medium", "high", "very_high"}:
+            new2, n = _DINGWEI_LOW_RE.subn(rf"\g<1>{level_zh}", new)
+            if n:
+                changed = True
+                new = new2
+        return new, changed
+
+    def _mismatch_level_words(text: str) -> bool:
+        if level in {"medium", "high", "very_high"} and _UNDERSTATE_LOW_RE.search(text):
             return True
         if level in {"high", "very_high"} and _UNDERSTATE_MED_RE.search(text):
             return True
         return False
 
     def _fix(text: str) -> str | None:
-        if not text or "规则托底后" in text or "規則托底後" in text:
+        if not text:
             return None
-        if not _mismatch(text):
+        new, score_changed = _rewrite_score_mentions(text)
+        need_note = _mismatch_level_words(new)
+        if not score_changed and not need_note:
             return None
-        return text.rstrip("。.") + note
+        if need_note and "规则托底后" not in new and "規則托底後" not in new:
+            new = new.rstrip("。.") + note
+        return new
 
     for key in ("summary", "reasoning"):
         fixed = _fix(str(report.get(key) or ""))
@@ -655,7 +754,6 @@ def _align_narrative_to_level(report: dict[str, Any], warnings: list[str]) -> No
         if fixed:
             dim["analysis"] = fixed
             warnings.append(f"narrative_aligned:dim:{dim.get('dimension')}")
-
 
 def _metric_series_brief(metrics: dict[str, Any], code: str) -> str:
     series = metrics.get(code) if isinstance(metrics.get(code), dict) else None
@@ -1114,6 +1212,8 @@ def _validate_submit(report: dict[str, Any], state: dict[str, Any]) -> list[str]
     _merge_rules_floor(report, state, warnings)
     _apply_18a_data_insufficient_guard(report, state, warnings)
     _sanitize_negative_findings(report, state, warnings)
+    # 须在所有分数地板/抬升之后，避免「风险分25」与最终 40 残留不一致
+    _align_narrative_to_level(report, warnings)
     return warnings
 
 
@@ -1526,6 +1626,11 @@ async def _tool_run_finance_rule_checks(
     if gates.get("is_unprofitable") and not gates.get("skip_3_4"):
         if cash_burn.get("skipped") and "finance_cash_flow" in skill_results:
             coverage_hints.append("cash_runway_not_computed")
+        if cash_burn.get("CASH_RUNWAY_MONTHS") is None and not cash_burn.get("skipped"):
+            coverage_hints.append("runway_null_need_search")
+            flags = pack.get("flags") or {}
+            if flags.get("runway_uncertain"):
+                coverage_hints.append("runway_uncertain:search_finance_evidence")
 
     if coverage_hints:
         state["search_quota"] = max(

@@ -43,6 +43,7 @@ class FinanceAgent:
         max_turns: int = 10,
         debate_dir: Path | str | None = None,
         reasoning_effort: str | None = "low",
+        close_logger: bool = True,
     ) -> None:
         self._llm = llm
         self._run_logger = run_logger
@@ -51,6 +52,9 @@ class FinanceAgent:
         self._max_turns = max_turns
         self._debate_dir = debate_dir
         self._reasoning_effort = reasoning_effort or "low"
+        self._close_logger = close_logger
+        self._doc_id = ""
+        self._parse_json: Path | str | None = None
 
     async def run(
         self,
@@ -66,6 +70,8 @@ class FinanceAgent:
         task_id: str | None = None,
         analysis_id: str | None = None,
     ) -> AgentResult:
+        self._doc_id = doc_id
+        self._parse_json = parse_json
         if self._rules_only or self._pipeline or not (
             self._llm is not None and getattr(self._llm, "available", False)
         ):
@@ -267,7 +273,8 @@ class FinanceAgent:
                 "summary": summary,
                 "n_turns": loop_out.get("n_turns"),
             })
-            log.close(final_summary=summary)
+            if self._close_logger:
+                log.close(final_summary=summary)
 
         guard_warnings: list[str] = []
         _apply_18a_data_insufficient_guard(report, state, guard_warnings)
@@ -325,10 +332,37 @@ class FinanceAgent:
         skill_results = state.get("skill_results") or {}
         pack = state.get("rule_pack") or {}
         payload = _compose_finance_submit_payload(state, pack)
-        summary = (
+        # 结构化摘要：按 skill 列 top 风险，避免空模板
+        lines = [
             f"財務 ReAct 自動收束（{reason or 'max_turns'}）："
-            f"已完成 {len(skill_results)} 個 skill"
-        )
+            f"已完成 {len(skill_results)}/{4} skill；"
+            f"規則參考分 {pack.get('risk_score')}（{pack.get('risk_level')}）。"
+        ]
+        for name, data in skill_results.items():
+            pts = [p for p in (data.get("risk_points") or []) if isinstance(p, dict)]
+            top = sorted(
+                pts,
+                key=lambda p: {"high": 0, "medium": 1, "low": 2}.get(
+                    str(p.get("level") or "medium"), 3
+                ),
+            )[:3]
+            bits = []
+            for p in top:
+                code = p.get("code") or "?"
+                page = p.get("evidence_page")
+                if page is None:
+                    ev = p.get("evidence") or []
+                    if isinstance(ev, list) and ev and isinstance(ev[0], dict):
+                        page = ev[0].get("page")
+                bits.append(f"{code}" + (f"@p{page}" if page else ""))
+            lines.append(
+                f"- {name}：{len(pts)} 點"
+                + (f"（{'；'.join(bits)}）" if bits else "")
+            )
+        cash = state.get("cash_burn") or {}
+        if cash.get("CASH_RUNWAY_MONTHS") is None and not cash.get("skipped"):
+            lines.append("- 注意：現金跑道未測算（runway=null），已/應計 RUNWAY_UNCERTAIN。")
+        summary = "\n".join(lines)
         payload["summary"] = summary
         payload["reasoning"] = f"{summary}\n{payload.get('reasoning') or ''}".strip()
         obs = await tools.execute("submit_finance_report", payload, state)
@@ -427,6 +461,16 @@ class FinanceAgent:
 
         if scoring_mode != "llm":
             scored = score_finance(metrics, gates, cash_burn, extracted)
+            from src.skills.finance_toolbox import _draft_finance_dimensions_metrics
+
+            draft_state = {
+                "metrics": metrics,
+                "gates": gates,
+                "cash_burn": cash_burn,
+                "issuer_type": issuer_type,
+                "skill_results": {},
+            }
+            dims = _draft_finance_dimensions_metrics(draft_state)
             llm_pack = {
                 "scoring_mode": "rules",
                 "risk_score": scored["risk_score"],
@@ -434,12 +478,22 @@ class FinanceAgent:
                 "score_breakdown": scored.get("score_breakdown") or [],
                 "risk_points": scored.get("risk_points") or [],
                 "negative_findings": scored.get("negative_findings") or [],
-                "dimensions": [],
-                "reasoning": "规则/流水线兜底",
-                "summary": "",
+                "dimensions": dims,
+                "reasoning": scored.get("reasoning")
+                or scored.get("summary")
+                or "规则引擎打分（含 runway/CFO；无证据页仍计分）",
+                "summary": scored.get("summary") or "",
                 "think_status": "n/a",
+                "flags": scored.get("flags") or {},
             }
-            tool_calls.append({"tool": "score_finance_rules_fallback", "risk_score": scored["risk_score"]})
+            tool_calls.append(
+                {
+                    "tool": "score_finance_rules_fallback",
+                    "risk_score": scored["risk_score"],
+                    "flags": scored.get("flags"),
+                    "n_breakdown": len(scored.get("score_breakdown") or []),
+                }
+            )
 
         table_meta = extracted.get("table_meta") or {}
         snippets = [
@@ -454,9 +508,21 @@ class FinanceAgent:
         risk_score = float(llm_pack.get("risk_score") or 0)
         risk_level = str(llm_pack.get("risk_level") or "very_low")
         nf = llm_pack.get("negative_findings") or []
-        summary = llm_pack.get("summary") or (
-            f"财务指标{len(metrics)}项；风险分 {risk_score:.1f} ({risk_level}) [{scoring_mode}]"
-        )
+        # 禁止模板摘要「财务指标N项 [rules]」
+        summary = (llm_pack.get("summary") or "").strip()
+        if (not summary) or summary.startswith("财务指标") or "[rules]" in summary:
+            from src.skills.score_finance import build_rules_summary
+
+            summary = build_rules_summary(
+                risk_score=risk_score,
+                risk_level=risk_level,
+                flags=llm_pack.get("flags") or {},
+                breakdown=list(llm_pack.get("score_breakdown") or []),
+                metrics=metrics,
+                cash_burn=cash_burn,
+                gates=gates,
+            )
+            llm_pack["summary"] = summary
         guard_warnings: list[str] = []
         _apply_18a_data_insufficient_guard(
             llm_pack,
@@ -470,14 +536,26 @@ class FinanceAgent:
         if guard_warnings:
             risk_score = float(llm_pack.get("risk_score") or risk_score)
             risk_level = str(llm_pack.get("risk_level") or risk_level)
-            summary = llm_pack.get("summary") or (
-                f"财务指标{len(metrics)}项；风险分 {risk_score:.1f} ({risk_level}) "
-                f"[{scoring_mode}; data_insufficient]"
-            )
+            summary = (llm_pack.get("summary") or summary or "").strip()
+            if (not summary) or summary.startswith("财务指标") or "[rules]" in summary:
+                from src.skills.score_finance import build_rules_summary
+
+                summary = build_rules_summary(
+                    risk_score=risk_score,
+                    risk_level=risk_level,
+                    flags=llm_pack.get("flags") or {},
+                    breakdown=list(llm_pack.get("score_breakdown") or []),
+                    metrics=metrics,
+                    cash_burn=cash_burn,
+                    gates=gates,
+                )
+                summary = summary + "；data_insufficient 已抬档"
+                llm_pack["summary"] = summary
         log_paths = log.paths if log else {}
         if log:
             log.result({"risk_score": risk_score, "scoring_mode": scoring_mode, "summary": summary})
-            log.close(final_summary=summary)
+            if self._close_logger:
+                log.close(final_summary=summary)
 
         return AgentResult(
             agent="finance",
@@ -515,4 +593,26 @@ class FinanceAgent:
                 "run_log": log_paths,
             },
             summary=summary,
+        )
+
+    async def respond_to_controller(
+        self,
+        question,
+        claim_card: dict[str, Any] | None = None,
+        *,
+        round_no: int = 1,
+        doc_id: str | None = None,
+        parse_json: Path | str | None = None,
+    ):
+        from src.skills.debate_reply import expert_respond_to_controller
+
+        return await expert_respond_to_controller(
+            agent="finance",
+            question=question,
+            claim_card=claim_card,
+            llm=self._llm,
+            doc_id=doc_id or self._doc_id,
+            parse_json=parse_json or self._parse_json,
+            run_logger=self._run_logger,
+            round_no=round_no,
         )

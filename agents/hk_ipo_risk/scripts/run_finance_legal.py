@@ -29,6 +29,7 @@ from src.config import (  # noqa: E402
 from src.graph.parallel import (  # noqa: E402
     run_finance_legal_market_parallel,
     run_finance_legal_parallel,
+    run_master_from_saved,
 )
 from src.tools.llm_client import LLMClient  # noqa: E402
 from src.tracing.run_logger import AgentRunLogger  # noqa: E402
@@ -84,7 +85,7 @@ async def _amain() -> int:
         "--agent",
         choices=["finance", "legal", "market", "all"],
         default="all",
-        help="选定 Agent：finance / legal / market / all（三者并行）",
+        help="选定 Agent：finance/legal/market/all（默认三者并行后接总控）",
     )
     parser.add_argument(
         "--use-live-retrieval",
@@ -161,8 +162,32 @@ async def _amain() -> int:
         action="store_true",
         help="关闭文件推理日志",
     )
+    parser.add_argument(
+        "--skip-master",
+        action="store_true",
+        help="专家探查后不跑总控（旧行为：master=null）",
+    )
+    parser.add_argument(
+        "--skip-experts",
+        action="store_true",
+        help="跳过财务/法务/市场探查，直接总控；必须配合 --from-result",
+    )
+    parser.add_argument(
+        "--from-result",
+        type=Path,
+        default=None,
+        help="已有专家 merged JSON（含 finance/legal）；供 --skip-experts 复用",
+    )
+    parser.add_argument("--master-provider", default=None, choices=["deepseek", "openrouter", "openai", "vllm"])
+    parser.add_argument("--master-chat-model", default=None, help="覆盖总控 chat model；默认与专家共用")
     parser.add_argument("--out", type=Path, default=PKG_ROOT / ".runtime" / "mixue_finance_legal.json")
     args = parser.parse_args()
+    if args.skip_experts and args.skip_master:
+        parser.error("--skip-experts 与 --skip-master 互斥")
+    if args.skip_experts and not args.from_result:
+        parser.error("--skip-experts 需要 --from-result 指向已有专家结果 JSON")
+    if args.skip_experts and args.from_result and not Path(args.from_result).is_file():
+        parser.error(f"--from-result 不存在: {args.from_result}")
 
     stock_code = args.stock_code
     if not stock_code:
@@ -188,9 +213,11 @@ async def _amain() -> int:
     # 财务默认启 LLM；法务默认 ReAct（--legal-rules-only 关闭）
     legal_react = not args.legal_rules_only
     need_llm = (
-        (args.agent in {"finance", "all"} and not finance_rules_only)
-        or (args.agent in {"legal", "all"} and legal_react)
-        or args.agent in {"market", "all"}
+        (not args.skip_experts and args.agent in {"finance", "all"} and not finance_rules_only)
+        or (not args.skip_experts and args.agent in {"legal", "all"} and legal_react)
+        or (not args.skip_experts and args.agent in {"market", "all"})
+        or (args.skip_experts)
+        or (args.agent == "all" and not args.skip_master)
         or args.use_llm
     )
     llm = None
@@ -213,14 +240,21 @@ async def _amain() -> int:
             not finance_rules_only and args.agent in {"finance", "all"},
             legal_react and args.agent in {"legal", "all"},
         )
-        if not settings["api_key"]:
-            if args.agent in {"finance", "all"} and not finance_rules_only:
-                logger.warning("No API key — finance will fall back to rules scoring")
-            if args.agent in {"legal", "all"} and legal_react:
-                logger.warning("No API key — legal will fall back to rules pipeline")
+        if not settings["api_key"] and settings.get("provider") != "vllm":
+            if args.skip_experts:
+                logger.warning("No API key — master will degrade (rules fallback)")
+            else:
+                if args.agent in {"finance", "all"} and not finance_rules_only:
+                    logger.warning("No API key — finance will fall back to rules scoring")
+                if args.agent in {"legal", "all"} and legal_react:
+                    logger.warning("No API key — legal will fall back to rules pipeline")
+                if args.agent == "all" and not args.skip_master:
+                    logger.warning("No API key — master will degrade (rules fallback)")
 
     finance_logger = None
-    if not args.no_run_log and args.agent in {"finance", "all"}:
+    if not args.no_run_log and (
+        args.skip_experts or args.agent in {"finance", "all"}
+    ):
         finance_logger = AgentRunLogger(
             agent="finance",
             doc_id=args.doc_id,
@@ -232,7 +266,9 @@ async def _amain() -> int:
         logger.info("Finance run log → %s", finance_logger.log_path)
 
     legal_logger = None
-    if not args.no_run_log and args.agent in {"legal", "all"} and legal_react:
+    if not args.no_run_log and (
+        args.skip_experts or (args.agent in {"legal", "all"} and legal_react)
+    ):
         legal_logger = AgentRunLogger(
             agent="legal",
             doc_id=args.doc_id,
@@ -243,8 +279,22 @@ async def _amain() -> int:
         )
         logger.info("Legal run log → %s", legal_logger.log_path)
 
+    master_logger = None
+    if not args.no_run_log and (
+        args.skip_experts or (args.agent == "all" and not args.skip_master)
+    ):
+        master_logger = AgentRunLogger(
+            agent="master",
+            doc_id=args.doc_id,
+            log_dir=args.log_dir,
+            issuer_type=args.issuer_type,
+            doc_name=args.doc_name,
+            pdf_name=args.pdf_name,
+        )
+        logger.info("Master run log → %s", master_logger.log_path)
+
     market_logger = None
-    if not args.no_run_log and args.agent in {"market", "all"}:
+    if not args.no_run_log and (args.skip_experts or args.agent in {"market", "all"}):
         market_logger = AgentRunLogger(
             agent="market",
             doc_id=args.doc_id,
@@ -276,9 +326,45 @@ async def _amain() -> int:
         local_settings_path=sina_ref.get("local_settings_path"),
         enabled=bool(sina_ref.get("enabled", False)),
     )
+    result: dict = {}
 
     try:
-        if args.agent == "all":
+        if args.skip_experts:
+            master_llm = llm
+            if args.master_provider or args.master_chat_model:
+                mset = resolve_api_settings(
+                    api_key=args.api_key,
+                    api_base=args.api_base,
+                    chat_model=args.master_chat_model or args.chat_model,
+                    provider=args.master_provider or args.provider,
+                )
+                master_llm = LLMClient(mset)
+                await master_llm.init()
+            logger.info("skip-experts from %s", args.from_result)
+            result = await run_master_from_saved(
+                args.from_result,
+                master_llm=master_llm,
+                parse_json=parse_json,
+                debate_dir=debate_dir,
+                finance_run_logger=finance_logger,
+                legal_run_logger=legal_logger,
+                market_run_logger=market_logger,
+                master_run_logger=master_logger,
+                doc_name=args.doc_name,
+                finance_reasoning_effort=finance_effort,
+                legal_reasoning_effort=legal_effort,
+            )
+        elif args.agent == "all":
+            master_llm = llm
+            if args.master_provider or args.master_chat_model:
+                mset = resolve_api_settings(
+                    api_key=args.api_key,
+                    api_base=args.api_base,
+                    chat_model=args.master_chat_model or args.chat_model,
+                    provider=args.master_provider or args.provider,
+                )
+                master_llm = LLMClient(mset)
+                await master_llm.init()
             result = await run_finance_legal_market_parallel(
                 args.doc_id,
                 stock_code=str(stock_code),
@@ -293,12 +379,14 @@ async def _amain() -> int:
                 parse_json=parse_json,
                 finance_llm=finance_llm,
                 legal_llm=legal_llm,
+                master_llm=master_llm,
                 top_k=args.top_k,
                 finance_run_logger=finance_logger,
                 finance_rules_only=finance_rules_only,
                 finance_pipeline=args.finance_pipeline,
                 legal_react=legal_react,
                 legal_run_logger=legal_logger,
+                master_run_logger=master_logger,
                 legal_max_turns=legal_max_turns,
                 finance_max_turns=finance_max_turns,
                 debate_dir=debate_dir,
@@ -306,7 +394,18 @@ async def _amain() -> int:
                 pdf_name=args.pdf_name,
                 legal_reasoning_effort=legal_effort,
                 finance_reasoning_effort=finance_effort,
+                skip_master=args.skip_master,
+                include_market=False,
             )
+        elif args.agent == "market":
+            mkt = await MarketAgent(
+                llm=llm,
+                market_settings=market_settings,
+                firecrawl_settings=firecrawl_settings,
+                sina_settings=sina_settings,
+                run_logger=market_logger,
+            ).run(args.doc_id, stock_code=str(stock_code))
+            result = {"doc_id": args.doc_id, "market": mkt.model_dump(), "master": None}
         elif args.agent == "finance":
             fin = await FinanceAgent(
                 llm=finance_llm,
@@ -349,28 +448,36 @@ async def _amain() -> int:
                 pdf_name=args.pdf_name,
             )
             result = {"doc_id": args.doc_id, "legal": leg.model_dump()}
-        else:
-            market = await MarketAgent(
-                llm=llm,
-                market_settings=market_settings,
-                firecrawl_settings=firecrawl_settings,
-                sina_settings=sina_settings,
-                run_logger=market_logger,
-            ).run(args.doc_id, stock_code=str(stock_code))
-            result = {"doc_id": args.doc_id, "market": market.model_dump()}
     finally:
+        extra_master = locals().get("master_llm")
+        if extra_master is not None and extra_master is not llm:
+            try:
+                await extra_master.close()
+            except Exception:
+                pass
         if llm is not None:
             await llm.close()
+        fin_sum = (result.get("finance") or {}).get("summary") if isinstance(locals().get("result"), dict) else None
+        leg_sum = (result.get("legal") or {}).get("summary") if isinstance(locals().get("result"), dict) else None
+        mas = (result.get("master") or {}) if isinstance(locals().get("result"), dict) else {}
+        mas_sum = ((mas.get("judgment") or {}).get("verdict_reasoning") if isinstance(mas, dict) else None) or "done"
         if finance_logger is not None and not finance_logger._closed:
-            finance_logger.close(final_summary="aborted")
+            finance_logger.close(final_summary=fin_sum or "done")
         if legal_logger is not None and not legal_logger._closed:
-            legal_logger.close(final_summary="aborted")
+            legal_logger.close(final_summary=leg_sum or "done")
         if market_logger is not None and not market_logger._closed:
-            market_logger.close(final_summary="aborted")
+            mkt_sum = (
+                (result.get("market") or {}).get("summary")
+                if isinstance(locals().get("result"), dict)
+                else None
+            )
+            market_logger.close(final_summary=mkt_sum or "done")
+        if master_logger is not None and not master_logger._closed:
+            master_logger.close(final_summary=str(mas_sum)[:200])
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
+        json.dump(result, f, ensure_ascii=False, indent=2, default=str)
 
     print(f"\n=== Output: {args.out} ===")
     if "finance" in result:
@@ -429,8 +536,19 @@ async def _amain() -> int:
         print(f"[market] ERROR: {result['market_error']}")
     if "reference_fundamental_score" in result:
         print(f"[ref] fundamental≈{result['reference_fundamental_score']}")
-    if "master" in result:
-        print(f"[master] {result.get('master')} cross_agent_n={len(result.get('cross_agent_features') or [])}")
+    master = result.get("master")
+    if isinstance(master, dict) and master:
+        j = master.get("judgment") or {}
+        print(
+            f"[master] score={j.get('overall_score')} level={j.get('risk_level_http')} "
+            f"degraded={master.get('degraded')} debate_rounds={len(master.get('debate_history') or [])}"
+        )
+        if master.get("dossier_path"):
+            print(f"  dossier: {master.get('dossier_path')}")
+        emb = master.get("embellishment") or {}
+        print(f"  embellishment: {emb.get('score')} ({emb.get('level')})")
+    elif "master" in result:
+        print(f"[master] {master} cross_agent_n={len(result.get('cross_agent_features') or [])}")
     return 0
 
 

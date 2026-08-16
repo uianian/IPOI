@@ -1,13 +1,13 @@
-# hk_ipo_risk — 港股 IPO 财务 ‖ 法务多 Agent
+# hk_ipo_risk — 港股 IPO 财务 ‖ 法务 ‖ 总控多 Agent
 
-独立于 `agents/ipo`。本仓库实现 **财务穿透 Agent** 与 **法务合规 Agent**（默认完整 ReAct：多轮选工具 → 规则托底 → LLM `submit_*` 终裁；失败再服务端托底），并提供 **HTTP 分析服务（9102）** 供前端经 **9100 网关** 调用。
+独立于 `agents/ipo`。本仓库实现 **财务穿透 Agent**、**法务合规 Agent**（默认完整 ReAct）与 **总控决策 Agent**（冲突研判 / 主持辩论 / 粉饰 / 终裁 / 报告），并提供 **HTTP 分析服务（9102）** 供前端经 **9100 网关** 调用。市场情绪为本轮可替换 **demo stub**。
 
 | 能力 | 状态 |
 |------|------|
 | 财务 / 法务 ReAct + `react+rules_floor` | **已启用**（CLI + HTTP） |
-| DebateDossier 落盘 + 独立补证据 API | **素材/接口已备** |
-| 总控决策 / 多轮辩论编排 | **占位未启用**（`master=null`） |
-| 市场情绪 Agent | **占位 / SSE 标 skipped**（接入规范见下） |
+| DebateDossier 落盘 + 独立补证据 API | **已启用**；辩论阶段增量 `search_*_standalone` |
+| 总控决策 / 多轮辩论编排 | **已启用**（LangGraph 总控子图；终裁为正式分） |
+| 市场情绪 Agent | **demo stub**（`status=completed`，`reason=demo_stub`） |
 
 契约文档：[`dataset/interface_new.md`](../../dataset/interface_new.md)  
 前端联调冒烟：[`pdf_parsing/docs/frontend_api_smoke.md`](../../pdf_parsing/docs/frontend_api_smoke.md)  
@@ -18,7 +18,7 @@
 ## 目录
 
 1. [架构总览](#1-架构总览)
-2. [财务 Agent](#2-财务-agent)
+2. [财务 Agent](#2-财务-agent)（[评分](#23-评分-reactrules_floor) · [抽数](#24-抽数要点) · [检索包契约](#25-检索包契约retrieve_finance-依赖)）
 3. [法务 Agent](#3-法务-agent)
 4. [Tool / Skill 编排流程](#4-tool--skill-编排流程)
 5. [中间结果与最终产物](#5-中间结果与最终产物)
@@ -39,12 +39,13 @@
 ```
 招股书 PDF
   → pdf_parsing（9100）→ full_parse.json
-  → retrieval（9101）→ 向量索引 + 财务/法务检索包
+  → retrieval（9101）→ 向量索引 + 财务/法务检索包（财务为整表 pack，见 §2.5）
   → hk_ipo_risk（9102）
-       ├── FinanceAgent (ReAct)
-       └── LegalAgent   (ReAct)
-  → 合并结果 JSON + DebateDossier + Markdown 报告
-  →（未来）Master / 辩论 → 综合风险报告
+       ├── FinanceAgent (ReAct)：retrieve → extract → skills → 规则托底 → submit 定稿
+       ├── LegalAgent   (ReAct)：retrieve → skills → 规则核对 → submit 定稿
+       ├── MarketAgent  (demo)：中性分 50，可替换
+       └── MasterAgent  (LangGraph 子图)：冲突研判 → 条件辩论(≤3) → 粉饰 → 终裁 → 报告
+  → 合并结果 JSON + DebateDossier + 总控 `*_master_*.json` + Markdown 报告
 ```
 
 ### 分层
@@ -55,7 +56,7 @@
 | **Skill** | 可移植业务包（检索+Prompt+阈值） | 4：profitability / cash_flow / solvency / business_context | 5：governance / shareholder_rights / related_party / contracts_and_ip / regulatory_litigation |
 | **Agent** | LLM 决定调谁、何时结束 | ReAct（默认）；可降级 pipeline / rules-only | ReAct（默认）；可降级 rules-only |
 
-Skill vs Tool：**Tool** 无状态原子能力；**Skill** 经 `run_*_skill` 暴露，内部编排检索 + 规则/LLM 抽取 + 阈值。`FinanceSkill.meta()` / `LegalSkill.meta()` 可序列化。
+Skill vs Tool：**Tool** 无状态原子能力；**Skill** 经 `run_*_skill` 暴露，内部编排检索 + 规则/LLM 抽取 + 阈值。`FinanceSkill.meta()` / `LegalSkill.meta()` 可序列化。财务 `retrieve_finance` **只消费**上游整表包，不在 Agent 内切表。
 
 ### 职责分轨（页面可重合、归因不重合）
 
@@ -63,7 +64,7 @@ Skill vs Tool：**Tool** 无状态原子能力；**Skill** 经 `run_*_skill` 暴
 |------|------|------|
 | 对赌/赎回/优先股 | 表内 `CV_PREF` → `CV_PREF_LIABILITY` | 协议条款/清理 → `REDEMPTION_*` |
 | 管线/临床 | 只解释钱与商业化，**不计**临床阶段分 | §3.5 / IP Skill |
-| 现金消耗/跑道 | §3.4 `CASH_RUNWAY_*` / `BURN_YOY_UP_30` | 不进法务分 |
+| 现金消耗/跑道 | §3.4 `CASH_RUNWAY_*` / `RUNWAY_UNCERTAIN` / `BURN_YOY_UP_30` | 不进法务分 |
 | 关联交易占比 | 不做独立占比打分 | §3.2 + 關連交易专章表/百分比率抽取 |
 
 ### 发行人类型
@@ -81,7 +82,7 @@ Skill vs Tool：**Tool** 无状态原子能力；**Skill** 经 `run_*_skill` 暴
 
 | # | Tool | 作用 |
 |---|------|------|
-| 1 | `retrieve_finance` | 三张财务主表证据 |
+| 1 | `retrieve_finance` | 消费检索整表包（`TBL_IS` / `TBL_BS` / `TBL_CF` + 可选 `TBL_BS_COMPANY`）；不自行切表 |
 | 2 | `extract_metrics` | REV/GP/CFO/NET_LOSS/CV_PREF… |
 | 3 | `derive_gates` | 盈利 / 3.4 / biotech 门控；低风险可 `fast_path` |
 | 4 | `calc_cash_runway` | 未盈利现金跑道 + burn YoY |
@@ -112,13 +113,25 @@ LLM 负责选工具、四维叙述、初始分；`submit` 时与 `configs/score_
 | `CFO_NEGATIVE` | CFO 持续为负 | 15 |
 | `GP_MARGIN_DROP` | 毛利率降幅 >5pp | 10 |
 | `CASH_RUNWAY_LT_12` / `CASH_RUNWAY_12_24` | 未盈利跑道 | 20 / 10 |
+| `RUNWAY_UNCERTAIN` | 未盈利但跑道算不出（缺 CFO/烧钱序列） | 15 |
 | `BURN_YOY_UP_30` | 烧钱同比 >30%（全年∨中期） | 15 |
 | `CV_PREF_LIABILITY` | CV_PREF 相对资产≥10% 或现金≥50% | 10 |
+| `DATA_INSUFFICIENT_IS` | 18A 抽不出 `NET_LOSS` 且分 <40 | 抬至 **40**（关注档，非 yaml 规则码） |
+
+`submit_finance_report` **定稿顺序**（`finalize_finance_report` / `_validate_submit`）：
+
+1. `_merge_rules_floor`：主题桶 max，规则为锚
+2. `_apply_18a_data_insufficient_guard`：18A 缺 `NET_LOSS` 禁止 silent `very_low=0`
+3. `_align_narrative_to_level`：改写 summary/reasoning 里残留的旧分数/等级
+
+叙事对齐会处理「規則打分 0.0」「中級（40分）」「定為低（45分）」等与最终 `risk_score` / `risk_level` 不一致的措辞（等级词一并改写，不只改数字）。`high` vs 中文「中等」若语义接近则可能只加注，不强制改写等级词。
 
 要点：
 
 - 空参 `submit_finance_report({})` → `submit_recovered`（规则分 + 四维草稿恢复）。
 - 硬信号（未盈利/连续亏损/CFO 负）时最终分以合并 breakdown 为准。
+- `max_turns` 耗尽但已有 metrics/gates：`_auto_submit_if_ready` 用 **按 skill 列风险点** 的结构化摘要收束（含 `RUNWAY_UNCERTAIN` 提示），不再用空模板「未觸發規則扣分項」。
+- ReAct / pipeline LLM 失败：`score_finance_rules_fallback`；`build_rules_summary` 按已触发规则写摘要，无证据页仍计分。
 - 默认 `reasoning_effort=low`；可用 `--finance-reasoning-effort`。
 - 结果看 `features.scoring_mode`、`features.rules_floor`（`llm_score` / `final_score` / `theme_merge`）。
 
@@ -126,9 +139,30 @@ LLM 负责选工具、四维叙述、初始分；`submit` 时与 `configs/score_
 
 ### 2.4 抽数要点
 
-- 主表 text/html 一视同仁；`TBL_BS_COMPANY` 不并入综合 BS。
-- 年份区分完整年与中期（`2024_i1`）；盈利门控只用完整年；跑道用最新现金，中期 CFO 按 8 个月年化。
+实现：`src/skills/extract_financials.py` + `table_utils.py`；别名：`configs/finance_schema.yaml`。
+
+- 主表 **text / html 一视同仁**（解析常把附录主表标成 `text`）；`TBL_BS_COMPANY` 只登记证据，**不并入**综合 BS 指标。
+- 年份：完整年 vs 中期（`2024_i1`）；支持表头「二零一八年人民幣千元」、文本表把 `2023年`/`2024年` 拆成多行。盈利门控只用完整年；跑道用最新现金，中期 CFO 按 8 个月年化。
 - 18A 无产品收入时保留 `OTHER_INCOME` / `CV_PREF`，勿把其他收入当营收。
+- **`NET_LOSS`**：优先「年內/期內溢利(虧損)」底行，税前亏损仅回退；行名括号/繁简/空格归一（含 `動→动`）。IS 未召回时，可用现金流量表「除税前虧損」代理（`extract_notes` 会标明）。
+- **`CFO/CFI/CFF`**：覆盖「所用現金淨額」「所產生（所用）」、带空格的「投資活動 (所用) 所得」、以及「經營活動現金流入/流出淨額」。
+- **`TBL_BS`**：`資產總值` → `TOTAL_ASSETS`；`負債總值` → `TOTAL_LIAB`；`虧絀總額` / 應佔虧絀 → `NET_ASSETS`（可为负）。`資產總值減流動負債` 仍由行名黑名单拒绝。
+- 拆格行名（「應佔年內」+「全面虧損總額」）会拼格后再匹配。
+
+### 2.5 检索包契约（`retrieve_finance` 依赖）
+
+财务 Agent **不自己切表**，只消费 `retrieval` 整表包（`evidence_by_table`）。改表名/跨页门控后必须 **重建检索包**（批量不要加 `--skip-retrieval`）。不为单家发行人写 profile，别名表吸收写法差异。
+
+配置：`retrieval/configs/agent_retrieval_profiles.yaml`；展开：`retrieval/src/retrieval/evidence_expand.py`。策略说明：[`retrieval/configs/finance_table_retrieval_strategy.md`](../../retrieval/configs/finance_table_retrieval_strategy.md)。
+
+| 表 | 18A 易漏写法（已吸收进通用别名） |
+|----|----------------------------------|
+| `TBL_IS` | `綜合全面虧損表` / `合併損益及其他綜合收益表`；税前虧損、年／期內溢利(虧損) |
+| `TBL_BS` | `綜合資產負債表`（不仅「財務狀況表」）；`資產總值` ∧（`權益總額` / `虧絀總額` / `負債總值`） |
+| `TBL_BS_COMPANY` | `貴公司財務狀況表` **或** `本公司資產負債表`；不并入集团 BS pack |
+| `TBL_CF` | 经营页 + 投资/融资续页；续页含「投資活動/融資活動」不得误判为损益表；行名可带空格括号或拆行 |
+
+`must_have_groups`：组内 OR、组间 AND。CF 投资/融资组对「投資活動 (所用) 所得現金淨額」等做宽松匹配。
 
 ---
 
@@ -146,7 +180,9 @@ LLM 负责选工具、四维叙述、初始分；`submit` 时与 `configs/score_
 
 辩论补证：`search_legal_evidence_standalone(...)`。
 
-理想路径约 7–8 轮：`retrieve → skill×5 →（可选 search）→ run_rule_checks` → **`prefer_llm_submit` 再叫一轮真正的 `submit_legal_report`**（写 summary/reasoning；`risk_points` 可空由系统从 skill 填充）。LLM 终裁失败 / `max_turns` 耗尽才 `_auto_submit_if_ready` 托底（`auto_submit:rule_checks_ready` 等）。默认 `max_turns=10`。
+理想路径约 7–8 轮：`retrieve → skill×5 →（可选 search）→ run_rule_checks` → **`prefer_llm_submit` 再叫一轮真正的 `submit_legal_report`**（写 summary/reasoning；`risk_points` 可空由系统从 skill 填充）。LLM 终裁失败 / `max_turns` 耗尽才 `_auto_submit_if_ready` 托底。默认 `max_turns=10`。
+
+自动收束：至少 2 个 skill 后，用 `_structured_legal_auto_summary` 按 skill 汇总风险点（code / level / 页码），**禁止**空模板摘要；`submit_warnings` 记 `auto_submit:{reason}`。
 
 ### 3.2 Skills（5）
 
@@ -203,8 +239,8 @@ think
   → (search_finance_evidence ≤2/3)
   → run_finance_rule_checks
   → prefer_llm_submit：尽量再叫一轮真正的 submit_finance_report
-  → LLM 终裁失败 / 轮次耗尽：服务端 _auto_submit_if_ready 托底
-  → 主题 max 规则托底 → DebateDossier 落盘
+  → LLM 终裁失败 / 轮次耗尽：服务端 _auto_submit_if_ready 托底（结构化摘要）
+  → submit 定稿：规则托底 → 18A DATA_INSUFFICIENT → 叙事对齐 → DebateDossier 落盘
 ```
 
 ### 4.2 法务 ReAct
@@ -217,7 +253,7 @@ think
   → run_rule_checks
   → 无缺口且 skill 齐全：prefer_llm_submit → 再叫一轮真正的 submit_legal_report
      有缺口：精选 search 后 submit_legal_report
-  → LLM 终裁失败 / 轮次耗尽：服务端 _auto_submit_if_ready 托底
+  → LLM 终裁失败 / 轮次耗尽：服务端 _auto_submit_if_ready 托底（_structured_legal_auto_summary）
   → point_kind + 饱和聚合 → DebateDossier
 ```
 
@@ -234,21 +270,22 @@ Token：中间轮 `max_tokens=2048`，收束/submit `4096`。DeepSeek 认 `reaso
 
 ### 4.4 并行出口
 
-`src/graph/parallel.py`：`asyncio.gather(finance, legal)` →
+`src/graph/parallel.py`：`asyncio.gather(finance, legal, market)` → `MasterAgent`（`src/graph/master_graph.py` 只包总控子图）：
 
 ```json
 {
   "doc_id": "...",
   "finance": { "...AgentResult" },
   "legal": { "...AgentResult" },
+  "market": { "...AgentResult", "features": { "demo": true } },
   "reference_fundamental_score": 66.48,
   "cross_agent_features": [],
-  "master": null,
-  "note": "...总控辩论未启用"
+  "master": { "judgment": { "overall_score": 70, "level": "high", "risk_level_http": "HIGH" }, "...": "..." },
+  "note": "对照加權分 vs 總控終裁"
 }
 ```
 
-`reference_fundamental_score = legal×0.45 + finance×0.55`（参考值，非总控正式输出）。
+`reference_fundamental_score = legal×0.45 + finance×0.55`（对照值）。**正式等级与顶层 HTTP `riskLevel` 以总控终裁为准。** `--skip-master` 可回到 `master=null`。
 
 ---
 
@@ -262,7 +299,7 @@ Token：中间轮 `max_tokens=2048`，收束/submit `4096`。DeepSeek 认 `reaso
 | 财务检索包 | `retrieval/.runtime/agent_retrieval_{doc_id}_finance.json` |
 | 法务检索包 | `retrieval/.runtime/agent_retrieval_{doc_id}_legal.json` |
 
-HTTP 路径下由 9101 prepare 生成；CLI 可离线 JSON 或 `--use-live-retrieval`。
+HTTP 路径下由 9101 prepare 生成；CLI 可离线 JSON 或 `--use-live-retrieval`。改了 `agent_retrieval_profiles.yaml` / `evidence_expand.py` 后须重建检索包，否则 Agent 仍吃旧整表证据。
 
 ### 5.2 Agent 运行中
 
@@ -372,7 +409,11 @@ python scripts/generate_analysis_report.py \
 
 | 参数 | 说明 |
 |------|------|
-| `--agent` | `finance` / `legal` / `all`（默认并行） |
+| `--agent` | `finance` / `legal` / `market` / `all`（默认三专家并行后接总控） |
+| `--skip-master` | 专家探查后不跑总控（旧行为 `master=null`） |
+| `--skip-experts` | 跳过财务/法务/市场探查，直接总控；必须配合 `--from-result` |
+| `--from-result` | 已有专家 merged JSON（含 `finance`/`legal`） |
+| `--master-provider` / `--master-chat-model` | 覆盖总控模型；默认与专家共用同一 `LLMClient` |
 | `--doc-id` / `--doc-name` / `--pdf-name` | 文档标识与展示名 |
 | `--issuer-type` | `general` / `18a` / `18c` / `biotech` |
 | `--parse-json` | `full_parse.json`（财务章节检索 + 法务专章/grep） |
@@ -454,7 +495,31 @@ python scripts/run_finance_legal.py --agent finance ... --finance-pipeline \
   --out .runtime/hansiaitai_finance_pipeline.json
 ```
 
-### 8.4 近期联调快照
+### 8.4 跳过专家、只跑总控（复用已有 JSON）
+
+```bash
+python scripts/run_finance_legal.py \
+  --skip-experts \
+  --from-result .runtime/hansiaitai_finance_legal_opt_v5.json \
+  --doc-id hansiaitai \
+  --doc-name 翰思艾泰 \
+  --pdf-name "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf" \
+  --issuer-type 18a \
+  --parse-json "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch_old/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json" \
+  --provider deepseek \
+  --chat-model deepseek-v4-flash \
+  --out .runtime/hansiaitai_master.json
+
+python scripts/generate_analysis_report.py \
+  --result .runtime/hansiaitai_master.json \
+  --doc-name 翰思艾泰 \
+  --pdf-name "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf" \
+  --out reports/hansiaitai_warning_report.md
+```
+
+`--parse-json` 仍建议提供：总控粉饰读前五页，辩论补证走 `search_*_standalone`。与 `--skip-master` 互斥。
+
+### 8.5 近期联调快照
 
 | 产物 | 分数 | 说明 |
 |------|------|------|
@@ -470,10 +535,21 @@ python scripts/run_finance_legal.py --agent finance ... --finance-pipeline \
 
 | 组件 | 状态 |
 |------|------|
-| `DebateDossier` / `DebateClaim`（`src/models/debate.py`） | 交卷时落盘 |
-| `cross_agent_features` / `master` | 恒为 `[]` / `null` |
-| 多轮辩论编排 | **未实现** |
-| 独立补证据函数 | **已实现**，待总控调用 |
+| `DebateDossier` / `DebateClaim`（`src/models/debate.py`） | 探查结束落盘 |
+| `MasterAgent` / `src/graph/master_graph.py` | **已启用**：冲突研判 → 条件辩论(≤3) → 粉饰 → 终裁 → 报告 |
+| `cross_agent_features` / `master` | 总控输出；对照分仍写 `reference_fundamental_score` |
+| 独立补证据函数 | 辩论中由专家 `respond_to_controller` 调用（可自拟新 query，每问≤2） |
+
+总控是 **LLM Agent**，不是规则引擎。规则只做：dossier 压成短卡片、第五章清单写入 Prompt、API/JSON 全失败时 `degraded` 出分。禁止 `if qwen: skip_master_llm`。
+
+评测（Qwen3.6 35B + vLLM）与开发（DeepSeek）走**同一套步骤**，差异只在压缩输入 / JSON 重试 / 协议：
+
+```bash
+python scripts/run_finance_legal.py --agent all \
+  --provider vllm --api-base http://<评委>:8000/v1 --chat-model <Qwen3.6-35B>
+```
+
+`provider=vllm` 允许空 API key。Payload **不会**发送 DeepSeek `thinking` / OpenRouter `reasoning`。无 key 的开发机才会规则降级（`trace.degraded`），不阻断出分。
 
 ### 9.2 Dossier 结构（可供总控回看）
 
@@ -489,7 +565,8 @@ DebateDossier
   client_project_id / task_id / analysis_id
 ```
 
-路径：`.runtime/debate/{doc_id}_{finance|legal}_dossier_{ts}.json`  
+路径：`.runtime/debate/{doc_id}_{finance|legal|market}_dossier_{ts}.json`  
+总控落盘：`.runtime/debate/{doc_id}_master_{ts}.json`  
 读写：`save_dossier` / `load_dossier`。
 
 ### 9.3 补证据 API（辩论阶段可调用）
@@ -520,19 +597,21 @@ await search_finance_evidence_standalone(
 )
 ```
 
-设计意图：总控判定证据不足时，按 dossier 记录的 query **增量检索**；当前 **不会** 在辩论中自动重跑完整 `run_*_skill` ReAct。
+设计意图：总控质询时，专家先用已有 evidence；不够则**自拟新 query** 调 standalone（每问最多 2 次）。查到或查不到都必须推理发言；空 hits 时 confidence≤0.4，禁止编造页码。辩论中 **不会** 重跑完整 `run_*_skill` ReAct / `submit_*_report`。
 
-### 9.4 跨 Agent 主题表（未来总控）
+「一轮问完」= 本轮已决定要问的问题一次性打包并行（cap 4）。答完后总控再判是否因未决或**新触发问询**开下一轮；`max_rounds=3` 硬顶。
 
-模型：`src/models/cross_agent.py`
+### 9.4 跨 Agent 主题表（总控冲突研判遵守）
 
-| 主题 | 财务 | 法务 | 总控（未来） |
-|------|------|------|--------------|
-| 赎回/优先股 | `CV_PREF_LIABILITY` | `REDEMPTION_*` | 兑付/上市前清理 |
-| 加盟 | 收入依赖（general） | 合同责任 | 商业模式风险 |
-| 供应链 | 成本/集中 | 供应协议 | 供应链风险 |
-| 海外 | 汇率/收入 | 境外监管 | 出海合规 |
-| 数据 | 相关收入 | 隐私合规 | 数据业务风险 |
+模型：`src/models/cross_agent.py`；清单：`configs/master_rules.yaml`
+
+| 主题 | 财务 | 法务 | 总控怎么判 |
+|------|------|------|------------|
+| 赎回/优先股 | `CV_PREF` 表内负债 | `REDEMPTION_*` / 清理条款 | 同向=共振；表内重大 vs 已清理=冲突 |
+| 现金跑道 | `CASH_RUNWAY_*` | 不计分 | 财务单方硬门控，非法务缺席 |
+| 客户/供应商集中 | 只解释钱，不打 CONCENTRATION 分 | `CONCENTRATION_*` | 非法务缺席 |
+| 关联交易占比 | 不做独立占比打分 | `RELATED_PARTY_*` | 同上 |
+| 文本粉饰 | 双方均未做 | 双方均未做 | **总控第四章 Skill** |
 
 ---
 
@@ -611,7 +690,7 @@ await search_finance_evidence_standalone(
 | `analysis_complete` | `{overallScore, riskLevel}` |
 | `heartbeat` | 约 15s |
 
-Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**（内部并行，对外有序）。`market` 本轮 `skipped`；`orchestrator` 用参考分收尾。
+Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**，再 **market**（demo），最后 **orchestrator**（总控 jsonl：质询 / 补证 / 粉饰 / 终裁）。
 
 **法务 / 财务 Thought 对齐（前端可共用渲染）**
 
@@ -662,23 +741,25 @@ Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**（内部
       "financeDetail": { "tables": [], "metrics": [], "gates": {}, "cashBurn": null },
       "agentResult": {}
     },
-    "market": { "agentId": "market", "status": "skipped", "reason": "not_implemented" },
+    "market": { "agentId": "market", "status": "completed", "reason": "demo_stub", "riskScore": 50 },
     "orchestrator": {
       "agentId": "orchestrator",
-      "status": "placeholder",
-      "overallScore": 66,
+      "status": "completed",
+      "overallScore": 70,
       "riskLevel": "HIGH",
-      "note": "weighted_reference_score"
+      "note": "master_verdict",
+      "logText": "…",
+      "logEvents": []
     }
   },
-  "dossierPaths": { "finance": "...", "legal": "..." },
+  "dossierPaths": { "finance": "...", "legal": "...", "market": "...", "master": "..." },
   "completedAt": "..."
 }
 ```
 
-要点：顶层 `overallScore` 为 **整数**参考融合分（`legal×0.45+finance×0.55`）；顶层 `riskLevel` 为大写三档，`agents.*.riskLevel` 为 Agent 小写枚举；`rulesFloor` 财务/法务字段不对称。  
+要点：顶层 `overallScore` / `riskLevel` 为 **总控终裁**（`HIGH|MEDIUM|LOW`）；`reference_fundamental_score` 仍作对照加权分写入 `agents.orchestrator`。`agents.*.riskLevel` 为 Agent 小写枚举；`rulesFloor` 财务/法务字段不对称。  
 Thought / EvidenceSnippet 类型见契约 §10.3（`interface_new.md` **v3.3**）。  
-**尚未由本仓实现**：`/report`、`/report/export`、`/rag/query`。
+**尚未由本仓实现**：`/report`、`/report/export`、`/rag/query`。上市后 day1/5/20/60 验证本轮只留空字段。
 
 ---
 
@@ -796,7 +877,12 @@ python scripts/batch_finance_legal_18a.py --n 5 --skip-index --skip-retrieval
 
 # 从第 4 家起再跑 5 家；单家失败继续
 python scripts/batch_finance_legal_18a.py --n 5 --start 3 --continue-on-error
+
+# 只重跑指定代码（忽略 --n/--start 切片；仍按名单顺序）
+python scripts/batch_finance_legal_18a.py --codes 09606,09939 --skip-index --continue-on-error
 ```
+
+改了 `agent_retrieval_profiles.yaml` / `evidence_expand.py` 之后 **不要** `--skip-retrieval`，否则 Agent 仍吃旧检索包。索引可 `--skip-index` 复用。目录名若曾被 CP866 误解码（「全球發售」花成西里尔字母），`parse_stem` 会自动还原。
 
 | 参数 | 默认 | 说明 |
 |------|------|------|
@@ -813,6 +899,7 @@ python scripts/batch_finance_legal_18a.py --n 5 --start 3 --continue-on-error
 | `--legal-reasoning-effort` | `high` | 法务思考强度（同 §8.1） |
 | `--max-turns` | `10` | ReAct 上限 |
 | `--continue-on-error` | 关 | 单家失败继续下一家 |
+| `--codes` | 空 | 仅跑这些股票代码（逗号分隔，如 `02509,09606`）；设置后忽略 `--n/--start` 切片 |
 
 产物约定：
 
@@ -834,9 +921,16 @@ conda activate ipo-risk
 cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
 python -m pytest tests/test_legal_react.py tests/test_legal_thought_mapper.py \
   tests/test_finance_react_skills.py tests/test_finance_submit_recover.py \
-  tests/test_related_party_ratio.py -q
+  tests/test_related_party_ratio.py tests/test_score_finance_runway_uncertain.py \
+  tests/test_net_loss_cf_proxy_and_narrative.py \
+  tests/test_extract_aliases_and_years.py \
+  tests/test_master_gate_warning.py tests/test_conflict_cards.py \
+  tests/test_embellishment_prompt.py tests/test_debate_trace.py \
+  tests/test_debate_cap.py tests/test_llm_vllm_qwen.py -q
 python scripts/assert_legal_stream_parity.py --self-check
 ```
+
+环境若无 pytest，可直接 `python -c` import 测试函数。检索侧（表名/跨页）单测在 `retrieval/tests/`：`test_tbl_is_18a_aliases.py`、`test_tbl_bs_18a_aliases.py`、`test_tbl_cf_continuation.py`、`test_company_bs_kind.py`。
 
 ### 13.2 关键目录
 
@@ -845,7 +939,7 @@ agents/hk_ipo_risk/
 ├── README.md
 ├── docs/
 │   └── market_sentiment_agent_spec.md   # 市场情绪接入规范（合并用）
-├── configs/                 # score_rules / finance_schema / legal_schema
+├── configs/                 # score_rules / finance_schema / legal_schema / master_rules
 ├── scripts/
 │   ├── run_finance_legal.py
 │   ├── batch_finance_legal_18a.py
@@ -854,12 +948,12 @@ agents/hk_ipo_risk/
 │   └── start_analysis_service.sh
 ├── service/                 # FastAPI 9102
 ├── src/
-│   ├── agents/              # finance_agent / legal_agent / react_loop
-│   ├── skills/              # toolbox / presets / extract_* / score_*
-│   ├── models/              # debate / evidence / cross_agent
+│   ├── agents/              # finance / legal / market(demo) / master
+│   ├── skills/              # toolbox + master_detect/debate/embellish/decide/report
+│   ├── models/              # debate / evidence / cross_agent / master
 │   ├── tools/               # schemas / retrieval_tool / llm_client
-│   ├── graph/parallel.py
-│   └── llm/prompts.py
+│   ├── graph/parallel.py / master_graph.py
+│   └── llm/prompts.py / master_prompts.py / debate_prompts.py
 ├── tests/
 ├── logs/  reports/  .runtime/debate/  .runtime/analyses/
 ```
@@ -868,10 +962,18 @@ agents/hk_ipo_risk/
 
 | 主题 | 文件 |
 |------|------|
-| 财务工具与托底 | `src/skills/finance_toolbox.py` / `finance_presets.py` |
+| 财务工具与托底 / 叙事对齐 | `src/skills/finance_toolbox.py` / `finance_presets.py` |
+| 财务抽数与行名归一 | `src/skills/extract_financials.py` / `table_utils.py` / `configs/finance_schema.yaml` |
+| 财务规则分 / 跑道不确定 | `src/skills/score_finance.py` / `configs/score_rules.yaml` |
+| ReAct 自动收束 | `src/agents/finance_agent.py` / `legal_agent.py` |
 | 法务工具与饱和分 | `src/skills/legal_toolbox.py` / `legal_presets.py` / `legal_point_kind.py` |
 | 关联交易占比 | `src/skills/extract_legal.py` |
 | 辩论素材 | `src/models/debate.py` |
+| 总控模型 / 规则 | `src/models/master.py` / `configs/master_rules.yaml` |
+| 总控 Agent / 子图 | `src/agents/master_agent.py` / `src/graph/master_graph.py` |
+| 总控 Skill | `src/skills/detect_conflicts.py` / `run_debate.py` / `score_embellishment.py` / `master_decide.py` / `generate_warning_report.py` |
+| 市场 demo | `src/agents/market_agent.py` / `src/skills/market_toolbox.py` |
 | HTTP Thought 映射 | `service/thought_mapper.py` |
 | 规则配置 | `configs/score_rules.yaml` |
+| 财务检索包（Agent 上游） | `retrieval/configs/agent_retrieval_profiles.yaml` / `retrieval/src/retrieval/evidence_expand.py` |
 | 市场情绪接入规范 | [`docs/market_sentiment_agent_spec.md`](docs/market_sentiment_agent_spec.md) |
