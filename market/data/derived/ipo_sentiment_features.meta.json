@@ -1,13 +1,15 @@
 {
   "file": "ipo_sentiment_features.csv",
   "source": "features + subscription_multiples + wind/ipo_listing_stats",
-  "fetched_at": "2026-08-02T15:08:41",
+  "fetched_at": "2026-08-13T12:20:46",
   "rows": 565,
   "columns": [
     "stock_code",
     "windcode",
     "company",
     "listing_date",
+    "as_of_date",
+    "market_observation_date",
     "industry",
     "hsics_l1_name",
     "industry_source",

@@ -1,0 +1,71 @@
+version: 1
+purpose: T-1市场情绪证据输出跨年份首轮实验
+selection_principles:
+  - 覆盖2020至2025六个上市年份
+  - 覆盖消费、医疗、TMT、金融、地产和工业等行业
+  - 2020样本保留VHSI不可得的MVP情形，用于验证早期年份缺失处理
+  - 优先选择行业映射明确且结构化市场数据可用的公司
+  - outcome字段仅在Agent完成后用于实验评价，绝不进入Agent输入
+
+companies:
+  - stock_code: "09992"
+    company: 泡泡瑪特
+    listing_year: 2020
+    rationale: 2020消费代表；验证VHSI缺失回退
+  - stock_code: "06618"
+    company: 京東健康
+    listing_year: 2020
+    rationale: 2020医疗健康代表；验证早期年份行业与IPO热度
+  - stock_code: "01945"
+    company: 清科創業
+    listing_year: 2020
+    rationale: 2020金融代表；扩展行业覆盖
+  - stock_code: "00020"
+    company: 商湯－Ｗ
+    listing_year: 2021
+    rationale: 2021TMT代表；成长风格与大市信号对照
+  - stock_code: "02015"
+    company: 理想汽車－Ｗ
+    listing_year: 2021
+    rationale: 2021大型新经济发行代表
+  - stock_code: "00606"
+    company: 中駿商管
+    listing_year: 2021
+    rationale: 2021地产服务代表；扩展行业情绪覆盖
+  - stock_code: "02121"
+    company: 創新奇智
+    listing_year: 2022
+    rationale: 2022TMT代表；本地新闻存在但全部为上市后，可验证舆情截止
+  - stock_code: "01880"
+    company: 中國中免
+    listing_year: 2022
+    rationale: 2022消费代表
+  - stock_code: "02245"
+    company: 力勤資源
+    listing_year: 2022
+    rationale: 2022工业制造代表
+  - stock_code: "01519"
+    company: 極兔速遞－Ｗ
+    listing_year: 2023
+    rationale: 2023工业物流代表
+  - stock_code: "01973"
+    company: 天圖投資
+    listing_year: 2023
+    rationale: 2023金融代表
+  - stock_code: "00300"
+    company: 美的集團
+    listing_year: 2024
+    rationale: 2024大型消费制造发行代表
+  - stock_code: "02431"
+    company: 佑駕創新
+    listing_year: 2024
+    rationale: 2024TMT/智能驾驶代表
+  - stock_code: "02097"
+    company: 蜜雪集团
+    listing_year: 2025
+    rationale: 2025消费代表；本地新闻存在但晚于上市日
+  - stock_code: "01276"
+    company: 恒瑞医药
+    listing_year: 2025
+    rationale: 2025医疗健康代表
+

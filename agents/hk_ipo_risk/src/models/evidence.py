@@ -33,7 +33,7 @@ class RiskPoint(BaseModel):
 
 
 class AgentResult(BaseModel):
-    agent: Literal["finance", "legal"]
+    agent: Literal["finance", "legal", "market"]
     doc_id: str = ""
     risk_score: float = 0.0
     risk_level: str = "very_low"

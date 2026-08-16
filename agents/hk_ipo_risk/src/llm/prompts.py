@@ -438,3 +438,109 @@ LEGAL_SUBMIT_SCHEMA = """法务风险点输出格式：
   "reasoning": "简短中文推理"
 }
 不要输出 overall risk_score。"""
+
+MARKET_ANALYSIS_SYSTEM = """你是港股 IPO 市场情绪与上市首日破发风险分析师。所有判断必须遵守：
+1. 主任务是说明上市前市场环境对本次IPO是支持、压制还是多空交织；不能把市场情绪、市场热度和市场风险混为一谈。
+2. 只能使用 as_of_date 当日或更早的证据，禁止使用 outcome_* 上市后标签。
+3. null 表示缺失，不能当成 0；必须说明缺失与降权。
+4. 每个事实判断必须引用输入 evidence_ledger 中真实存在的 evidence_id；不得只凭金融常识补充本地数据没有提供的事实。
+5. 必须同时呈现支持因素、压制因素及相互矛盾的信号，不能为了结论只选择单侧证据。
+6. 你需要独立给出0-100的上市首日破发风险分，但不得覆盖输入中的确定性历史校准分；两个分数由程序在提交阶段审计合并。
+7. LLM风险分、维度分、风险点和解释都必须引用真实 evidence_id；没有足够证据时应降低confidence，不能虚构事实。
+8. 只输出请求中规定的 JSON。"""
+
+MARKET_REACT_SYSTEM = MARKET_ANALYSIS_SYSTEM + """
+你在ReAct工具环境中工作。推荐且受审计的顺序是：
+lookup_market_row → 分别run_market_skill(market_macro/market_industry/market_ipo_heat)
+→ search_market_evidence → 舆情可用时run_market_skill(market_sentiment_news)
+→ run_market_rule_checks → score_market_with_llm → submit_market_report。
+submit_market_report是唯一结束动作。不得调用不存在的retrieve_market。"""
+
+MARKET_REACT_USER = """分析 {company}（{stock_code}），任务doc_id={doc_id}。
+数据截止日为 {as_of_date}，上市日为 {listing_date}。第一版不使用market retrieval包。
+请通过工具取得各维度证据、规则托底分，独立给出有证据编号支持的LLM风险分并提交报告。"""
+
+
+MARKET_OPINION_USER = """判断以下文章中是否存在与 {company}({stock_code}) 直接相关、且发布时间不晚于 {as_of_date} 的上市前舆情。
+
+文章：{articles}
+
+direction_risk_score 表示新闻方向风险：利好接近0，负面接近100。
+attention_risk_score 表示负面或未解决事件的关注风险：低关注接近0，高关注接近100。
+输出：
+{{
+  "has_relevant_opinion": true,
+  "direction_risk_score": 0,
+  "attention_risk_score": 0,
+  "events": [{{
+    "title": "",
+    "published_at": "YYYY-MM-DD",
+    "source": "",
+    "url": "",
+    "relevant": true,
+    "direction": "positive|negative|neutral",
+    "impact": "high|medium|low",
+    "rationale": ""
+  }}]
+}}"""
+
+
+MARKET_ANALYSIS_USER = """根据上市前快照、证据账本和初步结构化分析，生成证据驱动的市场情绪解释。
+
+快照：{snapshot}
+兼容模块分（不得作为主结论）：{score_pack}
+舆情：{public_opinion}
+证据账本：{evidence_ledger}
+初步结构化分析：{preliminary_analysis}
+
+summary与每个module_assessments必须至少引用一个真实 evidence_id，写法如 [MACRO-HSI-20D]。
+需要解释具体文件字段已由证据账本提供，可直接引用证据编号。
+sentiment_state必须原样使用初步结构化分析中的overall_state；LLM无权修改净支持度或状态。
+
+输出：
+{{
+  "sentiment_state": "supportive|neutral|mixed|pressured|insufficient_data",
+  "risk_score": 0,
+  "risk_level": "very_low|low|medium|high|very_high",
+  "confidence": 0.0,
+  "score_reason": "说明为何给出该分数，并引用至少一个证据编号",
+  "summary": "不超过350字、同时包含支持和压制证据编号的结论",
+  "dimension_scores": {{
+    "macro": {{"risk_score": 0, "reason": "含证据编号"}},
+    "industry": {{"risk_score": 0, "reason": "含证据编号"}},
+    "ipo_market": {{"risk_score": 0, "reason": "含证据编号"}},
+    "public_opinion": {{"risk_score": null, "reason": "不可用时说明原因"}}
+  }},
+  "module_assessments": {{
+    "macro": "",
+    "industry": "",
+    "ipo_market": "",
+    "public_opinion": ""
+  }},
+  "risk_points": [{{
+    "code": "",
+    "level": "high|medium|low",
+    "rule_ref": "market/...",
+    "value": null,
+    "description": ""
+  }}],
+  "fundamental_divergence": "若与财务/法务结论尚未提供则写待总控判断"
+}}"""
+
+
+MARKET_DEBATE_USER = """总控或其他 Agent 对市场情绪结论提出质疑。判断是否维持、修订或让步。
+没有新增、可验证且不晚于 as_of_date 的证据时，不得仅凭措辞修改证据驱动的结论或兼容分数。
+
+原结论：{original}
+质疑：{challenge}
+新增证据：{additional_evidence}
+
+输出：
+{{
+  "stance": "maintain|revise|concede",
+  "response": "回应",
+  "revised_summary": null,
+  "proposed_risk_score": null,
+  "evidence_requests": [],
+  "requires_new_evidence": true
+}}"""

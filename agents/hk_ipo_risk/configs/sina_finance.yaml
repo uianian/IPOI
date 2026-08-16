@@ -1,0 +1,28 @@
+sina_finance:
+  enabled: false
+  # 部署时填写真实 API URL；也可用 SINA_FINANCE_API_URL 环境变量覆盖。
+  base_url: ""
+  method: "GET"
+  api_key: ""
+  auth:
+    location: "header"       # header 或 query
+    name: "Authorization"
+    prefix: "Bearer "
+  request:
+    query_param: "q"
+    limit_param: "limit"
+    limit: 20
+    timeout_seconds: 30
+    static_params: {}
+  response:
+    # 点号表示嵌套路径，例如 data.items；空字符串表示响应本身就是数组。
+    items_path: "data.items"
+    fields:
+      title: "title"
+      content: "content"
+      published_at: "published_at"
+      source: "source"
+      url: "url"
+  cache:
+    merge_existing: true
+

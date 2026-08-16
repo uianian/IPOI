@@ -298,6 +298,41 @@ LEGAL_TOOL_SCHEMAS: list[dict[str, Any]] = [
 ]
 
 
+MARKET_TOOL_SCHEMAS: list[dict[str, Any]] = [
+    _fn("lookup_market_row", "按股票代码读取上市前市场宽表及数据边界。", {}),
+    _fn(
+        "run_market_skill",
+        "分析一个市场维度。",
+        {"skill": {"type": "string", "enum": ["market_macro", "market_industry", "market_ipo_heat", "market_sentiment_news"]}},
+        required=["skill"],
+    ),
+    _fn("search_market_evidence", "检查本地舆情，缺失时按配置使用Firecrawl。", {}),
+    _fn("run_market_rule_checks", "运行确定性阈值与历史同期校准，产生rules floor。", {}),
+    _fn(
+        "score_market_with_llm",
+        "提交独立LLM风险评分，必须引用证据ID。",
+        {
+            "risk_score": {"type": "number", "minimum": 0, "maximum": 100},
+            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+            "score_reason": {"type": "string"},
+            "evidence_ids": {"type": "array", "items": {"type": "string"}},
+            "dimension_scores": {"type": "object"},
+        },
+        required=["risk_score", "confidence", "score_reason", "evidence_ids"],
+    ),
+    _fn(
+        "submit_market_report",
+        "唯一结束动作，合并LLM分与rules floor并生成报告。",
+        {
+            "summary": {"type": "string"},
+            "module_assessments": {"type": "object"},
+            "risk_points": {"type": "array", "items": {"type": "object"}},
+        },
+        required=["summary"],
+    ),
+]
+
+
 class ToolRegistry:
     """名称 → OpenAI tool schema + async handler(args, state)->result。"""
 

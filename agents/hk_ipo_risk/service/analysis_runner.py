@@ -25,6 +25,7 @@ from service.thought_mapper import (
     agent_bundle_from_result,
     map_finance_event,
     map_legal_event,
+    map_market_event,
     new_thought,
     score_to_risk_level,
     to_zh_hant,
@@ -209,8 +210,16 @@ class AnalysisRunner:
         llm_config: Optional[dict[str, Any]],
         rules_only: bool,
     ) -> None:
-        from src.config import resolve_api_settings
-        from src.graph.parallel import run_finance_legal_parallel
+        from src.config import (
+            resolve_api_settings,
+            resolve_firecrawl_settings,
+            resolve_market_agent_settings,
+            resolve_sina_finance_settings,
+        )
+        from src.graph.parallel import (
+            run_finance_legal_market_parallel,
+            run_finance_legal_parallel,
+        )
         from src.tools.llm_client import LLMClient
         from src.tracing.run_logger import AgentRunLogger
 
@@ -244,6 +253,9 @@ class AnalysisRunner:
         issuer_type = parse_meta.get("issuerType") or "general"
         doc_name = parse_meta.get("companyName") or parse_meta.get("fileName") or task_id
         pdf_name = parse_meta.get("fileName") or ""
+        stock_code = str(parse_meta.get("stockCode") or parse_meta.get("ticker") or "").strip()
+        if stock_code:
+            emitter.emit("agent_status", {"agentId": "market", "status": "running"})
 
         # LLM：前端 llmConfig 优先（apiKey/apiBaseUrl/model），缺省用后端默认
         # 财务/法务共用同一 client；任一方 RULES_ONLY 时该侧不注入 LLM
@@ -287,6 +299,7 @@ class AnalysisRunner:
         legal_llm = shared_llm if legal_react else None
 
         legal_events: list[dict[str, Any]] = []
+        market_events: list[dict[str, Any]] = []
 
         def on_finance_event(ev: dict[str, Any]) -> None:
             for th in map_finance_event(ev):
@@ -300,6 +313,11 @@ class AnalysisRunner:
         def on_legal_progress(ev: dict[str, Any]) -> None:
             # 规则流水线 on_progress；ReAct 主要走 legal_run_logger
             on_legal_event(ev)
+
+        def on_market_event(ev: dict[str, Any]) -> None:
+            market_events.append(ev)
+            for th in map_market_event(ev):
+                emitter.emit("thought", {"thought": th})
 
         run_logger = AgentRunLogger(
             agent="finance",
@@ -322,33 +340,77 @@ class AnalysisRunner:
                 on_event=on_legal_event,
             )
 
+        market_run_logger = None
+        if stock_code:
+            market_run_logger = AgentRunLogger(
+                agent="market",
+                doc_id=task_id,
+                log_dir=log_dir,
+                issuer_type=issuer_type,
+                doc_name=doc_name,
+                pdf_name=pdf_name,
+                on_event=on_market_event,
+            )
+
         client_project_id = parse_meta.get("clientProjectId")
         DEBATE_DIR.mkdir(parents=True, exist_ok=True)
 
-        merged = await run_finance_legal_parallel(
-            task_id,
-            issuer_type=issuer_type,
-            finance_retrieval_json=fin_path,
-            legal_retrieval_json=leg_path,
-            parse_json=parse_path,
-            finance_llm=finance_llm,
-            legal_llm=legal_llm,
-            finance_run_logger=run_logger,
-            legal_run_logger=legal_run_logger,
-            legal_on_progress=on_legal_progress,
-            finance_rules_only=rules_only,
-            legal_react=legal_react,
-            debate_dir=DEBATE_DIR,
-            client_project_id=str(client_project_id) if client_project_id else None,
-            task_id=task_id,
-            analysis_id=analysis_id,
-            doc_name=doc_name,
-            pdf_name=pdf_name,
-        )
+        parallel_kwargs = {
+            "issuer_type": issuer_type,
+            "finance_retrieval_json": fin_path,
+            "legal_retrieval_json": leg_path,
+            "parse_json": parse_path,
+            "finance_llm": finance_llm,
+            "legal_llm": legal_llm,
+            "finance_run_logger": run_logger,
+            "legal_run_logger": legal_run_logger,
+            "legal_on_progress": on_legal_progress,
+            "finance_rules_only": rules_only,
+            "legal_react": legal_react,
+            "debate_dir": DEBATE_DIR,
+            "client_project_id": str(client_project_id) if client_project_id else None,
+            "task_id": task_id,
+            "analysis_id": analysis_id,
+            "doc_name": doc_name,
+            "pdf_name": pdf_name,
+        }
+        if stock_code:
+            market_settings = resolve_market_agent_settings()
+            firecrawl_ref = market_settings.get("firecrawl") or {}
+            firecrawl_settings = resolve_firecrawl_settings(
+                settings_path=firecrawl_ref.get("settings_path"),
+                local_settings_path=firecrawl_ref.get("local_settings_path"),
+                enabled=bool(firecrawl_ref.get("enabled", True)),
+            )
+            sina_ref = market_settings.get("sina_finance") or {}
+            sina_settings = resolve_sina_finance_settings(
+                settings_path=sina_ref.get("settings_path"),
+                local_settings_path=sina_ref.get("local_settings_path"),
+                enabled=bool(sina_ref.get("enabled", False)),
+            )
+            merged = await run_finance_legal_market_parallel(
+                task_id,
+                stock_code=stock_code,
+                market_llm=shared_llm,
+                market_settings=market_settings,
+                firecrawl_settings=firecrawl_settings,
+                sina_settings=sina_settings,
+                market_run_logger=market_run_logger,
+                market_on_progress=on_market_event,
+                **parallel_kwargs,
+            )
+        else:
+            merged = await run_finance_legal_parallel(task_id, **parallel_kwargs)
+            merged["market"] = None
+            merged["market_error"] = "missing_stock_code"
         run_logger.close(final_summary=(merged.get("finance") or {}).get("summary"))
         if legal_run_logger is not None:
             legal_run_logger.close(
                 final_summary=(merged.get("legal") or {}).get("summary")
+            )
+        if market_run_logger is not None:
+            market_run_logger.close(
+                final_summary=(merged.get("market") or {}).get("summary")
             )
 
         emitter.emit("agent_status", {"agentId": "legal", "status": "completed"})
@@ -356,19 +418,22 @@ class AnalysisRunner:
         emitter.emit("agent_status", {"agentId": "financial", "status": "completed"})
         emitter.flush_financial()
 
-        # market skipped
-        emitter.emit("agent_status", {"agentId": "market", "status": "skipped"})
-        emitter.emit(
-            "thought",
-            {
-                "thought": new_thought(
-                    agent_id="market",
-                    typ="thinking",
-                    content="市場情緒 Agent 本輪跳過（未啓用）",
-                    meta={"kind": "model_think"},
-                )
-            },
-        )
+        market_status = "completed" if merged.get("market") else "failed"
+        if not stock_code:
+            market_status = "skipped"
+        emitter.emit("agent_status", {"agentId": "market", "status": market_status})
+        if not merged.get("market"):
+            emitter.emit(
+                "thought",
+                {
+                    "thought": new_thought(
+                        agent_id="market",
+                        typ="thinking",
+                        content=f"市场情绪 Agent 未产出结果：{merged.get('market_error')}",
+                        meta={"kind": "model_think"},
+                    )
+                },
+            )
 
         # orchestrator 收尾
         score = float(merged.get("reference_fundamental_score") or 0)
@@ -394,6 +459,14 @@ class AnalysisRunner:
         emitter.emit("agent_status", {"agentId": "orchestrator", "status": "completed"})
 
         report_md = _build_report_md(merged, doc_name=str(doc_name), pdf_name=str(pdf_name))
+        market_report_md = str(
+            ((merged.get("market") or {}).get("features") or {}).get(
+                "sentiment_report_markdown"
+            )
+            or ""
+        )
+        if market_report_md:
+            report_md = report_md.rstrip() + "\n\n---\n\n" + market_report_md + "\n"
         (ad / "report.md").write_text(report_md, encoding="utf-8")
         (ad / "merged.json").write_text(
             json.dumps(merged, ensure_ascii=False, indent=2, default=str),
@@ -441,7 +514,19 @@ class AnalysisRunner:
             ((merged.get("legal") or {}).get("features") or {}).get("debate_dossier_path")
             or ((merged.get("legal") or {}).get("trace") or {}).get("debate_dossier_path")
         )
-        dossier_paths = {"finance": fin_dossier, "legal": leg_dossier}
+        market_dossier = (
+            ((merged.get("market") or {}).get("features") or {}).get(
+                "debate_dossier_path"
+            )
+            or ((merged.get("market") or {}).get("trace") or {}).get(
+                "debate_dossier_path"
+            )
+        )
+        dossier_paths = {
+            "finance": fin_dossier,
+            "legal": leg_dossier,
+            "market": market_dossier,
+        }
 
         # 分拆报告：整份报告两边各一份（前端按 agent 展示）
         agents = {
@@ -459,11 +544,29 @@ class AnalysisRunner:
                 log_text=_read_text(fin_log),
                 log_events=_read_jsonl(fin_jsonl),
             ),
-            "market": {
-                "agentId": "market",
-                "status": "skipped",
-                "reason": "not_implemented",
-            },
+            "market": (
+                agent_bundle_from_result(
+                    agent_key="market",
+                    agent_result=merged.get("market") or {},
+                    report_markdown=market_report_md,
+                    log_text=_read_text(
+                        Path(market_run_logger.log_path)
+                        if market_run_logger is not None and market_run_logger.log_path
+                        else None
+                    ),
+                    log_events=_read_jsonl(
+                        Path(market_run_logger.jsonl_path)
+                        if market_run_logger is not None and market_run_logger.jsonl_path
+                        else None
+                    ),
+                )
+                if merged.get("market")
+                else {
+                    "agentId": "market",
+                    "status": market_status,
+                    "reason": merged.get("market_error"),
+                }
+            ),
             "orchestrator": {
                 "agentId": "orchestrator",
                 "status": "placeholder",

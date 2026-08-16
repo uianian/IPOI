@@ -746,6 +746,71 @@ def map_legal_event(event: dict[str, Any]) -> list[dict[str, Any]]:
     return thoughts
 
 
+def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
+    """市场 AgentRunLogger / on_progress 事件 → Thought[]。"""
+    ev = event.get("event")
+    if ev == "react_turn":
+        tool_calls = event.get("tool_calls") or []
+        tool_names = [
+            tc.get("name") for tc in tool_calls
+            if isinstance(tc, dict) and tc.get("name")
+        ]
+        reason_zh = None
+        for tc in tool_calls:
+            if isinstance(tc, dict):
+                reason_zh = _tool_reason(tc.get("arguments"))
+                if reason_zh:
+                    break
+        content, meta = _bilingual_think(
+            turn=event.get("turn") or event.get("step_index") or "?",
+            tool_names=tool_names,
+            reasoning=str(event.get("reasoning") or ""),
+            reason_zh=reason_zh,
+            reasoning_display=event.get("reasoning_display"),
+        )
+        return [new_thought(agent_id="market", typ="thinking", content=content, meta=meta)]
+
+    if ev == "step":
+        name = str(event.get("name") or "market_tool")
+        status = str(event.get("status") or "ok")
+        output = event.get("output")
+        action = "正在执行" if status == "running" else "已完成"
+        content = f"市场工具 {name} {action}"
+        if isinstance(output, dict):
+            hint = output.get("summary") or output.get("hint")
+            if hint:
+                content += "\n" + str(hint)
+        return [
+            new_thought(
+                agent_id="market",
+                typ="thinking",
+                content=content,
+                meta={
+                    "kind": "tool_call" if status == "running" else "tool_result",
+                    "toolName": name,
+                    "toolStatus": status,
+                    "toolArgs": event.get("input_summary"),
+                    "durationMs": event.get("duration_ms"),
+                },
+            )
+        ]
+
+    if ev == "result":
+        payload = event.get("payload") or {}
+        return [
+            new_thought(
+                agent_id="market",
+                typ="conclusion",
+                content=(
+                    f"上市首日破发风险分 {payload.get('risk_score')}。"
+                    + str(payload.get("summary") or "")
+                ),
+                meta={"kind": "model_think"},
+            )
+        ]
+    return []
+
+
 def score_to_risk_level(score: float) -> str:
     s = float(score)
     if s >= 60:
@@ -868,7 +933,11 @@ def agent_bundle_from_result(
         "scoring_mode"
     )
     bundle: dict[str, Any] = {
-        "agentId": "financial" if agent_key == "finance" else "legal",
+        "agentId": (
+            "financial"
+            if agent_key == "finance"
+            else ("market" if agent_key == "market" else "legal")
+        ),
         "riskScore": agent_result.get("risk_score"),
         "riskLevel": agent_result.get("risk_level"),
         "summary": to_zh_hant(str(agent_result.get("summary") or "")),
@@ -883,4 +952,15 @@ def agent_bundle_from_result(
         bundle["financeDetail"] = _finance_detail_from_agent_result(agent_result)
     elif agent_key == "legal":
         bundle["legalDetail"] = _legal_detail_from_agent_result(agent_result)
+    elif agent_key == "market":
+        bundle["marketDetail"] = {
+            "deterministicScore": features.get("deterministic_score"),
+            "llmScore": features.get("llm_score"),
+            "sentimentAnalysis": features.get("sentiment_analysis"),
+            "evidenceCatalog": (
+                features.get("evidence_catalog")
+                or (features.get("sentiment_analysis") or {}).get("evidence_ledger")
+            ),
+            "debateDossierPath": features.get("debate_dossier_path"),
+        }
     return bundle

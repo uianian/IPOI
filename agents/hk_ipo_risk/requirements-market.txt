@@ -1,0 +1,8 @@
+# Market-sentiment Agent standalone runtime (Python 3.10+)
+httpx==0.28.1
+pydantic==2.13.4
+PyYAML==6.0.3
+firecrawl-py==4.22.1
+SQLAlchemy==2.0.51
+asyncpg==0.31.0
+

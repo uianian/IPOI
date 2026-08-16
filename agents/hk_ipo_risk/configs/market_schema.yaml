@@ -1,0 +1,18 @@
+version: market-v1
+required_runtime_inputs: [stock_code, doc_id]
+retrieval_package_enabled: false
+skills:
+  - market_macro
+  - market_industry
+  - market_ipo_heat
+  - market_sentiment_news
+scoring:
+  range: [0, 100]
+  higher_means: higher_day1_break_risk
+  reconciliation: max_llm_and_rules_floor
+  require_llm_evidence_ids: true
+weights:
+  with_verified_public_opinion: {macro: 0.25, industry: 0.25, ipo_market: 0.25, public_opinion: 0.25}
+  without_verified_public_opinion: {macro: 0.3333333333, industry: 0.3333333333, ipo_market: 0.3333333333, public_opinion: 0.0}
+
+

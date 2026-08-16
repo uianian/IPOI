@@ -6,6 +6,7 @@ from typing import Any
 
 from src.agents.finance_agent import FinanceAgent
 from src.agents.legal_agent import LegalAgent
+from src.agents.market_agent import MarketAgent
 from src.models.evidence import AgentResult
 
 
@@ -99,6 +100,62 @@ async def run_finance_legal_parallel(
     )
     finance_result, legal_result = await asyncio.gather(fin_task, leg_task)
     return merge_results(finance_result, legal_result)
+
+
+async def run_finance_legal_market_parallel(
+    doc_id: str,
+    *,
+    stock_code: str,
+    market_llm: Any | None = None,
+    market_settings: dict[str, Any] | None = None,
+    firecrawl_settings: dict[str, Any] | None = None,
+    sina_settings: dict[str, Any] | None = None,
+    market_run_logger: Any | None = None,
+    market_on_progress: Any | None = None,
+    market_max_turns: int | None = None,
+    market_features_csv: Path | str | None = None,
+    market_news_dir: Path | str | None = None,
+    **finance_legal_kwargs: Any,
+) -> dict[str, Any]:
+    """财务、法务、市场并行；市场结果独立返回，不改变基本面参考分。"""
+
+    market_agent = MarketAgent(
+        llm=market_llm,
+        market_settings=market_settings,
+        firecrawl_settings=firecrawl_settings,
+        sina_settings=sina_settings,
+        run_logger=market_run_logger,
+        on_progress=market_on_progress,
+        max_turns=market_max_turns,
+    )
+
+    async def _run_market_safely() -> tuple[AgentResult | None, str | None]:
+        try:
+            result = await market_agent.run(
+                doc_id,
+                stock_code=stock_code,
+                features_csv=market_features_csv,
+                news_dir=market_news_dir,
+            )
+            return result, None
+        except Exception as exc:  # 市场失败不应中断财务/法务结果
+            return None, f"{type(exc).__name__}: {exc}"
+
+    fundamental_task = asyncio.create_task(
+        run_finance_legal_parallel(doc_id, **finance_legal_kwargs)
+    )
+    market_task = asyncio.create_task(_run_market_safely())
+    merged, (market_result, market_error) = await asyncio.gather(
+        fundamental_task,
+        market_task,
+    )
+    merged["market"] = market_result.model_dump() if market_result is not None else None
+    merged["market_error"] = market_error
+    merged["note"] = (
+        str(merged.get("note") or "")
+        + "; market 为独立上市首日破发风险，不计入 reference_fundamental_score"
+    )
+    return merged
 
 
 def merge_results(finance: AgentResult, legal: AgentResult) -> dict[str, Any]:

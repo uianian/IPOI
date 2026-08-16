@@ -17,6 +17,7 @@ dataset/
 # Local secrets and machine-specific files
 .env
 *.env
+agents/hk_ipo_risk/configs/*.local.yaml
 .DS_Store
 
 # Model weights and large binary artifacts

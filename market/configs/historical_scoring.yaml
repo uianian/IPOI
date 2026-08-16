@@ -1,0 +1,73 @@
+version: "historical-v1"
+
+history:
+  lookback_years: 2
+  same_period_days: 45
+  minimum_history_samples: 12
+  minimum_same_period_samples: 3
+  level_weight: 0.70
+  trend_weight: 0.30
+
+score_semantics:
+  risk_anchor: issue_price
+  secondary_market_return_base: first_trading_day_open
+  primary_validation_target: first_day_close_below_issue_price
+  secondary_validation_target: first_day_close_below_first_day_open
+
+overall_module_weights_without_opinion:
+  macro: 0.3333333333
+  industry: 0.3333333333
+  ipo_market: 0.3333333333
+  public_opinion: 0.0
+
+overall_module_weights_with_opinion:
+  macro: 0.25
+  industry: 0.25
+  ipo_market: 0.25
+  public_opinion: 0.25
+
+# risk_direction=higher 表示数值越高风险越高；lower 表示越低风险越高。
+indicators:
+  hsi_ret_5d: {module: macro, label: 恒指5日收益, risk_direction: lower, weight: 0.075}
+  hsi_ret_20d: {module: macro, label: 恒指20日收益, risk_direction: lower, weight: 0.105}
+  hsi_ret_60d: {module: macro, label: 恒指60日收益, risk_direction: lower, weight: 0.045}
+  hstech_ret_20d: {module: macro, label: 恒生科技20日收益, risk_direction: lower, weight: 0.075}
+  mkt_turnover_chg_20d: {module: macro, label: 市场成交额20日变化, risk_direction: lower, weight: 0.20}
+  southbound_net_20d: {module: macro, label: 南向资金20日净额, risk_direction: lower, weight: 0.20}
+  vhsi_avg_5d: {module: macro, label: VHSI五日均值, risk_direction: higher, weight: 0.20}
+  hsi_vol_20d: {module: macro, label: 恒指20日实现波动率, risk_direction: higher, weight: 0.20, fallback_for: vhsi_avg_5d}
+  dxy_ret_20d: {module: macro, label: 美元指数20日收益, risk_direction: higher, weight: 0.04}
+  us10y_chg_20d: {module: macro, label: 美国十年期国债收益率变化, risk_direction: higher, weight: 0.03}
+  dff_chg_30cd: {module: macro, label: 联邦基金利率30日变化, risk_direction: higher, weight: 0.03}
+
+  ind_ret_20d: {module: industry, label: 行业20日收益, risk_direction: lower, weight: 0.25}
+  ind_excess_20d: {module: industry, label: 行业相对恒指超额收益, risk_direction: lower, weight: 0.25}
+  ind_amount_chg_20d: {module: industry, label: 行业成交额变化, risk_direction: lower, weight: 0.15}
+  ind_newhigh_ratio: {module: industry, label: 行业创新高比例, risk_direction: lower, weight: 0.10}
+  ind_net_inflow_20d: {module: industry, label: 行业资金净流入, risk_direction: lower, weight: 0.10}
+  ind_avg_day1_return_365d: {module: industry, label: 行业历史IPO首日表现, risk_direction: lower, weight: 0.10}
+  ind_break_rate_365d: {module: industry, label: 行业历史IPO破发率, risk_direction: higher, weight: 0.05}
+
+  ipo_count_30d: {module: ipo_market, label: 近30日IPO数量, risk_direction: lower, weight: 0.08}
+  ipo_count_90d: {module: ipo_market, label: 近90日IPO数量, risk_direction: lower, weight: 0.07}
+  avg_day1_return_60d: {module: ipo_market, label: 近期IPO首日收益, risk_direction: lower, weight: 0.18}
+  avg_day5_return_60d: {module: ipo_market, label: 近期IPO五日收益, risk_direction: lower, weight: 0.10}
+  avg_day20_return_60d: {module: ipo_market, label: 近期IPO二十日收益, risk_direction: lower, weight: 0.10}
+  break_rate_60d: {module: ipo_market, label: 近期IPO破发率, risk_direction: higher, weight: 0.20}
+  avg_mdd20_60d: {module: ipo_market, label: 近期IPO平均最大回撤, risk_direction: lower, weight: 0.12}
+  subscription_multiple: {module: ipo_market, label: 整体超额认购倍数, risk_direction: lower, weight: 0.06}
+  public_offer_multiple: {module: ipo_market, label: 公开发售认购倍数, risk_direction: lower, weight: 0.05}
+  international_placing_multiple: {module: ipo_market, label: 国际配售认购倍数, risk_direction: lower, weight: 0.04}
+
+postlisting:
+  checkpoints: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
+  minimum_history_samples: 10
+  metrics:
+    below_issue_price: {risk_direction: higher, weight: 0.35, primary_anchor: true}
+    cumulative_return_from_open: {risk_direction: lower, weight: 0.25}
+    excess_hsi_return: {risk_direction: lower, weight: 0.15}
+    excess_industry_return: {risk_direction: lower, weight: 0.10}
+    max_drawdown_from_open: {risk_direction: lower, weight: 0.10}
+    realized_volatility: {risk_direction: higher, weight: 0.03}
+    turnover_change: {risk_direction: lower, weight: 0.02}
+

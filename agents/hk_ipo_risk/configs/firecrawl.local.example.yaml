@@ -1,0 +1,5 @@
+firecrawl:
+  # 复制本文件为 firecrawl.local.yaml 后填写；不要提交真实 Key。
+  api_key: "fc-your-api-key"
+  enabled: true
+

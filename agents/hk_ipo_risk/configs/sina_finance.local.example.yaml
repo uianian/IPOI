@@ -1,0 +1,14 @@
+sina_finance:
+  enabled: true
+  base_url: "https://your-sina-news-api.example/search"
+  api_key: "REPLACE_ME"
+  # 如实际响应结构不同，只改这里，无需改 Agent 代码。
+  response:
+    items_path: "data.items"
+    fields:
+      title: "title"
+      content: "content"
+      published_at: "published_at"
+      source: "source"
+      url: "url"
+

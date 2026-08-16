@@ -19,8 +19,17 @@ sys.path.insert(0, str(PKG_ROOT))
 
 from src.agents.finance_agent import FinanceAgent  # noqa: E402
 from src.agents.legal_agent import LegalAgent  # noqa: E402
-from src.config import resolve_api_settings  # noqa: E402
-from src.graph.parallel import run_finance_legal_parallel  # noqa: E402
+from src.agents.market_agent import MarketAgent  # noqa: E402
+from src.config import (  # noqa: E402
+    resolve_api_settings,
+    resolve_firecrawl_settings,
+    resolve_market_agent_settings,
+    resolve_sina_finance_settings,
+)
+from src.graph.parallel import (  # noqa: E402
+    run_finance_legal_market_parallel,
+    run_finance_legal_parallel,
+)
 from src.tools.llm_client import LLMClient  # noqa: E402
 from src.tracing.run_logger import AgentRunLogger  # noqa: E402
 
@@ -49,6 +58,11 @@ async def _amain() -> int:
     parser.add_argument("--doc-name", default="蜜雪集團")
     parser.add_argument("--pdf-name", default="02097_21-02-2025_蜜雪集團_全球發售.pdf")
     parser.add_argument(
+        "--stock-code",
+        default=None,
+        help="市场 Agent 所需港股代码；未提供时尝试从 --pdf-name 开头识别",
+    )
+    parser.add_argument(
         "--issuer-type",
         choices=["general", "biotech", "18a", "18c"],
         default="general",
@@ -68,9 +82,9 @@ async def _amain() -> int:
     )
     parser.add_argument(
         "--agent",
-        choices=["finance", "legal", "all"],
+        choices=["finance", "legal", "market", "all"],
         default="all",
-        help="选定 Agent：finance=仅财务，legal=仅法务，all=两者并行（默认）",
+        help="选定 Agent：finance / legal / market / all（三者并行）",
     )
     parser.add_argument(
         "--use-live-retrieval",
@@ -150,6 +164,13 @@ async def _amain() -> int:
     parser.add_argument("--out", type=Path, default=PKG_ROOT / ".runtime" / "mixue_finance_legal.json")
     args = parser.parse_args()
 
+    stock_code = args.stock_code
+    if not stock_code:
+        code_match = __import__("re").match(r"^\s*(\d{4,5})", args.pdf_name or "")
+        stock_code = code_match.group(1) if code_match else None
+    if args.agent in {"market", "all"} and not stock_code:
+        parser.error("--agent market/all 需要 --stock-code，或 --pdf-name 必须以股票代码开头")
+
     finance_rules_only = args.finance_rules_only or args.no_finance_llm
 
     fin_json = None if args.use_live_retrieval else (args.retrieval_finance_json or defaults["finance_json"])
@@ -169,6 +190,7 @@ async def _amain() -> int:
     need_llm = (
         (args.agent in {"finance", "all"} and not finance_rules_only)
         or (args.agent in {"legal", "all"} and legal_react)
+        or args.agent in {"market", "all"}
         or args.use_llm
     )
     llm = None
@@ -221,6 +243,18 @@ async def _amain() -> int:
         )
         logger.info("Legal run log → %s", legal_logger.log_path)
 
+    market_logger = None
+    if not args.no_run_log and args.agent in {"market", "all"}:
+        market_logger = AgentRunLogger(
+            agent="market",
+            doc_id=args.doc_id,
+            log_dir=args.log_dir,
+            issuer_type=args.issuer_type,
+            doc_name=args.doc_name,
+            pdf_name=args.pdf_name,
+        )
+        logger.info("Market run log → %s", market_logger.log_path)
+
     finance_llm = None if finance_rules_only else llm
     legal_llm = llm if (legal_react or args.use_llm) else None
     finance_max_turns = args.max_turns if args.max_turns is not None else 10
@@ -229,11 +263,30 @@ async def _amain() -> int:
     legal_effort = args.legal_reasoning_effort or args.reasoning_effort or "high"
     debate_dir = Path(PKG_ROOT) / ".runtime" / "debate"
     debate_dir.mkdir(parents=True, exist_ok=True)
+    market_settings = resolve_market_agent_settings()
+    firecrawl_ref = market_settings.get("firecrawl") or {}
+    firecrawl_settings = resolve_firecrawl_settings(
+        settings_path=firecrawl_ref.get("settings_path"),
+        local_settings_path=firecrawl_ref.get("local_settings_path"),
+        enabled=bool(firecrawl_ref.get("enabled", True)),
+    )
+    sina_ref = market_settings.get("sina_finance") or {}
+    sina_settings = resolve_sina_finance_settings(
+        settings_path=sina_ref.get("settings_path"),
+        local_settings_path=sina_ref.get("local_settings_path"),
+        enabled=bool(sina_ref.get("enabled", False)),
+    )
 
     try:
         if args.agent == "all":
-            result = await run_finance_legal_parallel(
+            result = await run_finance_legal_market_parallel(
                 args.doc_id,
+                stock_code=str(stock_code),
+                market_llm=llm,
+                market_settings=market_settings,
+                firecrawl_settings=firecrawl_settings,
+                sina_settings=sina_settings,
+                market_run_logger=market_logger,
                 issuer_type=args.issuer_type,
                 finance_retrieval_json=fin_json,
                 legal_retrieval_json=leg_json,
@@ -278,7 +331,7 @@ async def _amain() -> int:
                 "cross_agent_features": [],
                 "master": None,
             }
-        else:
+        elif args.agent == "legal":
             leg = await LegalAgent(
                 llm=legal_llm,
                 react=legal_react,
@@ -296,6 +349,15 @@ async def _amain() -> int:
                 pdf_name=args.pdf_name,
             )
             result = {"doc_id": args.doc_id, "legal": leg.model_dump()}
+        else:
+            market = await MarketAgent(
+                llm=llm,
+                market_settings=market_settings,
+                firecrawl_settings=firecrawl_settings,
+                sina_settings=sina_settings,
+                run_logger=market_logger,
+            ).run(args.doc_id, stock_code=str(stock_code))
+            result = {"doc_id": args.doc_id, "market": market.model_dump()}
     finally:
         if llm is not None:
             await llm.close()
@@ -303,6 +365,8 @@ async def _amain() -> int:
             finance_logger.close(final_summary="aborted")
         if legal_logger is not None and not legal_logger._closed:
             legal_logger.close(final_summary="aborted")
+        if market_logger is not None and not market_logger._closed:
+            market_logger.close(final_summary="aborted")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w", encoding="utf-8") as f:
@@ -350,6 +414,19 @@ async def _amain() -> int:
             print(f"  run_log: {logp.get('log')}")
         for b in (leg.get("score_breakdown") or [])[:10]:
             print(f"  +{b.get('delta')} {b.get('code')} ({b.get('rule_ref')}) {b.get('note') or ''}")
+    if result.get("market"):
+        market = result["market"]
+        features = market.get("features") or {}
+        print(
+            f"[market] day1_break_risk={market['risk_score']} "
+            f"level={market['risk_level']} mode={features.get('scoring_mode')}"
+        )
+        print(f"  summary: {market.get('summary')}")
+        print(f"  deterministic_score: {features.get('deterministic_score')}")
+        print(f"  llm_score: {features.get('llm_score')}")
+        print(f"  debate_dossier: {features.get('debate_dossier_path')}")
+    if result.get("market_error"):
+        print(f"[market] ERROR: {result['market_error']}")
     if "reference_fundamental_score" in result:
         print(f"[ref] fundamental≈{result['reference_fundamental_score']}")
     if "master" in result:
