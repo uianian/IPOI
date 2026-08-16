@@ -45,12 +45,14 @@ _TITLE_CONTINUATION_RE = re.compile(
 
 _PACK_STOP_TITLE_RE = re.compile(
     r"貴公司財務狀況表|公司財務狀況表|貴公司資產負債表|公司資產負債表|"
+    r"本公司財務狀況表|本公司資產負債表|"
     r"綜合損益表|综合损益表|"
     r"綜合全面收益表|综合全面收益表|合併綜合收益表|合并综合收益表|"
     r"綜合損益及其他全面開支表|综合损益及其他全面开支表|"
     r"綜合全面開支表|综合全面开支表|"
     r"綜合財務狀況表|综合财务状况表|"
-    r"合併權益變動表|合并权益变动表|"
+    r"綜合資產負債表|综合资产负债表|"
+    r"合併權益變動表|合并权益变动表|綜合權益變動表|综合权益变动表|"
     r"綜合現金流量表|综合现金流量表|"
     r"歷史財務資料附註|历史财务资料附注|"
     r"II\.\s*歷史|II\.\s*历史|"
@@ -64,10 +66,14 @@ _STATEMENT_TITLE_BY_TYPE = {
     "income_statement": re.compile(
         r"綜合損益表|综合损益表|合併損益表|合并损益表|"
         r"損益及其他全面收益表|綜合損益及其他全面收益表|综合损益及其他全面收益表|"
+        r"合併損益及其他全面收益表|合并损益及其他全面收益表|"
+        r"損益及其他綜合收益表|綜合損益及其他綜合收益表|综合损益及其他综合收益表|"
+        r"合併損益及其他綜合收益表|合并损益及其他综合收益表|"
         r"綜合全面收益表|综合全面收益表|合併綜合全面收益表|合并综合全面收益表|"
         r"綜合損益及其他全面開支表|综合损益及其他全面开支表|"
         r"損益及其他全面開支表|损益及其他全面开支表|"
-        r"綜合全面開支表|综合全面开支表",
+        r"綜合全面開支表|综合全面开支表|"
+        r"綜合全面虧損表|综合全面亏损表|合併全面虧損表|合并全面亏损表",
         re.I,
     ),
     "balance_sheet": re.compile(
@@ -75,7 +81,8 @@ _STATEMENT_TITLE_BY_TYPE = {
         re.I,
     ),
     "company_balance_sheet": re.compile(
-        r"貴公司財務狀況表|公司財務狀況表|貴公司資產負債表|公司資產負債表",
+        r"貴公司財務狀況表|公司財務狀況表|貴公司資產負債表|公司資產負債表|"
+        r"本公司財務狀況表|本公司資產負債表",
         re.I,
     ),
     "cash_flow": re.compile(
@@ -85,24 +92,34 @@ _STATEMENT_TITLE_BY_TYPE = {
 }
 
 _CF_BODY_RE = re.compile(
-    r"經營活動(?:所得|所用)?現金流量|"
+    r"經營活動(?:所得|所用|所產生|產生)?(?:現金流量|現金淨額|的現金淨額)|"
+    r"經營活動所用(?:的)?現金淨額|"
     r"經營\s*[（(]?\s*(?:所用|所得).{0,12}現金|"
-    r"投資活動(?:所得|所用)?現金流量|"
-    r"融資活動(?:所得|所用)?現金流量",
+    r"投資活動(?:所得|所用|產生)?(?:現金流量|現金淨額)?|"
+    r"融資活動(?:所得|所用|產生)?(?:現金流量|現金淨額)?",
     re.I,
 )
 _BS_BODY_RE = re.compile(
     r"非流動資產|非流动资产|流動資產|流动资产|"
-    r"總資產|总资产|資產總額|资产总额|資產淨值|资产净值|"
-    r"非流動負債|非流动负债|流動負債|流动负债|負債總額|负债总额|權益總額|权益总额",
+    r"總資產|总资产|資產總額|资产总额|資產總值|资产总值|"
+    r"資產淨值|资产净值|虧絀總額|亏绌总额|"
+    r"非流動負債|非流动负债|流動負債|流动负债|"
+    r"負債總額|负债总额|負債總值|负债总值|權益總額|权益总额",
     re.I,
 )
 _IS_BODY_RE = re.compile(
-    r"銷售成本|销售成本|毛利|年度[／/]?期間內利潤|年內溢利|年内溢利",
+    r"銷售成本|销售成本|毛利|"
+    r"年度[／/]?期間內利潤|年內溢利|年内溢利|"
+    # 18A 无产品收入常见：税前虧損 / 年內／期內虧損 / 研究及開發成本
+    r"税前虧損|稅前虧損|除税前虧損|除稅前虧損|除所得稅前虧損|"
+    r"年內[／/]期內虧損|年内[／/]期内亏损|年[／/]期內虧損|"
+    r"年[／/]期內溢利|全面虧損|"
+    r"研究及開發成本|研究及开发成本|研發成本|研发成本",
     re.I,
 )
 _COMPANY_ONLY_BS_RE = re.compile(
-    r"貴公司財務狀況表|公司財務狀況表|貴公司資產負債表|公司資產負債表",
+    r"貴公司財務狀況表|公司財務狀況表|貴公司資產負債表|公司資產負債表|"
+    r"本公司財務狀況表|本公司資產負債表",
     re.I,
 )
 _CONSOLIDATED_BS_RE = re.compile(
@@ -112,7 +129,12 @@ _CONSOLIDATED_BS_RE = re.compile(
 )
 _OCI_TITLE_RE = re.compile(
     r"合併綜合收益表|合并综合收益表|綜合全面收益表|综合全面收益表|"
-    r"全面收益表|其他綜合收益表",
+    r"全面收益表|其他綜合收益表|"
+    # 维昇等：合併損益及其他綜合收益表（「綜合收益」≠「全面收益」）
+    r"損益及其他綜合收益表|损益及其他综合收益表|"
+    r"損益及其他全面收益表|损益及其他全面收益表|"
+    # 映恩等 18A：綜合全面虧損表
+    r"綜合全面虧損表|综合全面亏损表|合併全面虧損表|合并全面亏损表|全面虧損表",
     re.I,
 )
 _TAX_NOTE_RE = re.compile(r"即期稅項|递延稅項|遞延稅項|稅項開支|税项开支|所得稅開支", re.I)
@@ -120,6 +142,9 @@ _TAX_NOTE_RE = re.compile(r"即期稅項|递延稅項|遞延稅項|稅項開支|
 _IS_FAMILY_TITLE_RE = re.compile(
     r"綜合全面收益表|综合全面收益表|合併綜合收益表|合并综合收益表|"
     r"全面收益表|綜合收益表|综合收益表|"
+    r"全面虧損表|综合全面亏损表|綜合全面虧損表|"
+    r"損益及其他綜合收益表|损益及其他综合收益表|"
+    r"損益及其他全面收益表|损益及其他全面收益表|"
     r"綜合損益及其他全面開支表|综合损益及其他全面开支表|"
     r"損益及其他全面開支表|损益及其他全面开支表|"
     r"綜合全面開支表|综合全面开支表",
@@ -298,14 +323,26 @@ def table_has_row_label(content: str, label: str) -> bool:
     return False
 
 
+def _fold_label_blob(text: str) -> str:
+    """Strip spaces/fullwidth spaces and unify parens for alias matching."""
+    s = (text or "").replace("（", "(").replace("）", ")")
+    s = re.sub(r"[\s　]+", "", s)
+    return s
+
+
 def matched_row_labels(content: str, row_labels: list[str]) -> list[str]:
     if not content or not row_labels:
         return []
+    folded = _fold_label_blob(content)
     out: list[str] = []
     for lb in row_labels:
         if not lb:
             continue
         if table_has_row_label(content, lb) or lb in content:
+            out.append(lb)
+            continue
+        flb = _fold_label_blob(lb)
+        if flb and flb in folded:
             out.append(lb)
     return out
 
@@ -331,6 +368,10 @@ def infer_statement_kind(content: str, page_title_blob: str = "") -> str:
         return "income_statement"
     if _CF_BODY_RE.search(blob) or (
         "經營活動現金流量" in blob and ("投資活動" in blob or "融資活動" in blob)
+    ) or (
+        "經營活動" in blob
+        and ("投資活動" in blob or "融資活動" in blob)
+        and ("現金淨額" in blob or "現金流量" in blob)
     ):
         return "cash_flow"
     if _IS_BODY_RE.search(blob) and (
@@ -350,10 +391,15 @@ def infer_statement_kind(content: str, page_title_blob: str = "") -> str:
         or "总资产" in blob
         or "資產總額" in blob
         or "资产总额" in blob
+        or "資產總值" in blob
+        or "资产总值" in blob
         or "資產淨值" in blob
         or "资产净值" in blob
         or "權益總額" in blob
         or "負債總額" in blob
+        or "負債總值" in blob
+        or "亏绌总额" in blob
+        or "虧絀總額" in blob
     ):
         return "balance_sheet"
     if _TAX_NOTE_RE.search(blob):
@@ -385,6 +431,16 @@ def page_title_blob(page_chunks: list[DocumentChunk]) -> str:
     )
 
 
+# 脑动极光等：投資活動 (所用) 所得現金淨額 / 融資活動所得 (所用) 拆行
+_CF_INVEST_FINANCE_RE = re.compile(
+    r"投資活動.{0,24}(?:所用|所得).{0,16}現金(?:流量)?淨額|"
+    r"投资活动.{0,24}(?:所用|所得).{0,16}现金(?:流量)?净额|"
+    r"融資活動.{0,24}(?:所用|所得)|"
+    r"融资活动.{0,24}(?:所用|所得)",
+    re.I,
+)
+
+
 def must_have_groups_ok(content: str, groups: list[list[str]] | None) -> bool:
     """Each group needs ≥1 label hit (OR within group, AND across groups)."""
     if not groups:
@@ -394,8 +450,15 @@ def must_have_groups_ok(content: str, groups: list[list[str]] | None) -> bool:
         labels = [str(x) for x in group if x]
         if not labels:
             continue
-        if not matched_row_labels(blob, labels):
-            return False
+        if matched_row_labels(blob, labels):
+            continue
+        invest_finance = any(
+            any(tok in x for tok in ("投資活動", "投资活动", "融資活動", "融资活动"))
+            for x in labels
+        )
+        if invest_finance and _CF_INVEST_FINANCE_RE.search(blob):
+            continue
+        return False
     return True
 
 
@@ -591,6 +654,10 @@ def collect_cross_page_pack(
             content = c.content or ""
             if ccat == "table":
                 kind = infer_statement_kind(content, titles)
+                if table_type == "cash_flow" and re.search(
+                    r"投資活動|融資活動|融资活動", content
+                ):
+                    kind = "cash_flow"
                 if table_type and not statement_kind_compatible(table_type, kind) and kind not in (
                     "unknown",
                     "",

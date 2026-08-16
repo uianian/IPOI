@@ -17,6 +17,19 @@ def _is_deepseek(settings: dict[str, Any]) -> bool:
     return provider == "deepseek" or "deepseek.com" in base
 
 
+def _is_vllm(settings: dict[str, Any]) -> bool:
+    provider = str(settings.get("provider") or "").lower()
+    if provider == "vllm":
+        return True
+    if provider in {"deepseek", "openrouter"}:
+        return False
+    base = str(settings.get("api_base") or "").lower()
+    return any(
+        tok in base
+        for tok in ("localhost", "127.0.0.1", "0.0.0.0", ":8000", ":8001")
+    )
+
+
 class LLMClient:
     """轻量 OpenAI 兼容客户端；支持 OpenRouter/Gemma reasoning 与 DeepSeek thinking。"""
 
@@ -48,7 +61,15 @@ class LLMClient:
 
     @property
     def available(self) -> bool:
-        return bool(self.settings.get("api_key"))
+        if self.settings.get("api_key"):
+            key = str(self.settings.get("api_key") or "").strip()
+            if key.lower() not in {"empty", "none", "na"}:
+                return True
+        # 本地 vLLM / 内网 OpenAI 兼容常无 key 或用 EMPTY
+        if _is_vllm(self.settings):
+            return bool(self.settings.get("api_base") and self.settings.get("chat_model"))
+        key = str(self.settings.get("api_key") or "").strip()
+        return key.lower() in {"empty", "none", "na"}
 
     def _build_payload(
         self,
@@ -75,9 +96,6 @@ class LLMClient:
 
         if _is_deepseek(self.settings):
             # DeepSeek 官方：thinking + reasoning_effort；思维链在 reasoning_content。
-            # reasoning_max_tokens 仅 OpenRouter 有效，此处忽略。
-            # reasoning tokens 计入 max_tokens 并计费，故默认 effort=low。
-            # https://api-docs.deepseek.com/zh-cn/guides/thinking_mode
             if enable_reasoning:
                 payload["thinking"] = {"type": "enabled"}
                 effort = (
@@ -88,6 +106,10 @@ class LLMClient:
                 payload["reasoning_effort"] = effort
             else:
                 payload["thinking"] = {"type": "disabled"}
+            return payload
+
+        # vLLM / Qwen：不要发 DeepSeek thinking 或 OpenRouter reasoning（易 400）
+        if _is_vllm(self.settings):
             return payload
 
         if enable_reasoning:
@@ -150,7 +172,7 @@ class LLMClient:
         if not self._client:
             raise RuntimeError("LLMClient not initialized")
         if not self.available:
-            raise RuntimeError("No API key configured")
+            raise RuntimeError("LLM unavailable (no API key / vLLM base)")
 
         payload = self._build_payload(
             messages,

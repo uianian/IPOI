@@ -35,6 +35,11 @@ finance:
       rule_ref: "doc§3.4"
       when: runway_12_24
       require_gate: unprofitable
+    - code: RUNWAY_UNCERTAIN
+      delta: 15
+      rule_ref: "doc§3.4/uncertainty"
+      when: runway_uncertain
+      require_gate: unprofitable
     - code: BURN_YOY_UP_30
       delta: 15
       rule_ref: "doc§3.4"

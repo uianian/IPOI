@@ -336,6 +336,148 @@ class AgentRunLogger:
         block.append("")
         self._emit(rec, "\n".join(block))
 
+    def debate_question(
+        self,
+        *,
+        round: int,
+        question_id: str,
+        target_agent: str,
+        utterance: str,
+        claim_id: str | None = None,
+        theme: str = "",
+        duration_ms: int | None = None,
+        reasoning: str | None = None,
+        usage: dict[str, Any] | None = None,
+        model: str | None = None,
+    ) -> None:
+        rec = {
+            "event": "debate_question",
+            "round": round,
+            "question_id": question_id,
+            "target_agent": target_agent,
+            "claim_id": claim_id,
+            "theme": theme,
+            "utterance": utterance,
+            "duration_ms": duration_ms,
+            "reasoning": reasoning,
+            "think_status": "ok" if reasoning else "think_from_content",
+            "usage": usage,
+            "model": model,
+        }
+        block = [
+            f"### debate_question r{round} → {target_agent} `{question_id}`",
+            f"- duration_ms: `{duration_ms}`",
+            "",
+            utterance,
+            "",
+        ]
+        if reasoning:
+            block.extend(["##### [model_think]", "```", reasoning, "```", ""])
+        self._emit(rec, "\n".join(block))
+
+    def debate_search(
+        self,
+        *,
+        round: int,
+        question_id: str,
+        target_agent: str,
+        tool_calls: list[dict[str, Any]],
+        evidence: list[dict[str, Any]] | None = None,
+        duration_ms: int | None = None,
+        search_hit_count: int = 0,
+    ) -> None:
+        rec = {
+            "event": "debate_search",
+            "round": round,
+            "question_id": question_id,
+            "target_agent": target_agent,
+            "tool_calls": tool_calls,
+            "evidence": evidence or [],
+            "duration_ms": duration_ms,
+            "search_hit_count": search_hit_count,
+        }
+        block = [
+            f"### debate_search r{round} {target_agent} hits={search_hit_count} `{duration_ms}ms`",
+            "```json",
+            _trunc(tool_calls, self.max_segment_chars),
+            "```",
+            "",
+        ]
+        self._emit(rec, "\n".join(block))
+
+    def debate_reply(
+        self,
+        *,
+        round: int,
+        question_id: str,
+        target_agent: str,
+        utterance: str,
+        status: str = "unresolved",
+        confidence: float | None = None,
+        duration_ms: int | None = None,
+        reasoning: str | None = None,
+        tool_calls: list[dict[str, Any]] | None = None,
+        evidence: list[dict[str, Any]] | None = None,
+        new_queries: list[dict[str, Any]] | None = None,
+        usage: dict[str, Any] | None = None,
+        model: str | None = None,
+    ) -> None:
+        rec = {
+            "event": "debate_reply",
+            "round": round,
+            "question_id": question_id,
+            "target_agent": target_agent,
+            "utterance": utterance,
+            "status": status,
+            "confidence": confidence,
+            "duration_ms": duration_ms,
+            "reasoning": reasoning,
+            "think_status": "ok" if reasoning else ("think_from_content" if utterance else "reasoning_missing"),
+            "tool_calls": tool_calls or [],
+            "evidence": evidence or [],
+            "new_queries": new_queries or [],
+            "usage": usage,
+            "model": model,
+        }
+        block = [
+            f"### debate_reply r{round} {target_agent} status={status} `{duration_ms}ms`",
+            utterance or "_empty reply_",
+            "",
+        ]
+        if reasoning:
+            block.extend(["##### [model_think]", "```", reasoning, "```", ""])
+        self._emit(rec, "\n".join(block))
+
+    def master_step(
+        self,
+        *,
+        event: str,
+        utterance: str = "",
+        duration_ms: int | None = None,
+        reasoning: str | None = None,
+        usage: dict[str, Any] | None = None,
+        extra: dict[str, Any] | None = None,
+        model: str | None = None,
+    ) -> None:
+        rec = {
+            "event": event,
+            "utterance": utterance,
+            "duration_ms": duration_ms,
+            "reasoning": reasoning,
+            "think_status": "ok" if reasoning else ("think_from_content" if utterance else "reasoning_missing"),
+            "usage": usage,
+            "model": model,
+            **(extra or {}),
+        }
+        block = [
+            f"### {event} `{duration_ms}ms`",
+            utterance[:2000] if utterance else "",
+            "",
+        ]
+        if reasoning:
+            block.extend(["##### [model_think]", "```", reasoning, "```", ""])
+        self._emit(rec, "\n".join(block))
+
     def result(self, payload: dict[str, Any]) -> None:
         """结果输出区块。"""
         rec = {"event": "result", "payload": payload}

@@ -811,6 +811,136 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
     return []
 
 
+def map_master_event(event: dict[str, Any]) -> list[dict[str, Any]]:
+    """总控 / 辩论 jsonl → orchestrator Thought（financial 之后刷）。"""
+    ev = str(event.get("event") or "")
+    thoughts: list[dict[str, Any]] = []
+    if ev in {"run_start", "run_end", "result", "step"}:
+        return thoughts
+
+    reasoning = str(event.get("reasoning") or "").strip()
+    utterance = str(event.get("utterance") or "").strip()
+    target = event.get("target_agent") or "orchestrator"
+    qid = event.get("question_id") or ""
+    rnd = event.get("round")
+
+    if ev == "debate_question":
+        content = utterance or "總控質詢"
+        meta: dict[str, Any] = {
+            "kind": "model_think",
+            "round": rnd,
+            "questionId": qid,
+            "targetAgent": target,
+        }
+        if reasoning:
+            meta["rawThink"] = reasoning
+        thoughts.append(
+            new_thought(
+                agent_id="orchestrator",
+                typ="thinking",
+                content=content,
+                meta=meta,
+            )
+        )
+        return thoughts
+
+    if ev == "debate_search":
+        tools = event.get("tool_calls") or []
+        names = []
+        for tc in tools:
+            if isinstance(tc, dict):
+                names.append(str(tc.get("name") or "search_standalone"))
+        thoughts.append(
+            new_thought(
+                agent_id="orchestrator",
+                typ="action",
+                content=to_zh_hant(f"辯論補證檢索：{'、'.join(names) or 'search'}"),
+                meta={
+                    "kind": "tool_call",
+                    "round": rnd,
+                    "questionId": qid,
+                    "targetAgent": target,
+                    "toolCalls": tools,
+                },
+            )
+        )
+        evidence = event.get("evidence") or []
+        if evidence:
+            snips = _snip_evidence(evidence if isinstance(evidence, list) else [])
+            page = snips[0].get("page") if snips else None
+            thoughts.append(
+                new_thought(
+                    agent_id="orchestrator",
+                    typ="observation",
+                    content=to_zh_hant(
+                        f"檢索命中 {event.get('search_hit_count') or len(snips)} 條"
+                    ),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={"kind": "evidence", "evidence": snips, "kind_tool": "tool_result"},
+                )
+            )
+        else:
+            thoughts.append(
+                new_thought(
+                    agent_id="orchestrator",
+                    typ="observation",
+                    content="檢索未命中（禁止編造頁碼）",
+                    meta={"kind": "tool_result", "searchHitCount": 0},
+                )
+            )
+        return thoughts
+
+    if ev == "debate_reply":
+        content = utterance or "專家作答"
+        meta = {
+            "kind": "model_think",
+            "round": rnd,
+            "questionId": qid,
+            "targetAgent": target,
+            "status": event.get("status"),
+            "confidence": event.get("confidence"),
+        }
+        if reasoning:
+            meta["rawThink"] = reasoning
+        thoughts.append(
+            new_thought(
+                agent_id="orchestrator",
+                typ="observation",
+                content=content,
+                meta=meta,
+            )
+        )
+        evs = event.get("evidence") or []
+        if evs:
+            snips = _snip_evidence(evs if isinstance(evs, list) else [])
+            page = snips[0].get("page") if snips else None
+            thoughts.append(
+                new_thought(
+                    agent_id="orchestrator",
+                    typ="observation",
+                    content=to_zh_hant("辯論證據"),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={"kind": "evidence", "evidence": snips},
+                )
+            )
+        return thoughts
+
+    # conflict_detection / embellishment / fusion / debate_plan / debate_followup
+    content = utterance or ev
+    meta = {"kind": "model_think", "event": ev}
+    if reasoning:
+        meta["rawThink"] = reasoning
+    thoughts.append(
+        new_thought(
+            agent_id="orchestrator",
+            typ="thinking" if ev != "fusion" else "conclusion",
+            content=content,
+            meta=meta,
+        )
+    )
+    return thoughts
+
+
 def score_to_risk_level(score: float) -> str:
     s = float(score)
     if s >= 60:

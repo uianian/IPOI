@@ -15,6 +15,8 @@ FIELD_LINE_REJECT: dict[str, tuple[str, ...]] = {
     "REV": ("其他收入", "其他收益", "利息收入", "公允價值收益", "公允价值收益", "政府補助", "政府补助"),
     "TOTAL_ASSETS": ("減", "减", "減去", "减去"),
     "TOTAL_LIAB": ("流動負債總額", "流动负债总额", "非流動負債總額", "非流动负债总额"),
+    "NET_LOSS": ("每股", "減值虧損", "减值亏损", "其他收益及虧損", "其他收益及亏损", "出售"),
+    "CFO": ("投資活動", "融资活動", "融資活動", "融資成本", "融资成本"),
 }
 
 
@@ -151,22 +153,61 @@ _UNIT_ONLY_RE = re.compile(
     r"^(人民幣|人民币|港元|千元|万元|千港元|百萬|百万).*$|^元$"
 )
 
+_CN_YEAR_DIGIT = {
+    "零": "0",
+    "〇": "0",
+    "○": "0",
+    "一": "1",
+    "二": "2",
+    "三": "3",
+    "四": "4",
+    "五": "5",
+    "六": "6",
+    "七": "7",
+    "八": "8",
+    "九": "9",
+}
+_CN_YEAR_RE = re.compile(r"二[零〇○一二三四五六七八九]{3}")
+_ARABIC_YEAR_RE = re.compile(r"(20\d{2})")
+
+
+def chinese_year_to_arabic(text: str) -> str | None:
+    """二零一八 → 2018；非四位年份返回 None。"""
+    m = _CN_YEAR_RE.search(text or "")
+    if not m:
+        return None
+    digits = "".join(_CN_YEAR_DIGIT.get(ch, "") for ch in m.group(0))
+    if len(digits) == 4 and digits.startswith("20"):
+        return digits
+    return None
+
+
+def _years_in_cell(text: str) -> list[tuple[str, bool]]:
+    """Arabic 20xx first; else 中文数字年份（健世/榮昌表头）。"""
+    found: list[tuple[str, bool]] = []
+    for m in _ARABIC_YEAR_RE.finditer(text or ""):
+        found.append((m.group(1), _cell_interim_hint(text)))
+    if found:
+        return found
+    cy = chinese_year_to_arabic(text or "")
+    if cy:
+        found.append((cy, _cell_interim_hint(text)))
+    return found
+
 
 def extract_year_headers(rows: list[list[str]]) -> list[str]:
     """Keep column order; duplicate years / interim hints get _i suffix.
 
     - 单行 ≥2 个年份即可（港股两年往绩常见）
     - 若单行不足，按列号跨行聚合（「2022年」与「人民幣千元」分行）
+    - 支持「二零二零年人民幣千元」
     """
     header_blob = " ".join(c for row in rows[:8] for c in row)
     # 1) 同行多列年份
     for row in rows[:8]:
         found: list[tuple[str, bool]] = []
         for cell in row:
-            text = cell or ""
-            m = re.search(r"(20\d{2})", text)
-            if m:
-                found.append((m.group(1), _cell_interim_hint(text)))
+            found.extend(_years_in_cell(cell or ""))
         if len(found) >= 2:
             return _years_from_found(found, header_blob)
 
@@ -177,17 +218,29 @@ def extract_year_headers(rows: list[list[str]]) -> list[str]:
             text = (cell or "").strip()
             if not text or _UNIT_ONLY_RE.match(text):
                 continue
-            m = re.search(r"(20\d{2})", text)
-            if not m:
+            hits = _years_in_cell(text)
+            if not hits:
                 continue
-            # 同列已有年份时保留先出现的；附带中期提示可升级
-            interim = _cell_interim_hint(text)
+            y, interim = hits[0]
             prev = col_year.get(col_i)
             if prev is None or (interim and not prev[1]):
-                col_year[col_i] = (m.group(1), interim)
+                col_year[col_i] = (y, interim)
     if len(col_year) >= 2:
         found = [col_year[i] for i in sorted(col_year)]
         return _years_from_found(found, header_blob)
+    # 3) 文本表把「2023年」「2024年」拆成多行同一列（映恩等）
+    stacked: list[tuple[str, bool]] = []
+    for row in rows[:12]:
+        blob = " ".join(c for c in row if c)
+        if not blob.strip() or _UNIT_ONLY_RE.match(blob.strip()):
+            continue
+        if re.search(r"\d{1,3}(?:,\d{3})+", blob):
+            continue
+        hits = _years_in_cell(blob)
+        if hits:
+            stacked.extend(hits)
+    if len({y for y, _ in stacked}) >= 2:
+        return _years_from_found(stacked, header_blob)
     return []
 
 
@@ -206,6 +259,97 @@ def _normalize_row_label_cell(cell: str) -> str:
     return s
 
 
+_TRAD_FOLD = str.maketrans(
+    {
+        "稅": "税",
+        "經": "经",
+        "營": "营",
+        "現": "现",
+        "額": "额",
+        "損": "损",
+        "虧": "亏",
+        "產": "产",
+        "內": "内",
+        "開": "开",
+        "應": "应",
+        "佔": "占",
+        "總": "总",
+        "潤": "润",
+        "淨": "净",
+        "動": "动",
+        "餘": "余",
+        "與": "与",
+        "為": "为",
+        "從": "从",
+        "會": "会",
+        "計": "计",
+        "綜": "综",
+        "負": "负",
+        "債": "债",
+        "資": "资",
+        "幣": "币",
+        "權": "权",
+        "結": "结",
+        "業": "业",
+        "務": "务",
+        "報": "报",
+        "項": "项",
+        "費": "费",
+        "減": "减",
+        "備": "备",
+        "關": "关",
+        "聯": "联",
+        "東": "东",
+        "發": "发",
+        "變": "变",
+        "購": "购",
+        "貨": "货",
+        "銷": "销",
+        "術": "术",
+        "際": "际",
+        "數": "数",
+        "據": "据",
+        "億": "亿",
+        "萬": "万",
+        "點": "点",
+        "後": "后",
+        "於": "于",
+        "並": "并",
+        "將": "将",
+        "屬": "属",
+        "對": "对",
+        "調": "调",
+        "攤": "摊",
+        "撥": "拨",
+    }
+)
+
+
+def _fold_label(text: str) -> str:
+    """Unify punctuation/spaces/glyphs so 溢利 (虧損) matches 溢利（虧損）."""
+    s = (text or "").strip().translate(_TRAD_FOLD)
+    s = s.replace("（", "(").replace("）", ")")
+    s = s.replace("／", "/").replace(" ", "").replace("　", "")
+    return s
+
+
+# 先瑞達「年／期內溢利 (虧損) 及全面收益 (開支) 總額」；開拓「除所得稅前虧損／應佔年內虧損」
+_NET_LOSS_ROW_RE = re.compile(
+    r"(年/?期内?|期内|年内).{0,8}(溢利|利润|亏损)"
+    r"|除(所得税?)?前.{0,6}(溢利|亏损)"
+    r"|税前(溢利|亏损)"
+    r"|应占.{0,16}(年内|期内)(亏损|溢利)"
+    r"|全面(亏损|开支|收益).{0,6}总额",
+    re.I,
+)
+_CFO_ROW_RE = re.compile(
+    r"经营活动(所得|所用|所产生|产生).{0,12}现金(流量)?净额"
+    r"|经营所用现金净额"
+    r"|经营所得/?.{0,6}现金净额",
+    re.I,
+)
+
+
 def _row_label_score(first_cell: str, labels: list[str], *, field: str | None = None) -> int:
     """Higher is better. Prefer exact / prefix match to avoid 其他收入 matching 收入."""
     cell = _normalize_row_label_cell(first_cell)
@@ -213,22 +357,42 @@ def _row_label_score(first_cell: str, labels: list[str], *, field: str | None = 
         return 0
     if line_rejected_for_field(cell, field):
         return 0
+    folded_cell = _fold_label(cell)
     best = 0
     for lab in labels:
         if not lab:
             continue
-        if cell == lab:
+        folded_lab = _fold_label(lab)
+        if cell == lab or folded_cell == folded_lab:
             best = max(best, 100)
         elif lab == cell.replace(" ", ""):
             best = max(best, 90)
         elif cell.startswith(lab) and len(cell) <= len(lab) + 4:
             # 允许「收入。」等短后缀；禁止「收入」匹配「其他收入及收益」
             best = max(best, 80)
-        elif cell.startswith(lab):
+        elif folded_cell.startswith(folded_lab) and len(folded_cell) <= len(folded_lab) + 8:
+            best = max(best, 80)
+        elif cell.startswith(lab) or folded_cell.startswith(folded_lab):
             best = max(best, 50)
         # 禁止 lab 为 cell 的真子串（如 收入 ⊂ 其他收入及收益、資產總值 ⊂ 資產總值減…）
         elif lab in cell and not cell.startswith(lab):
             continue
+    if field == "NET_LOSS":
+        if best < 50 and _NET_LOSS_ROW_RE.search(folded_cell):
+            best = 75
+        # 税前是回退口径：有「年內/期內」底行时不得压过
+        pretax_only = bool(
+            re.search(r"除(所得税?)?前|税前", folded_cell)
+        ) and not re.search(r"年/?期内?|期内|年内|应占", folded_cell)
+        if pretax_only and best:
+            best = min(best, 62)
+        if re.search(
+            r"(年/?期内?|期内|年内).{0,16}(溢利|利润|亏损)|全面(亏损|开支).{0,8}总额",
+            folded_cell,
+        ):
+            best = max(best, 90)
+    if best < 50 and field == "CFO" and _CFO_ROW_RE.search(folded_cell):
+        best = 75
     return best
 
 
@@ -297,6 +461,12 @@ def find_row_values(
             continue
         first = (row[0] or "").strip()
         score = _row_label_score(first, labels, field=field)
+        # 映恩等：行名被拆成「應佔年內」+「全面虧損總額」两格
+        if score < 90 and len(row) > 1:
+            second = (row[1] or "").strip()
+            if second and parse_number(second) is None and not _NUM_RE.match(second):
+                joined = first + second
+                score = max(score, _row_label_score(joined, labels, field=field))
         if score < 50:
             continue
         numeric_cells = _row_numeric_cells(row, n_years=n_years)

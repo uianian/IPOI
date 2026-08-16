@@ -26,6 +26,7 @@ from service.thought_mapper import (
     map_finance_event,
     map_legal_event,
     map_market_event,
+    map_master_event,
     new_thought,
     score_to_risk_level,
     to_zh_hant,
@@ -257,8 +258,8 @@ class AnalysisRunner:
         if stock_code:
             emitter.emit("agent_status", {"agentId": "market", "status": "running"})
 
-        # LLM：前端 llmConfig 优先（apiKey/apiBaseUrl/model），缺省用后端默认
-        # 财务/法务共用同一 client；任一方 RULES_ONLY 时该侧不注入 LLM
+        # LLM：前端 llmConfig 优先（apiKey/apiBaseUrl/model/provider），缺省用后端默认
+        # 财务/法务/总控共用同一 client；vLLM 允许空 key
         shared_llm = None
         need_llm = (not rules_only) or (not LEGAL_RULES_ONLY)
         if need_llm:
@@ -275,17 +276,23 @@ class AnalysisRunner:
                     api_key=_nonempty("apiKey"),
                     api_base=_nonempty("apiBaseUrl"),
                     chat_model=_nonempty("model"),
+                    provider=_nonempty("provider"),
                 )
                 logger.info(
-                    "analysis %s LLM model=%s base=%s key_from=%s",
+                    "analysis %s LLM provider=%s model=%s base=%s key_from=%s",
                     analysis_id,
+                    settings.get("provider"),
                     settings.get("chat_model"),
                     settings.get("api_base"),
                     "frontend" if _nonempty("apiKey") else "backend_default",
                 )
-                if not settings.get("api_key"):
-                    logger.warning("No API key — finance/legal rules_only fallback")
+                vllm_ok = str(settings.get("provider") or "").lower() == "vllm" and bool(
+                    settings.get("api_base")
+                )
+                if not settings.get("api_key") and not vllm_ok:
+                    logger.warning("No API key — finance/legal rules fallback; master degraded")
                     rules_only = True
+                    shared_llm = None
                 else:
                     shared_llm = LLMClient(settings)
                     await shared_llm.init()
@@ -339,6 +346,14 @@ class AnalysisRunner:
                 pdf_name=pdf_name,
                 on_event=on_legal_event,
             )
+        master_run_logger = AgentRunLogger(
+            agent="master",
+            doc_id=task_id,
+            log_dir=log_dir,
+            issuer_type=issuer_type,
+            doc_name=doc_name,
+            pdf_name=pdf_name,
+        )
 
         market_run_logger = None
         if stock_code:
@@ -362,8 +377,11 @@ class AnalysisRunner:
             "parse_json": parse_path,
             "finance_llm": finance_llm,
             "legal_llm": legal_llm,
+            "master_llm": shared_llm,
             "finance_run_logger": run_logger,
             "legal_run_logger": legal_run_logger,
+            "market_run_logger": market_run_logger,
+            "master_run_logger": master_run_logger,
             "legal_on_progress": on_legal_progress,
             "finance_rules_only": rules_only,
             "legal_react": legal_react,
@@ -373,6 +391,7 @@ class AnalysisRunner:
             "analysis_id": analysis_id,
             "doc_name": doc_name,
             "pdf_name": pdf_name,
+            "skip_master": False,
         }
         if stock_code:
             market_settings = resolve_market_agent_settings()
@@ -397,10 +416,13 @@ class AnalysisRunner:
                 sina_settings=sina_settings,
                 market_run_logger=market_run_logger,
                 market_on_progress=on_market_event,
+                include_market=False,
                 **parallel_kwargs,
             )
         else:
-            merged = await run_finance_legal_parallel(task_id, **parallel_kwargs)
+            merged = await run_finance_legal_parallel(
+                task_id, include_market=False, **parallel_kwargs
+            )
             merged["market"] = None
             merged["market_error"] = "missing_stock_code"
         run_logger.close(final_summary=(merged.get("finance") or {}).get("summary"))
@@ -412,6 +434,8 @@ class AnalysisRunner:
             market_run_logger.close(
                 final_summary=(merged.get("market") or {}).get("summary")
             )
+        master_j = ((merged.get("master") or {}).get("judgment") or {})
+        master_run_logger.close(final_summary=str(master_j.get("verdict_reasoning") or "master"))
 
         emitter.emit("agent_status", {"agentId": "legal", "status": "completed"})
         # legal completed 会触发 flush financial buffer
@@ -435,11 +459,20 @@ class AnalysisRunner:
                 },
             )
 
-        # orchestrator 收尾
-        score = float(merged.get("reference_fundamental_score") or 0)
-        overall = int(round(score))
-        risk_level = score_to_risk_level(score)
+        master = merged.get("master") if isinstance(merged.get("master"), dict) else {}
+        judgment = master.get("judgment") or {}
+        ref_score = float(merged.get("reference_fundamental_score") or 0)
+        try:
+            overall = int(round(float(judgment.get("overall_score") if judgment.get("overall_score") is not None else ref_score)))
+        except (TypeError, ValueError):
+            overall = int(round(ref_score))
+        risk_level = str(judgment.get("risk_level_http") or "").upper() or score_to_risk_level(
+            float(judgment.get("overall_score") or ref_score)
+        )
         emitter.emit("agent_status", {"agentId": "orchestrator", "status": "running"})
+        for ev in _read_jsonl(Path(master_run_logger.jsonl_path)):
+            for th in map_master_event(ev):
+                emitter.emit("thought", {"thought": th})
         fin_s = (merged.get("finance") or {}).get("summary") or ""
         leg_s = (merged.get("legal") or {}).get("summary") or ""
         emitter.emit(
@@ -449,8 +482,11 @@ class AnalysisRunner:
                     agent_id="orchestrator",
                     typ="conclusion",
                     content=to_zh_hant(
-                        f"綜合參考基本面分 {overall}（{risk_level}）。"
-                        f"法務：{leg_s}；財務：{fin_s}"
+                        judgment.get("verdict_reasoning")
+                        or (
+                            f"總控終裁 {overall}（{risk_level}）。"
+                            f"法務：{leg_s}；財務：{fin_s}"
+                        )
                     ),
                     meta={"kind": "model_think"},
                 )
@@ -514,18 +550,14 @@ class AnalysisRunner:
             ((merged.get("legal") or {}).get("features") or {}).get("debate_dossier_path")
             or ((merged.get("legal") or {}).get("trace") or {}).get("debate_dossier_path")
         )
-        market_dossier = (
-            ((merged.get("market") or {}).get("features") or {}).get(
-                "debate_dossier_path"
-            )
-            or ((merged.get("market") or {}).get("trace") or {}).get(
-                "debate_dossier_path"
-            )
-        )
         dossier_paths = {
             "finance": fin_dossier,
             "legal": leg_dossier,
-            "market": market_dossier,
+            "market": (
+                ((merged.get("market") or {}).get("features") or {}).get("debate_dossier_path")
+                or ((merged.get("market") or {}).get("trace") or {}).get("debate_dossier_path")
+            ),
+            "master": (merged.get("master") or {}).get("dossier_path"),
         }
 
         # 分拆报告：整份报告两边各一份（前端按 agent 展示）
@@ -569,10 +601,15 @@ class AnalysisRunner:
             ),
             "orchestrator": {
                 "agentId": "orchestrator",
-                "status": "placeholder",
+                "status": "completed",
                 "overallScore": overall,
                 "riskLevel": risk_level,
-                "note": "weighted_reference_score",
+                "note": "master_verdict",
+                "degraded": bool((merged.get("master") or {}).get("degraded")),
+                "referenceFundamentalScore": merged.get("reference_fundamental_score"),
+                "logText": _read_text(Path(master_run_logger.log_path)),
+                "logEvents": _read_jsonl(Path(master_run_logger.jsonl_path)),
+                "master": merged.get("master") or {},
             },
         }
 
@@ -609,3 +646,8 @@ class AnalysisRunner:
             overall,
             risk_level,
         )
+        if shared_llm is not None:
+            try:
+                await shared_llm.close()
+            except Exception:
+                pass
