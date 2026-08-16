@@ -44,6 +44,96 @@ _LEGAL_SECTION_QUERIES = {
 }
 
 
+def _point_page(p: dict[str, Any]) -> int | None:
+    page = p.get("evidence_page") or p.get("page")
+    if page is not None:
+        try:
+            return int(page)
+        except (TypeError, ValueError):
+            pass
+    ev = p.get("evidence") or []
+    if isinstance(ev, list):
+        for e in ev:
+            if isinstance(e, dict) and e.get("page") is not None:
+                try:
+                    return int(e["page"])
+                except (TypeError, ValueError):
+                    continue
+    return None
+
+
+def _structured_legal_auto_summary(
+    skill_results: dict[str, Any],
+    points: list[dict[str, Any]],
+    *,
+    reason: str | None,
+) -> tuple[str, str]:
+    """max_turns 自动收束时生成按 skill 汇总的结构化 summary/reasoning。"""
+    level_rank = {"high": 0, "medium": 1, "low": 2}
+    high_n = sum(1 for p in points if str(p.get("level")) == "high")
+    med_n = sum(1 for p in points if str(p.get("level")) == "medium")
+    head = (
+        f"法務 ReAct 自動收束（{reason or 'max_turns'}）："
+        f"完成 {len(skill_results)} 個 skill，彙總 {len(points)} 個風險點"
+        f"（high={high_n}, medium={med_n}）。"
+    )
+    # 全局 top risks
+    top_all = sorted(
+        [p for p in points if isinstance(p, dict) and p.get("code")],
+        key=lambda p: (
+            level_rank.get(str(p.get("level") or "medium"), 3),
+            -(float(p.get("score") or p.get("delta") or 0) or 0),
+        ),
+    )[:5]
+    top_bits = []
+    for p in top_all:
+        page = _point_page(p)
+        desc = str(p.get("description") or p.get("statement") or "")[:48]
+        top_bits.append(
+            f"{p.get('code')}[{p.get('level') or '?'}]"
+            + (f"@p{page}" if page else "")
+            + (f"：{desc}" if desc else "")
+        )
+    if top_bits:
+        head += " 主要風險：" + "；".join(top_bits) + "。"
+
+    lines = [head, "", "## 按 Skill 風險摘要"]
+    # 稳定顺序：已知 skill 名优先
+    preferred = [
+        "legal_governance",
+        "legal_shareholder_rights",
+        "legal_related_party",
+        "legal_contracts_and_ip",
+        "legal_regulatory_litigation",
+    ]
+    names = [n for n in preferred if n in skill_results] + [
+        n for n in skill_results if n not in preferred
+    ]
+    for name in names:
+        data = skill_results.get(name) or {}
+        pts = [p for p in (data.get("risk_points") or []) if isinstance(p, dict)]
+        if not pts:
+            conf = data.get("confidence")
+            lines.append(f"- **{name}**：無風險點" + (f"（confidence={conf}）" if conf else ""))
+            continue
+        top = sorted(
+            pts,
+            key=lambda p: level_rank.get(str(p.get("level") or "medium"), 3),
+        )[:3]
+        bits = []
+        for p in top:
+            page = _point_page(p)
+            bits.append(
+                f"{p.get('code') or '?'}[{p.get('level') or '?'}]"
+                + (f"@p{page}" if page else "")
+            )
+        lines.append(f"- **{name}**：{len(pts)} 點 → " + "；".join(bits))
+    reasoning = "\n".join(lines)
+    # summary 保持单段可读（报告总览用）
+    summary = head
+    return summary, reasoning
+
+
 def _default_gates(issuer_type: str) -> dict[str, Any]:
     it = issuer_type.lower()
     is_biotech = it in {"biotech", "18a", "18c"}
@@ -68,6 +158,7 @@ class LegalAgent:
         max_turns: int = 10,
         debate_dir: Path | str | None = None,
         reasoning_effort: str | None = "high",
+        close_logger: bool = True,
     ) -> None:
         self._llm = llm
         self._on_progress = on_progress
@@ -76,6 +167,9 @@ class LegalAgent:
         self._max_turns = max_turns
         self._debate_dir = debate_dir
         self._reasoning_effort = reasoning_effort or "high"
+        self._close_logger = close_logger
+        self._doc_id = ""
+        self._parse_json: Path | str | None = None
 
     def _emit(self, event: dict[str, Any]) -> None:
         if self._on_progress is None:
@@ -100,6 +194,8 @@ class LegalAgent:
         task_id: str | None = None,
         analysis_id: str | None = None,
     ) -> AgentResult:
+        self._doc_id = doc_id
+        self._parse_json = parse_json
         if self._react and self._llm is not None and getattr(self._llm, "available", False):
             return await self._run_react(
                 doc_id,
@@ -245,16 +341,15 @@ class LegalAgent:
                 points.append(item)
             for n in data.get("negative_findings") or []:
                 negatives.append(n if isinstance(n, dict) else {"description": str(n)})
-        summary = (
-            f"法務 ReAct 自動收束（{reason or 'max_turns'}）："
-            f"已完成 {len(skill_results)} 個 skill，彙總 {len(points)} 個風險點"
+        summary, reasoning = _structured_legal_auto_summary(
+            skill_results, points, reason=reason
         )
         obs = await tools.execute(
             "submit_legal_report",
             {
                 "risk_points": points,
                 "negative_findings": negatives,
-                "reasoning": summary,
+                "reasoning": reasoning,
                 "summary": summary,
             },
             state,
@@ -352,7 +447,8 @@ class LegalAgent:
                     "debate_dossier_path": report.get("debate_dossier_path"),
                 }
             )
-            log.close(final_summary=summary)
+            if self._close_logger:
+                log.close(final_summary=summary)
 
         return AgentResult(
             agent="legal",
@@ -746,4 +842,26 @@ class LegalAgent:
             },
             trace={"tool_calls": tool_calls, "elapsed_sec": round(time.time() - t0, 3)},
             summary=summary,
+        )
+
+    async def respond_to_controller(
+        self,
+        question,
+        claim_card: dict[str, Any] | None = None,
+        *,
+        round_no: int = 1,
+        doc_id: str | None = None,
+        parse_json: Path | str | None = None,
+    ):
+        from src.skills.debate_reply import expert_respond_to_controller
+
+        return await expert_respond_to_controller(
+            agent="legal",
+            question=question,
+            claim_card=claim_card,
+            llm=self._llm,
+            doc_id=doc_id or self._doc_id,
+            parse_json=parse_json or self._parse_json,
+            run_logger=self._run_logger,
+            round_no=round_no,
         )

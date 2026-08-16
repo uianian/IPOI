@@ -1,0 +1,50 @@
+# 总控决策 Agent：Prompt 清单 + 工程配额。终裁由 LLM 完成，本文件不覆盖等级。
+score_scale: { min: 0, max: 100, higher_means: risk }
+
+chapter5_checklist:
+  high:
+    - { code: CASH_RUNWAY_LT_12, label: "现金跑道 < 12 个月" }
+    - { code: REDEMPTION_HIGH, label: "对赌/赎回高危（期限短或金额重大）" }
+    - { code: CONCENTRATION_HIGH, label: "单一客户或供应商占比 > 50%" }
+    - { code: VALUATION_INVERSION, label: "IPO 较 Pre-IPO 折价 > 30% 或估值倒挂" }
+  medium:
+    - { code: CASH_RUNWAY_12_24, label: "现金跑道 12–24 个月" }
+    - { code: RELATED_PARTY_HIGH, label: "关联交易占比 > 30%" }
+    - { code: CONCENTRATION_TOP5, label: "前五大客户占比 > 80%" }
+    - { code: EMBELLISHMENT_HIGH, label: "文本粉饰度 ≥ 7" }
+
+reference_weights:
+  legal: 0.45
+  finance: 0.55
+  fundamental: 0.65
+  market: 0.35
+
+debate:
+  max_rounds: 3
+  max_questions_per_round: 4
+  max_new_searches_per_question: 2
+  excerpt_max_chars: 200
+  hits_per_search: 4
+  debate_max_tokens: 1024
+  question_max_tokens: 800
+  decide_max_tokens: 1200
+  embellishment_max_tokens: 1024
+  debate_reasoning_effort: low
+
+embellishment:
+  first_pages: 5
+  page_char_cap: 1200
+  buzzwords:
+    - 领先
+    - 第一
+    - 最佳
+    - 卓越
+    - 革命性
+    - 颠覆
+    - 最大
+    - 唯一
+
+confidence_rubric: |
+  高置信度：风险结论有≥2个独立证据来源（不同页或不同 Agent），且均能定位至招股书原文。
+  中置信度：有1个证据来源，或存在间接推断。
+  低置信度：基于模型推断，缺乏招股书原文证据。

@@ -27,12 +27,29 @@ DEFAULT_RETRIEVAL_DIR = IPOI_ROOT / "retrieval"
 EFFORT_CHOICES = ("low", "high", "max")
 
 
+def recover_cp866_mojibake(text: str) -> str:
+    """恢复「UTF-8 中文被按 CP866 误解码」的文件名片段。
+
+    典型：``全球發售`` → ``хЕичРГчЩ╝хФо``。整批 ``dataset/2025`` 曾中招。
+    """
+    if not any("\u0400" <= c <= "\u04FF" for c in text):
+        return text
+    try:
+        fixed = text.encode("cp866").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return text
+    if any("\u4e00" <= c <= "\u9fff" for c in fixed) or "發售" in fixed:
+        return fixed
+    return text
+
+
 def parse_stem(stem: str) -> tuple[str, str, str]:
     """从目录名解析股票代码、上市日、展示名。
 
     约定：``{股票代码}_{DD-MM-YYYY}_{公司名}_全球發售``
     例：``01244_29-11-2022_3D MEDICINES-B_全球發售``
     """
+    stem = recover_cp866_mojibake(stem)
     m = re.match(r"^(\d{5})_(\d{2})-(\d{2})-(\d{4})_(.+)$", stem)
     if not m:
         raise ValueError(f"unexpected stem: {stem}")
@@ -282,6 +299,11 @@ def main() -> int:
         action="store_true",
         help="单家失败时继续下一家（默认遇错即退出）",
     )
+    parser.add_argument(
+        "--codes",
+        default="",
+        help="仅跑这些股票代码（逗号分隔，如 02509,02561）；设置后忽略 --n/--start 切片语义，仍受名单顺序约束",
+    )
     args = parser.parse_args()
 
     batch = args.batch_dir.resolve()
@@ -294,7 +316,19 @@ def main() -> int:
 
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     all_ok = [r for r in summary["records"] if r.get("status") == "ok"]
-    records = all_ok[args.start : args.start + args.n]
+    code_set = {c.strip().zfill(5) for c in args.codes.split(",") if c.strip()}
+    if code_set:
+        records = []
+        for r in all_ok:
+            stem = str(r.get("stem") or "")
+            code = stem.split("_")[0] if stem else ""
+            if code in code_set:
+                records.append(r)
+        # 保持用户给定 codes 顺序
+        order = {c: i for i, c in enumerate(c.strip().zfill(5) for c in args.codes.split(",") if c.strip())}
+        records.sort(key=lambda r: order.get(str(r.get("stem") or "").split("_")[0], 999))
+    else:
+        records = all_ok[args.start : args.start + args.n]
     if not records:
         print(
             f"ERROR: no ok records in range start={args.start} n={args.n} "
@@ -313,7 +347,8 @@ def main() -> int:
 
     print(
         f"Batch joint analysis: {len(records)} companies "
-        f"(start={args.start}, n={args.n}, total_ok={len(all_ok)})"
+        f"(start={args.start}, n={args.n}, codes={sorted(code_set) if code_set else '-'}, "
+        f"total_ok={len(all_ok)})"
     )
     print(f"  batch_dir     = {batch}")
     print(f"  retrieval_dir = {retrieval}")

@@ -25,6 +25,23 @@ _LIAB_PARTS = {
     "NONCURRENT_LIAB": ["非流動負債總額", "非流动负债总额"],
     "CURRENT_LIAB": ["流動負債總額", "流动负债总额"],
 }
+# IS 未召回时，CF 间接法调节起点常见「税前虧損」行（维昇等）
+_CF_NET_LOSS_PROXY_LABELS = [
+    "税前虧損",
+    "稅前虧損",
+    "除税前虧損",
+    "除稅前虧損",
+    "除税前溢利／（虧損）",
+    "除稅前溢利／（虧損）",
+    "除税前溢利/(虧損)",
+    "除稅前溢利/(虧損)",
+    "年內虧損",
+    "期內虧損",
+]
+
+
+def _has_metric_series(series: dict[str, float | None] | None) -> bool:
+    return bool(series) and any(v is not None for v in series.values())
 
 
 def _short_excerpt(text: str, min_len: int = 50, max_len: int = 200) -> str:
@@ -284,6 +301,38 @@ def extract_financials_from_retrieval(bundle: dict[str, Any]) -> dict[str, Any]:
         if hits:
             _register_table_meta(table_code, hits)
 
+    # IS 未召回 NET_LOSS 时：从现金流量表「税前虧損」等行代理回填（间接法起点）
+    if not _has_metric_series(metrics.get("NET_LOSS")):
+        cf_hits = list(iter_field_hits(bundle, "TBL_CF"))
+        if cf_hits:
+            best = cf_hits[0]
+            excerpt = best.get("excerpt") or best.get("content") or ""
+            page = best.get("page") or best.get("page_number")
+            rows = html_table_to_rows(excerpt)
+            if "TBL_CF" in table_meta and table_meta["TBL_CF"].get("years"):
+                years = list(table_meta["TBL_CF"]["years"])
+                src = str(table_meta["TBL_CF"].get("source_type") or "table")
+            else:
+                _, years, src, rows, page = _register_table_meta("TBL_CF", cf_hits)
+            is_labels = list((label_maps.get("TBL_IS") or {}).get("NET_LOSS") or [])
+            labels = list(dict.fromkeys(_CF_NET_LOSS_PROXY_LABELS + is_labels))
+            vals, line = _extract_labeled_series(
+                excerpt, labels, years, field="NET_LOSS", rows=rows
+            )
+            if vals and any(v is not None for v in vals.values()):
+                metrics["NET_LOSS"] = vals
+                extract_notes.append(
+                    "NET_LOSS ← TBL_CF 税前/除税前虧損（IS未召回代理）"
+                )
+                evidence.setdefault("NET_LOSS", []).append(
+                    {
+                        "page": page,
+                        "excerpt": _short_excerpt(line or excerpt),
+                        "source_type": src,
+                        "field_code": "NET_LOSS",
+                    }
+                )
+
     # 18A：无产品收入行时不要把 OTHER_INCOME 当成 REV
     if "REV" in metrics and "OTHER_INCOME" in metrics:
         rev, oi = metrics["REV"], metrics["OTHER_INCOME"]
@@ -333,6 +382,9 @@ def evidence_refs_for(field_or_table: str, extracted: dict[str, Any]) -> list[Ev
         "OTHER_INCOME",
     }:
         items = (extracted.get("evidence") or {}).get("TBL_IS") or []
+    if not items and field_or_table == "NET_LOSS":
+        # IS 缺失时 NET_LOSS 可能来自 CF 税前虧損代理
+        items = (extracted.get("evidence") or {}).get("TBL_CF") or []
     if not items and field_or_table in {
         "TOTAL_ASSETS",
         "TOTAL_LIAB",

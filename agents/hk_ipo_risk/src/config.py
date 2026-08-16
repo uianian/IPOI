@@ -95,7 +95,15 @@ def resolve_api_settings(
         or ""
     ).strip()
 
-    if provider_l == "deepseek":
+    if provider_l == "vllm":
+        base = (explicit_base or yaml_base or "http://127.0.0.1:8000/v1").rstrip("/")
+        model = model_from or yaml_model or "Qwen3.6-35B"
+        reasoning_effort = (
+            os.environ.get("IPO_LLM_REASONING_EFFORT")
+            or yaml_effort
+            or "low"
+        )
+    elif provider_l == "deepseek":
         if explicit_base:
             base = explicit_base.rstrip("/")
         elif "deepseek.com" in yaml_base.lower():
@@ -146,3 +154,7 @@ def load_finance_schema() -> dict[str, Any]:
 
 def load_legal_schema() -> dict[str, Any]:
     return load_yaml(PKG_ROOT / "configs" / "legal_schema.yaml")
+
+
+def load_master_rules() -> dict[str, Any]:
+    return load_yaml(PKG_ROOT / "configs" / "master_rules.yaml")

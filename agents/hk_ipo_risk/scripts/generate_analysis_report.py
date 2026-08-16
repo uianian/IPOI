@@ -581,10 +581,24 @@ def build_report(
     parts.append(f"- 生成时间：{now}")
     parts.append(f"- 招股书：`{pdf_name}`")
     parts.append(f"- doc_id：`{result.get('doc_id')}`")
-    parts.append(
-        f"- 参考基本面融合分：`{_fmt_score(result.get('reference_fundamental_score'))}` "
-        f"（legal×0.45 + finance×0.55；总控未启用）"
-    )
+    master = result.get("master") if isinstance(result.get("master"), dict) else None
+    if master:
+        j = master.get("judgment") or {}
+        parts.append(
+            f"- 总控终裁：`{_fmt_score(j.get('overall_score'))}` "
+            f"（{j.get('risk_level_http') or j.get('level')}，置信度 {j.get('confidence')}）"
+        )
+        parts.append(
+            f"- 对照基本面分：`{_fmt_score(result.get('reference_fundamental_score'))}` "
+            f"（legal×0.45 + finance×0.55）"
+        )
+        if master.get("degraded"):
+            parts.append(f"- 总控降级：`{master.get('degraded_reason')}`")
+    else:
+        parts.append(
+            f"- 参考基本面融合分：`{_fmt_score(result.get('reference_fundamental_score'))}` "
+            f"（legal×0.45 + finance×0.55；总控未启用）"
+        )
     parts.append(f"- 财务评分模式：`{mode or '—'}`")
     run_log = feats.get("run_log") or {}
     if run_log.get("log"):
@@ -604,6 +618,18 @@ def build_report(
             f"{(legal.get('summary') or '').replace('|', '/')} |"
         )
     parts.append("")
+
+    if master:
+        try:
+            if str(PKG_ROOT) not in sys.path:
+                sys.path.insert(0, str(PKG_ROOT))
+            from src.skills.generate_warning_report import render_master_markdown
+
+            parts.append(render_master_markdown(master))
+        except Exception:
+            parts.append("## 總控綜合判定\n")
+            parts.append(str((master.get("judgment") or {}).get("verdict_reasoning") or "—"))
+            parts.append("")
 
     # ---------- Finance ----------
     parts.append("## 2. 财务穿透 Agent\n")

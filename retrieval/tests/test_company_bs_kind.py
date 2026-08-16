@@ -26,3 +26,12 @@ def test_consolidated_bs_still_rejected_as_company() -> None:
     assert kind == "balance_sheet"
     assert statement_kind_compatible("balance_sheet", kind)
     assert not statement_kind_compatible("company_balance_sheet", kind)
+
+
+def test_consolidated_bs_not_company_when_zonghe_zichan() -> None:
+    kind = infer_statement_kind(
+        "非流動資產\n資產總值\n虧絀總額\n負債總值",
+        "綜合資產負債表",
+    )
+    assert kind == "balance_sheet"
+    assert not statement_kind_compatible("company_balance_sheet", kind)
