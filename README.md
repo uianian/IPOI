@@ -1,23 +1,17 @@
 # IPOI 仓库总说明
 
-## 1. 当前仓库检查结论
+## 1. 当前仓库结论
 
-截至当前检查时间，`IPOI` 根仓库未发现明显的文件、代码或配置丢失，结论如下：
+- 远端：`origin -> git@github.com:uianian/IPOI.git`
+- 对外主分支：`main`（已保护：必须走 PR，至少 1 个有写权限的人 Approve，禁止 force push / 删除）
+- 协作者：仓库主人 + `likesnow97`（Collaborator，可推功能分支）
+- 截至 2026-08-16，`main` 已合入：
+  - PR #1：周杰市场情绪 Agent（`c44f862`）
+  - PR #2：本地财务/法务/总控接回（`6a65d01`）
+- Agent 模块说明见 [`agents/hk_ipo_risk/README.md`](agents/hk_ipo_risk/README.md)（市场改动 §14，冲突处理 §15，总控/辩论 §9）
+- **所有协作者必须按第 7 节走功能分支 + PR，禁止直推 `main`**
 
-- 当前工作分支：`main`
-- 当前远端：`origin -> git@github.com:uianian/IPOI.git`
-- 当前工作区状态：`git status --short` 为空，说明工作区在 git 视角下是干净的
-- 本地保留分支：`local-secret-backup`
-- `main` 与 `local-secret-backup` 的跟踪文件数量一致，均为 `1314`
-- `main` 与 `local-secret-backup` 的差异仅有 2 个文件：
-  - `agents/ipo/configs/settings.yaml`
-  - `agents/ipo/src/config.py`
-
-因此可以判断：
-
-1. 没有出现整批目录丢失、代码缺失或配置文件大面积遗漏。
-2. 当前 `main` 是一份为 GitHub 公开仓库整理后的安全版本。
-3. `local-secret-backup` 保留了本地历史，用于兜底和回看，但不建议直接推送。
+`local-secret-backup` 仍是本机兜底分支，**不要推送到公开仓库**。工作区里的 `pdf_parsing/output`、报告成品、`*.local.yaml` 密钥不要提交。
 
 ## 2. 根目录结构
 
@@ -134,27 +128,19 @@ CONDA_BIN=/nfs/users/wuqianqian/anaconda3/envs/ipo-risk/bin ./scripts/start_retr
 
 ### `main`
 
-这是当前对外发布分支，已经推送到 GitHub。
+公开主分支。**禁止直接 `git push origin main`。** 所有改动经功能分支 + Pull Request 进入。
 
-用途：
+### 功能分支
 
-- 作为公开仓库主分支
-- 不包含提交到历史中的真实密钥
-- 适合作为后续正常开发、提交、推送的基础分支
+命名：`feat/主题`、`fix/主题`。从最新 `main` 拉出，推送到 `origin`，再开 PR。
 
 ### `local-secret-backup`
 
-这是本地保留的备份分支，用于兜底，不建议直接推送。
+仅本机兜底，不要推送。日常开发不要在这个分支上继续写。
 
-用途：
+### `backup/local-wip-20260816`
 
-- 保留此前本地整理过程中的历史
-- 在需要核对某次中间状态时可参考
-
-注意：
-
-- 该分支不应直接推送到公开仓库
-- 日常开发应以 `main` 为准
+本机备份提交（PR #2 合入前的财务/法务/总控工作区）。只作对照，不要推送、不要在上面继续开发。
 
 ## 5. `settings.yaml` 与密钥说明
 
@@ -241,110 +227,156 @@ git update-index --skip-worktree agents/ipo/configs/settings.yaml
 - 不把原始数据集、运行缓存、日志、模型权重、第三方 demo 资源和敏感文件传到公开仓库
 - 保留与你项目直接相关的代码、报告、样例材料和必要过程产物
 
-## 7. 以后日常必备 Git 命令
+## 7. 协作者 Git 工作流程（所有人必须遵守）
 
-以下命令默认都在仓库根目录 `IPOI/` 下执行。
+仓库：`git@github.com:uianian/IPOI.git`。`main` 已保护，直接推 `main` 会被拒绝。自己的 PR 一般不能自己 Approve，需另一名有写权限的协作者 Approve 后再 Merge。
 
-### 7.1 查看状态
+以下命令均在仓库根目录执行。不要 `git add -A` / `git add .`（会把解析产物、报告、密钥加进去）。不要 `git push --force` 到 `main`。不要 `git reset --hard`、`git clean -fd`，除非你明确知道会丢掉什么。
+
+### 7.1 第一次：克隆官方仓库
+
+周杰及后续协作者应直接克隆本仓库，不要把 fork 当主工作区。
 
 ```bash
-git status
-git status --short
-git branch -vv
+git clone git@github.com:uianian/IPOI.git
+cd IPOI
 git remote -v
+# 应看到 origin -> git@github.com:uianian/IPOI.git
 ```
 
-### 7.2 拉取远端最新内容
+若本地还是旧 fork：
 
 ```bash
-git fetch origin
-git pull --rebase origin main
+git remote add official git@github.com:uianian/IPOI.git
+git fetch official
+git checkout -B main official/main
+git branch -u official/main main
 ```
 
-如果你当前就在 `main` 上，推荐优先使用：
+之后推送用 `official`，或把 `origin` 改成官方地址。
+
+本机已有克隆（服务器 `/nfs/users/wuqianqian/IPOI`）只需：
 
 ```bash
-git pull --rebase
+cd /nfs/users/wuqianqian/IPOI
+git checkout main
+git pull origin main
 ```
 
-### 7.3 提交本地修改
+### 7.2 每次开工：对齐 main，再开功能分支
 
-提交流程建议固定为：
+```bash
+git checkout main
+git pull origin main
+git checkout -b feat/你的主题
+git branch --show-current
+git log -1 --oneline
+```
+
+分支名示例：`feat/master-debate`、`feat/market-postlisting`、`fix/finance-runway`。不要两人都叫 `dev`。
+
+`pdf_parsing/output` 等未提交文件可以留在工作区，只要后面只 `git add` 你改的代码。
+
+### 7.3 提交（只加有价值的代码）
 
 ```bash
 git status
-git add .
-git status
-git commit -m "你的提交说明"
-```
-
-更稳妥的检查方式：
-
-```bash
 git diff
+git add agents/hk_ipo_risk/src/path/to/file.py
 git diff --cached
+git commit -m "说明为什么改，而不是改了哪些文件"
 ```
 
-### 7.4 推送到远端
+不要加入：`pdf_parsing/output`、`*.local.yaml`、`.env`、密钥、大 CSV/JSON 解析结果、`agents/hk_ipo_risk/reports/` 跑批成品（除非约定要入库）。
+
+### 7.4 推功能分支（不要推 main）
 
 ```bash
-git push origin main
+git push -u origin feat/你的主题
 ```
 
-如果当前分支已经跟踪了远端，一般可直接：
+成功后终端会给出开 PR 的链接。**不要**执行 `git push origin main`。
+
+### 7.5 网页开 Pull Request
+
+1. 打开 https://github.com/uianian/IPOI 或终端给出的  
+   `https://github.com/uianian/IPOI/pull/new/feat/你的主题`
+2. 也可手动：https://github.com/uianian/IPOI/compare/main...feat/你的主题
+3. **base** 必须是 `main`，**compare** 是你的功能分支
+4. 写清改了什么、是否动到共享文件（见下）
+5. 点 **Create pull request**
+
+### 7.6 网页审核与合并
+
+1. 另一人打开 PR → **Files changed**
+2. **Review changes** → **Approve**（或 Request changes）→ **Submit review**
+3. 作者按意见改完后 `git add` / `commit` / `git push`（同一功能分支即可，PR 自动更新）
+4. 若开启了 “Dismiss stale approvals”，改完后需要重新 Approve
+5. 批准后：**Create a merge commit** → **Merge pull request** → **Confirm merge**
+
+作者不能给自己的 PR 点 Approve。只有仓库主人可见 **Merge without waiting for requirements to be met (bypass rules)**，仅紧急时使用，日常不要旁路。
+
+合完后网页上可 **Delete branch**。
+
+### 7.7 合完后两边都拉 main
 
 ```bash
+git checkout main
+git pull origin main
+git log -1 --oneline
+```
+
+本地功能分支可删：
+
+```bash
+git branch -d feat/你的主题
+git push origin --delete feat/你的主题
+```
+
+### 7.8 与对方分支冲突时
+
+在你的功能分支上：
+
+```bash
+git checkout feat/你的主题
+git fetch origin
+git merge origin/main
+# 打开标为 both modified 的文件，搜 <<<<<<<
+# 改完：
+git add 解决完的文件
+git commit
 git push
 ```
 
-### 7.5 新建功能分支
+高冲突共享文件（PR #2 已处理过一次，以后仍容易打架）：
+
+- `agents/hk_ipo_risk/scripts/run_finance_legal.py`
+- `agents/hk_ipo_risk/service/analysis_runner.py`
+- `agents/hk_ipo_risk/service/thought_mapper.py`
+- `agents/hk_ipo_risk/src/agents/market_agent.py`
+- `agents/hk_ipo_risk/src/config.py`
+- `agents/hk_ipo_risk/src/graph/parallel.py`
+- `agents/hk_ipo_risk/src/models/evidence.py`
+- `agents/hk_ipo_risk/src/skills/market_toolbox.py`
+
+原则：市场正式实现以周杰侧为准；总控/财务/法务/辩论以接回后的 `main` 为准，不要再写回市场 demo stub。
+
+### 7.9 常用只读命令
 
 ```bash
-git switch -c feature/your-topic
-```
-
-开发完成后切回主分支：
-
-```bash
-git switch main
-git pull --rebase
-```
-
-### 7.6 查看提交历史
-
-```bash
-git log --oneline --decorate -20
-git log --graph --oneline --decorate --all
-```
-
-### 7.7 查看两个分支差异
-
-```bash
-git diff --stat main..local-secret-backup
-git diff main..local-secret-backup -- agents/ipo/configs/settings.yaml
-```
-
-### 7.8 检查某个文件是否被忽略
-
-```bash
+git status -sb
+git branch -vv
+git log --oneline --decorate -15
+git diff --stat origin/main...HEAD
 git check-ignore -v path/to/file
+git restore --staged path/to/file    # 撤销误 add
 ```
 
-### 7.9 恢复误加到暂存区的文件
-
-```bash
-git restore --staged path/to/file
-```
-
-### 7.10 放弃工作区未提交修改
-
-谨慎使用：
+放弃某个未提交文件（会丢该文件的工作区改动）：
 
 ```bash
 git restore path/to/file
 ```
-
-不要在不确定时直接批量恢复整个仓库。
 
 ## 8. 与 `settings.yaml` 相关的常用命令
 
@@ -383,41 +415,36 @@ export OPENAI_API_KEY="your-key"
 
 ## 9. 建议的日常操作顺序
 
-每次开始开发前：
-
-```bash
-git switch main
-git pull --rebase
-git status
+```text
+git checkout main && git pull origin main
+    → git checkout -b feat/主题
+    → 改代码（只 add 具体文件）
+    → git commit && git push -u origin feat/主题
+    → 网页开 PR
+    → 另一人 Approve
+    → 网页 Merge
+    → git checkout main && git pull origin main
 ```
 
-每次修改后：
-
-```bash
-git diff
-git add .
-git diff --cached
-git commit -m "your message"
-git push
-```
-
-每次涉及 `settings.yaml` 前：
+涉及 `agents/ipo/configs/settings.yaml` 前：
 
 ```bash
 git update-index --no-skip-worktree agents/ipo/configs/settings.yaml
 ```
 
-完成后若要恢复本地保护：
+提交完成后若要继续本地留密钥：
 
 ```bash
 git update-index --skip-worktree agents/ipo/configs/settings.yaml
 ```
 
+市场 Agent 密钥用 `*.local.yaml` 或环境变量，不要提交真实 Key。
+
 ## 10. 当前仓库维护建议
 
 - 公开仓库中不要再次提交真实 API Key
-- 如需长期保留本地密钥，优先考虑环境变量方案
-- 推送前始终执行一次 `git status` 和 `git diff --cached`
-- 不要把 `local-secret-backup` 直接推送到远端
-- 如果后续新增新的运行缓存、权重目录或本地输出目录，应及时补充 `.gitignore`
-- `pdf_parsing` 与 `retrieval` / Agent **分环境维护**；改依赖后记得重新导出对应 `requirements.txt`
+- 不要直接推 `main`；不要把 `local-secret-backup` 推到远端
+- 推送前执行 `git status` 和 `git diff --cached`，确认没有解析产物
+- 新增运行缓存、权重、本地输出目录时及时补 `.gitignore`
+- `pdf_parsing` 与 `retrieval` / Agent **分环境维护**；改依赖后重新导出对应 `requirements.txt`
+- 市场额外依赖：`agents/hk_ipo_risk/requirements-market.txt`
