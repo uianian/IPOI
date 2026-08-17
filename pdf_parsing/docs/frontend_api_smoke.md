@@ -1,14 +1,15 @@
 # 前端联调 — 统一网关 9100
 
-> 契约：`dataset/interface_new.md` v3.3  
+> 契约：`dataset/interface_protocol_v3.4.md`  
 > **前端只配一个 Base**：`http://223.3.95.129:9100`（本机 `http://127.0.0.1:9100`）  
 > 后端内部：9100 解析/索引 + 反代分析；9101 检索（内部）；9102 分析（被 9100 反代，前端不直连）  
 > 当前：**桩模式**解析；解析完成后自动调本机 9101 建索引
 
 ```
 前端 ──► :9100
-           ├─ parse / index-status     （本机）
-           └─ analysis/start|stream|result  ──反代──► :9102
+           ├─ parse / index-status / agents/status     （status 反代 9102）
+           ├─ analysis/start|stream|result             ──反代──► :9102
+           └─ report | report/export                   ──反代──► :9102
 ```
 
 ---
@@ -35,6 +36,8 @@ BASE=http://127.0.0.1:9100   # 前端机器改为 http://223.3.95.129:9100
 
 curl -s "$BASE/api/v1/health"
 # 期望 stubMode=true，gateway=true，upstreams.analysis.ok=true
+curl -s "$BASE/api/v1/agents/status"
+# 期望 readyCount=4
 ```
 
 ---
@@ -167,6 +170,7 @@ RESP=$(curl -s -X POST "$BASE/api/v1/projects/${PROJ}/analysis/start" \
   -d "{
     \"clientProjectId\": \"${PROJ}\",
     \"taskId\": \"${TASK}\",
+    \"ticker\": \"03378.HK\",
     \"llmConfig\": {
       \"apiBaseUrl\": \"https://openrouter.ai/api/v1\",
       \"apiKey\": \"sk-or-v1-YOUR_KEY\",
@@ -182,6 +186,10 @@ curl -N -s "$BASE/api/v1/projects/${PROJ}/analysis/stream?analysisId=${AID}"
 
 # result
 curl -s "$BASE/api/v1/projects/${PROJ}/analysis/result?analysisId=${AID}" -o /tmp/analysis_result.json
+# report JSON ≡ result.report
+curl -s "$BASE/api/v1/projects/${PROJ}/report?analysisId=${AID}" -o /tmp/report.json
+# PDF
+curl -s "$BASE/api/v1/projects/${PROJ}/report/export?analysisId=${AID}" -o /tmp/report.pdf
 python3 <<'PY'
 import json
 d=json.load(open("/tmp/analysis_result.json"))["data"]
@@ -191,14 +199,16 @@ print("status", d.get("status"), "overall", d.get("overallScore"), d.get("riskLe
 print("scoringMode", leg.get("scoringMode"), fin.get("scoringMode"))
 print("legalDetail.skills", [s.get("name") for s in ((leg.get("legalDetail") or {}).get("skills") or [])])
 print("financeDetail", bool(fin.get("financeDetail")), "dossierPaths", d.get("dossierPaths"))
-print("market", (ag.get("market") or {}).get("status"), "orchestrator", (ag.get("orchestrator") or {}).get("status"))
+print("market", (ag.get("market") or {}).get("status") or (ag.get("market") or {}).get("agentId"), "orchestrator", (ag.get("orchestrator") or {}).get("status"))
 assert d.get("status")=="completed"
 assert leg.get("scoringMode") and fin.get("scoringMode")
 assert fin.get("financeDetail") is not None
 assert (leg.get("legalDetail") or {}).get("skills")
-assert (ag.get("market") or {}).get("status")=="skipped"
-assert (ag.get("orchestrator") or {}).get("status")=="placeholder"
-print("OK: v3.3 result shell")
+mkt = ag.get("market") or {}
+assert mkt.get("agentId")=="market"
+assert mkt.get("status") in {None, "completed", "failed", "skipped"} or mkt.get("reportMarkdown") or mkt.get("marketDetail")
+assert (ag.get("orchestrator") or {}).get("status")=="completed"
+print("OK: v3.4 result shell")
 PY
 ```
 
@@ -206,13 +216,13 @@ PY
 |------|------|
 | `clientProjectId` | 与路径一致 |
 | `taskId` | 可选，关联解析任务 |
+| `ticker` | 建议；市场 Agent 优先使用（允许 `03378.HK`） |
 | `llmConfig` | 可选；`apiBaseUrl` / `apiKey` / `model` 缺省则用后端默认 |
 | `isBiotech` | 可选；`true`→`issuerType=biotech`（≡18a 门控）；解析 meta 已有则可省略 |
 
-期望：start **202**；stream 有 thought；result 含 `scoringMode` / `financeDetail` / `legalDetail` / `dossierPaths` / market+orchestrator stub；索引未 ready → **409** `INDEX_NOT_READY`。  
-若 9102 未启动：网关返回 **502** `ANALYSIS_UPSTREAM_DOWN`。
-
-RAG / report 页接口仍未实现（契约 v3.3 已标注）。
+期望：start **202**；stream 三路 thought **实时交错**（财务 thought 不必等法务 completed）；初评无 `category`；条件开辩才有 `category`；result 含独立三份 `reportMarkdown`、`phase`/`debate`/`report`；随后 `/report` 与 `result.report` 字段一致；`/report/export` 为非空 PDF。索引未 ready → **409** `INDEX_NOT_READY`。  
+无 ticker 且 parse meta 也无股票代码时 market=`skipped`。  
+若 9102 未启动：网关返回 **502** `ANALYSIS_UPSTREAM_DOWN`；`/agents/status` 可降级为 `readyCount=0`。
 
 ---
 

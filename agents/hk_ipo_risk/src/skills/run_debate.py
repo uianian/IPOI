@@ -48,6 +48,7 @@ def _parse_questions(raw_list: Any, *, cap: int) -> list[DebateQuestion]:
                     question=question,
                     required_evidence_types=list(raw.get("required_evidence_types") or []),
                     priority=raw.get("priority") or "medium",
+                    search_hints=raw.get("search_hints") if isinstance(raw.get("search_hints"), dict) else None,
                 )
             )
         except Exception:

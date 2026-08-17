@@ -88,7 +88,7 @@ market/data/external/news/raw/02451_2023-10-11_firecrawl.json；只有合格
 
     python scripts/run_finance_legal.py --agent all --stock-code 02451 --doc-id REAL_TASK_ID --doc-name 綠源集團控股 --pdf-name 02451_test.pdf --use-live-retrieval --out .runtime/all_02451.json
 
-market 是独立上市首日破发风险，不计入 reference_fundamental_score。
+有真实市场结果时，对照分按 `(legal×0.55 + finance×0.45)×0.65 + market×0.35` 计入 `reference_fundamental_score`。
 
 服务先在备用端口启动：
 

@@ -2,7 +2,7 @@
 
 > **读者**：周杰（市场情绪 Agent 开发）、`hk_ipo_risk` 集成方  
 > **用途**：合并前对齐代码落点、报告、9102 契约、输入输出、Skill/Tool 边界、辩论落盘与补证据；标明现阶段无法确认的闸门  
-> **权威契约**：本仓 [`README.md`](../README.md) §1 / §5 / §9 / §10；前端 [`dataset/interface_new.md`](../../../dataset/interface_new.md)  
+> **权威契约**：本仓 [`README.md`](../README.md) §1 / §5 / §9 / §10；前端 [`dataset/interface_protocol_v3.4.md`](../../../dataset/interface_protocol_v3.4.md)  
 > **数据交接**：[`market/市场情绪数据使用报告_交接周杰.md`](../../../market/市场情绪数据使用报告_交接周杰.md)  
 > **撰写日期**：2026-08-11
 
@@ -170,12 +170,13 @@ cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
 
 ## 3. 输入输出规范
 
-### 3.1 start 输入（与前端对齐，市场不另加字段）
+### 3.1 start 输入（与前端对齐）
 
 ```json
 {
   "clientProjectId": "proj-xxx",
   "taskId": "task_expert_...",
+  "ticker": "03378.HK",
   "llmConfig": {
     "apiBaseUrl": "https://api.deepseek.com",
     "apiKey": "sk-...",
@@ -189,12 +190,14 @@ cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
 |------|------|------------|
 | `clientProjectId` | 是 | 与路径一致；写入 dossier |
 | `taskId` | 建议 | 解析 meta / 检索包 id |
+| `ticker` | 建议 | 港股代码，允许 `03378.HK`；市场 Agent 优先使用 |
+| `stockCode` | 否 | `ticker` 别名 |
 | `llmConfig` | 否 | 与财务 / 法务共用覆盖 |
 | `isBiotech` | 否 | 发行人类型提示；市场宽表打分通常不门控 18A，但应透传 `issuer_type` 便于日志一致 |
 
-**定位对象公司**（start body **无**股票代码字段）：
+**定位对象公司**：
 
-1. runner 从解析任务 meta 读取 `stockCode` / `companyName` / `listingDate` / `fileName` / `issuerType` 等  
+1. start body 的 `ticker` / `stockCode` 优先，其次解析任务 meta 的 `stockCode` / `ticker`  
 2. 用规范化后的 `stock_code`（5 位，如 `02097`）查宽表行  
 3. `doc_id` / `taskId` 用于检索包与 dossier 命名（与财务 / 法务同一套）
 
@@ -204,7 +207,7 @@ cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
 
 | 输入 | 典型路径 | 说明 |
 |------|----------|------|
-| 股票代码 / 公司名 / 上市日 | 解析 meta | 定位宽表 |
+| 股票代码 / 公司名 / 上市日 | start body `ticker` 优先，否则解析 meta | 定位宽表 |
 | 情绪特征宽表 | `market/data/derived/ipo_sentiment_features.csv` | **主**输入；每家一行 |
 | 可选事件表 | `market/data/derived/ipo_events.csv` | 验证 / 报告；**禁止**把 `outcome_*` 当预测特征 |
 | 可选检索包 | `retrieval/.runtime/agent_retrieval_{taskId}_market.json` | 仅招股书证据；命名见 §1.4 |
@@ -491,7 +494,7 @@ DebateDossier
 | 4 | 是否纳入 9101 `prepareAgents: [finance, legal, market]` | 现仅 finance/legal | 纳入则 `indexStatus=ready` 含 market 包；不纳入则市场不因缺 `_market.json` 单独阻塞（仍可能因财务 / 法务等索引） |
 | 5 | 共用 start 强制 `INDEX_NOT_READY` | 财务 / 法务需要 | 市场单方无法取消；记录为集成约束 |
 | 6 | `EvidenceRef.source_type` 是否扩展（如 `market_series`） | Literal 仅四值 | 扩展需改模型 + 前后端；短期用 `table`+`field_code` |
-| 7 | 三方融合分权重 | 现 `legal×0.45+finance×0.55`；总控 placeholder | 市场启用后 overallScore 公式未定 |
+| 7 | 三方融合分权重 | `legal×0.55+finance×0.45`，有市场时再 `(基本面)×0.65+market×0.35` | 已启用；无市场结果回退基本面 |
 | 8 | SSE 对外刷序 | 现 legal → financial；market skipped | 建议 market 接在 financial 之后；需前端确认 |
 | 9 | 舆情子分权重 | 交接材料建议 MVP 砍掉或固定中性 50 | 产品确认后写入 `score_rules.yaml` / Skill 开关 |
 | 10 | `marketDetail` 字段细目 | 本规范仅给示意 | 与前端约定后再锁 schema |

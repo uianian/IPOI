@@ -395,7 +395,6 @@ async def _amain() -> int:
                 legal_reasoning_effort=legal_effort,
                 finance_reasoning_effort=finance_effort,
                 skip_master=args.skip_master,
-                include_market=False,
             )
         elif args.agent == "market":
             mkt = await MarketAgent(

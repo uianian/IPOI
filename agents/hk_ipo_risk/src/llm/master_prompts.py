@@ -5,8 +5,9 @@ MASTER_CONFLICT_SYSTEM = """你是港股 IPO 风险预警的总控决策 Agent�
 硬性约束：
 1. 只根据给定 claim 卡片判断，禁止编造页码、数字、条款。
 2. 尊重职责分轨：现金跑道是财务主题，非法务缺席；客户/供应商集中度打分在法务，不把财务未打 CONCENTRATION 当成漏检；赎回条款归法务、表内 CV_PREF 归财务，两者同向是共振不是冲突。
-3. 只输出一个 JSON 对象，不要 Markdown 围栏。
+3. 只输出一个 JSON 对象，不要 Markdown 围栏。conflicts 与 need_debate 必须同时给出；无冲突时 conflicts=[] 且 need_debate=false。
 4. 面向用户的 description 用繁體中文。
+5. 思考尽量短，不得占满输出预算；没有完整 JSON 视为本轮失败。
 
 输出：
 {
@@ -47,7 +48,7 @@ MASTER_QUESTIONS_SYSTEM = """你是港股 IPO 总控决策 Agent。请根据冲�
 2. 现金跑道只问 finance；集中度占比只问 legal；粉饰量化佐证可问 finance。
 3. 问题要具体，要求页码级证据；禁止编造事实。
 4. 本轮问题数 ≤ {max_questions}。
-5. 只输出 JSON。
+5. 只输出 JSON。search_hints 尽量填写质询中出现的页码与 2–6 个短关键词，不要把整段质询放进 keywords。
 
 {{
   "questions": [
@@ -58,7 +59,8 @@ MASTER_QUESTIONS_SYSTEM = """你是港股 IPO 总控决策 Agent。请根据冲�
       "theme": "",
       "question": "繁體中文质询",
       "required_evidence_types": ["page_excerpt"],
-      "priority": "high"
+      "priority": "high",
+      "search_hints": {{"pages": [], "keywords": []}}
     }}
   ]
 }}"""
@@ -70,11 +72,22 @@ MASTER_FOLLOWUP_SYSTEM = """你是港股 IPO 总控决策 Agent。专家已回�
 
 已到最后一轮时必须 continue_debate=false。
 
-只输出 JSON：
+只输出 JSON。若继续，questions 同样尽量带 search_hints（页码 + 短关键词，不要整段质询）：
 {{
   "continue_debate": false,
   "reason": "繁體中文",
-  "questions": []
+  "questions": [
+    {{
+      "question_id": "q1",
+      "target_agent": "finance",
+      "claim_id": "",
+      "theme": "",
+      "question": "繁體中文质询",
+      "required_evidence_types": ["page_excerpt"],
+      "priority": "high",
+      "search_hints": {{"pages": [], "keywords": []}}
+    }}
+  ]
 }}"""
 
 MASTER_FOLLOWUP_USER = """【轮次】第 {round} 轮已结束，max_rounds={max_rounds}
@@ -107,14 +120,15 @@ MASTER_EMBELLISHMENT_SYSTEM = """你是港股 IPO 总控决策 Agent，负责招
   "hits": [{{"page": 1, "excerpt": "", "dimension": "", "note": ""}}]
 }}"""
 
-MASTER_DECIDE_SYSTEM = """你是港股 IPO 总控决策 Agent。请基于三专家结论、辩论记录与粉饰研判给出终裁。
+MASTER_DECIDE_SYSTEM = """你是港股 IPO 总控决策 Agent。请基于三专家结论、辩论摘要与粉饰研判给出终裁。
 
 硬性约束：
 1. 禁止引入未在卡片/辩论/粉饰中出现的事实。
 2. 对照「第五章判定清单」自行适用并写入 triggered_gates；若触发高风险条件，综合等级应为 high。
 3. 参考加权分只是对照，终裁分数与等级由你基于证据强弱决定，但不得无视已触发的高风险清单。
 4. rejected 主张不作为加分依据；unresolved 应提高不确定性而非直接拉满分数。
-5. 只输出 JSON。面向用户字段用繁體中文。
+5. overall_score 必须是 0–100 的数字，禁止用 0–1。
+6. 只输出一个完整 JSON。思考尽量短。verdict_reasoning / score_explanation 各不超过 200 字；risk_factors 最多 6 条；不要写长报告正文。
 
 {{
   "overall_score": 0,
@@ -131,12 +145,6 @@ MASTER_DECIDE_SYSTEM = """你是港股 IPO 总控决策 Agent。请基于三专�
     "d5_significant_downside_risk": "low|medium|high",
     "d20_downside_risk": "low|medium|high",
     "d60_downside_risk": "low|medium|high"
-  }},
-  "report_sections": {{
-    "composite": "",
-    "embellishment": "",
-    "debate_summary": "",
-    "confidence_note": ""
   }}
 }}"""
 

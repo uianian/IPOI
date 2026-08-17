@@ -105,6 +105,8 @@ class MarketAgent:
         self._sina_settings = sina_settings
         self._sina_client = sina_client
         self._run_logger = run_logger
+        self._last_result: AgentResult | None = None
+        self._doc_id = ""
         configured_turns = int(
             max_turns
             if max_turns is not None
@@ -130,6 +132,7 @@ class MarketAgent:
         public_opinion: PublicOpinionAssessment | dict[str, Any] | None = None,
     ) -> AgentResult:
         started = time.time()
+        self._doc_id = doc_id
         data_settings = self._market_settings.get("data") or {}
         loader_kwargs: dict[str, Any] = {
             "strict_cutoff": self._strict_cutoff,
@@ -305,7 +308,7 @@ class MarketAgent:
             + f"- 证据档案：`{dossier_path}`\n"
             + "- 第一版未启用 market retrieval package；辩论补证使用独立市场证据工具。\n"
         )
-        return AgentResult(
+        result = AgentResult(
             agent="market",
             doc_id=doc_id,
             risk_score=scoring["final_score"],
@@ -416,6 +419,8 @@ class MarketAgent:
             },
             summary=summary,
         )
+        self._last_result = result
+        return result
 
     async def _prepare_react_context(self, state: dict[str, Any]) -> dict[str, Any]:
         context = state.get("_market_context")
@@ -1059,6 +1064,54 @@ class MarketAgent:
             reasoning_max_tokens=256,
         )
         return MarketDebateResponse.model_validate(response.get("data") or {})
+
+    async def respond_to_controller(
+        self,
+        question,
+        claim_card: dict[str, Any] | None = None,
+        *,
+        round_no: int = 1,
+        doc_id: str | None = None,
+        parse_json: Path | str | None = None,
+    ):
+        from src.models.master import ClaimUpdate
+
+        del claim_card, round_no, parse_json
+        if doc_id:
+            self._doc_id = doc_id
+        original = self._last_result
+        if original is None:
+            return ClaimUpdate(
+                question_id=getattr(question, "question_id", "") or "",
+                target_agent="market",
+                clue_id=getattr(question, "claim_id", None),
+                status="unresolved",
+                confidence=0.3,
+                reply="市場情緒 Agent 尚無已完成的探查結果，無法回應總控質詢。",
+                remaining_uncertainty="等待市場探查完成",
+            )
+        resp = await self.challenge(original, getattr(question, "question", "") or "")
+        stance_status = {
+            "maintain": "verified",
+            "revise": "partially_accepted",
+            "concede": "challenged",
+        }
+        status = stance_status.get(resp.stance, "unresolved")
+        if resp.requires_new_evidence and resp.stance == "maintain":
+            status = "unresolved"
+        reply = (resp.response or "").strip()
+        if resp.revised_summary:
+            reply = f"{reply}\n修訂摘要：{resp.revised_summary}".strip()
+        return ClaimUpdate(
+            question_id=getattr(question, "question_id", "") or "",
+            target_agent="market",
+            clue_id=getattr(question, "claim_id", None),
+            status=status,
+            confidence=0.6 if status != "unresolved" else 0.4,
+            reply=reply or "維持原市場結論，未提供可驗證的新證據。",
+            revision_reason=resp.stance,
+            remaining_uncertainty="; ".join(resp.evidence_requests) if resp.evidence_requests else "",
+        )
 
     def build_debate_toolbox(
         self,

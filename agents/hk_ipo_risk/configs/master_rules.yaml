@@ -14,8 +14,8 @@ chapter5_checklist:
     - { code: EMBELLISHMENT_HIGH, label: "文本粉饰度 ≥ 7" }
 
 reference_weights:
-  legal: 0.45
-  finance: 0.55
+  legal: 0.55
+  finance: 0.45
   fundamental: 0.65
   market: 0.35
 
@@ -27,9 +27,62 @@ debate:
   hits_per_search: 4
   debate_max_tokens: 1024
   question_max_tokens: 800
-  decide_max_tokens: 1200
+  # 冲突研判 JSON 正文预算；DeepSeek 会另加 reasoning 预留。过小会被思考挤空。
+  conflict_max_tokens: 2048
+  conflict_reasoning_max_tokens: 512
+  # 终裁 JSON 正文预算；辩论后输入变长，1200 会被思考/长字段挤空。
+  decide_max_tokens: 4096
+  decide_reasoning_max_tokens: 512
   embellishment_max_tokens: 1024
   debate_reasoning_effort: low
+  debate_search:
+    query_max_chars: 32
+    max_pages: 4
+    themes:
+      redemption:
+        finance_keywords: [贖回負債, 可轉換可贖回優先股, 可贖回優先股]
+        legal_keywords: [購回權, 特別權利, 自動恢復, 股東協議]
+        section_hint: [financial_information, history_and_corporate_structure, risk_factors]
+        finance_intent: financing_dependency
+        legal_intent: redemption
+      cash_runway:
+        finance_keywords: [現金及現金等價物, 經營活動所用現金, 流動資金及資本資源]
+        legal_keywords: []
+        section_hint: [financial_information]
+        finance_intent: financing_dependency
+        legal_intent: business_context
+      related_party:
+        finance_keywords: []
+        legal_keywords: [關連交易, 百分比率, 年度上限]
+        section_hint: [connected_transactions]
+        finance_intent: business_context
+        legal_intent: related_party
+      concentration:
+        finance_keywords: []
+        legal_keywords: [前五大客戶, 前五大供應商]
+        section_hint: [business, financial_information]
+        finance_intent: business_context
+        legal_intent: concentration
+      valuation:
+        finance_keywords: [估值, 發行價]
+        legal_keywords: [估值倒掛, Pre-IPO]
+        section_hint: [summary, financial_information]
+        finance_intent: business_context
+        legal_intent: business_context
+      embellishment:
+        finance_keywords: [領先, 第一]
+        legal_keywords: [領先, 第一]
+        section_hint: [summary, business]
+        finance_intent: business_context
+        legal_intent: business_context
+    codes:
+      CV_PREF_LIABILITY: [可轉換可贖回優先股, 贖回負債]
+      REDEMPTION_HIGH: [購回權, 贖回負債, 特別權利]
+      REDEMPTION_MEDIUM: [贖回負債, 購回權]
+      RIGHTS_CLEANUP_INCOMPLETE: [特別權利, 自動恢復, 購回權]
+      CASH_RUNWAY_12_24: [現金及現金等價物, 流動資金]
+      CASH_RUNWAY_LT_12: [現金及現金等價物, 流動資金]
+      BURN_YOY_UP_30: [經營活動所用現金, 現金流量]
 
 embellishment:
   first_pages: 5

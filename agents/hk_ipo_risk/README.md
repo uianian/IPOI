@@ -1,17 +1,20 @@
-# hk_ipo_risk — 港股 IPO 财务 ‖ 法务 ‖ 总控多 Agent
+# hk_ipo_risk — 港股 IPO 财务 ‖ 法务 ‖ 市场 ‖ 总控多 Agent
 
-独立于 `agents/ipo`。本仓库实现 **财务穿透 Agent**、**法务合规 Agent**（默认完整 ReAct）与 **总控决策 Agent**（冲突研判 / 主持辩论 / 粉饰 / 终裁 / 报告），并提供 **HTTP 分析服务（9102）** 供前端经 **9100 网关** 调用。市场情绪为本轮可替换 **demo stub**。
+独立于 `agents/ipo`。本仓库实现 **财务穿透 Agent**、**法务合规 Agent**（默认完整 ReAct）、**市场情绪 Agent**（上市前首日破发风险 + 上市后 D5–D60）与 **总控决策 Agent**（冲突研判 → 条件辩论 → 粉饰 → 终裁 → 报告；正式分来自终裁而非对照加权），并提供 **HTTP 分析服务（9102）** 供前端经 **9100 网关** 调用。
+
+现行 `main` 已合入：周杰市场 Agent（PR #1）+ 本地财务/法务/总控接回（PR #2，2026-08-16）。市场不再是 demo stub。
 
 | 能力 | 状态 |
 |------|------|
 | 财务 / 法务 ReAct + `react+rules_floor` | **已启用**（CLI + HTTP） |
-| DebateDossier 落盘 + 独立补证据 API | **已启用**；辩论阶段增量 `search_*_standalone` |
+| DebateDossier 落盘 + 辩论补证 | **已启用**；页码直取 + 短关键词，`search_*_standalone`（`prefer_pages`） |
 | 总控决策 / 多轮辩论编排 | **已启用**（LangGraph 总控子图；终裁为正式分） |
-| 市场情绪 Agent | **demo stub**（`status=completed`，`reason=demo_stub`） |
+| 市场情绪 Agent | **已启用**：历史校准分 + LLM ReAct + 多空辩论；失败不阻断财务/法务 |
 
-契约文档：[`dataset/interface_new.md`](../../dataset/interface_new.md)  
+契约文档：[`dataset/interface_protocol_v3.4.md`](../../dataset/interface_protocol_v3.4.md)  
 前端联调冒烟：[`pdf_parsing/docs/frontend_api_smoke.md`](../../pdf_parsing/docs/frontend_api_smoke.md)  
-市场情绪接入规范（周杰 / 合并用）：[`docs/market_sentiment_agent_spec.md`](docs/market_sentiment_agent_spec.md)
+市场情绪接入规范（周杰 / 合并用）：[`docs/market_sentiment_agent_spec.md`](docs/market_sentiment_agent_spec.md)  
+Git 协作流程（clone / 功能分支 / 网页 PR）：仓库根目录 [`README.md`](../../README.md) 第 7 节。
 
 ---
 
@@ -25,12 +28,14 @@
 6. [运行脚本与完整命令](#6-运行脚本与完整命令)
 7. [CLI 参数详解](#7-cli-参数详解)
 8. [示例运行（翰思 18A）](#8-示例运行翰思-18a)
-9. [总控决策 / 辩论阶段接口](#9-总控决策--辩论阶段接口)
+9. [总控决策 Agent](#9-总控决策-agent)
 10. [前端相关：端口 / 输入输出 / HTTP](#10-前端相关端口--输入输出--http)
 11. [前端联调示例命令](#11-前端联调示例命令)
 12. [批量 18A](#12-批量-18a)
 13. [测试与目录](#13-测试与目录)
-14. [市场情绪 Agent 接入规范](docs/market_sentiment_agent_spec.md)
+14. [市场情绪 Agent（已合并）](#14-市场情绪-agent已合并)
+15. [合并冲突处理结果（PR #1 / #2）](#15-合并冲突处理结果pr--1--2)
+16. [市场情绪接入规范（原稿）](docs/market_sentiment_agent_spec.md)
 
 ---
 
@@ -43,9 +48,12 @@
   → hk_ipo_risk（9102）
        ├── FinanceAgent (ReAct)：retrieve → extract → skills → 规则托底 → submit 定稿
        ├── LegalAgent   (ReAct)：retrieve → skills → 规则核对 → submit 定稿
-       ├── MarketAgent  (demo)：中性分 50，可替换
-       └── MasterAgent  (LangGraph 子图)：冲突研判 → 条件辩论(≤3) → 粉饰 → 终裁 → 报告
-  → 合并结果 JSON + DebateDossier + 总控 `*_master_*.json` + Markdown 报告
+       ├── MarketAgent  (正式)：宏观/行业/IPO 市场/舆情 → 首日破发风险 0–100；上市后 D5–D60
+       └── MasterAgent  (LangGraph 子图，专家探查之后)：
+             冲突研判 →（仅 need_debate）辩论≤3 轮 → 粉饰 → 终裁 → 报告
+  → 合并结果 JSON + 三专家 DebateDossier + 总控 `*_master_*.json`
+    + 三份独立 MD（`{代码}_finance|legal|market_report.md`）
+    + HTTP `result.report` / `/report` JSON + `/report/export` PDF
 ```
 
 ### 分层
@@ -266,26 +274,27 @@ think
 | `reasoning_missing` | 缺 think；整场首次 nudge 重试一次 |
 | `reasoning_missing_after_retry` | 重试后仍缺；工具照常执行 |
 
-Token：中间轮 `max_tokens=2048`，收束/submit `4096`。DeepSeek 认 `reasoning_effort`（计入 `max_tokens`）；`reasoning_max_tokens` 仅 OpenRouter 有效。
+Token：专家 ReAct 中间轮 `max_tokens=2048`，收束/submit `4096`。DeepSeek 思考计入 `max_tokens`：调用方的 `max_tokens` 视为正文预算，另加 `reasoning_max_tokens`（总控 JSON 步默认 512）。空 JSON / `finish_reason=length` 时 `llm_json` 会放大预算并重试，最后一轮关掉 thinking。`provider=vllm` 不发 DeepSeek `thinking`。
 
 ### 4.4 并行出口
 
-`src/graph/parallel.py`：`asyncio.gather(finance, legal, market)` → `MasterAgent`（`src/graph/master_graph.py` 只包总控子图）：
+`src/graph/parallel.py`：`--agent all` 走 `run_finance_legal_market_parallel`——财务 ‖ 法务 ‖ 市场 **三专家并行探查**，`asyncio.gather` 齐了再 `merge_results` 进总控。对照分按 `configs/master_rules.yaml` 权重计入市场分。总控子图在 `src/graph/master_graph.py`（专家探查不进该图）。市场失败写 `market_error`，不阻断财务/法务/总控。
 
 ```json
 {
   "doc_id": "...",
   "finance": { "...AgentResult" },
   "legal": { "...AgentResult" },
-  "market": { "...AgentResult", "features": { "demo": true } },
+  "market": { "...AgentResult", "features": { "scoring_mode": "historical_rules_floor|llm", "deterministic_score": 62, "llm_score": 70 } },
+  "market_error": null,
   "reference_fundamental_score": 66.48,
   "cross_agent_features": [],
   "master": { "judgment": { "overall_score": 70, "level": "high", "risk_level_http": "HIGH" }, "...": "..." },
-  "note": "对照加權分 vs 總控終裁"
+  "note": "对照加权分 vs 总控终裁；有市场结果时计入 market 权重"
 }
 ```
 
-`reference_fundamental_score = legal×0.45 + finance×0.55`（对照值）。**正式等级与顶层 HTTP `riskLevel` 以总控终裁为准。** `--skip-master` 可回到 `master=null`。
+`reference_fundamental_score`：先算基本面 `legal×0.55 + finance×0.45`，有真实市场结果时再合成 `(基本面)×0.65 + market×0.35`（权重见 `configs/master_rules.yaml`）。无市场结果时不掺占位分。**正式等级与顶层 HTTP `riskLevel` 以总控终裁为准。** `--skip-master` 可回到 `master=null`。市场失败时 `market=null` 且写入 `market_error`，财务/法务/总控仍出结果。
 
 ---
 
@@ -305,19 +314,20 @@ HTTP 路径下由 9101 prepare 生成；CLI 可离线 JSON 或 `--use-live-retri
 
 | 产物 | 路径 / 位置 |
 |------|-------------|
-| 推理日志 | `logs/{doc_name}_{finance\|legal}_{ts}.log` + `.jsonl` |
+| 推理日志 | `logs/{doc_name}_{finance\|legal\|market\|master}_{ts}.log` + `.jsonl` |
 | ReAct state | 内存：`skill_results` / `metrics` / `queries_used` / `rule_pack` |
-| HTTP SSE | `.runtime/analyses/{analysisId}/events`（thought / agent_status） |
+| HTTP SSE | `.runtime/analyses/{analysisId}/events.jsonl`（thought / agent_status / agent_report / phase_change / debate_* / report_ready / analysis_complete） |
 
 ### 5.3 交卷后
 
 | 产物 | 路径 |
 |------|------|
-| 联合结果 JSON | `.runtime/{name}_finance_legal*.json` |
-| 财务 dossier | `.runtime/debate/{doc_id}_finance_dossier_{ts}.json` |
-| 法务 dossier | `.runtime/debate/{doc_id}_legal_dossier_{ts}.json` |
-| Markdown 报告 | `reports/*_report.md`（风险分展示 1 位小数） |
-| HTTP result | `.runtime/analyses/{analysisId}/result.json` |
+| 合并结果 JSON | `.runtime/{name}_finance_legal*.json`（文件名沿用；内含 `finance` / `legal` / `market` / `master`） |
+| 财务 / 法务 / 市场 dossier | `.runtime/debate/{doc_id}_{finance\|legal\|market}_dossier_{ts}.json` |
+| 总控 dossier | `.runtime/debate/{doc_id}_master_{ts}.json`（含 `judgment`、`debate_history`、`report_markdown`） |
+| 三份专家 MD | `reports/{五位代码}_finance_report.md` / `_legal_report.md` / `_market_report.md`（总控章节不写入这三份） |
+| HTTP result | `.runtime/analyses/{analysisId}/result.json`（`agents.*.reportMarkdown` 三份独立；含 `debate` / `report`） |
+| HTTP 总控报告 | `.runtime/analyses/{analysisId}/report.json` ≡ `GET .../report`；PDF 由同一 ReportData 渲染 |
 
 ### 5.4 AgentResult 关键字段
 
@@ -396,9 +406,12 @@ python scripts/generate_analysis_report.py \
   --result .runtime/hansiaitai_finance_legal_opt_v4.json \
   --doc-name 翰思艾泰 \
   --pdf-name "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf" \
+  --stock-code 03378 \
   --finance-retrieval /nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_finance.json \
   --legal-retrieval /nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_legal.json \
-  --out reports/hansiaitai_finance_legal_opt_v4_report.md
+  --reports-dir reports
+# 产出 reports/03378_finance_report.md / 03378_legal_report.md / 03378_market_report.md
+# --out 已废弃：若仍传入，目录当作 --reports-dir，文件则取其父目录
 ```
 
 ---
@@ -410,6 +423,7 @@ python scripts/generate_analysis_report.py \
 | 参数 | 说明 |
 |------|------|
 | `--agent` | `finance` / `legal` / `market` / `all`（默认三专家并行后接总控） |
+| `--stock-code` | 市场 Agent 港股代码；未传时从 `--pdf-name` 开头识别；`market`/`all` 必填 |
 | `--skip-master` | 专家探查后不跑总控（旧行为 `master=null`） |
 | `--skip-experts` | 跳过财务/法务/市场探查，直接总控；必须配合 `--from-result` |
 | `--from-result` | 已有专家 merged JSON（含 `finance`/`legal`） |
@@ -439,7 +453,9 @@ python scripts/generate_analysis_report.py \
 
 解析路径若使用 `samples_batch_old`，按实际 `full_parse.json` 替换。
 
-### 8.1 财务 + 法务并行（推荐）
+### 8.1 财务 + 法务 + 市场 + 总控（推荐）
+
+`pdf-name` 以 `03378` 开头时可省略 `--stock-code`；显式传入更稳。无股票代码时市场为 `skipped`，财务/法务/总控仍跑。
 
 ```bash
 conda activate ipo-risk
@@ -447,6 +463,7 @@ cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
 
 python scripts/run_finance_legal.py \
   --agent all \
+  --stock-code 03378 \
   --doc-id hansiaitai \
   --doc-name 翰思艾泰 \
   --pdf-name "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf" \
@@ -499,119 +516,160 @@ python scripts/run_finance_legal.py --agent finance ... --finance-pipeline \
 
 ```bash
 python scripts/run_finance_legal.py \
-  --skip-experts \
-  --from-result .runtime/hansiaitai_finance_legal_opt_v5.json \
+  --agent all --skip-experts \
+  --from-result .runtime/hansiaitai_finance_legal_market.json \
   --doc-id hansiaitai \
   --doc-name 翰思艾泰 \
   --pdf-name "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf" \
-  --issuer-type 18a \
-  --parse-json "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch_old/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json" \
+  --parse-json "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售/full_parse.json" \
   --provider deepseek \
   --chat-model deepseek-v4-flash \
-  --out .runtime/hansiaitai_master.json
+  --out .runtime/hansiaitai_master.json \
+  --log-dir logs
 
 python scripts/generate_analysis_report.py \
   --result .runtime/hansiaitai_master.json \
   --doc-name 翰思艾泰 \
   --pdf-name "03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf" \
-  --out reports/hansiaitai_warning_report.md
+  --stock-code 03378 \
+  --finance-retrieval /nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_finance.json \
+  --legal-retrieval /nfs/users/wuqianqian/IPOI/retrieval/.runtime/agent_retrieval_hansiaitai_legal.json \
+  --reports-dir reports
+# 产出 reports/03378_finance_report.md / 03378_legal_report.md / 03378_market_report.md
 ```
 
-`--parse-json` 仍建议提供：总控粉饰读前五页，辩论补证走 `search_*_standalone`。与 `--skip-master` 互斥。
+加载日志应含市场分，例如 `finance=75.0 legal=60.9 market=62.0`。未传 `--doc-name` 会落到默认「蜜雪集團」。`--parse-json` 供粉饰读前五页、辩论页码直取。与 `--skip-master` 互斥。
 
 ### 8.5 近期联调快照
 
 | 产物 | 分数 | 说明 |
 |------|------|------|
-| `reports/hansiaitai_finance_legal_opt_v4_report.md` | 财务 **75.0** / 法务 **60.9** | 关联交易 `ratio_pct=5.0`；报告分一位小数 |
-| `reports/hansiaitai_finance_legal_opt_v3_report.md` | 财务 75 / 法务 ~52 | 占比增强前 |
+| `.runtime/hansiaitai_finance_legal_market.json` | 财务 75.0 / 法务 60.9 / 市场 62.0 | 对照分 **65.41**；三专家联跑 |
+| `.runtime/hansiaitai_master_decide_fix.json` | 总控终裁 **65.0 / HIGH** | `degraded=false`；闸门 `REDEMPTION_HIGH` |
+| HTTP 翰思 E2E `analysis_20260817_000031` | 终裁 **63 / HIGH** | 跳过辩论（`rounds=0`）；三份独立 MD |
+| `reports/03378_finance_report.md` 等 | 财务 75.0 / 法务 60.9 / 市场独立成文 | 标题对齐；不含总控「綜合判定」 |
 | 蜜雪低风险对照 | 财务 **0 / very_low** | `.runtime/mixue_finance_react_token_slim_v2.json` |
 
 ---
 
-## 9. 总控决策 / 辩论阶段接口
+## 9. 总控决策 Agent
 
-### 9.1 现状
+总控是默认主链路，不是规划项。`--agent all` 与 HTTP 9102 都在三专家探查之后跑 `MasterAgent`。专家探查（财务/法务 ReAct、市场 ReAct）**不进**总控子图。
 
-| 组件 | 状态 |
+```
+三专家并行探查（finance ‖ legal ‖ market）
+        ↓  merge_results：对照分 + 压卡片
+   MasterAgent / master_graph
+        ├─ detect_conflicts     冲突研判 JSON
+        ├─ [need_debate?] run_debate
+        ├─ score_embellishment  前五页粉饰
+        ├─ master_decide        终裁 JSON（0–100）
+        └─ generate_warning_report
+        ↓
+   master.judgment + *_master_*.json + report_markdown
+```
+
+| 组件 | 职责 |
 |------|------|
-| `DebateDossier` / `DebateClaim`（`src/models/debate.py`） | 探查结束落盘 |
-| `MasterAgent` / `src/graph/master_graph.py` | **已启用**：冲突研判 → 条件辩论(≤3) → 粉饰 → 终裁 → 报告 |
-| `cross_agent_features` / `master` | 总控输出；对照分仍写 `reference_fundamental_score` |
-| 独立补证据函数 | 辩论中由专家 `respond_to_controller` 调用（可自拟新 query，每问≤2） |
+| `src/agents/master_agent.py` | 编排入口：压卡片、跑子图/顺序 pipeline、落盘 dossier |
+| `src/graph/master_graph.py` | LangGraph：`detect → (debate?) → embellish → decide → report` |
+| `src/skills/master_cards.py` | dossier → 短卡片；对照分 `legal×0.55+finance×0.45`，有市场再 `×0.65+market×0.35` |
+| `src/skills/detect_conflicts.py` | 研判 `resonance` / `conflict` / `evidence_gap` |
+| `src/skills/run_debate.py` + `debate_reply.py` + `debate_query.py` | 条件辩论与补证检索 |
+| `src/skills/score_embellishment.py` | 第四章粉饰 0–10 |
+| `src/skills/master_decide.py` | 终裁；漏用第五章高风险清单则 LLM 再修订一次 |
+| `src/skills/generate_warning_report.py` | 把终裁 JSON 排成 Markdown，不另起结论 |
+| `configs/master_rules.yaml` | 第五章清单、对照权重、辩论/终裁 token、主题检索词表 |
+| `--skip-experts --from-result` | 复用已有 merged JSON（含市场分）只跑总控 |
+| `--skip-master` | 专家探查后 `master=null` |
 
-总控是 **LLM Agent**，不是规则引擎。规则只做：dossier 压成短卡片、第五章清单写入 Prompt、API/JSON 全失败时 `degraded` 出分。禁止 `if qwen: skip_master_llm`。
+总控是 **LLM Agent**，不是规则引擎。规则只做：压卡片、把第五章清单写入 Prompt、JSON 全失败时 `degraded` 托底。Python **不直接改** `riskLevel`（含 `gate_warning` 后也不改）。禁止 `if qwen: skip_master_llm`。HTTP 上 `map_master_event` 把总控 **实时事件** 映射为 `agentId=orchestrator` 的 Thought（`StreamHub` 立刻推 SSE；**禁止**跑完后再回放 jsonl）。辩论补证/作答走 `map_debate_expert_event`，记到专家 `agentId`，不记成 orchestrator。
 
-评测（Qwen3.6 35B + vLLM）与开发（DeepSeek）走**同一套步骤**，差异只在压缩输入 / JSON 重试 / 协议：
+对照分 `reference_fundamental_score` 只作参考，**正式等级与顶层 HTTP `riskLevel` 以终裁为准**。
+
+评测（Qwen3.6 35B + vLLM）与开发（DeepSeek）走同一套步骤：
 
 ```bash
 python scripts/run_finance_legal.py --agent all \
   --provider vllm --api-base http://<评委>:8000/v1 --chat-model <Qwen3.6-35B>
 ```
 
-`provider=vllm` 允许空 API key。Payload **不会**发送 DeepSeek `thinking` / OpenRouter `reasoning`。无 key 的开发机才会规则降级（`trace.degraded`），不阻断出分。
+`provider=vllm` 允许空 API key，payload 不发 DeepSeek `thinking`。无 key 的开发机才会规则降级（`master.degraded`），不阻断出分。
 
-### 9.2 Dossier 结构（可供总控回看）
+### 9.1 冲突研判（是否开辩）
+
+输入：三路短卡片 + 对照分 + 第五章清单。输出必须同时有 `conflicts` 与 `need_debate`。空 JSON / 思考占满预算 **不得**当成「无冲突、不开辩」：标 `degraded`，正文预算 2048 + 思考预留 512，失败则放大预算并关 thinking 重试。
+
+`conflicts[].kind`：
+
+| kind | 含义 | 是否开辩 |
+|------|------|----------|
+| `conflict` | 两路主张打架（金额/期限/是否已清理对不上） | 应 `need_discussion=true` → 开辩 |
+| `resonance` | 同向印证，例如财务 `CV_PREF_LIABILITY` 与法务 `REDEMPTION_HIGH` 同指一笔赎回负债 | **不是冲突**；是否写入 `conflicts` 并由 `need_discussion` 开辩，由模型当轮决定 |
+| `evidence_gap` | 主张缺页码级证据 | 可开辩补证 |
+
+职责分轨（与 §1 / §9.4 一致）：现金跑道只归财务；集中度/关联交易打分只归法务；赎回**条款**归法务、**表内负债**归财务，同向是共振不是打架。市场卡片参与研判，无交叉矛盾时不必点名市场。
+
+工程开辩条件：`need_debate=true` **或** 任一条 `need_discussion=true`。纯共振且模型写 `conflicts=[]` 时会跳过辩论，直接粉饰、终裁（翰思艾泰 2026-08-17 15:06 那次即此）。
+
+### 9.2 条件辩论
+
+最多 **3** 轮；每轮问题一次性打包并行（cap **4**）；可问 `finance` / `legal` / `market`（`MarketAgent.respond_to_controller`）。答完再判是否追问。辩论 **不会** 重跑专家 ReAct / `submit_*_report`。
+
+质询 JSON 可带 `search_hints: {pages, keywords}`；不填则规则抽取。追问轮同样。
+
+补证检索（`src/skills/debate_query.py`，词表在 `master_rules.yaml` → `debate.debate_search`）：
+
+1. **质询文本只给人读，不进 BM25。** 禁止把「請財務總監…」整段当 query。
+2. **页码直取优先**：从质询/卡片/`search_hints` 抽页（如第 497/563 页）→ `hits_from_prefer_pages`。
+3. **短关键词其次**：金额、主题词（`贖回負債` / `購回權`）、code 词表；`query_max_chars=32`。
+4. 脏命中（不在指定页、无关键词）不算成功，打满每问 ≤2 次配额。
+5. 回答前注入「己方 claim 已有证据」；卡片已写明的金额/页码不得改口成未披露。
+
+Standalone 入口：`search_finance_evidence_standalone` / `search_legal_evidence_standalone`（均可 `prefer_pages`）。空有效 hits 仍须发言，`confidence≤0.4`，禁止 `verified`、禁止编造页码。
+
+### 9.3 粉饰与终裁
+
+粉饰：读招股书前五页，0–10（low/medium/high），不替代终裁。
+
+终裁 `master_decide`：
+
+- 输入用**压缩辩论摘要**（轮次 / status / 页码 / 回复前 280 字），不把 evidence HTML 全文塞进 prompt。
+- 正文预算 **4096** + 思考预留 512；必须同时有 `overall_score`（**0–100**，禁止 0–1）和 `level`。
+- JSON 三次仍空：`degraded=true`，规则托底对照分 + 第五章高风险码 → `high`，置信度 low。这不是正式终裁。
+- 第一次给出 `level=low` 但卡片含 `CASH_RUNWAY_LT_12` / `REDEMPTION_HIGH` / `CONCENTRATION_HIGH` / `VALUATION_INVERSION`：发 `gate_warning`，**再让 LLM 修订一次**；Python 不改等级。
+
+报告分层：
+
+- 总控 `generate_warning_report` 只排版终裁 JSON（给人读的综合章），写入 dossier / `result.report` 的摘要来源，**不**再拼进三份专家 MD。
+- 专家可读报告由 `scripts/generate_analysis_report.py`（CLI）或 HTTP runner 写成三份：`{代码}_finance_report.md` / `_legal_report.md` / `_market_report.md`。
+- 前端综合页走 `GET .../report`（ReportData JSON，与 `result.report` 同一对象）和 `GET .../report/export`（PDF）。
+
+### 9.4 Dossier
 
 ```text
-DebateDossier
+DebateDossier（专家探查结束即落盘，有无辩论都有）
   risk_score / risk_level / summary / reasoning
-  claims[]:
-    code, level, statement, reasoning
-    evidence_refs[]（页码/切片）
-    retrieval_queries[]（该主张相关 query）
-  retrieval_queries[]（全程检索记录）
-  negative_findings / rule_flags / run_log
-  client_project_id / task_id / analysis_id
+  claims[]: code, level, statement, evidence_refs[], retrieval_queries[]
+  retrieval_queries[] / negative_findings / rule_flags
 ```
 
 路径：`.runtime/debate/{doc_id}_{finance|legal|market}_dossier_{ts}.json`  
-总控落盘：`.runtime/debate/{doc_id}_master_{ts}.json`  
-读写：`save_dossier` / `load_dossier`。
+总控：`.runtime/debate/{doc_id}_master_{ts}.json`（`conflicts`、`debate_history`、`judgment`、`embellishment`、`report_markdown`）  
+读写：`save_dossier` / `load_dossier`。`.runtime/debate/` 下的专家 dossier **不是**辩论记录。
 
-### 9.3 补证据 API（辩论阶段可调用）
+### 9.5 跨 Agent 主题表
 
-**法务**（`src/skills/legal_toolbox.py`）：
+清单：`configs/master_rules.yaml`；主题码提示：`src/skills/master_cards.py` 的 `THEME_CODE_HINTS`。
 
-```python
-await search_legal_evidence_standalone(
-    doc_id=...,
-    parse_json=...,
-    query=...,          # 可取自 dossier.retrieval_queries
-    intent="business_context",
-    section_hint=...,
-    top_k=6,
-)
-```
-
-**财务**（`src/skills/finance_toolbox.py`）：
-
-```python
-await search_finance_evidence_standalone(
-    doc_id=...,
-    parse_json=...,
-    query=...,
-    intent="business_context",
-    section_hint=...,
-    top_k=6,
-)
-```
-
-设计意图：总控质询时，专家先用已有 evidence；不够则**自拟新 query** 调 standalone（每问最多 2 次）。查到或查不到都必须推理发言；空 hits 时 confidence≤0.4，禁止编造页码。辩论中 **不会** 重跑完整 `run_*_skill` ReAct / `submit_*_report`。
-
-「一轮问完」= 本轮已决定要问的问题一次性打包并行（cap 4）。答完后总控再判是否因未决或**新触发问询**开下一轮；`max_rounds=3` 硬顶。
-
-### 9.4 跨 Agent 主题表（总控冲突研判遵守）
-
-模型：`src/models/cross_agent.py`；清单：`configs/master_rules.yaml`
-
-| 主题 | 财务 | 法务 | 总控怎么判 |
-|------|------|------|------------|
-| 赎回/优先股 | `CV_PREF` 表内负债 | `REDEMPTION_*` / 清理条款 | 同向=共振；表内重大 vs 已清理=冲突 |
-| 现金跑道 | `CASH_RUNWAY_*` | 不计分 | 财务单方硬门控，非法务缺席 |
-| 客户/供应商集中 | 只解释钱，不打 CONCENTRATION 分 | `CONCENTRATION_*` | 非法务缺席 |
-| 关联交易占比 | 不做独立占比打分 | `RELATED_PARTY_*` | 同上 |
-| 文本粉饰 | 双方均未做 | 双方均未做 | **总控第四章 Skill** |
+| 主题 | 财务 | 法务 | 市场 | 总控怎么判 |
+|------|------|------|------|------------|
+| 赎回/优先股 | `CV_PREF_LIABILITY` 表内负债 | `REDEMPTION_*` / `RIGHTS_CLEANUP_*` | 不负责条款 | 同向=共振（交叉印证，不是打架）；表内重大 vs 已清理=冲突 |
+| 现金跑道 | `CASH_RUNWAY_*` / `BURN_YOY_*` | 不计分 | 不负责跑道 | 财务单方硬门控，非法务缺席 |
+| 客户/供应商集中 | 只解释钱，不打 CONCENTRATION | `CONCENTRATION_*` | — | 非法务缺席 |
+| 关联交易占比 | 不做独立占比打分 | `RELATED_PARTY_*` | — | 同上 |
+| 首日破发/板块 | — | — | `day1_break_risk` 等 | 与基本面无交叉矛盾则不必开辩 |
+| 文本粉饰 | 双方均未做 | 双方均未做 | — | **总控粉饰 Skill**（终裁前必跑） |
 
 ---
 
@@ -620,9 +678,11 @@ await search_finance_evidence_standalone(
 ### 10.1 端口拓扑
 
 ```
-前端 ──► :9100（解析网关 + 反代分析）
-           ├─ parse / index-status     （本机）
-           ├─ analysis/*  ──反代──► :9102（本仓）
+前端 ──► :9100（解析网关 + 反代分析；唯一 Base）
+           ├─ parse / index-status              （本机）
+           ├─ GET /api/v1/agents/status         ──反代──► :9102
+           ├─ analysis/start|stream|result      ──反代──► :9102
+           ├─ report | report/export            ──反代──► :9102
            └─（内部）9101 检索 prepare / artifacts
 ```
 
@@ -630,24 +690,29 @@ await search_finance_evidence_standalone(
 |------|------|--------------|
 | **9100** | 解析 + 网关 | **是**（唯一 Base） |
 | **9101** | 检索 | 否 |
-| **9102** | 财务/法务分析（本仓） | 否（经 9100 反代） |
+| **9102** | 财务/法务/市场分析 + 总控（本仓） | 否（经 9100 反代） |
 
 前端配置：只设 `VITE_API_BASE=http://<host>:9100`，**不要**配 9101/9102。
 
 ### 10.2 本仓暴露的 HTTP 路由（9102）
 
-前缀：`/api/v1/projects/{clientProjectId}/...`
+契约：[`dataset/interface_protocol_v3.4.md`](../../dataset/interface_protocol_v3.4.md)。前端只打 **9100**；9102 被网关原样反代。总控 **无** 独立 `/master/start`。
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/health` 或 `/api/v1/health` | 探活 |
-| POST | `.../analysis/start` | 启动分析 → **202** `{analysisId, status}` |
-| GET | `.../analysis/stream?analysisId=` | SSE：thought / agent_status / analysis_complete / heartbeat |
-| GET | `.../analysis/result?analysisId=` | 完整结果或进行中快照 |
+| GET | `/api/v1/agents/status` | 四 Agent `ready`（不在 `/projects` 下） |
+| POST | `/api/v1/projects/:id/analysis/start` | 启动分析 → **202** `{analysisId, status}` |
+| GET | `.../analysis/stream?analysisId=` | SSE：见 §10.4 |
+| GET | `.../analysis/result?analysisId=` | 完整结果或进行中快照（含 `phase` / `debate`） |
+| GET | `.../report` | ReportData JSON；分析未完成 → **404**；≡ `result.report` |
+| GET | `.../report/export` | PDF 二进制；`Content-Disposition: IPO风险报告_{ticker}_{date}.pdf` |
 
-实现：`service/app.py`、`service/routes_analysis.py`、`service/analysis_runner.py`、`service/thought_mapper.py`。
+不实现已删除的 `/rag/query`、`/parse/quick`、bbox `/evidence`。运维逃生口 `GET /capacity`（在 9100）、解析 `result/content.md` 不写入前端契约。
 
-法务 Thought 映射（`map_legal_event`）与财务对齐：消费 pipeline 顶层 `evidence_hits`、工具 `output.hits`/`evidence`、以及 `output.risk_points`；ReAct 默认 `translate_think=True`（繁中展示 + `meta.rawThink`）。
+实现：`service/app.py`、`service/routes_analysis.py`、`service/analysis_runner.py`、`service/thought_mapper.py`、`service/report_data.py`、`service/report_pdf.py`。
+
+法务 Thought 映射（`map_legal_event`）与财务对齐：消费 pipeline 顶层 `evidence_hits`、工具 `output.hits`/`evidence`、以及 `output.risk_points`；ReAct 默认 `translate_think=True`（繁中展示 + `meta.rawThink`）。辩论补证/作答走 `map_debate_expert_event`（记到专家 `agentId`，禁止记成 orchestrator）。
 
 ### 10.3 start 输入
 
@@ -655,6 +720,7 @@ await search_finance_evidence_standalone(
 {
   "clientProjectId": "proj-xxx",
   "taskId": "task_expert_...",
+  "ticker": "03378.HK",
   "llmConfig": {
     "apiBaseUrl": "https://api.deepseek.com",
     "apiKey": "sk-...",
@@ -668,16 +734,21 @@ await search_finance_evidence_standalone(
 |------|------|------|
 | `clientProjectId` | 是 | 与路径一致 |
 | `taskId` | 建议 | 关联解析任务；用于找 meta / 检索包 |
+| `ticker` | 建议 | 港股代码，允许 Wind 格式（`03378.HK`）；市场 Agent 优先用此字段 |
+| `stockCode` | 否 | `ticker` 的别名 |
 | `llmConfig` | 否 | 覆盖后端默认模型 |
 | `isBiotech` | 否 | 覆盖发行人类型 → `biotech` / `general`；`true` 与 CLI `18a`/`18c` **门控等价** |
 
 前置：解析任务存在且 `indexStatus=ready`，否则 **409** `INDEX_NOT_READY`。
+
+股票代码优先级：`body.ticker` / `body.stockCode` → 解析 meta 的 `stockCode`/`ticker`；规范化为五位数字（`03378.HK` → `03378`）。缺失则市场 Agent `skipped`。
 
 服务端解析 meta 后实际使用：
 
 - `parseJsonPath` → `full_parse.json`
 - `retrieval/.runtime/agent_retrieval_{taskId}_{finance|legal}.json`（或 9101 artifacts）
 - `issuerType` / `companyName` / `fileName`
+- `stockCode` / `ticker`（可被 start body 覆盖）
 
 ### 10.4 stream / result 输出
 
@@ -685,12 +756,17 @@ await search_finance_evidence_standalone(
 
 | 事件 | 数据要点 |
 |------|----------|
-| `agent_status` | `{agentId, status}`：`running` / `completed` / `skipped` |
-| `thought` | `{thought: Thought}`：繁体 `content` + 可选 `meta`（tool/evidence/metrics） |
-| `analysis_complete` | `{overallScore, riskLevel}` |
+| `agent_status` | `{agentId, status}`：`running` / `completed` / `skipped`；**仅辩论期**可加 `category` |
+| `thought` | `{thought: Thought}`：初评/detect/粉饰/终裁 **无** `category`；仅 `phase=debate` 时带 `category=finance\|legal\|market\|master` |
+| `phase_change` | `{phase}`：`debate`（条件开辩）/ `report` |
+| `agent_report` | 谁先完成谁发，`{agentId, reportMarkdown, agentResult}`，无 `category` |
+| `debate_message` | `{message}`：**仅实际开辩**；带 `category` |
+| `debate_complete` | `{rounds}`：仅开辩时发送 |
+| `report_ready` | `{report: ReportData}`：先落盘再发，随后可打 `/report` |
+| `analysis_complete` | `{overallScore, riskLevel}`：终裁 0–100 |
 | `heartbeat` | 约 15s |
 
-Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**，再 **market**（demo），最后 **orchestrator**（总控 jsonl：质询 / 补证 / 粉饰 / 终裁）。
+三专家 **实时混流**（不再缓冲 financial 到 legal 完成）。总控从 `detect_conflicts` 起以 `agentId=orchestrator` 实时推送（不回放 jsonl）。辩论是条件的：`need_debate=true` 或任一条 `need_discussion=true` 才 `phase_change: debate`；纯共振可跳过（`debate.rounds=0`，stream 无 `category`，不算失败）。无股票代码时 market 为 `skipped`。
 
 **法务 / 财务 Thought 对齐（前端可共用渲染）**
 
@@ -712,6 +788,7 @@ Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**，再 **
 {
   "analysisId": "...",
   "status": "completed",
+  "phase": "report",
   "overallScore": 66,
   "riskLevel": "HIGH",
   "thoughts": [ /* Thought[] */ ],
@@ -721,7 +798,7 @@ Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**，再 **
       "riskScore": 60.9,
       "riskLevel": "high",
       "summary": "…",
-      "reportMarkdown": "…（与 financial 同文）…",
+      "reportMarkdown": "…独立法务 MD…",
       "logText": "…",
       "logEvents": [],
       "scoringMode": "react+rules_floor",
@@ -736,16 +813,32 @@ Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**，再 **
       "agentId": "financial",
       "riskScore": 75.0,
       "riskLevel": "high",
+      "reportMarkdown": "…独立财务 MD…",
       "scoringMode": "react+rules_floor",
       "rulesFloor": { "finalScore": 75, "rulesScore": 75, "llmScore": 70 },
       "financeDetail": { "tables": [], "metrics": [], "gates": {}, "cashBurn": null },
       "agentResult": {}
     },
-    "market": { "agentId": "market", "status": "completed", "reason": "demo_stub", "riskScore": 50 },
+    "market": {
+      "agentId": "market",
+      "riskScore": 62,
+      "riskLevel": "medium",
+      "summary": "…",
+      "reportMarkdown": "…独立市场 MD…",
+      "scoringMode": "historical_rules_floor",
+      "marketDetail": {
+        "deterministicScore": 62,
+        "llmScore": 70,
+        "sentimentAnalysis": {},
+        "evidenceCatalog": [],
+        "debateDossierPath": "..."
+      },
+      "agentResult": {}
+    },
     "orchestrator": {
       "agentId": "orchestrator",
       "status": "completed",
-      "overallScore": 70,
+      "overallScore": 66,
       "riskLevel": "HIGH",
       "note": "master_verdict",
       "logText": "…",
@@ -753,13 +846,15 @@ Agent 展示顺序：先刷完 **legal** thought，再刷 **financial**，再 **
     }
   },
   "dossierPaths": { "finance": "...", "legal": "...", "market": "...", "master": "..." },
+  "debate": { "rounds": 0, "messages": [], "completedAt": null },
+  "report": { "overallScore": 66, "riskLevel": "HIGH", "comparableIPOs": [] },
   "completedAt": "..."
 }
 ```
 
 要点：顶层 `overallScore` / `riskLevel` 为 **总控终裁**（`HIGH|MEDIUM|LOW`）；`reference_fundamental_score` 仍作对照加权分写入 `agents.orchestrator`。`agents.*.riskLevel` 为 Agent 小写枚举；`rulesFloor` 财务/法务字段不对称。  
-Thought / EvidenceSnippet 类型见契约 §10.3（`interface_new.md` **v3.3**）。  
-**尚未由本仓实现**：`/report`、`/report/export`、`/rag/query`。上市后 day1/5/20/60 验证本轮只留空字段。
+Thought / EvidenceSnippet 类型见契约（`interface_protocol_v3.4.md`）。  
+已实现：`GET /api/v1/agents/status`、`GET .../report`（与 `result.report` 同对象）、`GET .../report/export`（PDF）。不实现已删除的 `/rag/query`、`/parse/quick`。总控无独立 HTTP，走 `analysis/stream` 的 `orchestrator`。上市后 day1/5/20/60 验证本轮 `comparableIPOs=[]`。
 
 ---
 
@@ -781,6 +876,8 @@ cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk && ./scripts/start_analysis_ser
 BASE=http://127.0.0.1:9100   # 远端改为 http://223.3.95.129:9100
 curl -s "$BASE/api/v1/health" | jq
 # 期望 upstreams.analysis.ok=true
+curl -s "$BASE/api/v1/agents/status" | jq
+# 期望 readyCount=4
 curl -s http://127.0.0.1:9102/api/v1/health | jq   # 直连分析服务（调试用）
 ```
 
@@ -823,6 +920,7 @@ RESP=$(curl -s -X POST "$BASE/api/v1/projects/${PROJ}/analysis/start" \
   -d "{
     \"clientProjectId\": \"${PROJ}\",
     \"taskId\": \"${TASK}\",
+    \"ticker\": \"03378.HK\",
     \"isBiotech\": true,
     \"llmConfig\": {
       \"apiBaseUrl\": \"https://api.deepseek.com\",
@@ -837,10 +935,14 @@ AID=$(echo "$RESP" | jq -r .data.analysisId)
 curl -N -s "$BASE/api/v1/projects/${PROJ}/analysis/stream?analysisId=${AID}" \
   -o /tmp/analysis_stream.sse
 
-# 结果
+# 结果 / 报告 JSON / PDF（均经 9100）
 curl -s "$BASE/api/v1/projects/${PROJ}/analysis/result?analysisId=${AID}" \
   -o /tmp/analysis_result.json
-python3 -c "import json;d=json.load(open('/tmp/analysis_result.json'))['data'];print(d['status'],d.get('overallScore'),d.get('riskLevel'),len(d.get('thoughts')or[]))"
+curl -s "$BASE/api/v1/projects/${PROJ}/report?analysisId=${AID}" \
+  -o /tmp/report.json
+curl -s "$BASE/api/v1/projects/${PROJ}/report/export?analysisId=${AID}" \
+  -o /tmp/report.pdf
+python3 -c "import json;d=json.load(open('/tmp/analysis_result.json'))['data'];print(d['status'],d.get('overallScore'),d.get('riskLevel'),d.get('debate',{}).get('rounds'),len(d.get('thoughts')or[]))"
 
 # 断言法务 stream 含推理 / 工具 / 中段 evidence（page+excerpt）
 cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
@@ -850,7 +952,16 @@ python scripts/assert_legal_stream_parity.py --events /tmp/analysis_stream.sse
 python scripts/assert_legal_stream_parity.py --self-check
 ```
 
-常见错误：索引未好 → **409** `INDEX_NOT_READY`；9102 未起 → 网关 **502** `ANALYSIS_UPSTREAM_DOWN`。
+期望：start **202**；stream 三路 thought **实时交错**（财务 thought 不必等法务 `completed`）；初评 / detect / 粉饰 / 终裁 / skip-debate **无** `category`；仅实际开辩才有 `phase=debate` 与 `category`；`debate.rounds=0`（跳过辩论）**不算失败**；result 含三份独立 `reportMarkdown`、`phase` / `debate` / `report`；`/report` 与 `result.report` 同一对象；`/report/export` 为非空 PDF。
+
+翰思全链路（桩解析 `STUB_MODE=True`，只打 9100，日志在 `tests/e2e_hansiaitai_v34/logs/`）：
+
+```bash
+cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
+bash tests/e2e_hansiaitai_v34/run_e2e.sh
+```
+
+常见错误：索引未好 → **409** `INDEX_NOT_READY`；9102 未起 → 网关 **502** `ANALYSIS_UPSTREAM_DOWN`；`/agents/status` 可降级为 `readyCount=0`。
 
 法务 Thought 单测：`python -m pytest tests/test_legal_thought_mapper.py -q`。
 
@@ -859,7 +970,7 @@ python scripts/assert_legal_stream_parity.py --self-check
 ## 12. 批量 18A
 
 前置：`pdf_parsing/output/18a_batch/` 已有各公司 `full_parse.json`（见 `batch_summary.json`）。  
-脚本对 `status=ok` 名单依次：建索引 → 财务/法务检索包 → `--agent all`（与 §8.1 同参）→ 报告。  
+脚本对 `status=ok` 名单依次：建索引 → 财务/法务检索包 → `--agent all`（与 §8.1 同参）→ 三份独立 MD。  
 `doc_id` 取股票代码（如 `01244`），`issuer-type=18a`。
 
 ```bash
@@ -872,7 +983,7 @@ python scripts/batch_finance_legal_18a.py --n 3
 # 前 10 家；索引已存在时不强制重建
 python scripts/batch_finance_legal_18a.py --n 10 --no-force-index
 
-# 索引与检索包已就绪，只跑联合分析 + 报告
+# 索引与检索包已就绪，只跑三专家+总控分析 + 三份独立 MD
 python scripts/batch_finance_legal_18a.py --n 5 --skip-index --skip-retrieval
 
 # 从第 4 家起再跑 5 家；单家失败继续
@@ -906,9 +1017,9 @@ python scripts/batch_finance_legal_18a.py --codes 09606,09939 --skip-index --con
 | 类型 | 路径 |
 |------|------|
 | 检索包 | `retrieval/.runtime/agent_retrieval_{股票代码}_{finance\|legal}.json` |
-| 联合 JSON | `.runtime/18a_{股票代码}_finance_legal.json` |
-| 报告 | `reports/18a_{股票代码}_finance_legal_report.md` |
-| DebateDossier | `.runtime/debate/{股票代码}_{finance\|legal}_dossier_{ts}.json` |
+| 合并结果 JSON | `.runtime/18a_{股票代码}_finance_legal.json`（文件名沿用；内含 market / master） |
+| 三份专家 MD | `reports/{五位代码}_finance_report.md` / `_legal_report.md` / `_market_report.md` |
+| DebateDossier | `.runtime/debate/{股票代码}_{finance\|legal\|market}_dossier_{ts}.json` |
 
 ---
 
@@ -925,9 +1036,15 @@ python -m pytest tests/test_legal_react.py tests/test_legal_thought_mapper.py \
   tests/test_net_loss_cf_proxy_and_narrative.py \
   tests/test_extract_aliases_and_years.py \
   tests/test_master_gate_warning.py tests/test_conflict_cards.py \
-  tests/test_embellishment_prompt.py tests/test_debate_trace.py \
-  tests/test_debate_cap.py tests/test_llm_vllm_qwen.py -q
+  tests/test_conflict_json_retry.py tests/test_master_decide.py \
+  tests/test_embellishment_prompt.py   tests/test_debate_trace.py \
+  tests/test_debate_cap.py tests/test_debate_query.py tests/test_llm_vllm_qwen.py \
+  tests/test_market_agent.py tests/test_market_config.py \
+  tests/test_market_historical_scoring.py tests/test_market_postlisting.py \
+  tests/test_parallel_market_wiring.py tests/test_stock_code.py -q
 python scripts/assert_legal_stream_parity.py --self-check
+# 翰思 HTTP E2E（会重启 9100/9101/9102；解析保持 STUB_MODE=True）
+# bash tests/e2e_hansiaitai_v34/run_e2e.sh
 ```
 
 环境若无 pytest，可直接 `python -c` import 测试函数。检索侧（表名/跨页）单测在 `retrieval/tests/`：`test_tbl_is_18a_aliases.py`、`test_tbl_bs_18a_aliases.py`、`test_tbl_cf_continuation.py`、`test_company_bs_kind.py`。
@@ -940,21 +1057,29 @@ agents/hk_ipo_risk/
 ├── docs/
 │   └── market_sentiment_agent_spec.md   # 市场情绪接入规范（合并用）
 ├── configs/                 # score_rules / finance_schema / legal_schema / master_rules
+│                            # + market_agent / firecrawl / sina_finance（密钥只写 *.local.yaml）
 ├── scripts/
 │   ├── run_finance_legal.py
+│   ├── run_market_agent.py / run_market_pilot.py / run_market_postlisting.py
 │   ├── batch_finance_legal_18a.py
 │   ├── assert_legal_stream_parity.py
-│   ├── generate_analysis_report.py
+│   ├── generate_analysis_report.py      # 三份独立 MD（不再写联合 warning_report）
 │   └── start_analysis_service.sh
 ├── service/                 # FastAPI 9102
+│   ├── analysis_runner.py   # StreamHub 实时混流；先写三份 MD 再 report_ready
+│   ├── report_data.py / report_pdf.py
+│   ├── thought_mapper.py    # map_* + map_debate_expert_event
+│   └── routes_analysis.py   # start/stream/result + agents/status + report/export
 ├── src/
-│   ├── agents/              # finance / legal / market(demo) / master
-│   ├── skills/              # toolbox + master_detect/debate/embellish/decide/report
-│   ├── models/              # debate / evidence / cross_agent / master
-│   ├── tools/               # schemas / retrieval_tool / llm_client
+│   ├── agents/              # finance / legal / market（正式） / master
+│   ├── skills/              # toolbox + debate_query/reply + master_detect/debate/embellish/decide/report
+│   ├── models/              # debate / evidence / cross_agent / master / market
+│   ├── tools/               # schemas / retrieval_tool / llm_client / firecrawl_news / market_data
 │   ├── graph/parallel.py / master_graph.py
 │   └── llm/prompts.py / master_prompts.py / debate_prompts.py
+├── migrations/              # 001_market_evidence.sql
 ├── tests/
+│   └── e2e_hansiaitai_v34/  # 翰思全链路；日志 logs/frontend|backend
 ├── logs/  reports/  .runtime/debate/  .runtime/analyses/
 ```
 
@@ -971,9 +1096,89 @@ agents/hk_ipo_risk/
 | 辩论素材 | `src/models/debate.py` |
 | 总控模型 / 规则 | `src/models/master.py` / `configs/master_rules.yaml` |
 | 总控 Agent / 子图 | `src/agents/master_agent.py` / `src/graph/master_graph.py` |
-| 总控 Skill | `src/skills/detect_conflicts.py` / `run_debate.py` / `score_embellishment.py` / `master_decide.py` / `generate_warning_report.py` |
-| 市场 demo | `src/agents/market_agent.py` / `src/skills/market_toolbox.py` |
-| HTTP Thought 映射 | `service/thought_mapper.py` |
+| 总控 Skill | `detect_conflicts` / `run_debate` / `debate_query` / `debate_reply` / `score_embellishment` / `master_decide` / `generate_warning_report` |
+| JSON 截断重试 | `src/skills/llm_json.py`（空 JSON ≠ 不开辩 / ≠ 对照分终裁） |
+| 市场正式实现 | `src/agents/market_agent.py` / `src/skills/score_market*.py` / `explain_market.py` / `src/tools/firecrawl_news.py` |
+| HTTP Thought 映射 | `service/thought_mapper.py`（`map_market_event` + `map_master_event` + `map_debate_expert_event`） |
+| HTTP 报告 | `service/report_data.py` / `report_pdf.py`；runner 写三份 `{代码}_*_report.md` |
+| 翰思 v3.4 E2E | `tests/e2e_hansiaitai_v34/` |
 | 规则配置 | `configs/score_rules.yaml` |
 | 财务检索包（Agent 上游） | `retrieval/configs/agent_retrieval_profiles.yaml` / `retrieval/src/retrieval/evidence_expand.py` |
 | 市场情绪接入规范 | [`docs/market_sentiment_agent_spec.md`](docs/market_sentiment_agent_spec.md) |
+
+---
+
+## 14. 市场情绪 Agent（已合并）
+
+来源：`likesnow97` 的 PR #1（`test/market-agent` → `main`，合并提交 `c44f862`）。部署与验收细节见 [`MARKET_DEPLOY_TEST.md`](MARKET_DEPLOY_TEST.md)。
+
+### 14.1 能力
+
+| 阶段 | 输出 | 说明 |
+|------|------|------|
+| 上市前 | 首日破发风险 0–100 | 确定性历史校准分 + LLM ReAct 研判 + 多空辩论 dossier |
+| 四大模块 | 宏观 / 行业 / IPO 市场 / 舆情 | 舆情仅在 LLM 验证相关性后参与权重 |
+| 上市后 | D5–D60 检查点 | 每 5 个交易日；破发锚点为发行价，二级收益以首日开盘价为基准 |
+
+市场分独立写成 `{代码}_market_report.md`；有真实结果时计入 `reference_fundamental_score`（`(legal×0.55+finance×0.45)×0.65 + market×0.35`）。总控读取正式 `market` 卡片（不是 demo stub）。总控辩论若点名市场，走 `MarketAgent.respond_to_controller`；市场模块内部的「多空辩论」是市场 Agent 自己的研判，**不是**总控子图里的 `run_debate`。
+
+### 14.2 主要新增文件
+
+- Agent / 模型：`src/agents/market_agent.py`、`src/models/market.py`
+- 评分：`src/skills/score_market.py`、`score_market_history.py`、`score_postlisting.py`、`explain_market.py`
+- 工具：`src/tools/firecrawl_news.py`、`market_data.py`、`market_debate.py`、`sina_finance_news.py`
+- 存储：`src/storage/market_store.py`、`migrations/001_market_evidence.sql`
+- 配置：`configs/market_agent.yaml`、`firecrawl.yaml`、`sina_finance.yaml` 及 `*.local.example.yaml`
+- CLI：`scripts/run_market_agent.py`、`run_market_pilot.py`、`run_market_postlisting.py`、`fetch_market_news_firecrawl.py`
+- 宽表：`market/data/derived/ipo_sentiment_features.csv`、`market/configs/*.yaml`
+- 依赖：`requirements-market.txt`（在 `ipo-risk` 环境另装）
+
+密钥只写 `*.local.yaml`（已 gitignore）或环境变量：`IPO_LLM_API_KEY`、`FIRECRAWL_API_KEY`、`MARKET_DATABASE_URL`。仓库内 yaml 的 `api_key` 为空或 `REPLACE_ME`。
+
+### 14.3 接入主链路的改动
+
+| 文件 | 改动 |
+|------|------|
+| `src/models/evidence.py` | `AgentResult.agent` 增加 `"market"` |
+| `src/config.py` | `resolve_market_agent_settings` / `resolve_firecrawl_settings` / `resolve_sina_finance_settings` |
+| `src/graph/parallel.py` | 三专家并行完成后 `merge_results`；市场失败不中断财务/法务 |
+| `scripts/run_finance_legal.py` | `--agent market`；`--agent all` 走三路并行；`--stock-code` |
+| `service/analysis_runner.py` | HTTP 挂正式市场；`StreamHub` 三路 thought 立刻推 SSE（不缓冲、不回放 jsonl）；start body `ticker`/`stockCode` 优先，否则 parse meta；缺失则 market=`skipped`；先写三份 MD 再 `report_ready` |
+| `service/thought_mapper.py` | `map_market_event` + `map_master_event` + `map_debate_expert_event` |
+
+独立跑市场：
+
+```bash
+conda activate ipo-risk
+cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
+pip install -r requirements-market.txt   # 首次
+python scripts/run_market_agent.py --stock-code 02451 --doc-id smoke-02451-offline
+```
+
+主链路（财务+法务+市场+总控）：
+
+```bash
+python scripts/run_finance_legal.py --agent all --stock-code 03378 ...
+```
+
+`--mode`（`run_market_agent.py`）：`auto` / `offline` / `llm`。
+
+---
+
+## 15. 合并冲突处理结果（PR #1 / #2）
+
+PR #2（`feat/restore-local-wip`）把本地财务/法务/总控接到「已含市场」的 `main`。6 个文件冲突，处理原则：**市场正式实现留周杰（HEAD），总控/财务/法务/辩论留本地备份。**
+
+| 文件 | 冲突类型 | 结果 |
+|------|----------|------|
+| `src/agents/market_agent.py` | 添加/添加 | **整份留周杰**（约 1104 行正式实现；丢弃本地 117 行 demo） |
+| `src/skills/market_toolbox.py` | 添加/添加 | **整份留周杰** |
+| `src/graph/parallel.py` | 内容 | **两边都留**：`MasterAgent` + 带总控的 `merge_results`；以及 `run_finance_legal_market_parallel`。正式市场替换 demo；三专家完成后再进总控 |
+| `scripts/run_finance_legal.py` | 内容 | **两边都留**：周杰的市场配置/`--stock-code`/正式 `--agent market`；本地的 `--skip-experts`、`--skip-master`、master 日志与打印 |
+| `service/analysis_runner.py` | 内容 | **两边都留，随后按 v3.4 改写**：`StreamHub` 实时混流；有股票代码走 `run_finance_legal_market_parallel`；始终跑总控；三份独立 MD + ReportData/PDF；去掉 `demo_stub` 与结束后 jsonl 回放 |
+| `service/thought_mapper.py` | 内容 | **都留**：`map_market_event` + `map_master_event` + `map_debate_expert_event`（辩论事件记专家，不记 orchestrator） |
+| `src/config.py` / `src/models/evidence.py` | 无冲突 | Git 自动合并 |
+
+未冲突、由备份直接进入 `main` 的本地工作包括：`MasterAgent` / `master_graph` / 辩论与粉饰 Skill、财务/法务增强、检索 18A 别名单测、`dataset_analysis` 测试集脚本。
+
+后续若再同时改这 6 个共享文件，开 PR 前先 `git pull origin main` 并在功能分支上解决冲突，不要直接推 `main`。

@@ -54,9 +54,18 @@ def _agent_id(raw: str | None) -> str:
         return "legal"
     if a == "market":
         return "market"
-    if a == "orchestrator":
+    if a in {"orchestrator", "master"}:
         return "orchestrator"
     return a or "financial"
+
+
+def category_for_agent_id(agent_id: str) -> str:
+    return {
+        "financial": "finance",
+        "legal": "legal",
+        "market": "market",
+        "orchestrator": "master",
+    }.get(agent_id, agent_id)
 
 
 def _labels():
@@ -105,10 +114,11 @@ def new_thought(
     content: str,
     ref: str | None = None,
     meta: dict[str, Any] | None = None,
+    category: str | None = None,
 ) -> dict[str, Any]:
     t: dict[str, Any] = {
         "id": f"th_{uuid.uuid4().hex[:12]}",
-        "agentId": agent_id,
+        "agentId": _agent_id(agent_id),
         "type": typ,
         "content": to_zh_hant(content),
         "timestamp": int(time.time() * 1000),
@@ -117,6 +127,8 @@ def new_thought(
         t["ref"] = ref
     if meta:
         t["meta"] = meta
+    if category:
+        t["category"] = category
     return t
 
 
@@ -811,56 +823,55 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
     return []
 
 
-def map_master_event(event: dict[str, Any]) -> list[dict[str, Any]]:
-    """总控 / 辩论 jsonl → orchestrator Thought（financial 之后刷）。"""
+def map_debate_expert_event(event: dict[str, Any], *, with_category: bool = True) -> list[dict[str, Any]]:
+    """辩论补证/作答 → 专家 Thought（finance/legal/market），不记成 orchestrator。"""
     ev = str(event.get("event") or "")
+    target = event.get("target_agent") or event.get("agent") or "finance"
+    agent_id = _agent_id(str(target))
+    category = category_for_agent_id(agent_id) if with_category else None
     thoughts: list[dict[str, Any]] = []
-    if ev in {"run_start", "run_end", "result", "step"}:
-        return thoughts
-
-    reasoning = str(event.get("reasoning") or "").strip()
-    utterance = str(event.get("utterance") or "").strip()
-    target = event.get("target_agent") or "orchestrator"
-    qid = event.get("question_id") or ""
     rnd = event.get("round")
-
-    if ev == "debate_question":
-        content = utterance or "總控質詢"
-        meta: dict[str, Any] = {
-            "kind": "model_think",
-            "round": rnd,
-            "questionId": qid,
-            "targetAgent": target,
-        }
-        if reasoning:
-            meta["rawThink"] = reasoning
-        thoughts.append(
-            new_thought(
-                agent_id="orchestrator",
-                typ="thinking",
-                content=content,
-                meta=meta,
-            )
-        )
-        return thoughts
+    qid = event.get("question_id") or ""
 
     if ev == "debate_search":
         tools = event.get("tool_calls") or []
         names = []
+        pages_hint: list[Any] = []
         for tc in tools:
-            if isinstance(tc, dict):
-                names.append(str(tc.get("name") or "search_standalone"))
+            if not isinstance(tc, dict):
+                continue
+            names.append(str(tc.get("name") or "search_standalone"))
+            args = tc.get("arguments") or {}
+            if isinstance(args, dict):
+                pages_hint.extend(args.get("pages") or [])
+        query_bits = []
+        for tc in tools:
+            if isinstance(tc, dict) and isinstance(tc.get("arguments"), dict):
+                q = tc["arguments"].get("query")
+                kind = tc["arguments"].get("kind")
+                if q:
+                    query_bits.append(f"{kind or 'keyword'}={q}")
+        content = to_zh_hant(
+            "辯論補證："
+            + ("、".join(query_bits) or "、".join(names) or "search")
+        )
+        if pages_hint:
+            content += to_zh_hant(f"（prefer_pages={pages_hint}）")
         thoughts.append(
             new_thought(
-                agent_id="orchestrator",
-                typ="action",
-                content=to_zh_hant(f"辯論補證檢索：{'、'.join(names) or 'search'}"),
+                agent_id=agent_id,
+                typ="thinking",
+                content=content,
+                category=category,
                 meta={
                     "kind": "tool_call",
+                    "toolName": names[0] if names else "search_standalone",
+                    "toolStatus": "running",
                     "round": rnd,
                     "questionId": qid,
                     "targetAgent": target,
                     "toolCalls": tools,
+                    "preferPages": pages_hint or None,
                 },
             )
         )
@@ -870,29 +881,32 @@ def map_master_event(event: dict[str, Any]) -> list[dict[str, Any]]:
             page = snips[0].get("page") if snips else None
             thoughts.append(
                 new_thought(
-                    agent_id="orchestrator",
-                    typ="observation",
+                    agent_id=agent_id,
+                    typ="finding",
                     content=to_zh_hant(
                         f"檢索命中 {event.get('search_hit_count') or len(snips)} 條"
                     ),
                     ref=f"p.{page}" if page is not None else None,
-                    meta={"kind": "evidence", "evidence": snips, "kind_tool": "tool_result"},
+                    category=category,
+                    meta={"kind": "evidence", "evidence": snips, "toolStatus": "ok"},
                 )
             )
         else:
             thoughts.append(
                 new_thought(
-                    agent_id="orchestrator",
-                    typ="observation",
+                    agent_id=agent_id,
+                    typ="thinking",
                     content="檢索未命中（禁止編造頁碼）",
-                    meta={"kind": "tool_result", "searchHitCount": 0},
+                    category=category,
+                    meta={"kind": "tool_result", "toolStatus": "ok", "searchHitCount": 0},
                 )
             )
         return thoughts
 
     if ev == "debate_reply":
-        content = utterance or "專家作答"
-        meta = {
+        content = str(event.get("utterance") or "專家作答")
+        reasoning = str(event.get("reasoning") or "").strip()
+        meta: dict[str, Any] = {
             "kind": "model_think",
             "round": rnd,
             "questionId": qid,
@@ -904,9 +918,10 @@ def map_master_event(event: dict[str, Any]) -> list[dict[str, Any]]:
             meta["rawThink"] = reasoning
         thoughts.append(
             new_thought(
-                agent_id="orchestrator",
-                typ="observation",
+                agent_id=agent_id,
+                typ="conclusion",
                 content=content,
+                category=category,
                 meta=meta,
             )
         )
@@ -916,29 +931,127 @@ def map_master_event(event: dict[str, Any]) -> list[dict[str, Any]]:
             page = snips[0].get("page") if snips else None
             thoughts.append(
                 new_thought(
-                    agent_id="orchestrator",
-                    typ="observation",
+                    agent_id=agent_id,
+                    typ="finding",
                     content=to_zh_hant("辯論證據"),
                     ref=f"p.{page}" if page is not None else None,
+                    category=category,
                     meta={"kind": "evidence", "evidence": snips},
                 )
             )
         return thoughts
+    return thoughts
+
+
+def debate_message_from_event(event: dict[str, Any], *, with_category: bool = True) -> dict[str, Any] | None:
+    ev = str(event.get("event") or "")
+    ts = int(time.time() * 1000)
+    if ev == "debate_question":
+        target = event.get("target_agent") or "finance"
+        msg = {
+            "id": f"deb-{event.get('question_id') or uuid.uuid4().hex[:8]}",
+            "agentId": "orchestrator",
+            "round": int(event.get("round") or 1),
+            "type": "question",
+            "content": to_zh_hant(str(event.get("utterance") or "")),
+            "targetAgentId": _agent_id(str(target)),
+            "timestamp": ts,
+        }
+        if with_category:
+            msg["category"] = "master"
+        return msg
+    if ev == "debate_reply":
+        target = event.get("target_agent") or "finance"
+        agent_id = _agent_id(str(target))
+        msg = {
+            "id": f"deb-r-{event.get('question_id') or uuid.uuid4().hex[:8]}",
+            "agentId": agent_id,
+            "round": int(event.get("round") or 1),
+            "type": "response",
+            "content": to_zh_hant(str(event.get("utterance") or "")),
+            "targetAgentId": None,
+            "timestamp": ts,
+        }
+        if with_category:
+            msg["category"] = category_for_agent_id(agent_id)
+        return msg
+    if ev in {"debate_plan", "debate_followup"}:
+        msg_type = "opening" if ev == "debate_plan" else "summary"
+        msg = {
+            "id": f"deb-{ev}-{uuid.uuid4().hex[:8]}",
+            "agentId": "orchestrator",
+            "round": int(event.get("round") or 1),
+            "type": msg_type,
+            "content": to_zh_hant(str(event.get("utterance") or ev)),
+            "targetAgentId": None,
+            "timestamp": ts,
+        }
+        if with_category:
+            msg["category"] = "master"
+        return msg
+    return None
+
+
+def map_master_event(event: dict[str, Any], *, in_debate: bool = False) -> list[dict[str, Any]]:
+    """总控 jsonl → Thought。辩论补证/作答改映射到专家；仅 in_debate 时加 category。"""
+    ev = str(event.get("event") or "")
+    if ev in {"run_start", "run_end", "result", "step"}:
+        return []
+    if ev in {"debate_search", "debate_reply"}:
+        return map_debate_expert_event(event, with_category=in_debate)
+
+    reasoning = str(event.get("reasoning") or "").strip()
+    utterance = str(event.get("utterance") or "").strip()
+    target = event.get("target_agent")
+    qid = event.get("question_id") or ""
+    rnd = event.get("round")
+    category = "master" if in_debate else None
+
+    if ev == "debate_question":
+        content = utterance or "總控質詢"
+        meta: dict[str, Any] = {
+            "kind": "model_think",
+            "round": rnd,
+            "questionId": qid,
+            "targetAgent": target,
+        }
+        if reasoning:
+            meta["rawThink"] = reasoning
+        return [
+            new_thought(
+                agent_id="orchestrator",
+                typ="thinking",
+                content=content,
+                category=category,
+                meta=meta,
+            )
+        ]
 
     # conflict_detection / embellishment / fusion / debate_plan / debate_followup
+    use_category = category if ev in {"debate_plan", "debate_followup"} else None
+    if ev in {"debate_plan", "debate_followup"} and in_debate:
+        use_category = "master"
     content = utterance or ev
     meta = {"kind": "model_think", "event": ev}
     if reasoning:
         meta["rawThink"] = reasoning
-    thoughts.append(
+    extra = {
+        k: event.get(k)
+        for k in ("need_debate", "score", "level", "overall_score", "gate_warning", "degraded")
+        if event.get(k) is not None
+    }
+    if extra:
+        meta.update(extra)
+    typ = "conclusion" if ev == "fusion" else "thinking"
+    return [
         new_thought(
             agent_id="orchestrator",
-            typ="thinking" if ev != "fusion" else "conclusion",
+            typ=typ,
             content=content,
+            category=use_category,
             meta=meta,
         )
-    )
-    return thoughts
+    ]
 
 
 def score_to_risk_level(score: float) -> str:

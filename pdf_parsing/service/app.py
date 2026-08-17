@@ -16,7 +16,11 @@ from fastapi.middleware.gzip import GZipMiddleware
 from service import __version__
 from service.config import ANALYSIS_BASE_URL, PARSE_DEFAULTS, SERVICE_VERSION, STUB_MODE
 from service.routes_contract import router as contract_router
-from service.routes_gateway import probe_analysis_health, router as gateway_router
+from service.routes_gateway import (
+    probe_analysis_health,
+    router as gateway_router,
+    status_router as gateway_status_router,
+)
 from service.routes_projects import router as projects_router
 from service.sample_catalog import SampleCatalog
 from service.stub_runner import StubRunner
@@ -82,6 +86,7 @@ app.add_middleware(
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 app.include_router(gateway_router)
+app.include_router(gateway_status_router)
 app.include_router(contract_router)
 app.include_router(projects_router)
 

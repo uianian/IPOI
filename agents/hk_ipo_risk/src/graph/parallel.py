@@ -11,9 +11,128 @@ from src.agents.legal_agent import LegalAgent
 from src.agents.market_agent import MarketAgent
 from src.agents.master_agent import MasterAgent
 from src.models.evidence import AgentResult
-from src.skills.master_cards import reference_fundamental
+from src.skills.master_cards import reference_fundamental, reference_score_note
 
 logger = logging.getLogger(__name__)
+
+
+def _market_score_for_reference(market: AgentResult | None) -> float | None:
+    if market is None:
+        return None
+    feats = market.features or {}
+    if feats.get("demo"):
+        return None
+    try:
+        return float(market.risk_score)
+    except (TypeError, ValueError):
+        return None
+
+
+async def _run_finance_legal_experts(
+    doc_id: str,
+    *,
+    issuer_type: str = "general",
+    finance_retrieval_json: Path | str | None = None,
+    legal_retrieval_json: Path | str | None = None,
+    parse_json: Path | str | None = None,
+    llm: Any | None = None,
+    finance_llm: Any | None = None,
+    legal_llm: Any | None = None,
+    top_k: int | None = None,
+    finance_run_logger: Any | None = None,
+    legal_on_progress: Any | None = None,
+    finance_rules_only: bool = False,
+    finance_pipeline: bool = False,
+    legal_react: bool = False,
+    legal_run_logger: Any | None = None,
+    legal_max_turns: int = 10,
+    finance_max_turns: int = 10,
+    debate_dir: Path | str | None = None,
+    client_project_id: str | None = None,
+    task_id: str | None = None,
+    analysis_id: str | None = None,
+    doc_name: str | None = None,
+    pdf_name: str | None = None,
+    legal_reasoning_effort: str | None = "high",
+    finance_reasoning_effort: str | None = "low",
+    keep_open: bool = True,
+    on_finance_done: Any | None = None,
+    on_legal_done: Any | None = None,
+) -> tuple[AgentResult, AgentResult, FinanceAgent, LegalAgent]:
+    """财务 ‖ 法务并行探查，不构造市场 Agent、不跑总控。"""
+    fin_llm = finance_llm if finance_llm is not None else llm
+    leg_llm = legal_llm if legal_llm is not None else None
+    finance_agent = FinanceAgent(
+        llm=fin_llm,
+        run_logger=finance_run_logger,
+        rules_only=finance_rules_only,
+        pipeline=finance_pipeline,
+        max_turns=finance_max_turns,
+        debate_dir=debate_dir,
+        reasoning_effort=finance_reasoning_effort,
+        close_logger=not keep_open,
+    )
+    legal_agent = LegalAgent(
+        llm=leg_llm,
+        on_progress=legal_on_progress,
+        react=legal_react,
+        run_logger=legal_run_logger,
+        max_turns=legal_max_turns,
+        debate_dir=debate_dir,
+        reasoning_effort=legal_reasoning_effort,
+        close_logger=not keep_open,
+    )
+
+    async def _run_finance() -> AgentResult:
+        result = await finance_agent.run(
+            doc_id,
+            issuer_type=issuer_type,
+            retrieval_json=finance_retrieval_json,
+            parse_json=parse_json,
+            top_k=top_k,
+            doc_name=doc_name,
+            pdf_name=pdf_name,
+            client_project_id=client_project_id,
+            task_id=task_id or doc_id,
+            analysis_id=analysis_id,
+        )
+        if on_finance_done is not None:
+            try:
+                on_finance_done(result)
+            except Exception:
+                logger.exception("on_finance_done failed")
+        return result
+
+    provisional_gates = {
+        "issuer_type": issuer_type,
+        "is_biotech_18a": issuer_type.lower() in {"biotech", "18a", "18c"},
+        "skip_3_5": issuer_type.lower() not in {"biotech", "18a", "18c"},
+        "skip_3_5_reason": None if issuer_type.lower() in {"biotech", "18a", "18c"} else "non-biotech",
+    }
+
+    async def _run_legal() -> AgentResult:
+        result = await legal_agent.run(
+            doc_id,
+            issuer_type=issuer_type,
+            gates=provisional_gates,
+            retrieval_json=legal_retrieval_json,
+            parse_json=parse_json,
+            top_k=top_k,
+            doc_name=doc_name,
+            pdf_name=pdf_name,
+            client_project_id=client_project_id,
+            task_id=task_id or doc_id,
+            analysis_id=analysis_id,
+        )
+        if on_legal_done is not None:
+            try:
+                on_legal_done(result)
+            except Exception:
+                logger.exception("on_legal_done failed")
+        return result
+
+    finance_result, legal_result = await asyncio.gather(_run_finance(), _run_legal())
+    return finance_result, legal_result, finance_agent, legal_agent
 
 
 async def run_finance_legal_parallel(
@@ -47,111 +166,47 @@ async def run_finance_legal_parallel(
     legal_reasoning_effort: str | None = "high",
     finance_reasoning_effort: str | None = "low",
     skip_master: bool = False,
-    include_market: bool = True,
+    include_market: bool = False,
+    on_finance_done: Any | None = None,
+    on_legal_done: Any | None = None,
 ) -> dict[str, Any]:
-    """财务 ‖ 法务 ‖ 市场(demo) 并行探查，随后总控子图。"""
-    fin_llm = finance_llm if finance_llm is not None else llm
-    leg_llm = legal_llm if legal_llm is not None else None
+    """财务 ‖ 法务并行探查，随后总控子图。正式市场请走 run_finance_legal_market_parallel。"""
+    del market_run_logger, include_market
     mas_llm = master_llm if master_llm is not None else llm
-    keep_open = not skip_master
-    finance_agent = FinanceAgent(
-        llm=fin_llm,
-        run_logger=finance_run_logger,
-        rules_only=finance_rules_only,
-        pipeline=finance_pipeline,
-        max_turns=finance_max_turns,
+    finance_result, legal_result, finance_agent, legal_agent = await _run_finance_legal_experts(
+        doc_id,
+        issuer_type=issuer_type,
+        finance_retrieval_json=finance_retrieval_json,
+        legal_retrieval_json=legal_retrieval_json,
+        parse_json=parse_json,
+        llm=llm,
+        finance_llm=finance_llm,
+        legal_llm=legal_llm,
+        top_k=top_k,
+        finance_run_logger=finance_run_logger,
+        legal_on_progress=legal_on_progress,
+        finance_rules_only=finance_rules_only,
+        finance_pipeline=finance_pipeline,
+        legal_react=legal_react,
+        legal_run_logger=legal_run_logger,
+        legal_max_turns=legal_max_turns,
+        finance_max_turns=finance_max_turns,
         debate_dir=debate_dir,
-        reasoning_effort=finance_reasoning_effort,
-        close_logger=not keep_open,
+        client_project_id=client_project_id,
+        task_id=task_id,
+        analysis_id=analysis_id,
+        doc_name=doc_name,
+        pdf_name=pdf_name,
+        legal_reasoning_effort=legal_reasoning_effort,
+        finance_reasoning_effort=finance_reasoning_effort,
+        keep_open=not skip_master,
+        on_finance_done=on_finance_done,
+        on_legal_done=on_legal_done,
     )
-    legal_agent = LegalAgent(
-        llm=leg_llm,
-        on_progress=legal_on_progress,
-        react=legal_react,
-        run_logger=legal_run_logger,
-        max_turns=legal_max_turns,
-        debate_dir=debate_dir,
-        reasoning_effort=legal_reasoning_effort,
-        close_logger=not keep_open,
-    )
-    market_agent = MarketAgent(
-        llm=None,
-        run_logger=market_run_logger,
-        debate_dir=debate_dir,
-        demo=True,
-    )
-
-    fin_task = asyncio.create_task(
-        finance_agent.run(
-            doc_id,
-            issuer_type=issuer_type,
-            retrieval_json=finance_retrieval_json,
-            parse_json=parse_json,
-            top_k=top_k,
-            doc_name=doc_name,
-            pdf_name=pdf_name,
-            client_project_id=client_project_id,
-            task_id=task_id or doc_id,
-            analysis_id=analysis_id,
-        )
-    )
-    provisional_gates = {
-        "issuer_type": issuer_type,
-        "is_biotech_18a": issuer_type.lower() in {"biotech", "18a", "18c"},
-        "skip_3_5": issuer_type.lower() not in {"biotech", "18a", "18c"},
-        "skip_3_5_reason": None if issuer_type.lower() in {"biotech", "18a", "18c"} else "non-biotech",
-    }
-    leg_task = asyncio.create_task(
-        legal_agent.run(
-            doc_id,
-            issuer_type=issuer_type,
-            gates=provisional_gates,
-            retrieval_json=legal_retrieval_json,
-            parse_json=parse_json,
-            top_k=top_k,
-            doc_name=doc_name,
-            pdf_name=pdf_name,
-            client_project_id=client_project_id,
-            task_id=task_id or doc_id,
-            analysis_id=analysis_id,
-        )
-    )
-    tasks: list[asyncio.Task] = [fin_task, leg_task]
-    if include_market:
-        tasks.append(
-            asyncio.create_task(
-                market_agent.run(
-                    doc_id,
-                    issuer_type=issuer_type,
-                    parse_json=parse_json,
-                    doc_name=doc_name,
-                    pdf_name=pdf_name,
-                    client_project_id=client_project_id,
-                    task_id=task_id or doc_id,
-                    analysis_id=analysis_id,
-                )
-            )
-        )
-    gathered = await asyncio.gather(*tasks, return_exceptions=True)
-    finance_result = gathered[0]
-    legal_result = gathered[1]
-    if isinstance(finance_result, Exception):
-        raise finance_result
-    if isinstance(legal_result, Exception):
-        raise legal_result
-    market_result: AgentResult | None = None
-    if include_market:
-        raw_m = gathered[2]
-        if isinstance(raw_m, Exception):
-            logger.warning("market demo failed, using fallback: %s", raw_m)
-            market_result = MarketAgent.fallback_result(doc_id)
-        else:
-            market_result = raw_m
-
     return await merge_results(
         finance_result,
         legal_result,
-        market=market_result,
+        market=None,
         skip_master=skip_master,
         master_llm=mas_llm,
         master_run_logger=master_run_logger,
@@ -159,7 +214,7 @@ async def run_finance_legal_parallel(
         debate_dir=debate_dir,
         finance_agent=finance_agent,
         legal_agent=legal_agent,
-        market_agent=market_agent,
+        market_agent=None,
         doc_name=doc_name,
     )
 
@@ -177,9 +232,20 @@ async def run_finance_legal_market_parallel(
     market_max_turns: int | None = None,
     market_features_csv: Path | str | None = None,
     market_news_dir: Path | str | None = None,
+    on_market_done: Any | None = None,
     **finance_legal_kwargs: Any,
 ) -> dict[str, Any]:
-    """财务、法务、市场并行；市场结果独立返回，不改变基本面参考分。"""
+    """财务、法务、市场并行；三专家完成后再进总控。"""
+    finance_legal_kwargs.pop("include_market", None)
+    finance_legal_kwargs.pop("market_run_logger", None)
+    skip_master = bool(finance_legal_kwargs.pop("skip_master", False))
+    master_llm = finance_legal_kwargs.pop("master_llm", None)
+    master_run_logger = finance_legal_kwargs.pop("master_run_logger", None)
+    parse_json = finance_legal_kwargs.get("parse_json")
+    debate_dir = finance_legal_kwargs.get("debate_dir")
+    doc_name = finance_legal_kwargs.get("doc_name")
+    llm = finance_legal_kwargs.get("llm")
+    mas_llm = master_llm if master_llm is not None else llm
 
     market_agent = MarketAgent(
         llm=market_llm,
@@ -201,22 +267,44 @@ async def run_finance_legal_market_parallel(
             )
             return result, None
         except Exception as exc:  # 市场失败不应中断财务/法务结果
+            logger.warning("market agent failed: %s", exc)
             return None, f"{type(exc).__name__}: {exc}"
 
-    fundamental_task = asyncio.create_task(
-        run_finance_legal_parallel(doc_id, include_market=False, **finance_legal_kwargs)
+    async def _run_market_and_notify() -> tuple[AgentResult | None, str | None]:
+        result, err = await _run_market_safely()
+        if on_market_done is not None:
+            try:
+                on_market_done(result, err)
+            except Exception:
+                logger.exception("on_market_done failed")
+        return result, err
+
+    experts_task = asyncio.create_task(
+        _run_finance_legal_experts(
+            doc_id,
+            keep_open=not skip_master,
+            **finance_legal_kwargs,
+        )
     )
-    market_task = asyncio.create_task(_run_market_safely())
-    merged, (market_result, market_error) = await asyncio.gather(
-        fundamental_task,
-        market_task,
+    market_task = asyncio.create_task(_run_market_and_notify())
+    (finance_result, legal_result, finance_agent, legal_agent), (market_result, market_error) = (
+        await asyncio.gather(experts_task, market_task)
     )
-    merged["market"] = market_result.model_dump() if market_result is not None else None
+    merged = await merge_results(
+        finance_result,
+        legal_result,
+        market=market_result,
+        skip_master=skip_master,
+        master_llm=mas_llm,
+        master_run_logger=master_run_logger,
+        parse_json=parse_json,
+        debate_dir=debate_dir,
+        finance_agent=finance_agent,
+        legal_agent=legal_agent,
+        market_agent=market_agent if market_result is not None else None,
+        doc_name=doc_name,
+    )
     merged["market_error"] = market_error
-    merged["note"] = (
-        str(merged.get("note") or "")
-        + "; market 为独立上市首日破发风险，不计入 reference_fundamental_score"
-    )
     return merged
 
 
@@ -235,7 +323,12 @@ async def merge_results(
     market_agent: Any | None = None,
     doc_name: str | None = None,
 ) -> dict[str, Any]:
-    fundamental = reference_fundamental(finance.risk_score, legal.risk_score)
+    market_score = _market_score_for_reference(market)
+    fundamental = reference_fundamental(
+        finance.risk_score,
+        legal.risk_score,
+        market_score,
+    )
     out: dict[str, Any] = {
         "doc_id": finance.doc_id or legal.doc_id,
         "finance": finance.model_dump(),
@@ -243,18 +336,11 @@ async def merge_results(
         "reference_fundamental_score": fundamental,
         "cross_agent_features": [],
         "master": None,
-        "note": (
-            "reference_fundamental_score = legal*0.45 + finance*0.55 为对照分；"
-            "正式等级以总控终裁为准"
-        ),
+        "note": reference_score_note(has_market=market_score is not None, skip_master=skip_master),
     }
     if market is not None:
         out["market"] = market.model_dump()
     if skip_master:
-        out["note"] = (
-            "reference_fundamental_score = legal*0.45 + finance*0.55; "
-            "--skip-master，总控未运行"
-        )
         return out
 
     master = MasterAgent(
@@ -296,8 +382,6 @@ def _agent_result_from_saved(raw: Any, *, fallback_agent: str, doc_id: str) -> A
             return AgentResult.model_validate(raw)
         except Exception:
             pass
-    if fallback_agent == "market":
-        return MarketAgent.fallback_result(doc_id)
     raise ValueError(f"--from-result 缺少可用的 {fallback_agent} AgentResult")
 
 
@@ -327,10 +411,9 @@ async def run_master_from_saved(
     finance = _agent_result_from_saved(saved.get("finance"), fallback_agent="finance", doc_id=doc_id)
     legal = _agent_result_from_saved(saved.get("legal"), fallback_agent="legal", doc_id=doc_id)
     doc_id = doc_id or finance.doc_id or legal.doc_id
+    market: AgentResult | None = None
     if saved.get("market"):
         market = _agent_result_from_saved(saved.get("market"), fallback_agent="market", doc_id=doc_id)
-    else:
-        market = MarketAgent.fallback_result(doc_id)
 
     finance_agent = FinanceAgent(
         llm=master_llm,
@@ -352,15 +435,20 @@ async def run_master_from_saved(
     legal_agent._doc_id = legal.doc_id or doc_id
     legal_agent._parse_json = parse_json
     market_agent = MarketAgent(
-        llm=None,
+        llm=master_llm,
         run_logger=market_run_logger,
-        debate_dir=debate_dir,
-        demo=True,
     )
     market_agent._doc_id = doc_id
-    market_agent._parse_json = parse_json
+    if market is not None:
+        market_agent._last_result = market
 
-    logger.info("skip-experts: load %s finance=%s legal=%s", path, finance.risk_score, legal.risk_score)
+    logger.info(
+        "skip-experts: load %s finance=%s legal=%s market=%s",
+        path,
+        finance.risk_score,
+        legal.risk_score,
+        None if market is None else market.risk_score,
+    )
     out = await merge_results(
         finance,
         legal,
@@ -372,11 +460,8 @@ async def run_master_from_saved(
         debate_dir=debate_dir,
         finance_agent=finance_agent,
         legal_agent=legal_agent,
-        market_agent=market_agent,
+        market_agent=market_agent if market is not None else None,
         doc_name=doc_name,
     )
-    out["note"] = (
-        (out.get("note") or "")
-        + f"；skip-experts from {path}"
-    )
+    out["note"] = (out.get("note") or "") + f"；skip-experts from {path}"
     return out

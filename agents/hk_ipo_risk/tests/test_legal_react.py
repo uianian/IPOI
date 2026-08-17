@@ -458,7 +458,7 @@ def test_submit_fills_empty_risk_points_from_skills(tmp_path: Path) -> None:
 
 def test_report_reads_legal_sections_from_rule_features() -> None:
     sys.path.insert(0, str(PKG_ROOT / "scripts"))
-    from generate_analysis_report import _legal_section_feat, build_report  # noqa: E402
+    from generate_analysis_report import _legal_section_feat, build_legal_report  # noqa: E402
 
     legal = {
         "risk_score": 50,
@@ -484,11 +484,10 @@ def test_report_reads_legal_sections_from_rule_features() -> None:
     }
     assert _legal_section_feat(legal, "3.1").get("exists") is True
     assert _legal_section_feat(legal, "3.2").get("ratio_pct") == 12.5
-    md = build_report(
+    md = build_legal_report(
         {"doc_id": "t", "finance": {}, "legal": legal},
         doc_name="测试",
         pdf_name="t.pdf",
-        finance_retrieval=None,
         legal_retrieval=None,
     )
     assert "exists=True" in md

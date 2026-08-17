@@ -53,6 +53,24 @@ app.add_middleware(
 app.include_router(analysis_router)
 
 
+@app.get("/api/v1/agents/status")
+async def agents_status():
+    agents = [
+        {"id": "legal", "name": "法务合规Agent", "status": "ready"},
+        {"id": "financial", "name": "财务穿透Agent", "status": "ready"},
+        {"id": "market", "name": "市场情绪Agent", "status": "ready"},
+        {"id": "orchestrator", "name": "风险融合总控Agent", "status": "ready"},
+    ]
+    return {
+        "success": True,
+        "data": {
+            "agents": agents,
+            "readyCount": 4,
+            "totalCount": 4,
+        },
+    }
+
+
 @app.get("/health")
 @app.get("/api/v1/health")
 async def health():

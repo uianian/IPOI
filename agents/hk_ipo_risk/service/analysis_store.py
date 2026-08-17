@@ -110,6 +110,7 @@ class AnalysisStore:
             "clientProjectId": client_project_id,
             "taskId": task_id,
             "status": "started",
+            "phase": "analysis",
             "createdAt": _utcnow(),
             "completedAt": None,
             "overallScore": None,

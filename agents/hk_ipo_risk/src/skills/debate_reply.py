@@ -9,6 +9,12 @@ from src.config import load_master_rules
 from src.llm.debate_prompts import FINANCE_DEBATE_REPLY, LEGAL_DEBATE_REPLY, MARKET_DEBATE_REPLY
 from src.models.evidence import EvidenceRef
 from src.models.master import ClaimUpdate, DebateQuestion
+from src.skills.debate_query import (
+    DebateSearchStep,
+    hit_is_useful,
+    looks_like_instruction,
+    plan_debate_searches,
+)
 from src.skills.llm_json import llm_json
 
 logger = logging.getLogger(__name__)
@@ -49,6 +55,8 @@ async def _maybe_search(
     query: str,
     intent: str,
     top_k: int,
+    section_hint: list[str] | None = None,
+    prefer_pages: list[int] | None = None,
 ) -> dict[str, Any]:
     if not query.strip():
         return {"ok": False, "hits": [], "query": query, "n": 0}
@@ -59,7 +67,13 @@ async def _maybe_search(
         from src.skills.finance_toolbox import search_finance_evidence_standalone
 
         raw = await search_finance_evidence_standalone(
-            doc_id=doc_id, query=query, intent=intent, parse_json=parse_json, top_k=top_k
+            doc_id=doc_id,
+            query=query,
+            intent=intent,
+            parse_json=parse_json,
+            top_k=top_k,
+            section_hint=section_hint,
+            prefer_pages=prefer_pages,
         )
     elif agent == "legal":
         if not parse_json:
@@ -67,7 +81,13 @@ async def _maybe_search(
         from src.skills.legal_toolbox import search_legal_evidence_standalone
 
         raw = await search_legal_evidence_standalone(
-            doc_id=doc_id, parse_json=parse_json, query=query, intent=intent, top_k=top_k
+            doc_id=doc_id,
+            parse_json=parse_json,
+            query=query,
+            intent=intent,
+            top_k=top_k,
+            section_hint=section_hint,
+            prefer_pages=prefer_pages,
         )
     else:
         from src.skills.market_toolbox import search_market_evidence_standalone
@@ -77,16 +97,44 @@ async def _maybe_search(
     return raw
 
 
-def _default_intent(agent: str, theme: str) -> str:
-    if agent == "legal":
-        if theme == "redemption":
-            return "redemption"
-        if theme == "related_party":
-            return "related_party"
-        if theme == "concentration":
-            return "concentration"
-        return "business_context"
-    return "business_context"
+async def _run_search_step(
+    *,
+    agent: str,
+    doc_id: str,
+    parse_json: Path | str | None,
+    step: DebateSearchStep,
+    top_k: int,
+) -> dict[str, Any]:
+    if step.kind == "page":
+        if not parse_json:
+            return {"ok": False, "hits": [], "query": step.query, "n": 0, "error": "缺少 parse_json"}
+        from src.tools.retrieval_tool import hits_from_prefer_pages
+
+        kws = [t for t in (step.query or "").split() if t]
+        t0 = time.time()
+        hits = hits_from_prefer_pages(
+            parse_json,
+            list(step.pages),
+            keywords=kws or None,
+            top_k=top_k,
+        )
+        return {
+            "ok": True,
+            "hits": hits,
+            "n": len(hits),
+            "query": step.query,
+            "pages": list(step.pages),
+            "duration_ms": int((time.time() - t0) * 1000),
+        }
+    return await _maybe_search(
+        agent=agent,
+        doc_id=doc_id,
+        parse_json=parse_json,
+        query=step.query,
+        intent=step.intent,
+        top_k=top_k,
+        section_hint=step.section_hint or None,
+    )
 
 
 def _coerce_status(raw: Any) -> str:
@@ -127,28 +175,53 @@ async def expert_respond_to_controller(
     hits_all: list[dict[str, Any]] = []
 
     qtext = question.question or ""
-    need_search = existing_n < 2 or any(k in qtext for k in ("粉饰", "粉飾", "第一", "領先", "领先"))
+    plan = plan_debate_searches(
+        agent=agent,
+        question_text=qtext,
+        theme=question.theme,
+        claim_card=claim_card,
+        search_hints=question.search_hints,
+        max_searches=max_search,
+    )
+    need_search = bool(plan.pages) or bool(plan.steps) or existing_n < 2 or any(
+        k in qtext for k in ("粉饰", "粉飾", "第一", "領先", "领先")
+    )
     if agent == "market" and demo_market:
         need_search = True  # standalone 返回空 hits，禁止伪造
 
     if need_search and max_search > 0:
-        intent = _default_intent(agent, question.theme)
-        queries = [qtext[:80]]
-        if max_search >= 2:
-            extra = (claim_card or {}).get("code") or question.theme or "風險披露"
-            queries.append(str(extra)[:80])
-        for q1 in queries[:max_search]:
-            raw = await _maybe_search(
-                agent=agent,
-                doc_id=doc_id,
-                parse_json=parse_json,
-                query=q1,
-                intent=intent,
-                top_k=top_k,
+        for step in plan.steps[:max_search]:
+            if looks_like_instruction(step.query) and step.kind != "page":
+                continue
+            try:
+                raw = await _run_search_step(
+                    agent=agent,
+                    doc_id=doc_id,
+                    parse_json=parse_json,
+                    step=step,
+                    top_k=top_k,
+                )
+            except Exception as exc:
+                logger.warning("debate search failed: %s", exc)
+                raw = {"ok": False, "hits": [], "query": step.query, "n": 0, "error": str(exc)}
+            raw_hits = [h for h in (raw.get("hits") or []) if isinstance(h, dict)]
+            useful = [
+                h
+                for h in raw_hits
+                if hit_is_useful(h, pages=plan.pages, keywords=plan.keywords)
+            ]
+            n_hits = len(useful)
+            queries_done.append(
+                {
+                    "query": step.query,
+                    "intent": step.intent,
+                    "kind": step.kind,
+                    "pages": list(step.pages),
+                    "n": n_hits,
+                    "n_raw": len(raw_hits),
+                }
             )
-            n_hits = int(raw.get("n") or len(raw.get("hits") or []))
-            queries_done.append({"query": q1, "intent": intent, "n": n_hits})
-            hits_all.extend([h for h in (raw.get("hits") or []) if isinstance(h, dict)])
+            hits_all.extend(useful)
             if run_logger is not None:
                 try:
                     run_logger.debate_search(
@@ -158,21 +231,24 @@ async def expert_respond_to_controller(
                         tool_calls=[
                             {
                                 "name": f"search_{agent}_evidence_standalone",
-                                "arguments": {"query": q1, "intent": intent},
+                                "arguments": {
+                                    "query": step.query,
+                                    "intent": step.intent,
+                                    "kind": step.kind,
+                                    "pages": list(step.pages),
+                                },
                             }
                         ],
                         evidence=[
                             {"page": h.get("page"), "excerpt": h.get("excerpt") or h.get("text") or ""}
-                            for h in (raw.get("hits") or [])[:4]
-                            if isinstance(h, dict)
+                            for h in useful[:4]
                         ],
                         duration_ms=raw.get("duration_ms"),
                         search_hit_count=n_hits,
                     )
                 except Exception:
                     logger.exception("debate_search log failed")
-            if n_hits > 0 and len(queries_done) >= 1 and existing_n >= 0:
-                # 已有命中则不必打满 2 次
+            if useful:
                 break
 
     evidence_refs = _hits_to_evidence(hits_all)
@@ -219,10 +295,12 @@ async def expert_respond_to_controller(
     )
     user = (
         f"【总控质询】{question.question}\n"
+        f"【己方 claim 已有证据】\n{plan.claimed_evidence}\n"
         f"【己方 claim 卡片】{claim_card or {}}\n"
         f"【本轮检索 hits 数】{hit_n}\n"
         f"【hits 摘要】{[{'page': e.page, 'excerpt': (e.excerpt or '')[:200]} for e in evidence_refs]}\n"
         "请作答。查不到也必须推理并发言，禁止编造页码或数字。"
+        "卡片已写明的金额/页码不得改口成未披露；本轮检索失败时维持探查结论并写明未再命中。"
     )
     out = await llm_json(
         llm,

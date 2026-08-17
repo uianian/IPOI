@@ -13,8 +13,62 @@ from src.llm.master_prompts import (
 from src.models.evidence import EvidenceRef
 from src.models.master import CompositeJudgment, PredictedWindows, RiskFactorItem
 from src.skills.base import BaseSkill, SkillInput, SkillOutput
-from src.skills.llm_json import dumps_cards, llm_json
+from src.skills.llm_json import dumps_cards, json_payload_usable, llm_json
 from src.skills.master_cards import checklist_text, high_risk_codes_present
+
+_DECIDE_JSON_KEYS = ("overall_score", "level")
+
+
+def compact_debate_digest(history: Any, *, reply_chars: int = 280) -> str:
+    """终裁只用短问答，禁止把 evidence HTML / 全文质询塞进 prompt。"""
+    rows: list[dict[str, Any]] = []
+    for rnd in history or []:
+        if not isinstance(rnd, dict):
+            continue
+        qmap = {
+            str(q.get("question_id")): q
+            for q in (rnd.get("questions") or [])
+            if isinstance(q, dict)
+        }
+        qa: list[dict[str, Any]] = []
+        for r in rnd.get("replies") or []:
+            if not isinstance(r, dict):
+                continue
+            q = qmap.get(str(r.get("question_id") or "")) or {}
+            pages: list[Any] = []
+            for e in r.get("evidence") or []:
+                if isinstance(e, dict) and e.get("page") is not None and e.get("page") not in pages:
+                    pages.append(e.get("page"))
+            qa.append(
+                {
+                    "id": r.get("question_id"),
+                    "agent": r.get("target_agent"),
+                    "theme": q.get("theme"),
+                    "q": str(q.get("question") or "")[:180],
+                    "status": r.get("status"),
+                    "conf": r.get("confidence"),
+                    "hits": r.get("search_hit_count"),
+                    "pages": pages[:8],
+                    "a": str(r.get("reply") or "")[:reply_chars],
+                }
+            )
+        rows.append(
+            {
+                "round": rnd.get("round"),
+                "continue": rnd.get("continue_debate"),
+                "qa": qa,
+            }
+        )
+    return json.dumps(rows, ensure_ascii=False) if rows else "[]"
+
+
+def _sections_from_judgment(judgment: CompositeJudgment, debate_digest: str) -> dict[str, Any]:
+    return {
+        "composite": judgment.verdict_reasoning,
+        "embellishment": "",
+        "debate_summary": debate_digest[:800],
+        "confidence_note": judgment.score_explanation,
+    }
 
 
 def _level_to_http(level: str) -> str:
@@ -27,6 +81,9 @@ def _parse_judgment(data: dict[str, Any]) -> tuple[CompositeJudgment, list[RiskF
         score = float(data.get("overall_score") if data.get("overall_score") is not None else 0)
     except (TypeError, ValueError):
         score = 0.0
+    # 模型偶发按 0–1 输出；终裁标尺是 0–100。
+    if 0.0 < score <= 1.0:
+        score *= 100.0
     score = max(0.0, min(100.0, score))
     level = str(data.get("level") or "low").lower()
     if level not in {"high", "medium", "low"}:
@@ -114,13 +171,16 @@ class MasterDecideSkill(BaseSkill):
         llm = p.get("llm")
         logger_ = p.get("run_logger")
         rules = load_master_rules()
-        max_tokens = int((rules.get("debate") or {}).get("decide_max_tokens") or 1200)
+        debate_cfg = rules.get("debate") or {}
+        max_tokens = int(debate_cfg.get("decide_max_tokens") or 4096)
+        reasoning_max_tokens = int(debate_cfg.get("decide_reasoning_max_tokens") or 512)
         finance = p.get("finance") or {}
         legal = p.get("legal") or {}
         market = p.get("market") or {}
         ref = p.get("reference_score")
         high_codes = high_risk_codes_present(finance, legal)
         emb = p.get("embellishment") or {}
+        debate_digest = compact_debate_digest(p.get("debate_history") or [])
         user = MASTER_DECIDE_USER.format(
             reference_score=ref,
             checklist=checklist_text(),
@@ -140,7 +200,7 @@ class MasterDecideSkill(BaseSkill):
             market_cards=dumps_cards(p.get("market_cards") or {}),
             embellish_score=emb.get("score"),
             embellish_reason=emb.get("reason") or "",
-            debate_digest=dumps_cards(p.get("debate_history") or []),
+            debate_digest=debate_digest,
         )
         out = await llm_json(
             llm,
@@ -149,20 +209,34 @@ class MasterDecideSkill(BaseSkill):
                 {"role": "user", "content": user},
             ],
             max_tokens=max_tokens,
+            reasoning_max_tokens=reasoning_max_tokens,
+            required_keys=_DECIDE_JSON_KEYS,
         )
-        llm_calls = 1
-        degraded = not out.get("ok")
+        llm_calls = 1 + int(out.get("retries") or 0)
+        usable = json_payload_usable(out.get("data") or {}, required_keys=_DECIDE_JSON_KEYS) and bool(out.get("ok"))
+        degraded = not usable
         if degraded:
             judgment, factors, windows, sections = _degraded_from_cards(
                 reference_score=float(ref or 0),
                 high_codes=high_codes,
                 embellish_score=int(emb.get("score") or 0),
             )
+            sections = _sections_from_judgment(judgment, debate_digest)
             if logger_ is not None:
                 logger_.master_step(
                     event="fusion",
                     utterance=judgment.verdict_reasoning,
-                    extra={"degraded": True, "high_codes": high_codes},
+                    duration_ms=out.get("duration_ms"),
+                    reasoning=out.get("reasoning"),
+                    usage=out.get("usage"),
+                    extra={
+                        "degraded": True,
+                        "high_codes": high_codes,
+                        "retries": out.get("retries"),
+                        "finish_reason": out.get("finish_reason"),
+                        "error": out.get("error"),
+                    },
+                    model=out.get("model"),
                 )
             return SkillOutput(
                 success=True,
@@ -173,9 +247,10 @@ class MasterDecideSkill(BaseSkill):
                     "report_sections": sections,
                     "llm_calls": llm_calls,
                     "high_risk_codes": high_codes,
+                    "retries": out.get("retries") or 0,
                 },
                 degraded=True,
-                degraded_reason=out.get("error") or "llm_unavailable",
+                degraded_reason=out.get("error") or "empty_json",
             )
 
         judgment, factors, windows, sections = _parse_judgment(out.get("data") or {})
@@ -206,14 +281,19 @@ class MasterDecideSkill(BaseSkill):
                     },
                 ],
                 max_tokens=max_tokens,
+                reasoning_max_tokens=reasoning_max_tokens,
+                required_keys=_DECIDE_JSON_KEYS,
             )
-            llm_calls += 1
-            if rev.get("ok") and rev.get("data"):
+            llm_calls += 1 + int(rev.get("retries") or 0)
+            if json_payload_usable(rev.get("data") or {}, required_keys=_DECIDE_JSON_KEYS) and rev.get("ok"):
                 judgment, factors, windows, sections = _parse_judgment(rev.get("data") or {})
                 judgment.revised = True
                 out = rev
             # 禁止 Python 直接改 riskLevel；保留总控（修订后）输出
             judgment.gate_warning = gate_warning
+
+        if not (isinstance(sections, dict) and (sections.get("composite") or sections.get("debate_summary"))):
+            sections = {**_sections_from_judgment(judgment, debate_digest), **(sections or {})}
 
         if logger_ is not None:
             logger_.master_step(
