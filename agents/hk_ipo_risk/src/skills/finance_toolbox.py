@@ -1508,6 +1508,7 @@ async def search_finance_evidence_standalone(
     parse_json: Path | str | None = None,
     section_hint: Any = None,
     top_k: int = 6,
+    prefer_pages: list[int] | None = None,
 ) -> dict[str, Any]:
     """供总控辩论按 dossier.retrieval_queries 增量补财务证据（无 ReAct state）。"""
     if not parse_json:
@@ -1520,6 +1521,7 @@ async def search_finance_evidence_standalone(
         section_hint=section_hint,
         top_k=top_k,
         prefer_source_type="mixed",
+        prefer_pages=prefer_pages,
     )
     hits = [h for h in (result.get("hits") or []) if isinstance(h, dict)]
     return {

@@ -51,7 +51,15 @@ def test_run_master_from_saved_skips_explore(tmp_path: Path):
         "legal": AgentResult(
             agent="legal", doc_id="hansiaitai", risk_score=60, risk_level="medium", summary="法務中"
         ).model_dump(),
-        "reference_fundamental_score": 68.25,
+        "market": AgentResult(
+            agent="market",
+            doc_id="hansiaitai",
+            risk_score=62,
+            risk_level="high",
+            summary="市場高",
+            features={"scoring_mode": "market_react+historical_rules_floor"},
+        ).model_dump(),
+        "reference_fundamental_score": 65.09,
     }
     src = tmp_path / "saved.json"
     src.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
@@ -67,6 +75,8 @@ def test_run_master_from_saved_skips_explore(tmp_path: Path):
     assert out["doc_id"] == "hansiaitai"
     assert out["finance"]["risk_score"] == 75
     assert out["legal"]["risk_score"] == 60
+    assert out["market"]["risk_score"] == 62
+    assert out["reference_fundamental_score"] == 65.09
     assert out["master"]["judgment"]["overall_score"] == 55
     assert "skip-experts" in (out.get("note") or "")
     assert llm.n >= 3

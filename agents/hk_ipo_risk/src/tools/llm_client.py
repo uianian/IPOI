@@ -96,6 +96,8 @@ class LLMClient:
 
         if _is_deepseek(self.settings):
             # DeepSeek 官方：thinking + reasoning_effort；思维链在 reasoning_content。
+            # 思考 token 计入 max_tokens：调用方的 max_tokens 视为「正文预算」，
+            # 另加 reasoning_max_tokens 作为思考预留，避免 JSON/tool 被 CoT 挤空。
             if enable_reasoning:
                 payload["thinking"] = {"type": "enabled"}
                 effort = (
@@ -104,6 +106,12 @@ class LLMClient:
                     or "low"
                 )
                 payload["reasoning_effort"] = effort
+                rmax = reasoning_max_tokens
+                if rmax is None:
+                    rmax = self.settings.get("reasoning_max_tokens", 512)
+                reserve = int(rmax or 0)
+                if reserve > 0:
+                    payload["max_tokens"] = out_tokens + reserve
             else:
                 payload["thinking"] = {"type": "disabled"}
             return payload
@@ -263,6 +271,7 @@ class LLMClient:
             "reasoning_details": result.get("reasoning_details") or [],
             "usage": result.get("usage"),
             "raw_message": result.get("raw_message") or {},
+            "finish_reason": result.get("finish_reason"),
         }
 
 

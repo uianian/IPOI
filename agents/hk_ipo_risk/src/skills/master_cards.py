@@ -108,12 +108,61 @@ def agent_result_dossier_path(agent_result: dict[str, Any] | None) -> str | None
     return feats.get("debate_dossier_path") or trace.get("debate_dossier_path")
 
 
-def reference_fundamental(finance_score: float, legal_score: float) -> float:
+def reference_weights() -> dict[str, float]:
     rules = load_master_rules()
     w = rules.get("reference_weights") or {}
-    legal_w = float(w.get("legal") or 0.45)
-    fin_w = float(w.get("finance") or 0.55)
-    return round(min(100.0, float(legal_score) * legal_w + float(finance_score) * fin_w), 2)
+    return {
+        "legal": float(w.get("legal") if w.get("legal") is not None else 0.55),
+        "finance": float(w.get("finance") if w.get("finance") is not None else 0.45),
+        "fundamental": float(w.get("fundamental") if w.get("fundamental") is not None else 0.65),
+        "market": float(w.get("market") if w.get("market") is not None else 0.35),
+    }
+
+
+def reference_fundamental(
+    finance_score: float,
+    legal_score: float,
+    market_score: float | None = None,
+) -> float:
+    w = reference_weights()
+    fundamental = min(
+        100.0,
+        float(legal_score) * w["legal"] + float(finance_score) * w["finance"],
+    )
+    if market_score is None:
+        return round(fundamental, 2)
+    combined = fundamental * w["fundamental"] + float(market_score) * w["market"]
+    return round(min(100.0, combined), 2)
+
+
+def reference_score_note(*, has_market: bool, skip_master: bool = False) -> str:
+    w = reference_weights()
+    base = f"legal*{w['legal']} + finance*{w['finance']}"
+    if has_market:
+        text = (
+            f"reference_fundamental_score = ({base})*{w['fundamental']} + market*{w['market']} 为对照分；"
+            "正式等级以总控终裁为准"
+        )
+    else:
+        text = (
+            f"reference_fundamental_score = {base} 为对照分（无市场结果，未计入市场分）；"
+            "正式等级以总控终裁为准"
+        )
+    if skip_master:
+        text = (
+            f"reference_fundamental_score = "
+            + (f"({base})*{w['fundamental']} + market*{w['market']}" if has_market else base)
+            + "；--skip-master，总控未运行"
+        )
+    return text
+
+
+def reference_formula_label(*, has_market: bool) -> str:
+    w = reference_weights()
+    base = f"legal×{w['legal']} + finance×{w['finance']}"
+    if has_market:
+        return f"({base})×{w['fundamental']} + market×{w['market']}"
+    return base
 
 
 def high_risk_codes_present(finance: dict[str, Any], legal: dict[str, Any]) -> list[str]:

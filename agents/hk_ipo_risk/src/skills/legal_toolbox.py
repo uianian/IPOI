@@ -334,6 +334,7 @@ async def search_legal_evidence_standalone(
     intent: str = "business_context",
     section_hint: str | list[str] | None = None,
     top_k: int = 6,
+    prefer_pages: list[int] | None = None,
 ) -> dict[str, Any]:
     """独立补证据入口：供总控辩论阶段（无 ReAct state）调用。"""
     result = await retrieve_section_evidence(
@@ -344,8 +345,13 @@ async def search_legal_evidence_standalone(
         section_hint=section_hint,
         top_k=top_k,
         prefer_source_type="mixed",
+        prefer_pages=prefer_pages,
     )
-    hits = [h for h in (result.get("hits") or []) if h.get("matched_terms")]
+    hits = [
+        h
+        for h in (result.get("hits") or [])
+        if h.get("matched_terms") or (prefer_pages and h.get("page") in set(int(p) for p in prefer_pages))
+    ]
     return {
         "ok": True,
         "doc_id": doc_id,

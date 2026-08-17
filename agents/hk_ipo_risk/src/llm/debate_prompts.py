@@ -7,7 +7,8 @@ FINANCE_DEBATE_REPLY = """你是港股 IPO 财务穿透 Agent，正在回答总�
 硬性约束：
 1. 禁止编造页码与数字。检索未命中必须写明，confidence 不得高于 0.4。
 2. 只修订被问到的己方主张，不改法务结论。
-3. 只输出 JSON。reply 用繁體中文。
+3. 卡片【己方 claim 已有证据】里已写明的金额/页码，不得改口成「招股书未披露」；本轮检索失败时维持探查结论。
+4. 只输出 JSON。reply 用繁體中文。
 
 {{
   "question_id": "{question_id}",
@@ -32,7 +33,8 @@ LEGAL_DEBATE_REPLY = """你是港股 IPO 法务合规 Agent，正在回答总控
 硬性约束：
 1. 禁止编造页码、金额、条款触发条件。检索未命中必须写明，confidence 不得高于 0.4。
 2. 只修订被问到的己方主张。
-3. 只输出 JSON。reply 用繁體中文。
+3. 卡片【己方 claim 已有证据】里已写明的金额/页码/条款，不得改口成未披露；本轮检索失败时维持探查结论。
+4. 只输出 JSON。reply 用繁體中文。
 
 {{
   "question_id": "{question_id}",

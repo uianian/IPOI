@@ -189,6 +189,53 @@ async def gateway_analysis_result(client_project_id: str, request: Request):
     )
 
 
+@router.get("/{client_project_id}/report")
+async def gateway_report(client_project_id: str, request: Request):
+    return await _proxy_json(request, f"/api/v1/projects/{client_project_id}/report")
+
+
+@router.get("/{client_project_id}/report/export")
+async def gateway_report_export(client_project_id: str, request: Request):
+    return await _proxy_json(
+        request, f"/api/v1/projects/{client_project_id}/report/export"
+    )
+
+
+status_router = APIRouter(tags=["gateway-agents"])
+
+
+@status_router.get("/api/v1/agents/status")
+async def gateway_agents_status(request: Request):
+    url = _upstream("/api/v1/agents/status", request.url.query)
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            upstream = await client.get(url, headers=_filter_request_headers(request))
+        return Response(
+            content=upstream.content,
+            status_code=upstream.status_code,
+            headers=_filter_response_headers(upstream.headers),
+            media_type=upstream.headers.get("content-type"),
+        )
+    except Exception as e:
+        logger.warning("agents/status upstream down: %s", e)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "data": {
+                    "agents": [
+                        {"id": "legal", "name": "法务合规Agent", "status": "degraded"},
+                        {"id": "financial", "name": "财务穿透Agent", "status": "degraded"},
+                        {"id": "market", "name": "市场情绪Agent", "status": "degraded"},
+                        {"id": "orchestrator", "name": "风险融合总控Agent", "status": "degraded"},
+                    ],
+                    "readyCount": 0,
+                    "totalCount": 4,
+                },
+            },
+        )
+
+
 async def probe_analysis_health() -> Optional[dict]:
     """供网关 /health 聚合。"""
     url = f"{ANALYSIS_BASE_URL.rstrip('/')}/api/v1/health"

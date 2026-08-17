@@ -27,6 +27,7 @@ class DebateQuestion(BaseModel):
     question: str = ""
     required_evidence_types: list[str] = Field(default_factory=list)
     priority: Literal["high", "medium", "low"] = "medium"
+    search_hints: dict[str, Any] | None = None
 
 
 class ClaimUpdate(BaseModel):

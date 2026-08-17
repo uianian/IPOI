@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""从 finance‖legal 运行结果 JSON 生成 Markdown 分析报告。
+"""从运行结果 JSON 生成财务 / 法务 / 市场三份独立 Markdown 报告。
 
 示例：
   cd agents/hk_ipo_risk
@@ -7,9 +7,10 @@
     --result .runtime/mixue_finance_legal.json \\
     --doc-name 蜜雪集團 \\
     --pdf-name 02097_21-02-2025_蜜雪集團_全球發售.pdf \\
+    --stock-code 02097 \\
     --finance-retrieval ../../retrieval/.runtime/agent_retrieval_mixue.json \\
     --legal-retrieval ../ipo/.runtime/agent_retrieval_mixue_legal.json \\
-    --out reports/mixue_finance_legal_report.md
+    --reports-dir reports
 """
 
 from __future__ import annotations
@@ -24,6 +25,88 @@ from pathlib import Path
 from typing import Any
 
 PKG_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _has_market_score(result: dict[str, Any]) -> bool:
+    market = result.get("market")
+    if not isinstance(market, dict) or not market:
+        return False
+    if (market.get("features") or {}).get("demo"):
+        return False
+    return market.get("risk_score") is not None
+
+
+def _formula_label(result: dict[str, Any]) -> str:
+    try:
+        if str(PKG_ROOT) not in sys.path:
+            sys.path.insert(0, str(PKG_ROOT))
+        from src.skills.master_cards import reference_formula_label
+
+        return reference_formula_label(has_market=_has_market_score(result))
+    except Exception:
+        return (
+            "(legal×0.55 + finance×0.45)×0.65 + market×0.35"
+            if _has_market_score(result)
+            else "legal×0.55 + finance×0.45"
+        )
+
+
+def market_report_markdown(result: dict[str, Any]) -> str:
+    market = result.get("market")
+    if not isinstance(market, dict):
+        return ""
+    return str((market.get("features") or {}).get("sentiment_report_markdown") or "").strip()
+
+
+def normalize_report_stock_code(raw: str | None) -> str:
+    t = (raw or "").strip().upper().replace(" ", "").replace(".HK", "")
+    if t.isdigit():
+        return t.zfill(5)
+    m = re.match(r"^(\d{1,5})", t)
+    return m.group(1).zfill(5) if m else ""
+
+
+def resolve_report_stock_code(
+    result: dict[str, Any],
+    *,
+    stock_code: str | None = None,
+    pdf_name: str = "",
+) -> str:
+    if stock_code:
+        code = normalize_report_stock_code(stock_code)
+        if code:
+            return code
+    for key in ("stock_code", "stockCode", "ticker"):
+        code = normalize_report_stock_code(str(result.get(key) or ""))
+        if code:
+            return code
+    code = normalize_report_stock_code(str(result.get("doc_id") or ""))
+    if code:
+        return code
+    code = normalize_report_stock_code(pdf_name)
+    if code:
+        return code
+    return "00000"
+
+
+def report_paths(reports_dir: Path, stock_code: str) -> dict[str, Path]:
+    code = normalize_report_stock_code(stock_code) or "00000"
+    return {
+        "finance": reports_dir / f"{code}_finance_report.md",
+        "legal": reports_dir / f"{code}_legal_report.md",
+        "market": reports_dir / f"{code}_market_report.md",
+    }
+
+
+def sibling_market_report_path(out: Path) -> Path:
+    """兼容旧调用；新入口请用 report_paths。"""
+    stem = out.stem
+    if stem.endswith("_finance_legal_report"):
+        name = stem[: -len("_finance_legal_report")] + "_market_report" + out.suffix
+        return out.with_name(name)
+    if stem.endswith("_report"):
+        return out.with_name(stem[: -len("_report")] + "_market_report" + out.suffix)
+    return out.with_name(stem + "_market_report" + out.suffix)
 
 
 def _load_json(path: Path | None) -> dict[str, Any] | list[Any] | None:
@@ -560,50 +643,69 @@ def _analyze_legal(legal: dict[str, Any]) -> list[str]:
     return notes
 
 
-def build_report(
+def _agent_header(
+    *,
+    doc_name: str,
+    agent_title: str,
+    pdf_name: str,
+    doc_id: Any,
+    score: Any,
+    level: Any,
+    scoring_mode: Any,
+    run_log_path: Any,
+    note: Any,
+    extra_lines: list[str] | None = None,
+) -> list[str]:
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    parts = [
+        f"# {doc_name} — {agent_title} 结果分析报告\n",
+        f"- 生成时间：{now}",
+        f"- 招股书：`{pdf_name}`",
+        f"- doc_id：`{doc_id}`",
+        f"- 本 Agent 风险分：`{_fmt_score(score)}`（{level or '—'}）",
+        f"- 评分模式：`{scoring_mode or '—'}`",
+    ]
+    if run_log_path:
+        parts.append(f"- 推理日志：`{run_log_path}`")
+    parts.append(f"- 说明：{note or '—'}")
+    for line in extra_lines or []:
+        parts.append(line)
+    parts.append("")
+    return parts
+
+
+def _footer() -> list[str]:
+    return [
+        "---\n",
+        "_本报告由 `scripts/generate_analysis_report.py` 根据 Agent 结构化输出自动生成。_\n",
+    ]
+
+
+def build_finance_report(
     result: dict[str, Any],
     *,
     doc_name: str,
     pdf_name: str,
     finance_retrieval: dict[str, Any] | None,
-    legal_retrieval: dict[str, Any] | None,
 ) -> str:
     finance = result.get("finance") or {}
-    legal = result.get("legal") or {}
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if not isinstance(finance, dict) or not finance:
+        return ""
     fin_ev = _collect_finance_evidence(finance, finance_retrieval)
-    leg_ev = _collect_legal_evidence(legal)
     feats = finance.get("features") or {}
     mode = feats.get("scoring_mode") or (finance.get("trace") or {}).get("scoring_mode")
-
-    parts: list[str] = []
-    parts.append(f"# {doc_name} — 财务/法务 Agent 结果分析报告\n")
-    parts.append(f"- 生成时间：{now}")
-    parts.append(f"- 招股书：`{pdf_name}`")
-    parts.append(f"- doc_id：`{result.get('doc_id')}`")
-    master = result.get("master") if isinstance(result.get("master"), dict) else None
-    if master:
-        j = master.get("judgment") or {}
-        parts.append(
-            f"- 总控终裁：`{_fmt_score(j.get('overall_score'))}` "
-            f"（{j.get('risk_level_http') or j.get('level')}，置信度 {j.get('confidence')}）"
-        )
-        parts.append(
-            f"- 对照基本面分：`{_fmt_score(result.get('reference_fundamental_score'))}` "
-            f"（legal×0.45 + finance×0.55）"
-        )
-        if master.get("degraded"):
-            parts.append(f"- 总控降级：`{master.get('degraded_reason')}`")
-    else:
-        parts.append(
-            f"- 参考基本面融合分：`{_fmt_score(result.get('reference_fundamental_score'))}` "
-            f"（legal×0.45 + finance×0.55；总控未启用）"
-        )
-    parts.append(f"- 财务评分模式：`{mode or '—'}`")
     run_log = feats.get("run_log") or {}
-    if run_log.get("log"):
-        parts.append(f"- 推理日志：`{run_log.get('log')}`")
-    parts.append(f"- 说明：{result.get('note') or '—'}\n")
+    parts = _agent_header(
+        doc_name=doc_name,
+        agent_title="财务穿透 Agent",
+        pdf_name=pdf_name,
+        doc_id=result.get("doc_id"),
+        score=finance.get("risk_score"),
+        level=finance.get("risk_level"),
+        scoring_mode=mode,
+        run_log_path=run_log.get("log"),
+        note=result.get("note"),
+    )
 
     parts.append("## 1. 总览\n")
     parts.append("| Agent | 风险分 (0-100↑风险) | 等级 | 摘要 |")
@@ -612,39 +714,16 @@ def build_report(
         f"| 财务穿透 | **{_fmt_score(finance.get('risk_score'))}** | {finance.get('risk_level')} | "
         f"{(finance.get('summary') or '').replace('|', '/')} |"
     )
-    if legal:
-        parts.append(
-            f"| 法务合规 | **{_fmt_score(legal.get('risk_score'))}** | {legal.get('risk_level')} | "
-            f"{(legal.get('summary') or '').replace('|', '/')} |"
-        )
     parts.append("")
 
-    if master:
-        try:
-            if str(PKG_ROOT) not in sys.path:
-                sys.path.insert(0, str(PKG_ROOT))
-            from src.skills.generate_warning_report import render_master_markdown
-
-            parts.append(render_master_markdown(master))
-        except Exception:
-            parts.append("## 總控綜合判定\n")
-            parts.append(str((master.get("judgment") or {}).get("verdict_reasoning") or "—"))
-            parts.append("")
-
-    # ---------- Finance ----------
-    parts.append("## 2. 财务穿透 Agent\n")
-    parts.append("### 2.1 得分与分解\n")
+    parts.append("## 2. 得分与分解\n")
     parts.append(_score_breakdown_md(finance.get("score_breakdown") or []))
     floor = feats.get("rules_floor") or (finance.get("trace") or {}).get("rules_floor")
     parts.append(_rules_floor_md(floor if isinstance(floor, dict) else None))
-    parts.append("### 2.2 风险点\n")
-    risk_points = (
-        feats.get("risk_points")
-        or finance.get("risk_points")
-        or []
-    )
+    parts.append("## 3. 风险点\n")
+    risk_points = feats.get("risk_points") or finance.get("risk_points") or []
     parts.append(_risk_points_md(risk_points if isinstance(risk_points, list) else []))
-    parts.append("### 2.3 四维分析（LLM）\n")
+    parts.append("## 4. 四维分析（LLM）\n")
     if feats.get("submit_composed_from_skills"):
         parts.append(
             "> 注：本次由服务端用 skill 结果拼装四维/reasoning（`submit_composed_from_skills`），"
@@ -662,7 +741,7 @@ def build_report(
             rules_floor=floor if isinstance(floor, dict) else None,
         )
     )
-    parts.append("### 2.4 推理链\n")
+    parts.append("## 5. 推理链\n")
     sr = (finance.get("trace") or {}).get("structured_reasoning") or (
         (feats.get("llm_analysis") or {}).get("reasoning")
     )
@@ -681,7 +760,6 @@ def build_report(
         parts.append(f"_submit 轮 think 状态：`{feats.get('think_status')}`_\n")
     turn_think = feats.get("turn_think_status") or []
     if not turn_think:
-        # 从工具链回填
         for t in (finance.get("trace") or {}).get("tool_calls") or []:
             if isinstance(t, dict) and (t.get("think_status") or t.get("status")):
                 turn_think.append(
@@ -701,7 +779,7 @@ def build_report(
                 f"`{row.get('tool') or '—'}` | `{row.get('think_status') or '—'}` |"
             )
         parts.append("")
-    parts.append("### 2.5 门控\n")
+    parts.append("## 6. 门控\n")
     gates = finance.get("gates") or {}
     parts.append("```json")
     parts.append(
@@ -712,11 +790,11 @@ def build_report(
         )
     )
     parts.append("```\n")
-    parts.append("### 2.6 抽取指标与现金消耗\n")
+    parts.append("## 7. 抽取指标与现金消耗\n")
     parts.append(_metrics_table(finance.get("metrics") or {}))
     parts.append("**3.4 现金消耗（cash_burn）**\n")
     parts.append(_cash_burn_md(finance))
-    parts.append("### 2.7 召回证据（主表）\n")
+    parts.append("## 8. 召回证据（主表）\n")
     if fin_ev:
         parts.append("| 表/字段 | 页码 | 类型 | 命中数 | 年份列 | 摘录 |")
         parts.append("|--------|------|------|--------|--------|------|")
@@ -735,13 +813,9 @@ def build_report(
         parts.append("")
     else:
         parts.append("_无主表证据元数据_\n")
-    section_hits = (finance.get("evidence_summary") or {}).get(
-        "section_evidence_hits"
-    ) or []
-    section_routes = (finance.get("evidence_summary") or {}).get(
-        "section_routes"
-    ) or []
-    parts.append("#### 2.7.1 章节化上下文证据\n")
+    section_hits = (finance.get("evidence_summary") or {}).get("section_evidence_hits") or []
+    section_routes = (finance.get("evidence_summary") or {}).get("section_routes") or []
+    parts.append("### 8.1 章节化上下文证据\n")
     if section_routes:
         for route in section_routes:
             route_bits = []
@@ -777,9 +851,9 @@ def build_report(
         parts.append("")
     else:
         parts.append("_本次未调用章节化上下文检索，或未命中证据。_\n")
-    parts.append("### 2.8 工具调用链（摘要）\n")
+    parts.append("## 9. 工具调用链（摘要）\n")
     parts.append(_tool_trace_summary_md(finance.get("trace") or {}))
-    parts.append("### 2.9 分析结论\n")
+    parts.append("## 10. 分析结论\n")
     for n in _analyze_finance(finance):
         parts.append(f"- {n}")
     parts.append("")
@@ -788,7 +862,7 @@ def build_report(
         nf_raw if isinstance(nf_raw, list) else [],
         finance.get("score_breakdown") or [],
     )
-    parts.append("### 2.10 阴性发现（已审查未见风险）\n")
+    parts.append("## 11. 阴性发现（已审查未见风险）\n")
     if nf_kept:
         for item in nf_kept:
             parts.append(
@@ -802,105 +876,201 @@ def build_report(
         parts.append(msg + "\n")
     bs = feats.get("bs_reconcile") or {}
     if bs.get("notes"):
-        parts.append("### 2.11 资产负债表交叉校验\n")
+        parts.append("## 12. 资产负债表交叉校验\n")
         for note in bs["notes"]:
             parts.append(f"- {note}")
         parts.append("")
-
-    # ---------- Legal ----------
-    if legal:
-        parts.append("## 3. 法务合规 Agent\n")
-        parts.append("### 3.1 得分与分解\n")
-        parts.append(_score_breakdown_md(legal.get("score_breakdown") or []))
-        parts.append("### 3.2 章节特征摘要\n")
-        parts.append("| 章节 | exists/skipped | 强度 | 关键字段 |")
-        parts.append("|------|----------------|------|----------|")
-        for sec in ("3.1", "3.2", "3.3", "3.4", "3.5", "3.6"):
-            feat = _legal_section_feat(legal, sec)
-            status = (
-                f"skipped={feat.get('skipped')}"
-                if feat.get("skipped")
-                else f"exists={feat.get('exists')}"
-            )
-            extra = []
-            for k in (
-                "ratio_pct",
-                "ratio_source",
-                "listing_rule_pct_max",
-                "waiver_pct_threshold",
-                "top1_customer_pct",
-                "top5_customer_pct",
-                "top1_supplier_pct",
-                "top5_supplier_pct",
-                "redemption_high",
-                "redemption_medium",
-                "related_party_ratio_gt_30",
-                "concentration_high",
-                "pipeline_high",
-                "stages_mentioned",
-                "valuation_inversion",
-                "owner",
-                "reason",
-            ):
-                if feat.get(k) not in (None, False, "", []):
-                    extra.append(f"{k}={feat.get(k)}")
-                elif feat.get(k) is False and k in {
-                    "redemption_high",
-                    "valuation_inversion",
-                    "pipeline_high",
-                    "related_party_ratio_gt_30",
-                    "concentration_high",
-                }:
-                    extra.append(f"{k}=False")
-            parts.append(
-                f"| {sec} | {status} | {feat.get('evidence_strength') or '—'} | "
-                f"{('; '.join(extra) if extra else '—')} |"
-            )
-        parts.append("")
-        parts.append("### 3.3 召回证据明细\n")
-        if leg_ev:
-            parts.append("| 章节 | 页码 | 类型 | 置信度 | 摘录 |")
-            parts.append("|------|------|------|--------|------|")
-            for e in leg_ev:
-                parts.append(
-                    "| {sec} | {page} | {st} | {conf} | {ex} |".format(
-                        sec=e.get("section"),
-                        page=e.get("page") if e.get("page") is not None else "—",
-                        st=e.get("source_type") or "—",
-                        conf=_fmt_num(e.get("confidence")) if e.get("confidence") is not None else "—",
-                        ex=(e.get("excerpt") or "—").replace("|", "/"),
-                    )
-                )
-            parts.append("")
-        else:
-            parts.append("_无法务证据_\n")
-
-        parts.append("### 3.4 计分证据（score_breakdown）\n")
-        for b in legal.get("score_breakdown") or []:
-            parts.append(f"#### `{b.get('code')}`（+{b.get('delta')}，{b.get('rule_ref')}）\n")
-            if b.get("note"):
-                parts.append(f"{b.get('note')}\n")
-            for ev in b.get("evidence") or []:
-                parts.append(
-                    f"- p{ev.get('page')}（{ev.get('source_type')}）："
-                    f"{_clean_excerpt(ev.get('excerpt') or '', 360)}"
-                )
-            parts.append("")
-
-        parts.append("### 3.5 工具调用链（摘要）\n")
-        parts.append(_tool_trace_summary_md(legal.get("trace") or {}))
-        parts.append("### 3.6 分析结论\n")
-        for n in _analyze_legal(legal):
-            parts.append(f"- {n}")
-        parts.append("")
-
-    parts.append("---\n")
-    parts.append("_本报告由 `scripts/generate_analysis_report.py` 根据 Agent 结构化输出自动生成。_\n")
+    parts.extend(_footer())
     return "\n".join(parts)
 
 
+def build_legal_report(
+    result: dict[str, Any],
+    *,
+    doc_name: str,
+    pdf_name: str,
+    legal_retrieval: dict[str, Any] | None = None,
+) -> str:
+    del legal_retrieval  # 证据优先走 Agent 自带 snippets
+    legal = result.get("legal") or {}
+    if not isinstance(legal, dict) or not legal:
+        return ""
+    leg_ev = _collect_legal_evidence(legal)
+    feats = legal.get("features") or {}
+    mode = feats.get("scoring_mode") or (legal.get("trace") or {}).get("scoring_mode")
+    run_log = feats.get("run_log") or {}
+    parts = _agent_header(
+        doc_name=doc_name,
+        agent_title="法务合规 Agent",
+        pdf_name=pdf_name,
+        doc_id=result.get("doc_id"),
+        score=legal.get("risk_score"),
+        level=legal.get("risk_level"),
+        scoring_mode=mode,
+        run_log_path=run_log.get("log"),
+        note=result.get("note"),
+    )
+
+    parts.append("## 1. 总览\n")
+    parts.append("| Agent | 风险分 (0-100↑风险) | 等级 | 摘要 |")
+    parts.append("|-------|---------------------|------|------|")
+    parts.append(
+        f"| 法务合规 | **{_fmt_score(legal.get('risk_score'))}** | {legal.get('risk_level')} | "
+        f"{(legal.get('summary') or '').replace('|', '/')} |"
+    )
+    parts.append("")
+
+    parts.append("## 2. 得分与分解\n")
+    parts.append(_score_breakdown_md(legal.get("score_breakdown") or []))
+    parts.append("## 3. 章节特征摘要\n")
+    parts.append("| 章节 | exists/skipped | 强度 | 关键字段 |")
+    parts.append("|------|----------------|------|----------|")
+    for sec in ("3.1", "3.2", "3.3", "3.4", "3.5", "3.6"):
+        feat = _legal_section_feat(legal, sec)
+        status = (
+            f"skipped={feat.get('skipped')}"
+            if feat.get("skipped")
+            else f"exists={feat.get('exists')}"
+        )
+        extra = []
+        for k in (
+            "ratio_pct",
+            "ratio_source",
+            "listing_rule_pct_max",
+            "waiver_pct_threshold",
+            "top1_customer_pct",
+            "top5_customer_pct",
+            "top1_supplier_pct",
+            "top5_supplier_pct",
+            "redemption_high",
+            "redemption_medium",
+            "related_party_ratio_gt_30",
+            "concentration_high",
+            "pipeline_high",
+            "stages_mentioned",
+            "valuation_inversion",
+            "owner",
+            "reason",
+        ):
+            if feat.get(k) not in (None, False, "", []):
+                extra.append(f"{k}={feat.get(k)}")
+            elif feat.get(k) is False and k in {
+                "redemption_high",
+                "valuation_inversion",
+                "pipeline_high",
+                "related_party_ratio_gt_30",
+                "concentration_high",
+            }:
+                extra.append(f"{k}=False")
+        parts.append(
+            f"| {sec} | {status} | {feat.get('evidence_strength') or '—'} | "
+            f"{('; '.join(extra) if extra else '—')} |"
+        )
+    parts.append("")
+    parts.append("## 4. 召回证据明细\n")
+    if leg_ev:
+        parts.append("| 章节 | 页码 | 类型 | 置信度 | 摘录 |")
+        parts.append("|------|------|------|--------|------|")
+        for e in leg_ev:
+            parts.append(
+                "| {sec} | {page} | {st} | {conf} | {ex} |".format(
+                    sec=e.get("section"),
+                    page=e.get("page") if e.get("page") is not None else "—",
+                    st=e.get("source_type") or "—",
+                    conf=_fmt_num(e.get("confidence")) if e.get("confidence") is not None else "—",
+                    ex=(e.get("excerpt") or "—").replace("|", "/"),
+                )
+            )
+        parts.append("")
+    else:
+        parts.append("_无法务证据_\n")
+
+    parts.append("## 5. 计分证据（score_breakdown）\n")
+    for b in legal.get("score_breakdown") or []:
+        parts.append(f"#### `{b.get('code')}`（+{b.get('delta')}，{b.get('rule_ref')}）\n")
+        if b.get("note"):
+            parts.append(f"{b.get('note')}\n")
+        for ev in b.get("evidence") or []:
+            parts.append(
+                f"- p{ev.get('page')}（{ev.get('source_type')}）："
+                f"{_clean_excerpt(ev.get('excerpt') or '', 360)}"
+            )
+        parts.append("")
+
+    parts.append("## 6. 工具调用链（摘要）\n")
+    parts.append(_tool_trace_summary_md(legal.get("trace") or {}))
+    parts.append("## 7. 分析结论\n")
+    for n in _analyze_legal(legal):
+        parts.append(f"- {n}")
+    parts.append("")
+    parts.extend(_footer())
+    return "\n".join(parts)
+
+
+def build_market_report(result: dict[str, Any]) -> str:
+    return market_report_markdown(result)
+
+
+def write_agent_reports(
+    result: dict[str, Any],
+    *,
+    reports_dir: Path,
+    stock_code: str,
+    doc_name: str,
+    pdf_name: str,
+    finance_retrieval: dict[str, Any] | None = None,
+    legal_retrieval: dict[str, Any] | None = None,
+) -> dict[str, Path]:
+    paths = report_paths(reports_dir, stock_code)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    written: dict[str, Path] = {}
+    finance_md = build_finance_report(
+        result,
+        doc_name=doc_name,
+        pdf_name=pdf_name,
+        finance_retrieval=finance_retrieval,
+    )
+    if finance_md:
+        paths["finance"].write_text(finance_md, encoding="utf-8")
+        written["finance"] = paths["finance"]
+    legal_md = build_legal_report(
+        result,
+        doc_name=doc_name,
+        pdf_name=pdf_name,
+        legal_retrieval=legal_retrieval,
+    )
+    if legal_md:
+        paths["legal"].write_text(legal_md, encoding="utf-8")
+        written["legal"] = paths["legal"]
+    market_md = build_market_report(result)
+    if market_md:
+        text = market_md + ("" if market_md.endswith("\n") else "\n")
+        paths["market"].write_text(text, encoding="utf-8")
+        written["market"] = paths["market"]
+    return written
+
+
+def build_report(
+    result: dict[str, Any],
+    *,
+    doc_name: str,
+    pdf_name: str,
+    finance_retrieval: dict[str, Any] | None,
+    legal_retrieval: dict[str, Any] | None,
+) -> str:
+    """兼容旧测试：返回法务独立报告（若无法务则返回财务）。"""
+    legal_md = build_legal_report(
+        result, doc_name=doc_name, pdf_name=pdf_name, legal_retrieval=legal_retrieval
+    )
+    if legal_md:
+        return legal_md
+    return build_finance_report(
+        result, doc_name=doc_name, pdf_name=pdf_name, finance_retrieval=finance_retrieval
+    )
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate finance/legal analysis markdown report")
+    parser = argparse.ArgumentParser(description="Generate split finance/legal/market markdown reports")
     parser.add_argument(
         "--result",
         type=Path,
@@ -908,6 +1078,7 @@ def main() -> int:
     )
     parser.add_argument("--doc-name", default="蜜雪集團")
     parser.add_argument("--pdf-name", default="02097_21-02-2025_蜜雪集團_全球發售.pdf")
+    parser.add_argument("--stock-code", default="")
     parser.add_argument(
         "--finance-retrieval",
         type=Path,
@@ -919,9 +1090,15 @@ def main() -> int:
         default=PKG_ROOT.parent / "ipo" / ".runtime" / "agent_retrieval_mixue_legal.json",
     )
     parser.add_argument(
+        "--reports-dir",
+        type=Path,
+        default=PKG_ROOT / "reports",
+    )
+    parser.add_argument(
         "--out",
         type=Path,
-        default=PKG_ROOT / "reports" / "mixue_finance_legal_report.md",
+        default=None,
+        help="已废弃：若传入且为目录则当作 --reports-dir；若为文件则取其父目录",
     )
     args = parser.parse_args()
 
@@ -937,16 +1114,26 @@ def main() -> int:
     if not isinstance(leg_ret, dict):
         leg_ret = None
 
-    md = build_report(
+    reports_dir = args.reports_dir
+    if args.out is not None:
+        reports_dir = args.out if args.out.suffix == "" else args.out.parent
+    stock_code = resolve_report_stock_code(
+        result, stock_code=args.stock_code, pdf_name=args.pdf_name
+    )
+    written = write_agent_reports(
         result,
+        reports_dir=reports_dir,
+        stock_code=stock_code,
         doc_name=args.doc_name,
         pdf_name=args.pdf_name,
         finance_retrieval=fin_ret,
         legal_retrieval=leg_ret,
     )
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(md, encoding="utf-8")
-    print(f"Wrote {args.out} ({len(md)} chars)")
+    if not written:
+        print("no reports written", file=sys.stderr)
+        return 1
+    for kind, path in written.items():
+        print(f"Wrote {kind} {path} ({path.stat().st_size} bytes)")
     return 0
 
 

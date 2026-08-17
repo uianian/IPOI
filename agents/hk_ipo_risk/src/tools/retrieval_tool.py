@@ -231,6 +231,80 @@ def _direct_section_search(
     return diversify_section_hits(candidates, top_k=top_k)
 
 
+def hits_from_prefer_pages(
+    parse_json: Path | str,
+    prefer_pages: list[int],
+    *,
+    keywords: list[str] | None = None,
+    top_k: int = 4,
+    excerpt_chars: int = 800,
+) -> list[dict[str, Any]]:
+    """辩论页码直取：不走章节路由，打开指定页后再按关键词过滤。"""
+    if not prefer_pages:
+        return []
+    pages = _load_full_parse_pages(parse_json)
+    want = {int(p) for p in prefer_pages}
+    kws = [str(k).strip() for k in (keywords or []) if str(k).strip()]
+    hits: list[dict[str, Any]] = []
+    matched_pages: set[int] = set()
+    page_blobs: dict[int, list[str]] = {}
+    for page_data in pages:
+        try:
+            page = int(page_data.get("page") or 0)
+        except (TypeError, ValueError):
+            continue
+        if page not in want:
+            continue
+        for elem_index, element in enumerate(page_data.get("elements") or []):
+            category = str(element.get("category") or "text")
+            if category not in {"text", "title", "table", "table_footnote", "table_caption"}:
+                continue
+            text = str(element.get("text") or "").strip()
+            if not text:
+                continue
+            page_blobs.setdefault(page, []).append(text)
+            matched = [k for k in kws if k.lower() in text.lower()]
+            if kws and not matched:
+                continue
+            hits.append(
+                {
+                    "page": page,
+                    "excerpt": text[:excerpt_chars],
+                    "section_id": "_prefer_page",
+                    "section_title": "",
+                    "source_type": "table" if category == "table" else "text",
+                    "category": category,
+                    "score": round(10.0 + len(matched), 4),
+                    "match_sources": ["prefer_pages", *(["grep"] if matched else [])],
+                    "matched_terms": matched,
+                    "element_index": elem_index,
+                }
+            )
+            matched_pages.add(page)
+    for page in sorted(want):
+        if page in matched_pages:
+            continue
+        blob = " ".join(page_blobs.get(page) or [])
+        if not blob:
+            continue
+        hits.append(
+            {
+                "page": page,
+                "excerpt": blob[:excerpt_chars],
+                "section_id": "_prefer_page",
+                "section_title": "",
+                "source_type": "text",
+                "category": "text",
+                "score": 1.0,
+                "match_sources": ["prefer_pages"],
+                "matched_terms": [k for k in kws if k.lower() in blob.lower()],
+                "element_index": 0,
+            }
+        )
+    hits.sort(key=lambda item: (-float(item.get("score") or 0), int(item.get("page") or 0)))
+    return hits[: max(1, int(top_k))]
+
+
 def _norm_excerpt_prefix(text: str, n: int = 80) -> str:
     t = re.sub(r"\s+", "", str(text or ""))
     return t[:n]
@@ -302,6 +376,7 @@ async def retrieve_section_evidence(
     section_hint: str | list[str] | None = None,
     top_k: int = 5,
     prefer_source_type: str = "mixed",
+    prefer_pages: list[int] | None = None,
 ) -> dict[str, Any]:
     """Section-first retrieval over full_parse.json; no full-document LLM context."""
     pages = _load_full_parse_pages(parse_json)
@@ -320,6 +395,22 @@ async def retrieve_section_evidence(
         top_k=max(1, min(int(top_k), 20)),
         prefer_source_type=prefer_source_type,
     )
+    if prefer_pages:
+        page_hits = hits_from_prefer_pages(
+            parse_json,
+            list(prefer_pages),
+            keywords=_query_terms(query, intent),
+            top_k=max(1, min(int(top_k), 20)),
+        )
+        merged: list[dict[str, Any]] = []
+        seen: set[tuple[Any, str]] = set()
+        for h in list(page_hits) + list(hits):
+            key = (h.get("page"), str(h.get("excerpt") or "")[:80])
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(h)
+        hits = merged[: max(1, min(int(top_k), 20))]
     return {
         "ok": True,
         "doc_id": doc_id,

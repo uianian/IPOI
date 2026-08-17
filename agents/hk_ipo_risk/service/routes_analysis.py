@@ -9,10 +9,11 @@ import time
 from typing import Any, AsyncIterator, Optional
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel
 
 from service.analysis_store import AnalysisStore, find_parse_task
+from service.stock_code import resolve_stock_code
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ class AnalysisStartBody(BaseModel):
     taskId: Optional[str] = None
     llmConfig: Optional[dict[str, Any]] = None
     isBiotech: Optional[bool] = None
+    ticker: Optional[str] = None
+    stockCode: Optional[str] = None
 
 
 def _err(status: int, code: str, message: str) -> JSONResponse:
@@ -86,6 +89,18 @@ async def analysis_start(
             **parse_meta,
             "isBiotech": bool(body.isBiotech),
             "issuerType": "biotech" if body.isBiotech else "general",
+        }
+
+    stock_code = resolve_stock_code(
+        ticker=body.ticker,
+        stock_code=body.stockCode,
+        parse_meta=parse_meta,
+    )
+    if stock_code:
+        parse_meta = {
+            **parse_meta,
+            "stockCode": stock_code,
+            "ticker": body.ticker or parse_meta.get("ticker") or stock_code,
         }
 
     # 记录是否使用前端覆盖的 LLM（不落盘明文 key）
@@ -205,11 +220,79 @@ async def analysis_result(
         {
             "analysisId": analysis_id,
             "status": meta.get("status") or "running",
+            "phase": meta.get("phase") or "analysis",
             "overallScore": meta.get("overallScore"),
             "riskLevel": meta.get("riskLevel"),
             "thoughts": thoughts,
             "agents": {},
+            "debate": {"rounds": 0, "messages": [], "completedAt": None},
             "completedAt": meta.get("completedAt"),
             "error": meta.get("error"),
         }
     )
+
+
+def _completed_result_or_404(
+    request: Request, client_project_id: str, analysis_id: Optional[str]
+):
+    store: AnalysisStore = request.app.state.analysis_store
+    aid = analysis_id or store.find_latest_by_project(client_project_id)
+    if not aid or not store.exists(aid):
+        return None, _err(404, "ANALYSIS_NOT_FOUND", "未找到分析任务")
+    meta = store.read_meta(aid)
+    if meta.get("clientProjectId") != client_project_id:
+        return None, _err(404, "ANALYSIS_NOT_FOUND", "analysisId 与 clientProjectId 不匹配")
+    result = store.read_result(aid)
+    if not result or meta.get("status") != "completed":
+        return None, _err(404, "REPORT_NOT_READY", "分析尚未完成，报告不可用")
+    return result, None
+
+
+@router.get("/{client_project_id}/report")
+async def analysis_report(
+    request: Request,
+    client_project_id: str,
+    analysisId: Optional[str] = None,
+):
+    result, err = _completed_result_or_404(request, client_project_id, analysisId)
+    if err is not None:
+        return err
+    report = (result or {}).get("report")
+    if not isinstance(report, dict):
+        return _err(404, "REPORT_NOT_READY", "报告尚未生成")
+    return _ok(report)
+
+
+@router.get("/{client_project_id}/report/export")
+async def analysis_report_export(
+    request: Request,
+    client_project_id: str,
+    analysisId: Optional[str] = None,
+):
+    from datetime import datetime
+    from urllib.parse import quote
+
+    from service.report_pdf import render_report_pdf
+
+    result, err = _completed_result_or_404(request, client_project_id, analysisId)
+    if err is not None:
+        return err
+    report = (result or {}).get("report")
+    if not isinstance(report, dict):
+        return _err(404, "REPORT_NOT_READY", "报告尚未生成")
+    store: AnalysisStore = request.app.state.analysis_store
+    aid = analysisId or store.find_latest_by_project(client_project_id)
+    meta = store.read_meta(aid) if aid else {}
+    parse_meta = meta.get("parseMeta") or {}
+    ticker = str(parse_meta.get("ticker") or parse_meta.get("stockCode") or "")
+    date_s = datetime.now().strftime("%Y-%m-%d")
+    filename = f"IPO风险报告_{ticker or 'unknown'}_{date_s}.pdf"
+    pdf_bytes = render_report_pdf(report, ticker=ticker)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}",
+        },
+    )
+

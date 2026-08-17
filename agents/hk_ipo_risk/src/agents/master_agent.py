@@ -142,16 +142,37 @@ class MasterAgent:
                 "claims": [],
             }
         market_cards = dossier_to_cards(mkt_dos, excerpt_max=excerpt_max)
+        usable_mkt = bool(mkt) and not bool((mkt.get("features") or {}).get("demo"))
         if not market_cards.get("agent"):
-            market_cards = {
-                "agent": "market",
-                "risk_score": mkt.get("risk_score") or 50,
-                "risk_level": mkt.get("risk_level") or "medium",
-                "summary": (mkt.get("summary") or "")[:280],
-                "claims": [],
-                "demo": True,
-            }
-        ref = reference_fundamental(float(fin.get("risk_score") or 0), float(leg.get("risk_score") or 0))
+            if usable_mkt:
+                market_cards = {
+                    "agent": "market",
+                    "risk_score": mkt.get("risk_score"),
+                    "risk_level": mkt.get("risk_level"),
+                    "summary": (mkt.get("summary") or "")[:280],
+                    "claims": [],
+                    "demo": False,
+                }
+            else:
+                market_cards = {
+                    "agent": "market",
+                    "risk_score": None,
+                    "risk_level": "",
+                    "summary": (mkt.get("summary") or "")[:280],
+                    "claims": [],
+                    "demo": True,
+                }
+        market_score = None
+        if usable_mkt and mkt.get("risk_score") is not None:
+            try:
+                market_score = float(mkt.get("risk_score"))
+            except (TypeError, ValueError):
+                market_score = None
+        ref = reference_fundamental(
+            float(fin.get("risk_score") or 0),
+            float(leg.get("risk_score") or 0),
+            market_score,
+        )
         state: dict[str, Any] = {
             "doc_id": doc_id,
             "doc_name": doc_name,

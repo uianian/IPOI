@@ -98,7 +98,7 @@ def process_one(
     fin_json = runtime / f"agent_retrieval_{doc_id}_finance.json"
     leg_json = runtime / f"agent_retrieval_{doc_id}_legal.json"
     result_json = agent / ".runtime" / f"18a_{doc_id}_finance_legal.json"
-    report_md = agent / "reports" / f"18a_{doc_id}_finance_legal_report.md"
+    reports_dir = agent / "reports"
 
     print(f"\n===== [{i}/{n}] {doc_id} {doc_name} =====")
 
@@ -186,7 +186,7 @@ def process_one(
         joint_cmd.extend(["--api-base", api_base])
     run(joint_cmd, cwd=agent)
 
-    # 4) Markdown 报告
+    # 4) Markdown 报告（三份独立：{code}_finance/legal/market_report.md）
     run(
         [
             py,
@@ -197,17 +197,22 @@ def process_one(
             doc_name,
             "--pdf-name",
             pdf_name,
+            "--stock-code",
+            doc_id,
             "--finance-retrieval",
             str(fin_json),
             "--legal-retrieval",
             str(leg_json),
-            "--out",
-            str(report_md),
+            "--reports-dir",
+            str(reports_dir),
         ],
         cwd=agent,
     )
     print(f"OK → {result_json}")
-    print(f"OK → {report_md}")
+    for kind in ("finance", "legal", "market"):
+        path = reports_dir / f"{doc_id}_{kind}_report.md"
+        if path.is_file():
+            print(f"OK → {path}")
     print(f"OK → debate dossiers under {agent / '.runtime' / 'debate'} (auto)")
     return True
 
