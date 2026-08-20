@@ -690,9 +690,11 @@ class MarketAgent:
                     {"role": "system", "content": MARKET_ANALYSIS_SYSTEM},
                     {"role": "user", "content": prompt},
                 ],
-                enable_reasoning=True,
+                # 舆情相关性分类是简单结构化 JSON 输出；thinking 模式长 CoT 会
+                # 挤爆 max_tokens 预算导致 content 为空、最终 JSON 被截断，
+                # 因此本调用关闭 thinking，确保分类结果稳定产出。
+                enable_reasoning=False,
                 max_tokens=2048,
-                reasoning_max_tokens=256,
             )
         except Exception as exc:
             logger.warning("market public-opinion classification failed: %s", exc)
