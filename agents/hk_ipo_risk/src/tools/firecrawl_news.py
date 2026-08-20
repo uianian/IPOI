@@ -5,7 +5,7 @@ import json
 import logging
 import re
 import tempfile
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
@@ -266,6 +266,7 @@ class FirecrawlNewsCollector:
                 "scraped_urls": 0,
                 "accepted_articles": 0,
                 "rejected_after_cutoff": 0,
+                "rejected_before_window": 0,
                 "rejected_missing_date": 0,
                 "rejected_empty_content": 0,
                 "raw_cache_used": False,
@@ -286,6 +287,7 @@ class FirecrawlNewsCollector:
                 if (
                     str(payload.get("stock_code")) == stock_code
                     and str(payload.get("as_of_date")) == as_of_date.isoformat()
+                    and self._raw_cache_matches_window(payload, as_of_date=as_of_date)
                 ):
                     status["raw_cache_used"] = True
                     status["skip_reason"] = "reused_raw_firecrawl_cache"
@@ -323,18 +325,25 @@ class FirecrawlNewsCollector:
         }
 
         discovered: dict[str, dict[str, Any]] = {}
-        max_urls = min(5, int(search_cfg.get("max_urls") or 5))
-        search_limit = min(5, int(search_cfg.get("limit_per_query") or 5))
+        max_urls = min(10, int(search_cfg.get("max_urls") or 10))
+        search_limit = min(10, int(search_cfg.get("limit_per_query") or 10))
         status["search_result_limit"] = search_limit
         sources = list(search_cfg.get("sources") or ["web"])
         status["search_sources"] = sources
         tbs = None
+        legacy_years = search_cfg.get("historical_lookback_years")
+        configured_lookback_days = (
+            int(search_cfg["lookback_days"])
+            if search_cfg.get("lookback_days") is not None
+            else int(legacy_years) * 365 if legacy_years is not None else 365
+        )
+        lookback_days = max(1, configured_lookback_days)
+        window_start = as_of_date - timedelta(days=lookback_days)
+        status["window_start"] = window_start.isoformat()
         if bool(search_cfg.get("use_tbs_date_filter", True)):
-            years = int(search_cfg.get("historical_lookback_years") or 5)
-            start_date = date(max(1900, as_of_date.year - years), 1, 1)
             tbs = (
                 "cdr:1,"
-                f"cd_min:{start_date.strftime('%m/%d/%Y')},"
+                f"cd_min:{window_start.strftime('%m/%d/%Y')},"
                 f"cd_max:{as_of_date.strftime('%m/%d/%Y')}"
             )
         status["tbs"] = tbs
@@ -350,6 +359,7 @@ class FirecrawlNewsCollector:
             "company": company,
             "listing_date": listing_date.isoformat(),
             "as_of_date": as_of_date.isoformat(),
+            "window_start": window_start.isoformat(),
             "query": query,
             "sources": sources,
             "tbs": tbs,
@@ -442,7 +452,7 @@ class FirecrawlNewsCollector:
             payload["articles"].append(article)
         self._write_raw_cache(raw_path, payload)
 
-        scrape_limit = min(5, int(scrape_cfg.get("max_requests") or 5))
+        scrape_limit = min(10, int(scrape_cfg.get("max_requests") or 10))
         status["scrape_request_limit"] = scrape_limit
         candidates = [
             article for article in payload["articles"]
@@ -521,11 +531,38 @@ class FirecrawlNewsCollector:
         news_dir: Path | str,
     ) -> bool:
         cache_cfg = self.settings.get("cache") or {}
-        return bool(cache_cfg.get("reuse_raw_results", True)) and self.raw_cache_path(
+        raw_path = self.raw_cache_path(
             stock_code=stock_code,
             as_of_date=as_of_date,
             news_dir=news_dir,
-        ).is_file()
+        )
+        if not bool(cache_cfg.get("reuse_raw_results", True)) or not raw_path.is_file():
+            return False
+        try:
+            payload = json.loads(raw_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, json.JSONDecodeError):
+            return False
+        return (
+            str(payload.get("stock_code")) == stock_code
+            and str(payload.get("as_of_date")) == as_of_date.isoformat()
+            and self._raw_cache_matches_window(payload, as_of_date=as_of_date)
+        )
+
+    def _raw_cache_matches_window(
+        self,
+        payload: dict[str, Any],
+        *,
+        as_of_date: date,
+    ) -> bool:
+        search_cfg = self.settings.get("search") or {}
+        legacy_years = search_cfg.get("historical_lookback_years")
+        configured_lookback_days = (
+            int(search_cfg["lookback_days"])
+            if search_cfg.get("lookback_days") is not None
+            else int(legacy_years) * 365 if legacy_years is not None else 365
+        )
+        expected_start = as_of_date - timedelta(days=max(1, configured_lookback_days))
+        return str(payload.get("window_start") or "") == expected_start.isoformat()
 
     def _finalize_payload(
         self,
@@ -541,6 +578,16 @@ class FirecrawlNewsCollector:
         status["raw_articles"] = len(articles)
         status["raw_cache_complete"] = bool(payload.get("completed"))
         status["cached_search_hits"] = len(articles)
+        search_cfg = self.settings.get("search") or {}
+        legacy_years = search_cfg.get("historical_lookback_years")
+        configured_lookback_days = (
+            int(search_cfg["lookback_days"])
+            if search_cfg.get("lookback_days") is not None
+            else int(legacy_years) * 365 if legacy_years is not None else 365
+        )
+        lookback_days = max(1, configured_lookback_days)
+        window_start = as_of_date - timedelta(days=lookback_days)
+        status["window_start"] = window_start.isoformat()
         status["raw_successful_articles"] = sum(
             article.get("scrape_status") == "success" for article in articles
         )
@@ -575,6 +622,11 @@ class FirecrawlNewsCollector:
                 article["accepted_for_scoring"] = False
                 article["rejection_reason"] = "after_as_of_date"
                 status["rejected_after_cutoff"] += 1
+                continue
+            if published < window_start:
+                article["accepted_for_scoring"] = False
+                article["rejection_reason"] = "before_window_start"
+                status["rejected_before_window"] += 1
                 continue
             article["accepted_for_scoring"] = True
             article["rejection_reason"] = None
@@ -678,4 +730,3 @@ class FirecrawlNewsCollector:
                 temporary = Path(temp_name)
                 if temporary.exists():
                     temporary.unlink()
-

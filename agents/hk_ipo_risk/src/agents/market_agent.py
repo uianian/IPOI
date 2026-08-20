@@ -134,10 +134,15 @@ class MarketAgent:
         started = time.time()
         self._doc_id = doc_id
         data_settings = self._market_settings.get("data") or {}
+        news_search_settings = self._firecrawl_settings.get("search") or {}
+        news_lookback_days = int(news_search_settings.get("lookback_days") or 365)
+        news_max_articles = int(news_search_settings.get("max_urls") or 10)
         loader_kwargs: dict[str, Any] = {
             "strict_cutoff": self._strict_cutoff,
             "features_csv": features_csv or data_settings.get("features_csv"),
             "news_dir": news_dir or data_settings.get("news_dir"),
+            "news_lookback_days": news_lookback_days,
+            "news_max_articles": news_max_articles,
         }
         loader_kwargs = {key: value for key, value in loader_kwargs.items() if value is not None}
         loader = MarketDataLoader(**loader_kwargs)
@@ -541,8 +546,21 @@ class MarketAgent:
         if policy == "never" and not reusable_raw:
             status["skip_reason"] = "fetch_policy_never"
             return status
-        if policy == "on_missing" and int(local_news_status.get("pre_cutoff_rows") or 0) > 0:
-            status["skip_reason"] = "usable_local_prelisting_news_exists"
+        in_window_rows = int(
+            local_news_status.get("in_window_rows")
+            if local_news_status.get("in_window_rows") is not None
+            else local_news_status.get("pre_cutoff_rows") or 0
+        )
+        max_articles = int(
+            local_news_status.get("max_articles")
+            or (self._firecrawl_settings.get("search") or {}).get("max_urls")
+            or 10
+        )
+        status["local_in_window_rows"] = in_window_rows
+        status["max_articles"] = max_articles
+        status["remaining_capacity"] = max(0, max_articles - in_window_rows)
+        if policy == "on_missing" and in_window_rows > 0:
+            status["skip_reason"] = "usable_local_news_in_window"
             return status
         if not collector.enabled and not reusable_raw:
             status["skip_reason"] = (

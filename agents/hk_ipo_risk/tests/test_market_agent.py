@@ -61,6 +61,45 @@ def _write_features(path: Path, *, include_as_of: bool = True) -> None:
 
 
 class MarketDataLoaderTest(unittest.TestCase):
+    def test_news_window_and_target_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "features.csv"
+            news_dir = root / "news"
+            news_dir.mkdir()
+            _write_features(path)
+            with (news_dir / "02097.csv").open("w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(
+                    f,
+                    fieldnames=["新闻标题", "新闻内容", "发布时间", "文章来源", "新闻链接"],
+                )
+                writer.writeheader()
+                for index in range(12):
+                    writer.writerow({
+                        "新闻标题": f"新闻{index}", "新闻内容": "正文",
+                        "发布时间": f"2025-02-{28 - index:02d}",
+                        "文章来源": "测试媒体", "新闻链接": f"https://example.com/{index}",
+                    })
+                writer.writerow({
+                    "新闻标题": "窗口外", "新闻内容": "旧正文",
+                    "发布时间": "2024-01-01", "文章来源": "测试媒体",
+                    "新闻链接": "https://example.com/old",
+                })
+            loader = MarketDataLoader(path, news_dir=news_dir, news_lookback_days=365, news_max_articles=10)
+            snapshot = loader.load_snapshot("02097")
+            status = loader.inspect_news_availability(snapshot)
+            candidates = loader.load_news_candidates(snapshot)
+
+        self.assertEqual(status["window_start"], "2024-03-02")
+        self.assertEqual(status["pre_cutoff_rows"], 13)
+        self.assertEqual(status["in_window_rows"], 12)
+        self.assertEqual(status["before_window_rows"], 1)
+        self.assertEqual(status["max_articles"], 10)
+        self.assertEqual(status["remaining_capacity"], 0)
+        self.assertEqual(len(candidates), 10)
+        self.assertEqual(candidates[0]["published_at"], "2025-02-28")
+        self.assertEqual(candidates[-1]["published_at"], "2025-02-19")
+
     def test_loader_enforces_cutoff_and_excludes_outcomes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "features.csv"
@@ -327,4 +366,3 @@ class MarketAgentTest(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

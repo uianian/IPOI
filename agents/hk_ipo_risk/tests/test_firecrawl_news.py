@@ -74,11 +74,11 @@ class FirecrawlConfigTest(unittest.TestCase):
             base = Path(tmp) / "firecrawl.yaml"
             local = Path(tmp) / "firecrawl.local.yaml"
             base.write_text(
-                "firecrawl:\n  api_key: base-key\n  enabled: true\n  search:\n    max_urls: 5\n",
+                "firecrawl:\n  api_key: base-key\n  enabled: true\n  search:\n    max_urls: 10\n    historical_lookback_years: 5\n",
                 encoding="utf-8",
             )
             local.write_text(
-                "firecrawl:\n  api_key: local-key\n  search:\n    max_urls: 7\n",
+                "firecrawl:\n  api_key: local-key\n  search:\n    max_urls: 12\n",
                 encoding="utf-8",
             )
             with patch.dict(os.environ, {"FIRECRAWL_API_KEY": "env-key"}, clear=False):
@@ -88,11 +88,11 @@ class FirecrawlConfigTest(unittest.TestCase):
                 )
 
         self.assertEqual(settings["api_key"], "env-key")
-        self.assertEqual(settings["search"]["max_urls"], 5)
-        self.assertEqual(settings["search"]["limit_per_query"], 5)
-        self.assertEqual(settings["scrape"]["max_requests"], 5)
+        self.assertEqual(settings["search"]["max_urls"], 10)
+        self.assertEqual(settings["search"]["limit_per_query"], 10)
+        self.assertEqual(settings["scrape"]["max_requests"], 10)
         self.assertTrue(settings["search"]["use_tbs_date_filter"])
-        self.assertEqual(settings["search"]["historical_lookback_years"], 5)
+        self.assertEqual(settings["search"]["lookback_days"], 1825)
         self.assertTrue(settings["cache"]["reuse_raw_results"])
         self.assertTrue(settings["enabled"])
         public = FirecrawlNewsCollector(settings, client=FakeFirecrawl()).public_status()
@@ -101,6 +101,56 @@ class FirecrawlConfigTest(unittest.TestCase):
 
 
 class FirecrawlCollectorTest(unittest.TestCase):
+    def test_ten_article_limits_and_rolling_window(self) -> None:
+        class TenResultClient:
+            def __init__(self) -> None:
+                self.search_options = None
+                self.scrape_urls = []
+
+            def search(self, query: str, **options):
+                self.search_options = options
+                return SimpleNamespace(web=[
+                    SimpleNamespace(
+                        url=f"https://example.com/{index}",
+                        title=f"新闻{index}",
+                        publishedDate="2024-12-15",
+                    )
+                    for index in range(12)
+                ])
+
+            def scrape(self, url: str, **options):
+                self.scrape_urls.append(url)
+                return SimpleNamespace(
+                    markdown="正文",
+                    metadata={"publishedTime": "2024-12-15"},
+                )
+
+        client = TenResultClient()
+        settings = {
+            "enabled": True,
+            "configured": True,
+            "requested_enabled": True,
+            "api_key": "test",
+            "search": {
+                "sources": ["web"], "limit_per_query": 10, "max_urls": 10,
+                "lookback_days": 365, "use_tbs_date_filter": True,
+            },
+            "scrape": {"max_requests": 10},
+            "cache": {"reuse_raw_results": False},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            status = FirecrawlNewsCollector(settings, client=client).collect(
+                company="翰思艾泰", stock_code="03378",
+                listing_date=date(2025, 12, 23), as_of_date=date(2025, 12, 15),
+                news_dir=tmp,
+            )
+
+        self.assertEqual(client.search_options["limit"], 10)
+        self.assertEqual(client.search_options["tbs"], "cdr:1,cd_min:12/15/2024,cd_max:12/15/2025")
+        self.assertEqual(len(client.scrape_urls), 10)
+        self.assertEqual(status["accepted_articles"], 10)
+        self.assertEqual(status["window_start"], "2024-12-15")
+
     def test_search_scrape_cutoff_and_cache(self) -> None:
         fake = FakeFirecrawl()
         settings = {
@@ -119,6 +169,7 @@ class FirecrawlCollectorTest(unittest.TestCase):
                 "location": "Hong Kong",
                 "use_tbs_date_filter": True,
                 "historical_lookback_years": 5,
+                "lookback_days": 365,
             },
             "scrape": {
                 "max_requests": 5,
@@ -167,7 +218,7 @@ class FirecrawlCollectorTest(unittest.TestCase):
         self.assertEqual(fake.searches[0][1]["limit"], 5)
         self.assertEqual(
             fake.searches[0][1]["tbs"],
-            "cdr:1,cd_min:01/01/2020,cd_max:03/02/2025",
+            "cdr:1,cd_min:03/02/2024,cd_max:03/02/2025",
         )
         self.assertEqual(fake.scrape_options[0]["formats"], ["markdown", "rawHtml"])
         self.assertIn("https://example.com/post", fake.scraped)
@@ -240,6 +291,47 @@ class FirecrawlCollectorTest(unittest.TestCase):
 
 
 class FirecrawlMarketAgentTest(unittest.IsolatedAsyncioTestCase):
+    async def test_agent_accepts_any_positive_local_count_up_to_the_cap(self) -> None:
+        settings = {
+            "enabled": False,
+            "requested_enabled": False,
+            "configured": False,
+            "fetch_policy": "on_missing",
+            "search": {"max_urls": 10, "lookback_days": 365},
+            "cache": {"reuse_raw_results": False},
+        }
+        snapshot = SimpleNamespace(
+            company="翰思艾泰",
+            stock_code="03378",
+            listing_date=date(2025, 12, 23),
+            as_of_date=date(2025, 12, 15),
+        )
+        agent = MarketAgent(firecrawl_settings=settings)
+        with tempfile.TemporaryDirectory() as tmp:
+            available = await agent._maybe_fetch_firecrawl_news(
+                snapshot,
+                news_dir=Path(tmp),
+                local_news_status={
+                    "pre_cutoff_rows": 1,
+                    "in_window_rows": 1,
+                    "max_articles": 10,
+                },
+            )
+            missing = await agent._maybe_fetch_firecrawl_news(
+                snapshot,
+                news_dir=Path(tmp),
+                local_news_status={
+                    "pre_cutoff_rows": 0,
+                    "in_window_rows": 0,
+                    "max_articles": 10,
+                },
+            )
+
+        self.assertEqual(available["skip_reason"], "usable_local_news_in_window")
+        self.assertEqual(available["remaining_capacity"], 9)
+        self.assertEqual(missing["skip_reason"], "firecrawl_disabled")
+        self.assertEqual(missing["remaining_capacity"], 10)
+
     async def test_agent_fetches_cache_before_opinion_resolution(self) -> None:
         fake = FakeFirecrawl()
         settings = {
@@ -338,4 +430,3 @@ class FirecrawlMarketAgentTest(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

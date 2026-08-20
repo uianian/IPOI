@@ -384,6 +384,12 @@ def resolve_firecrawl_settings(
     search = merged.get("search") if isinstance(merged.get("search"), dict) else {}
     scrape = merged.get("scrape") if isinstance(merged.get("scrape"), dict) else {}
     cache = merged.get("cache") if isinstance(merged.get("cache"), dict) else {}
+    legacy_years = search.get("historical_lookback_years")
+    configured_lookback_days = (
+        int(search["lookback_days"])
+        if search.get("lookback_days") is not None
+        else int(legacy_years) * 365 if legacy_years is not None else 365
+    )
 
     return {
         "enabled": bool(requested_enabled and resolved_key),
@@ -398,18 +404,22 @@ def resolve_firecrawl_settings(
                 or '"{company}" 风险 争议 监管 舆论 新闻'
             ),
             "sources": list(search.get("sources") or ["web"]),
-            "limit_per_query": max(1, min(5, int(search.get("limit_per_query") or 5))),
-            "max_urls": max(1, min(5, int(search.get("max_urls") or 5))),
+            "limit_per_query": max(1, min(10, int(search.get("limit_per_query") or 10))),
+            "max_urls": max(1, min(10, int(search.get("max_urls") or 10))),
             "timeout_ms": max(1000, int(search.get("timeout_ms") or 60000)),
             "location": str(search.get("location") or "Hong Kong"),
             "use_tbs_date_filter": bool(search.get("use_tbs_date_filter", True)),
+            "lookback_days": max(
+                1,
+                min(3650, configured_lookback_days),
+            ),
             "historical_lookback_years": max(
                 1, min(20, int(search.get("historical_lookback_years") or 5))
             ),
             "exclude_domains": list(search.get("exclude_domains") or []),
         },
         "scrape": {
-            "max_requests": max(1, min(5, int(scrape.get("max_requests") or 5))),
+            "max_requests": max(1, min(10, int(scrape.get("max_requests") or 10))),
             "only_main_content": bool(scrape.get("only_main_content", True)),
             "max_content_chars": max(500, int(scrape.get("max_content_chars") or 8000)),
             "timeout_ms": max(1000, int(scrape.get("timeout_ms") or 30000)),

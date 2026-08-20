@@ -75,10 +75,14 @@ class MarketDataLoader:
         *,
         news_dir: Path | str = DEFAULT_NEWS_DIR,
         strict_cutoff: bool = True,
+        news_lookback_days: int = 365,
+        news_max_articles: int = 10,
     ) -> None:
         self.features_csv = Path(features_csv)
         self.news_dir = Path(news_dir)
         self.strict_cutoff = strict_cutoff
+        self.news_lookback_days = max(1, int(news_lookback_days))
+        self.news_max_articles = max(1, int(news_max_articles))
 
     def load_snapshot(self, stock_code: str) -> MarketSnapshot:
         code5 = normalize_stock_code(stock_code)
@@ -173,6 +177,11 @@ class MarketDataLoader:
             "exists": path.is_file(),
             "total_rows": 0,
             "pre_cutoff_rows": 0,
+            "window_start": (snapshot.as_of_date - timedelta(days=self.news_lookback_days)).isoformat(),
+            "in_window_rows": 0,
+            "before_window_rows": 0,
+            "max_articles": self.news_max_articles,
+            "remaining_capacity": self.news_max_articles,
             "earliest_date": None,
             "latest_date": None,
         }
@@ -189,12 +198,21 @@ class MarketDataLoader:
                 dates.append(published)
                 if published <= snapshot.as_of_date:
                     result["pre_cutoff_rows"] += 1
+                    if published >= snapshot.as_of_date - timedelta(days=self.news_lookback_days):
+                        result["in_window_rows"] += 1
+                    else:
+                        result["before_window_rows"] += 1
         if dates:
             result["earliest_date"] = min(dates)
             result["latest_date"] = max(dates)
-        if result["pre_cutoff_rows"] == 0:
+        result["remaining_capacity"] = max(
+            0, self.news_max_articles - result["in_window_rows"]
+        )
+        if result["in_window_rows"] == 0:
             result["unavailable_reason"] = (
                 "all_local_news_after_as_of_date"
+                if dates and result["pre_cutoff_rows"] == 0
+                else "no_local_news_in_window"
                 if dates
                 else "local_news_dates_missing_or_invalid"
             )
@@ -206,10 +224,15 @@ class MarketDataLoader:
         if not path.is_file():
             return []
         candidates: list[dict[str, Any]] = []
+        window_start = snapshot.as_of_date - timedelta(days=self.news_lookback_days)
         with path.open("r", encoding="utf-8-sig", newline="") as f:
             for row in csv.DictReader(f):
                 published = _parse_date(row.get("发布时间") or row.get("published_at"))
-                if published is None or published > snapshot.as_of_date:
+                if (
+                    published is None
+                    or published < window_start
+                    or published > snapshot.as_of_date
+                ):
                     continue
                 candidates.append(
                     {
@@ -226,5 +249,5 @@ class MarketDataLoader:
                         "url": row.get("新闻链接") or row.get("url") or "",
                     }
                 )
-        return candidates
-
+        candidates.sort(key=lambda item: item["published_at"], reverse=True)
+        return candidates[: self.news_max_articles]
