@@ -202,8 +202,17 @@ def _is_homepage_url(url: str) -> bool:
     return parsed.path in {"", "/"} and not parsed.query
 
 
+def _is_excluded_domain(url: str, excluded_domains: list[str]) -> bool:
+    hostname = (urlparse(url).hostname or "").lower().rstrip(".")
+    for raw_domain in excluded_domains:
+        domain = str(raw_domain or "").lower().strip().lstrip(".").rstrip(".")
+        if domain and (hostname == domain or hostname.endswith(f".{domain}")):
+            return True
+    return False
+
+
 class FirecrawlNewsCollector:
-    """Discover and cache verifiably pre-listing article bodies.
+    """Discover and cache verifiably pre-listing article summaries or bodies.
 
     Search is only URL discovery. Every selected URL is passed through
     Firecrawl ``scrape`` with ``markdown`` and ``only_main_content``. An article
@@ -261,6 +270,7 @@ class FirecrawlNewsCollector:
                 "search_hits": 0,
                 "unique_urls": 0,
                 "filtered_homepage_urls": 0,
+                "filtered_excluded_domains": 0,
                 "scrape_request_limit": 0,
                 "scrape_requests": 0,
                 "scraped_urls": 0,
@@ -314,7 +324,7 @@ class FirecrawlNewsCollector:
         scrape_cfg = self.settings.get("scrape") or {}
         template = str(
             search_cfg.get("query_template")
-            or '"{company}" 风险 争议 监管 舆论 新闻'
+            or '"{company}" "{stock_code}"'
         )
         variables = {
             "company": company,
@@ -381,9 +391,6 @@ class FirecrawlNewsCollector:
             }
             if tbs:
                 search_options["tbs"] = tbs
-            excluded = list(search_cfg.get("exclude_domains") or [])
-            if excluded:
-                search_options["exclude_domains"] = excluded
             results = client.search(query, **search_options)
         except Exception as exc:
             logger.warning("Firecrawl search failed for %s: %s", query, exc)
@@ -401,12 +408,16 @@ class FirecrawlNewsCollector:
             )
         bucket_order = [name for name in ("news", "web") if name in sources]
         bucket_order.extend(name for name in sources if name not in bucket_order)
+        excluded = list(search_cfg.get("exclude_domains") or [])
         for bucket_name in bucket_order:
             bucket = _value(results, bucket_name) or []
             for item in bucket:
                 status["search_hits"] += 1
                 url = str(_value(item, "url") or "").strip()
                 if not url.startswith(("http://", "https://")) or url in discovered:
+                    continue
+                if _is_excluded_domain(url, excluded):
+                    status["filtered_excluded_domains"] += 1
                     continue
                 discovered[url] = {
                     "query": query,
@@ -431,10 +442,11 @@ class FirecrawlNewsCollector:
         status["unique_urls"] = len(discovered)
         for candidate in discovered.values():
             search_published_at = candidate.get("published_at")
+            scrape_enabled = bool(scrape_cfg.get("enabled", True))
             article = {
                 **{key: value for key, value in candidate.items() if key != "published_at"},
                 "search_published_at": search_published_at,
-                "scrape_status": "pending",
+                "scrape_status": "pending" if scrape_enabled else "search_only",
                 "scraped_at": None,
                 "markdown": "",
                 "raw_html": "",
@@ -596,9 +608,11 @@ class FirecrawlNewsCollector:
         )
         max_chars = int((self.settings.get("scrape") or {}).get("max_content_chars") or 8000)
         for article in articles:
-            if article.get("scrape_status") != "success":
+            if article.get("scrape_status") not in {"success", "search_only"}:
                 continue
-            markdown = str(article.get("markdown") or "").strip()
+            markdown = str(
+                article.get("markdown") or article.get("description") or ""
+            ).strip()
             if not markdown:
                 article["accepted_for_scoring"] = False
                 article["rejection_reason"] = "empty_content"
@@ -639,7 +653,11 @@ class FirecrawlNewsCollector:
                     "发布时间": published.isoformat(),
                     "文章来源": str(article.get("source") or urlparse(str(article.get("url") or "")).netloc),
                     "新闻链接": str(article.get("url") or ""),
-                    "抓取方式": f"firecrawl_search+scrape;date={date_source}",
+                    "抓取方式": (
+                        "firecrawl_search_summary"
+                        if article.get("scrape_status") == "search_only"
+                        else "firecrawl_search+scrape"
+                    ) + f";date={date_source}",
                     "抓取时间": str(article.get("scraped_at") or payload.get("updated_at") or ""),
                 }
             )

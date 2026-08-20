@@ -13,6 +13,7 @@ from unittest.mock import patch
 from src.agents.market_agent import MarketAgent
 from src.config import resolve_firecrawl_settings
 from src.tools.firecrawl_news import FirecrawlNewsCollector
+from src.tools.market_data import MarketDataLoader
 
 
 class FakeFirecrawl:
@@ -90,7 +91,9 @@ class FirecrawlConfigTest(unittest.TestCase):
         self.assertEqual(settings["api_key"], "env-key")
         self.assertEqual(settings["search"]["max_urls"], 10)
         self.assertEqual(settings["search"]["limit_per_query"], 10)
+        self.assertEqual(settings["search"]["query_template"], '"{company}" "{stock_code}"')
         self.assertEqual(settings["scrape"]["max_requests"], 10)
+        self.assertFalse(settings["scrape"]["enabled"])
         self.assertTrue(settings["search"]["use_tbs_date_filter"])
         self.assertEqual(settings["search"]["lookback_days"], 1825)
         self.assertTrue(settings["cache"]["reuse_raw_results"])
@@ -101,6 +104,89 @@ class FirecrawlConfigTest(unittest.TestCase):
 
 
 class FirecrawlCollectorTest(unittest.TestCase):
+    def test_search_summary_without_scrape_filters_domain_and_dates(self) -> None:
+        class SearchOnlyClient:
+            def __init__(self) -> None:
+                self.search_options = None
+                self.scraped = []
+
+            def search(self, query: str, **options):
+                self.search_options = options
+                return SimpleNamespace(web=[
+                    SimpleNamespace(
+                        url="https://www.xincailiao.com/blocked",
+                        title="被排除域名",
+                        description="不应入库",
+                        publishedDate="2025-06-01",
+                    ),
+                    SimpleNamespace(
+                        url="https://example.com/valid",
+                        title="有效摘要",
+                        description="搜索摘要正文",
+                        publishedDate="2025-06-01",
+                    ),
+                    SimpleNamespace(
+                        url="https://example.com/old",
+                        title="窗口前",
+                        description="过早摘要",
+                        publishedDate="2024-01-01",
+                    ),
+                    SimpleNamespace(
+                        url="https://example.com/future",
+                        title="截止日后",
+                        description="过期摘要",
+                        publishedDate="2025-12-16",
+                    ),
+                    SimpleNamespace(
+                        url="https://example.com/missing",
+                        title="无日期",
+                        description="无日期摘要",
+                    ),
+                ])
+
+            def scrape(self, url: str, **options):
+                self.scraped.append(url)
+                raise AssertionError("scrape must be disabled for summary validation")
+
+        client = SearchOnlyClient()
+        settings = {
+            "enabled": True, "configured": True, "requested_enabled": True,
+            "api_key": "test",
+            "search": {
+                "sources": ["web"], "limit_per_query": 10, "max_urls": 10,
+                "lookback_days": 365, "use_tbs_date_filter": True,
+                "exclude_domains": ["xincailiao.com"],
+            },
+            "scrape": {"enabled": False, "max_requests": 10},
+            "cache": {"reuse_raw_results": False},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            status = FirecrawlNewsCollector(settings, client=client).collect(
+                company="翰思艾泰", stock_code="03378",
+                listing_date=date(2025, 12, 23), as_of_date=date(2025, 12, 15),
+                news_dir=tmp,
+            )
+            with (Path(tmp) / "03378.csv").open(encoding="utf-8-sig", newline="") as stream:
+                rows = list(csv.DictReader(stream))
+            candidates = MarketDataLoader(news_dir=tmp).load_news_candidates(
+                SimpleNamespace(stock_code="03378", as_of_date=date(2025, 12, 15))
+            )
+
+        self.assertNotIn("exclude_domains", client.search_options)
+        self.assertEqual(status["filtered_excluded_domains"], 1)
+        self.assertEqual(status["accepted_articles"], 1)
+        self.assertEqual(status["rejected_before_window"], 1)
+        self.assertEqual(status["rejected_after_cutoff"], 1)
+        self.assertEqual(status["rejected_missing_date"], 1)
+        self.assertEqual(client.scraped, [])
+        self.assertEqual(rows[0]["新闻标题"], "有效摘要")
+        self.assertEqual(rows[0]["新闻内容"], "搜索摘要正文")
+        self.assertEqual(rows[0]["新闻链接"], "https://example.com/valid")
+        self.assertEqual(rows[0]["抓取方式"], "firecrawl_search_summary;date=search_result")
+        self.assertEqual(candidates[0]["title"], "有效摘要")
+        self.assertEqual(candidates[0]["summary"], "搜索摘要正文")
+        self.assertEqual(candidates[0]["url"], "https://example.com/valid")
+
     def test_ten_article_limits_and_rolling_window(self) -> None:
         class TenResultClient:
             def __init__(self) -> None:

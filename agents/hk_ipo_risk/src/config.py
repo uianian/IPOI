@@ -401,7 +401,7 @@ def resolve_firecrawl_settings(
         "search": {
             "query_template": str(
                 search.get("query_template")
-                or '"{company}" 风险 争议 监管 舆论 新闻'
+                or '"{company}" "{stock_code}"'
             ),
             "sources": list(search.get("sources") or ["web"]),
             "limit_per_query": max(1, min(10, int(search.get("limit_per_query") or 10))),
@@ -419,6 +419,7 @@ def resolve_firecrawl_settings(
             "exclude_domains": list(search.get("exclude_domains") or []),
         },
         "scrape": {
+            "enabled": bool(scrape.get("enabled", False)),
             "max_requests": max(1, min(10, int(scrape.get("max_requests") or 10))),
             "only_main_content": bool(scrape.get("only_main_content", True)),
             "max_content_chars": max(500, int(scrape.get("max_content_chars") or 8000)),

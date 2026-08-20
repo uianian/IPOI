@@ -17,7 +17,7 @@ firecrawl:
     max_urls: 10
     timeout_ms: 60000
     location: "Hong Kong"
-    query_template: '"{company}" 风险 争议 监管 舆论 新闻'
+    query_template: '"{company}" "{stock_code}"'
     use_tbs_date_filter: true
     # 截止日前滚动 365 天；旧 historical_lookback_years 仅作兼容回退。
     lookback_days: 365
@@ -25,6 +25,8 @@ firecrawl:
     exclude_domains: ["xincailiao.com"]
 
   scrape:
+    # 摘要验证路径默认不抓正文；需要正文时显式开启。
+    enabled: false
     # 对本次搜索得到的 URL 最多执行 10 次独立正文抓取。
     max_requests: 10
     only_main_content: true
