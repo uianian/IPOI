@@ -18,7 +18,7 @@ from src.llm.prompts import (
     MARKET_REACT_SYSTEM,
     MARKET_REACT_USER,
 )
-from src.models.evidence import AgentResult, RiskPoint, ScoreBreakdownItem
+from src.models.evidence import AgentResult, EvidenceRef, RiskPoint, ScoreBreakdownItem
 from src.models.debate import DebateClaim, DebateDossier
 from src.models.market import (
     MarketDebateResponse,
@@ -32,7 +32,7 @@ from src.skills.score_market_history import HistoricalMarketRiskScorer
 from src.skills.market_toolbox import build_market_tool_registry
 from src.tools.firecrawl_news import FirecrawlNewsCollector
 from src.tools.market_data import MarketDataLoader
-from src.tools.market_debate import MarketDebateToolbox
+from src.tools.market_debate import MarketDebateToolbox, search_market_evidence_standalone
 from src.models.debate import save_dossier
 from src.tools.sina_finance_news import SinaFinanceNewsCollector
 
@@ -1215,9 +1215,8 @@ class MarketAgent:
         )
         response = await self._llm.chat_json(
             [{"role": "system", "content": MARKET_ANALYSIS_SYSTEM}, {"role": "user", "content": prompt}],
-            enable_reasoning=True,
+            enable_reasoning=False,
             max_tokens=1536,
-            reasoning_max_tokens=256,
         )
         return MarketDebateResponse.model_validate(response.get("data") or {})
 
@@ -1232,21 +1231,61 @@ class MarketAgent:
     ):
         from src.models.master import ClaimUpdate
 
-        del claim_card, round_no, parse_json
+        del claim_card, parse_json
         if doc_id:
             self._doc_id = doc_id
         original = self._last_result
+        question_id = getattr(question, "question_id", "") or ""
+        question_text = getattr(question, "question", "") or ""
+        started = time.time()
+        original_features = (
+            original.features
+            if isinstance(original, AgentResult)
+            else ((original.get("features") or {}) if isinstance(original, dict) else {})
+        )
+        if not isinstance(original_features, dict):
+            original_features = {}
+        search_hints = getattr(question, "search_hints", None)
+        hinted_keywords = (
+            search_hints.get("keywords")
+            if isinstance(search_hints, dict)
+            else None
+        )
+        search_query = " ".join(
+            str(item).strip()
+            for item in (hinted_keywords or [])[:6]
+            if str(item).strip()
+        ) or question_text
+        local_result, local_evidence = await self._search_local_debate_evidence(
+            search_query,
+            stock_code=original_features.get("stock_code") if original_features else None,
+        )
+        self._log_market_debate_search(
+            round_no=round_no,
+            question_id=question_id,
+            query=search_query,
+            result=local_result,
+            evidence=local_evidence,
+        )
         if original is None:
-            return ClaimUpdate(
-                question_id=getattr(question, "question_id", "") or "",
+            update = ClaimUpdate(
+                question_id=question_id,
                 target_agent="market",
                 clue_id=getattr(question, "claim_id", None),
                 status="unresolved",
                 confidence=0.3,
                 reply="市場情緒 Agent 尚無已完成的探查結果，無法回應總控質詢。",
                 remaining_uncertainty="等待市場探查完成",
+                evidence=local_evidence,
+                search_hit_count=len(local_evidence),
             )
-        resp = await self.challenge(original, getattr(question, "question", "") or "")
+            self._log_market_debate_reply(round_no, update, local_evidence, started)
+            return update
+        resp = await self.challenge(
+            original,
+            question_text,
+            additional_evidence=self._build_local_debate_context(local_result),
+        )
         stance_status = {
             "maintain": "verified",
             "revise": "partially_accepted",
@@ -1258,8 +1297,8 @@ class MarketAgent:
         reply = (resp.response or "").strip()
         if resp.revised_summary:
             reply = f"{reply}\n修訂摘要：{resp.revised_summary}".strip()
-        return ClaimUpdate(
-            question_id=getattr(question, "question_id", "") or "",
+        update = ClaimUpdate(
+            question_id=question_id,
             target_agent="market",
             clue_id=getattr(question, "claim_id", None),
             status=status,
@@ -1267,7 +1306,172 @@ class MarketAgent:
             reply=reply or "維持原市場結論，未提供可驗證的新證據。",
             revision_reason=resp.stance,
             remaining_uncertainty="; ".join(resp.evidence_requests) if resp.evidence_requests else "",
+            evidence=local_evidence,
+            search_hit_count=len(local_evidence),
+            new_queries=(
+                [{"query": search_query, "kind": "local_market_evidence", "n": len(local_evidence)}]
+                if local_result.get("available") is not True
+                else []
+            ),
         )
+        self._log_market_debate_reply(round_no, update, local_evidence, started)
+        return update
+
+    async def _search_local_debate_evidence(
+        self,
+        query: str,
+        *,
+        stock_code: str | None,
+    ) -> tuple[dict[str, Any], list[EvidenceRef]]:
+        """Search only already persisted, date-bounded local market evidence."""
+        data = self._market_settings.get("data") or {}
+        features_csv = data.get("features_csv")
+        news_dir = data.get("news_dir")
+        if not stock_code or not features_csv or not news_dir:
+            return {
+                "available": False,
+                "remote_fetch_attempted": False,
+                "reason": "market_local_paths_not_configured",
+            }, []
+        try:
+            result = await search_market_evidence_standalone(
+                stock_code=str(stock_code),
+                query=query,
+                features_csv=features_csv,
+                news_dir=news_dir,
+                limit=10,
+            )
+        except Exception as exc:
+            logger.warning("market debate local evidence search failed: %s", exc)
+            return {
+                "available": False,
+                "remote_fetch_attempted": False,
+                "reason": "local_search_failed",
+            }, []
+        if (
+            result.get("remote_fetch_attempted") is not False
+            or result.get("cutoff_verified") is not True
+        ):
+            return {
+                "available": False,
+                "remote_fetch_attempted": result.get("remote_fetch_attempted", True),
+                "reason": "local_evidence_failed_temporal_or_remote_guard",
+            }, []
+        evidence: list[EvidenceRef] = []
+        for item in result.get("news_hits") or []:
+            if not isinstance(item, dict):
+                continue
+            excerpt = str(
+                item.get("excerpt")
+                or item.get("description")
+                or item.get("summary")
+                or item.get("title")
+                or ""
+            )[:400]
+            evidence.append(
+                EvidenceRef(
+                    excerpt=excerpt,
+                    source_type="text",
+                    confidence=1.0,
+                )
+            )
+        if not evidence:
+            for field, value in list((result.get("feature_hits") or {}).items())[:6]:
+                evidence.append(
+                    EvidenceRef(
+                        excerpt=f"本地市场字段 {field}: {str(value)[:240]}",
+                        source_type="table",
+                        field_code=str(field),
+                        confidence=0.8,
+                    )
+                )
+        return result, evidence
+
+    @staticmethod
+    def _build_local_debate_context(result: dict[str, Any]) -> list[dict[str, Any]]:
+        """Keep only bounded, auditable fields for the debate model."""
+        context: list[dict[str, Any]] = []
+        for item in (result.get("news_hits") or [])[:10]:
+            if not isinstance(item, dict):
+                continue
+            context.append(
+                {
+                    "kind": "prelisting_news",
+                    "title": str(item.get("title") or "")[:300],
+                    "url": str(item.get("url") or "")[:1000],
+                    "description": str(
+                        item.get("summary")
+                        or item.get("description")
+                        or item.get("excerpt")
+                        or ""
+                    )[:1200],
+                    "published_at": item.get("published_at"),
+                    "source": str(item.get("source") or "")[:200],
+                }
+            )
+        feature_hits = result.get("feature_hits") or {}
+        if isinstance(feature_hits, dict) and feature_hits:
+            context.append(
+                {
+                    "kind": "market_features",
+                    "as_of_date": result.get("as_of_date"),
+                    "cutoff_verified": result.get("cutoff_verified"),
+                    "fields": dict(list(feature_hits.items())[:12]),
+                }
+            )
+        return context
+
+    def _log_market_debate_search(
+        self,
+        *,
+        round_no: int,
+        question_id: str,
+        query: str,
+        result: dict[str, Any],
+        evidence: list[EvidenceRef],
+    ) -> None:
+        if self._run_logger is None or not hasattr(self._run_logger, "debate_search"):
+            return
+        try:
+            self._run_logger.debate_search(
+                round=round_no,
+                question_id=question_id,
+                target_agent="market",
+                tool_calls=[
+                    {
+                        "name": "search_market_evidence_local",
+                        "arguments": {"query": query, "remote_fetch": False},
+                    }
+                ],
+                evidence=[item.model_dump() for item in evidence[:4]],
+                search_hit_count=len(evidence),
+            )
+        except Exception:
+            logger.exception("market debate_search log failed")
+
+    def _log_market_debate_reply(
+        self,
+        round_no: int,
+        update: Any,
+        evidence: list[EvidenceRef],
+        started: float,
+    ) -> None:
+        if self._run_logger is None or not hasattr(self._run_logger, "debate_reply"):
+            return
+        try:
+            self._run_logger.debate_reply(
+                round=round_no,
+                question_id=update.question_id,
+                target_agent="market",
+                utterance=update.reply,
+                status=update.status,
+                confidence=update.confidence,
+                duration_ms=int((time.time() - started) * 1000),
+                evidence=[item.model_dump() for item in evidence[:4]],
+                new_queries=update.new_queries,
+            )
+        except Exception:
+            logger.exception("market debate_reply log failed")
 
     def build_debate_toolbox(
         self,

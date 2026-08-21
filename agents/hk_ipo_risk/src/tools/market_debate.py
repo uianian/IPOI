@@ -9,10 +9,10 @@ from src.tools.market_data import MarketDataLoader, normalize_stock_code
 
 async def search_market_evidence_standalone(
     *,
-    stock_code: str,
+    stock_code: str | None = None,
     query: str,
-    features_csv: Path | str,
-    news_dir: Path | str,
+    features_csv: Path | str | None = None,
+    news_dir: Path | str | None = None,
     limit: int = 10,
 ) -> dict[str, Any]:
     """Search audited local market/news evidence without ReAct state.
@@ -21,6 +21,15 @@ async def search_market_evidence_standalone(
     spends Firecrawl credits. A later caller may explicitly run the configured
     collector before invoking it, after which saved bodies are searchable here.
     """
+    if not stock_code or not features_csv or not news_dir:
+        return {
+            "available": False,
+            "query": query,
+            "news_hits": [],
+            "feature_hits": {},
+            "remote_fetch_attempted": False,
+            "error": "market_local_paths_not_configured",
+        }
     loader = MarketDataLoader(features_csv, news_dir=news_dir, strict_cutoff=True)
     snapshot = loader.load_snapshot(stock_code)
     terms = [term.lower() for term in str(query).split() if term.strip()]
@@ -139,4 +148,3 @@ class MarketDebateToolbox:
                 "checkpoint": result.model_dump(mode="json") if result else None,
             }
         raise KeyError(f"unknown market debate tool: {tool_name}")
-

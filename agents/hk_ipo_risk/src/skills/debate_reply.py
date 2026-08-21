@@ -90,9 +90,12 @@ async def _maybe_search(
             prefer_pages=prefer_pages,
         )
     else:
-        from src.skills.market_toolbox import search_market_evidence_standalone
+        from src.tools.market_debate import search_market_evidence_standalone
 
-        raw = await search_market_evidence_standalone(doc_id=doc_id, query=query)
+        # The generic fallback has no market settings/stock code. Let the
+        # local-only helper return a structured unavailable result; never
+        # invent a stock code from doc_id.
+        raw = await search_market_evidence_standalone(query=query)
     raw["duration_ms"] = int((time.time() - t0) * 1000)
     return raw
 
@@ -262,8 +265,8 @@ async def expert_respond_to_controller(
             status="unresolved",
             confidence=0.3,
             reply=(
-                "市場情緒 Agent 為 demo stub，本輪無真实行情寬表，"
-                "無法用認購/破發率佐證；检索未命中，confidence 封頂。"
+                "市場情緒 Agent 本輪沒有可驗證的本地上市前證據，"
+                "無法用認購/破發率佐證；維持原確定性分，confidence 封頂。"
             ),
             remaining_uncertainty="等待市場 Agent 正式接入",
             new_queries=queries_done,
