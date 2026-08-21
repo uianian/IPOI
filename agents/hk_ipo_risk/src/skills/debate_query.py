@@ -265,6 +265,25 @@ def plan_debate_searches(
             break
     steps = [s for s in steps if s.kind == "page" or (s.query and not looks_like_instruction(s.query))]
     steps = steps[: max(1, int(max_searches))]
+    # Market debate has no prospectus page anchors; always keep at least one
+    # local keyword search so expert_respond can probe dated market evidence.
+    if agent == "market" and not steps:
+        fallback = _short_query(keywords[:3], max_chars) or _short_query(
+            [str(question_text or "").strip()],
+            max_chars,
+        )
+        if fallback and not looks_like_instruction(fallback):
+            steps = [
+                DebateSearchStep(
+                    query=fallback,
+                    pages=[],
+                    intent=intent,
+                    section_hint=list(section_hint),
+                    kind="keyword",
+                )
+            ]
+            if fallback not in keywords:
+                keywords = list(keywords) + [fallback]
     return DebateSearchPlan(
         pages=pages,
         keywords=keywords,

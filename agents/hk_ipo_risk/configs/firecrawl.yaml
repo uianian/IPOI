@@ -12,19 +12,23 @@ firecrawl:
   search:
     # 历史中文新闻在 web 索引覆盖通常高于 news；仍只调用一次 search。
     sources: ["web"]
-    # 每家公司只调用一次 search，合计最多返回 5 个 URL。
-    limit_per_query: 5
-    max_urls: 5
+    # 每家公司只调用一次 search，合计最多返回 10 个 URL。
+    limit_per_query: 10
+    max_urls: 10
     timeout_ms: 60000
     location: "Hong Kong"
-    query_template: '"{company}" 风险 争议 监管 舆论 新闻'
+    query_template: '"{company}" "{stock_code}"'
     use_tbs_date_filter: true
+    # 截止日前滚动 365 天；旧 historical_lookback_years 仅作兼容回退。
+    lookback_days: 365
     historical_lookback_years: 5
     exclude_domains: ["xincailiao.com"]
 
   scrape:
-    # 对本次搜索得到的 URL 最多执行 5 次独立正文抓取。
-    max_requests: 5
+    # 摘要验证路径默认不抓正文；需要正文时显式开启。
+    enabled: false
+    # 对本次搜索得到的 URL 最多执行 10 次独立正文抓取。
+    max_requests: 10
     only_main_content: true
     max_content_chars: 8000
     timeout_ms: 30000
@@ -38,4 +42,3 @@ firecrawl:
     # 无论日期校验是否通过，都保存搜索结果和正文；后续默认复用，避免重复扣费。
     save_raw_results: true
     reuse_raw_results: true
-
