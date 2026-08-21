@@ -19,7 +19,10 @@ class ScoreBreakdownItem(BaseModel):
     rule_ref: str
     evidence: list[EvidenceRef] = Field(default_factory=list)
     note: str | None = None
+    # 规则计算使用 metric_value（保留数值类型）；面向报告的带口径文本单独存放，
+    # 避免主题合并时为了展示而覆盖可计算的原值。
     metric_value: Any = None
+    metric_display: str | None = None
     evidence_page: int | None = None
 
 

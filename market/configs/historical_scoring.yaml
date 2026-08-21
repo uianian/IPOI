@@ -60,7 +60,7 @@ indicators:
   international_placing_multiple: {module: ipo_market, label: 国际配售认购倍数, risk_direction: lower, weight: 0.04}
 
 postlisting:
-  checkpoints: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
+  checkpoints: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
   minimum_history_samples: 10
   metrics:
     below_issue_price: {risk_direction: higher, weight: 0.35, primary_anchor: true}
@@ -70,4 +70,3 @@ postlisting:
     max_drawdown_from_open: {risk_direction: lower, weight: 0.10}
     realized_volatility: {risk_direction: higher, weight: 0.03}
     turnover_change: {risk_direction: lower, weight: 0.02}
-

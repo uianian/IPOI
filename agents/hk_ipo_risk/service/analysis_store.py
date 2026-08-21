@@ -136,12 +136,19 @@ class AnalysisStore:
     def read_meta(self, analysis_id: str) -> Dict[str, Any]:
         return read_json(self.analysis_dir(analysis_id) / "meta.json")
 
-    def update_meta(self, analysis_id: str, **fields: Any) -> None:
+    def update_meta(
+        self,
+        analysis_id: str,
+        *,
+        notify: bool = True,
+        **fields: Any,
+    ) -> None:
         path = self.analysis_dir(analysis_id) / "meta.json"
         meta = read_json(path)
         meta.update(fields)
         atomic_write_json(path, meta)
-        self._notify(analysis_id)
+        if notify:
+            self._notify(analysis_id)
 
     def append_sse_event(self, analysis_id: str, event_type: str, data: Dict[str, Any]) -> None:
         """写入 SSE 事件；thought 同步追加 thoughts.json。"""

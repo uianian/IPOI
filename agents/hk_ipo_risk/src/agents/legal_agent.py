@@ -855,6 +855,17 @@ class LegalAgent:
     ):
         from src.skills.debate_reply import expert_respond_to_controller
 
+        audited = getattr(self, "_last_result", None)
+        raw = audited.model_dump(mode="json") if audited is not None else {}
+        features = raw.get("features") or {}
+        context = {
+            "risk_score": raw.get("risk_score"), "risk_level": raw.get("risk_level"),
+            "summary": raw.get("summary"),
+            "score_breakdown": raw.get("score_breakdown") or [],
+            "risk_points": raw.get("risk_points") or [],
+            "legal_sections": {k: v for k, v in features.items() if str(k).startswith("3.")},
+            "evidence_summary": raw.get("evidence_summary") or {},
+        }
         return await expert_respond_to_controller(
             agent="legal",
             question=question,
@@ -864,4 +875,5 @@ class LegalAgent:
             parse_json=parse_json or self._parse_json,
             run_logger=self._run_logger,
             round_no=round_no,
+            agent_context=context,
         )

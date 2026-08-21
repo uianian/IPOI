@@ -13,7 +13,7 @@ sys.path.insert(0, str(PKG_ROOT))
 from src.graph.parallel import merge_results, run_finance_legal_market_parallel
 from src.models.evidence import AgentResult
 from src.models.master import CompositeJudgment, MasterResult
-from src.skills.master_cards import reference_fundamental, reference_formula_label
+from src.skills.master_cards import market_reference_score, reference_fundamental, reference_formula_label
 
 
 def test_reference_fundamental_swapped_weights_without_market():
@@ -22,7 +22,29 @@ def test_reference_fundamental_swapped_weights_without_market():
     assert "market" not in reference_formula_label(has_market=False)
 
 
-def test_reference_fundamental_includes_market():
+def test_market_reference_score_uses_native_risk_score_and_keeps_net_support_as_context():
+    score, meta = market_reference_score(
+        {
+            "risk_score": 40,
+            "features": {
+                "sentiment_analysis": {
+                    "overall_net_support": 0.4,
+                }
+            },
+        }
+    )
+    assert score == 40.0
+    assert meta["source"] == "market_risk_score"
+    assert meta["overall_net_support"] == 0.4
+
+
+def test_market_reference_score_uses_risk_score_without_sentiment_context():
+    score, meta = market_reference_score({"risk_score": 40, "features": {}})
+    assert score == 40
+    assert meta["source"] == "market_risk_score"
+
+
+def test_reference_fundamental_includes_native_market_risk_score():
     # 69 * 0.65 + 40 * 0.35 = 44.85 + 14 = 58.85
     assert reference_fundamental(80, 60, 40) == 58.85
     assert "market" in reference_formula_label(has_market=True)
@@ -46,7 +68,14 @@ def test_merge_results_skips_demo_market_score():
 def test_run_finance_legal_market_parallel_passes_real_market_to_master():
     finance = AgentResult(agent="finance", doc_id="doc-1", risk_score=80, risk_level="high", summary="f")
     legal = AgentResult(agent="legal", doc_id="doc-1", risk_score=60, risk_level="medium", summary="l")
-    market = AgentResult(agent="market", doc_id="doc-1", risk_score=40, risk_level="low", summary="m")
+    market = AgentResult(
+        agent="market",
+        doc_id="doc-1",
+        risk_score=40,
+        risk_level="low",
+        summary="m",
+        features={"sentiment_analysis": {"overall_net_support": 0.4}},
+    )
     captured: dict = {}
 
     async def fake_experts(doc_id, **kwargs):
@@ -86,5 +115,36 @@ def test_run_finance_legal_market_parallel_passes_real_market_to_master():
     assert captured["market"].risk_score == 40
     assert captured["market_agent"] is not None
     assert out["reference_fundamental_score"] == 58.85
-    assert "market*" in (out.get("note") or "")
+    assert out["market_reference_score"] == 40.0
+    assert "market_risk_score*" in (out.get("note") or "")
     assert out.get("market_error") is None
+
+
+
+def test_merge_results_propagates_disabled_embellishment_to_master():
+    finance = AgentResult(agent="finance", doc_id="d", risk_score=20, risk_level="low")
+    legal = AgentResult(agent="legal", doc_id="d", risk_score=20, risk_level="low")
+    captured = {}
+
+    async def fake_master_run(self, **kwargs):
+        captured["enabled"] = self._enable_embellishment
+        return MasterResult(
+            doc_id="d",
+            embellishment=None,
+            analysis_options={"embellishment_enabled": self._enable_embellishment},
+            judgment=CompositeJudgment(overall_score=20, level="low", risk_level_http="LOW"),
+        )
+
+    async def go():
+        with patch("src.graph.parallel.MasterAgent.run", new=fake_master_run):
+            return await merge_results(
+                finance,
+                legal,
+                enable_embellishment=False,
+            )
+
+    out = asyncio.run(go())
+    assert captured["enabled"] is False
+    assert out["analysis_options"]["embellishment_enabled"] is False
+    assert out["master"]["analysis_options"]["embellishment_enabled"] is False
+    assert out["master"]["embellishment"] is None

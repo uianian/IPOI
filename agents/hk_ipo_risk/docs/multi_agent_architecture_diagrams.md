@@ -39,7 +39,8 @@ flowchart TB
         M3["run_debate<br/>条件辩论 ≤3 轮"]
         M4["score_embellishment<br/>前五页粉饰 0–10"]
         M5["master_decide<br/>终裁 0–100"]
-        M6["generate_warning_report<br/>报告排版"]
+        M6["validate_postlisting_performance<br/>D1/D5/D20/D60 上市后验证"]
+        M7["generate_warning_report<br/>报告排版"]
     end
 
     subgraph OUTPUT["📤 输出 Output"]
@@ -67,16 +68,16 @@ flowchart TB
     M1 --> M2
     M2 -->|"need_debate?"| M3
     M2 -->|"无冲突/纯共振"| M4
-    M3 --> M4 --> M5 --> M6
+    M3 --> M4 --> M5 --> M6 --> M7
 
     E1 --> O1 & O2
     E2 --> O1 & O2
     E3 --> O1 & O2
     M1 --> O3
     M5 --> O4
-    M6 --> O5
+    M7 --> O5
     M1 --> O6
-    M6 --> O8
+    M7 --> O8
     E1 & E2 & E3 --> O7
 
     style O4 fill:#ffe0e0,stroke:#c0392b,stroke-width:2px
@@ -89,7 +90,7 @@ flowchart TB
 |------|----------|----------|
 | 数据准备 | PDF → 结构化 JSON → 向量索引 + Agent 检索包 | `full_parse.json`、finance/legal 检索包 |
 | 三专家 | 各自 ReAct 推理 + 规则托底，产出带页码证据的风险分 | `AgentResult` + `DebateDossier` |
-| 总控 | 冲突研判 → 条件辩论 → 粉饰 → **终裁** → 报告 | `master.judgment`（正式分） |
+| 总控 | 冲突研判 → 条件辩论 → 粉饰 → **终裁** → 上市后验证 → 报告 | `master.judgment`（正式分）+ `post_listing` |
 | 网关 | 前端只连 `:9100`，反代 `analysis/*`、`report*`、`agents/status` 到 `:9102` | SSE 实时混流 + `result` / `report` / PDF |
 
 ---
@@ -130,18 +131,20 @@ flowchart TD
     E3 -->|否| E5["③ score_embellishment<br/>前五页文本粉饰 0–10"]
     E4 --> E5
     E5 --> E6["④ master_decide<br/>★ 终裁 overall_score + level"]
-    E6 --> E7["⑤ generate_warning_report<br/>ReportData + 总控摘要"]
-    E7 --> E8["⑥ 写三份独立专家 MD<br/>finance / legal / market"]
-    E8 --> E9["⑦ report_ready<br/>开放 /report 与 /report/export"]
+    E6 --> E7["⑤ validate_postlisting_performance<br/>对齐 D1/D5/D20/D60 预测与真实行情"]
+    E7 --> E8["⑥ generate_warning_report<br/>ReportData + 总控摘要"]
+    E8 --> E9["⑦ 写三份独立专家 MD<br/>finance / legal / market"]
+    E9 --> E10["⑧ 落盘 report/result.json<br/>并置 status=completed"]
+    E10 --> E11["⑨ report_ready<br/>开放 /report 与 /report/export"]
 
-    E9 --> F1["落盘产物"]
+    E10 --> F1["落盘产物"]
     F1 --> F2[".runtime/{doc}_finance_legal*.json"]
     F1 --> F3[".runtime/debate/*_dossier_*.json"]
     F1 --> F4[".runtime/debate/*_master_*.json"]
     F1 --> F5["reports/{ticker}_finance|legal|market_report.md"]
     F1 --> F6[".runtime/analyses/{analysisId}/report.json"]
 
-    E9 --> G1["HTTP 输出"]
+    E11 --> G1["HTTP 输出"]
     G1 --> G2["SSE：thought / agent_status / agent_report<br/>phase_change / debate_* / report_ready"]
     G1 --> G3["result.json<br/>overallScore + riskLevel + phase + debate<br/>★ 总控终裁"]
     G1 --> G4["GET /report<br/>ReportData JSON"]
@@ -228,8 +231,9 @@ flowchart TB
         O3["run_debate<br/>≤3轮 × ≤4问/轮<br/>search_*_standalone 补证"]
         O4["score_embellishment"]
         O5["master_decide ★终裁"]
-        O6["generate_warning_report<br/>ReportData"]
-        O7["写三份独立 MD<br/>先于 report_ready"]
+        O6["validate_postlisting_performance<br/>D1/D5/D20/D60 验证"]
+        O7["generate_warning_report<br/>ReportData"]
+        O8["写三份独立 MD + report/result<br/>置 completed 后再发 report_ready"]
         O_OUT["输出：judgment + master dossier<br/>riskLevel HIGH|MEDIUM|LOW"]
     end
 
@@ -248,7 +252,7 @@ flowchart TB
     O_IN --> O1 --> O2
     O2 -->|"need_debate / need_discussion"| O3 --> O4
     O2 -->|"跳过辩论"| O4
-    O4 --> O5 --> O6 --> O7 --> O_OUT
+    O4 --> O5 --> O6 --> O7 --> O8 --> O_OUT
 
     O_OUT --> G2
     F_OUT & L_OUT & M_OUT --> G2
@@ -271,8 +275,8 @@ MarketAgent   ██████████████ submit（或 market_err
               └──────── asyncio.gather ────────┘
                                               │
                                               ▼
-MasterAgent                              detect → debate? → embellish → decide → report
-Runner/UI                                写三份 MD → report_ready → /report JSON/PDF
+MasterAgent                              detect → debate? → embellish → decide → validate → report
+Runner/UI                                写 MD/report/result → status=completed → report_ready → /report JSON/PDF
 ```
 
 ---
@@ -292,7 +296,9 @@ stateDiagram-v2
 
     embellish --> decide: 前五页粉饰分 0–10\nlow / medium / high
 
-    decide --> report: overall_score 0–100\n+ level + risk_factors\n★ 正式终裁
+    decide --> validate_postlisting: overall_score 0–100\n+ level + risk_factors\n★ 正式终裁
+
+    validate_postlisting --> report: 对齐 D1/D5/D20/D60\n计算 weighted_hit_score\n无数据则 not_available
 
     report --> [*]: 输出 master dossier\n+ result.report / report.json
 
@@ -397,7 +403,7 @@ flowchart LR
     subgraph MKT_OUT["输出"]
         MO1["risk_score + day1_break_risk"]
         MO2["deterministic_score + llm_score"]
-        MO3["上市后 D5–D60 检查点"]
+        MO3["上市后 D1/D5–D60 检查点"]
         MO4["DebateDossier 落盘"]
     end
 
@@ -460,8 +466,8 @@ flowchart LR
 | **法务** | legal 检索包、parse JSON | ReAct + 5 Skills + 饱和聚合 | `AgentResult` + `DebateDossier` |
 | **市场** | stockCode、特征 CSV、舆情 | 历史校准 + LLM ReAct | `AgentResult` + `DebateDossier` |
 | **合并** | 三路 AgentResult | `reference_fundamental` 对照分 | merged JSON |
-| **总控** | 短卡片 + 第五章清单 | detect → debate? → embellish → decide | `master.judgment` ★ |
-| **报告** | 终裁 JSON + dossier | ReportData 汇总 + 三份独立专家 MD | `*_finance_report.md`、`*_legal_report.md`、`*_market_report.md`、`report.json` |
+| **总控** | 短卡片 + 第五章清单 | detect → debate? → embellish → decide → validate_postlisting | `master.judgment` ★ + `post_listing` |
+| **报告** | 终裁 JSON + dossier + 上市后验证 | ReportData 汇总 + 三份独立专家 MD | `*_finance_report.md`、`*_legal_report.md`、`*_market_report.md`、`report.json` |
 | **前端** | analysisId | SSE 实时混流 + `report_ready` 后拉取报告 | `result.json`、`GET /report`、`GET /report/export`、overallScore + riskLevel ★ |
 
 ---
@@ -471,7 +477,7 @@ flowchart LR
 1. **前端唯一 Base 仍是 `:9100`**，但除 `analysis/*` 外，现还会经网关访问 `GET /api/v1/agents/status`、`GET .../report`、`GET .../report/export`。
 2. **SSE 不再按 legal → financial → market 顺序缓冲回放**，而是三专家与总控 **实时混流**；谁先产生事件谁先推送。
 3. **`category` 只在真实辩论阶段出现**。初评、冲突研判、粉饰、终裁、skip-debate 都没有 `category`。
-4. **`report_ready` 在三份独立专家 MD 写完之后才发送**，随后前端才应拉取 `/report` 和 `/report/export`。
+4. **`report_ready` 在三份独立专家 MD、`report.json`、完整 `result.json` 均落盘且任务已置为 `completed` 后才发送**；收到事件后前端可立即拉取 `/report` 和 `/report/export`，不会命中 `REPORT_NOT_READY` 的时序窗口。
 5. **综合章与专家章分离**：总控 `generate_warning_report` 负责 `result.report` / `/report` 的综合输出；财务、法务、市场则分别写成三份独立 Markdown。
 
 ---
@@ -485,4 +491,4 @@ flowchart LR
 
 ---
 
-*文档版本：2026-08-17 · 对齐 `agents/hk_ipo_risk/README.md` 现行 main*
+*文档版本：2026-08-20 · 对齐 `agents/hk_ipo_risk` 当前实现*

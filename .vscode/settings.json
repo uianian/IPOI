@@ -1,0 +1,37 @@
+{
+  "terminal.integrated.gpuAcceleration": "off",
+  "terminal.integrated.defaultProfile.linux": "Bash (clean)",
+  "terminal.integrated.profiles.linux": {
+    "Bash (clean)": {
+      "path": "/home/wuqianqian/.local/bin/bash-clean-ulimit",
+      "args": []
+    }
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.runtime/**": true,
+    "**/node_modules/**": true,
+    "**/__pycache__/**": true,
+    "**/.venv/**": true,
+    "**/.pytest_cache/**": true,
+    "**/dataset/**": true,
+    "**/pdf_parsing/**": true,
+    "**/retrieval/**": true,
+    "**/*.pdf": true,
+    "**/*.parquet": true,
+    "**/*.ckpt": true,
+    "**/*.pt": true,
+    "**/*.pth": true,
+    "**/*.npy": true,
+    "**/*.npz": true
+  },
+  "search.exclude": {
+    "**/dataset/**": true,
+    "**/pdf_parsing/**": true,
+    "**/.git/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true
+  },
+  "search.followSymlinks": false
+}

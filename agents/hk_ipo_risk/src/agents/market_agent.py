@@ -1075,8 +1075,9 @@ class MarketAgent:
         parse_json: Path | str | None = None,
     ):
         from src.models.master import ClaimUpdate
+        from src.skills.debate_reply import expert_respond_to_controller
 
-        del claim_card, round_no, parse_json
+        del parse_json
         if doc_id:
             self._doc_id = doc_id
         original = self._last_result
@@ -1090,27 +1091,35 @@ class MarketAgent:
                 reply="市場情緒 Agent 尚無已完成的探查結果，無法回應總控質詢。",
                 remaining_uncertainty="等待市場探查完成",
             )
-        resp = await self.challenge(original, getattr(question, "question", "") or "")
-        stance_status = {
-            "maintain": "verified",
-            "revise": "partially_accepted",
-            "concede": "challenged",
-        }
-        status = stance_status.get(resp.stance, "unresolved")
-        if resp.requires_new_evidence and resp.stance == "maintain":
-            status = "unresolved"
-        reply = (resp.response or "").strip()
-        if resp.revised_summary:
-            reply = f"{reply}\n修訂摘要：{resp.revised_summary}".strip()
-        return ClaimUpdate(
-            question_id=getattr(question, "question_id", "") or "",
-            target_agent="market",
-            clue_id=getattr(question, "claim_id", None),
-            status=status,
-            confidence=0.6 if status != "unresolved" else 0.4,
-            reply=reply or "維持原市場結論，未提供可驗證的新證據。",
-            revision_reason=resp.stance,
-            remaining_uncertainty="; ".join(resp.evidence_requests) if resp.evidence_requests else "",
+        features = original.features if isinstance(original.features, dict) else {}
+        stock_code = str(features.get("stock_code") or original.doc_id or self._doc_id or "")
+        data = self._market_settings.get("data") or {}
+        return await expert_respond_to_controller(
+            agent="market",
+            question=question,
+            claim_card=claim_card,
+            llm=self._llm,
+            doc_id=self._doc_id or stock_code,
+            parse_json=None,
+            run_logger=self._run_logger,
+            round_no=round_no,
+            demo_market=bool(features.get("demo")),
+            market_stock_code=stock_code,
+            market_features_csv=data.get("features_csv"),
+            market_news_dir=data.get("news_dir"),
+            agent_context={
+                "risk_score": original.risk_score,
+                "risk_level": original.risk_level,
+                "summary": original.summary,
+                "overall_net_support": (features.get("sentiment_analysis") or {}).get("overall_net_support"),
+                "deterministic_score": features.get("deterministic_score"),
+                "llm_score": features.get("llm_score"),
+                "score_reconciliation": features.get("score_reconciliation"),
+                "historical_risk_calibration": features.get("prelisting_day1_risk"),
+                "llm_dimension_scores": (features.get("llm_risk_assessment") or {}).get("dimension_scores"),
+                "evidence_catalog": features.get("evidence_catalog") or [],
+                "scoring_lineage_rule": "risk_score=max(llm_score, deterministic_score); net support is descriptive only",
+            },
         )
 
     def build_debate_toolbox(

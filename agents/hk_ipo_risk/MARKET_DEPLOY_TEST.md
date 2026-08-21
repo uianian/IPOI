@@ -68,7 +68,7 @@ market/data/external/news/raw/02451_2023-10-11_firecrawl.json；只有合格
 
 不要在日常测试使用 --refresh-firecrawl。第二次直接运行应复用原始缓存。
 
-## 上市后 D5–D60
+## 上市后 D1/D5–D60
 
 先在仓库根目录构建检查点：
 
@@ -79,8 +79,9 @@ market/data/external/news/raw/02451_2023-10-11_firecrawl.json；只有合格
     cd agents/hk_ipo_risk
     python scripts/run_market_postlisting.py --stock-code 02451 --doc-id smoke-02451-post --through-day 60
 
-结果必须每五个交易日一个检查点。below_issue_price 是主要破发锚点；累计
-收益以首个交易日开盘价为基准。
+结果必须包含 D1 以及 D5 至 D60 每五个交易日一个检查点。below_issue_price
+是主要破发锚点；累计收益以首个交易日开盘价为基准。D1 检查点用于首日
+破发验证，D5 用于总控重点显著下跌预警复盘。
 
 ## 三 Agent 并行与 9102 服务
 

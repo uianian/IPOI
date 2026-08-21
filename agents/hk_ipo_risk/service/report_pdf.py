@@ -55,6 +55,43 @@ def render_report_pdf(
         if isinstance(d, dict):
             lines.append(f"- {d.get('name')}: {d.get('score')}")
     lines.append("")
+    embellishment = report.get("embellishmentAnalysis") if isinstance(report.get("embellishmentAnalysis"), dict) else {}
+    if embellishment:
+        lines.append("文本粉饰度专项分析：")
+        lines.append(
+            f"- 分数：{embellishment.get('score', 0)}/10（{embellishment.get('level') or '—'}）；"
+            f"状态：{embellishment.get('status') or 'not_available'}"
+        )
+        coverage = embellishment.get("coverage") if isinstance(embellishment.get("coverage"), dict) else {}
+        lines.append(
+            f"- 全书扫描页数：{len(coverage.get('pagesAnalyzed') or [])}；"
+            f"风险因素页数：{len(coverage.get('riskFactorPages') or [])}；"
+            f"候选复核：{coverage.get('evaluatedCandidateCount') or 0}/{coverage.get('candidateCount') or 0}"
+        )
+        if embellishment.get("summary"):
+            lines.append(f"- 结论：{embellishment.get('summary')}")
+        lines.append("- 五维评分：")
+        for dimension in embellishment.get("dimensions") or []:
+            if isinstance(dimension, dict):
+                lines.append(f"  · {dimension.get('name')}: {dimension.get('score')}；{dimension.get('finding') or '—'}")
+        excerpts = [item for item in (embellishment.get("highRiskExcerpts") or []) if isinstance(item, dict)][:10]
+        lines.append("- 高粉饰度原文切片（Top 10）：")
+        if excerpts:
+            for index, item in enumerate(excerpts, start=1):
+                lines.append(
+                    f"  {index}. p.{item.get('page') if item.get('page') is not None else '—'} "
+                    f"{item.get('section') or '—'} [{item.get('tactic') or '—'}]"
+                )
+                lines.append(f"     原文：{item.get('excerpt') or '—'}")
+                lines.append(
+                    f"     判定：{item.get('reason') or '—'}；证据状态：{item.get('supportStatus') or 'unknown'}；"
+                    f"计分 +{item.get('scoreContribution') or 0}"
+                )
+        else:
+            lines.append("  本次没有通过原文回查且达到高严重度、高置信度门槛的切片。")
+        for limitation in embellishment.get("limitations") or []:
+            lines.append(f"- 分析限制：{limitation}")
+        lines.append("")
     lines.append("风险来源：")
     for f in report.get("riskFactors") or []:
         if isinstance(f, dict):

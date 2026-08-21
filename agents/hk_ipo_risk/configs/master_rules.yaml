@@ -33,7 +33,8 @@ debate:
   # 终裁 JSON 正文预算；辩论后输入变长，1200 会被思考/长字段挤空。
   decide_max_tokens: 4096
   decide_reasoning_max_tokens: 512
-  embellishment_max_tokens: 1024
+  embellishment_max_tokens: 4096
+  embellishment_reasoning_max_tokens: 512
   debate_reasoning_effort: low
   debate_search:
     query_max_chars: 32
@@ -87,15 +88,31 @@ debate:
 embellishment:
   first_pages: 5
   page_char_cap: 1200
+  batch_size: 12
+  # 0 表示复核全部规则候选；正数会截断并把结果标为 partial。
+  max_candidates: 0
   buzzwords:
     - 领先
+    - 領先
     - 第一
     - 最佳
     - 卓越
     - 革命性
     - 颠覆
+    - 顛覆
     - 最大
     - 唯一
+  concept_words:
+    - AI赋能
+    - AI賦能
+    - 科技赋能
+    - 科技賦能
+    - 智能化
+    - 数字化生态
+    - 數字化生態
+    - 平台化
+    - 生态圈
+    - 生態圈
 
 confidence_rubric: |
   高置信度：风险结论有≥2个独立证据来源（不同页或不同 Agent），且均能定位至招股书原文。

@@ -292,28 +292,32 @@ class MarketAgentTest(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNone(non_numeric)
 
-    async def test_respond_to_controller_maps_challenge_stance(self) -> None:
+    async def test_respond_to_controller_uses_grounded_debate_reply(self) -> None:
         from src.models.evidence import AgentResult
-        from src.models.market import MarketDebateResponse
+        from src.models.master import ClaimUpdate
         from src.models.master import DebateQuestion
+        from unittest.mock import patch
 
         agent = MarketAgent(market_settings={"llm": {"enabled": False}, "cutoff": {}, "data": {}})
         agent._last_result = AgentResult(agent="market", doc_id="d", risk_score=40, summary="m")
 
-        async def fake_challenge(original_result, challenge, **kwargs):
-            return MarketDebateResponse(
-                stance="revise",
-                response="接受部分质询，维持历史校准底线。",
-                revised_summary="行业热度下行",
-                requires_new_evidence=False,
+        async def fake_reply(**kwargs):
+            self.assertEqual(kwargs["agent"], "market")
+            self.assertEqual(kwargs["market_stock_code"], "d")
+            self.assertEqual(kwargs["agent_context"]["risk_score"], 40)
+            return ClaimUpdate(
+                question_id="q1",
+                target_agent="market",
+                status="partially_accepted",
+                reply="接受部分質詢，維持歷史校準底線。",
             )
 
-        agent.challenge = fake_challenge  # type: ignore[method-assign]
         q = DebateQuestion(question_id="q1", target_agent="market", claim_id="c1", question="行业是否过热？")
-        upd = await agent.respond_to_controller(q, None, round_no=1)
+        with patch("src.skills.debate_reply.expert_respond_to_controller", new=fake_reply):
+            upd = await agent.respond_to_controller(q, None, round_no=1)
         self.assertEqual(upd.target_agent, "market")
         self.assertEqual(upd.status, "partially_accepted")
-        self.assertIn("接受部分质询", upd.reply)
+        self.assertIn("接受部分質詢", upd.reply)
 
     async def test_respond_to_controller_without_result_is_unresolved(self) -> None:
         from src.models.master import DebateQuestion
@@ -327,4 +331,3 @@ class MarketAgentTest(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

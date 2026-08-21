@@ -284,6 +284,40 @@ def _read_jsonl(path: Optional[Path]) -> list[dict[str, Any]]:
     return out
 
 
+def _publish_completed_result(
+    *,
+    store: AnalysisStore,
+    hub: StreamHub,
+    analysis_id: str,
+    result: dict[str, Any],
+    report: dict[str, Any],
+    overall: int,
+    risk_level: str,
+    completed_at: str,
+    dossier_paths: dict[str, Any],
+) -> None:
+    """先持久化可读终态，再广播 report_ready，避免报告接口的短暂 404。"""
+    store.write_result(analysis_id, result)
+    store.update_meta(
+        analysis_id,
+        notify=False,
+        status="completed",
+        phase="report",
+        overallScore=overall,
+        riskLevel=risk_level,
+        completedAt=completed_at,
+        dossierPaths=dossier_paths,
+    )
+    # report_ready 写入 events.jsonl 后统一唤醒 SSE；避免 completed 先唤醒，
+    # 使 stream 在该事件落盘前误判终态并提前结束。
+    hub.emit("report_ready", {"report": report})
+    hub.emit("agent_status", {"agentId": "orchestrator", "status": "completed"})
+    hub.emit(
+        "analysis_complete",
+        {"overallScore": overall, "riskLevel": risk_level},
+    )
+
+
 class AnalysisRunner:
     def __init__(self, store: AnalysisStore) -> None:
         self.store = store
@@ -295,6 +329,7 @@ class AnalysisRunner:
         parse_meta: dict[str, Any],
         llm_config: Optional[dict[str, Any]] = None,
         rules_only: bool = False,
+        enable_embellishment: bool = True,
     ) -> None:
         t = threading.Thread(
             target=self._thread_main,
@@ -303,6 +338,7 @@ class AnalysisRunner:
                 "parse_meta": parse_meta,
                 "llm_config": llm_config,
                 "rules_only": rules_only or FINANCE_RULES_ONLY,
+                "enable_embellishment": bool(enable_embellishment),
             },
             name=f"analysis-{analysis_id}",
             daemon=True,
@@ -316,6 +352,7 @@ class AnalysisRunner:
         parse_meta: dict[str, Any],
         llm_config: Optional[dict[str, Any]],
         rules_only: bool,
+        enable_embellishment: bool,
     ) -> None:
         try:
             asyncio.run(
@@ -324,6 +361,7 @@ class AnalysisRunner:
                     parse_meta=parse_meta,
                     llm_config=llm_config,
                     rules_only=rules_only,
+                    enable_embellishment=enable_embellishment,
                 )
             )
         except Exception as exc:
@@ -346,6 +384,7 @@ class AnalysisRunner:
         parse_meta: dict[str, Any],
         llm_config: Optional[dict[str, Any]],
         rules_only: bool,
+        enable_embellishment: bool,
     ) -> None:
         from src.config import (
             resolve_api_settings,
@@ -598,6 +637,7 @@ class AnalysisRunner:
             "doc_name": doc_name,
             "pdf_name": pdf_name,
             "skip_master": False,
+            "enable_embellishment": bool(enable_embellishment),
             "on_finance_done": on_finance_done,
             "on_legal_done": on_legal_done,
         }
@@ -728,8 +768,6 @@ class AnalysisRunner:
 
         hub.set_phase("report", message="生成风险报告")
         self.store.update_meta(analysis_id, status="reporting", phase="report")
-        hub.emit("report_ready", {"report": report})
-        hub.emit("agent_status", {"agentId": "orchestrator", "status": "completed"})
 
         # 法务日志：优先 ReAct run_logger，否则合成 on_progress 事件
         leg_log = (
@@ -846,6 +884,7 @@ class AnalysisRunner:
             "phase": "report",
             "overallScore": overall,
             "riskLevel": risk_level,
+            "analysisOptions": {"embellishmentEnabled": bool(enable_embellishment)},
             "thoughts": thoughts,
             "agents": agents,
             "debate": debate_block,
@@ -853,19 +892,16 @@ class AnalysisRunner:
             "dossierPaths": dossier_paths,
             "completedAt": completed_at,
         }
-        self.store.write_result(analysis_id, result)
-        self.store.update_meta(
-            analysis_id,
-            status="completed",
-            phase="report",
-            overallScore=overall,
-            riskLevel=risk_level,
-            completedAt=completed_at,
-            dossierPaths=dossier_paths,
-        )
-        hub.emit(
-            "analysis_complete",
-            {"overallScore": overall, "riskLevel": risk_level},
+        _publish_completed_result(
+            store=self.store,
+            hub=hub,
+            analysis_id=analysis_id,
+            result=result,
+            report=report,
+            overall=overall,
+            risk_level=risk_level,
+            completed_at=completed_at,
+            dossier_paths=dossier_paths,
         )
         logger.info(
             "analysis %s completed score=%s level=%s",

@@ -417,8 +417,22 @@ def _theme_of_code(code: str) -> str:
 
 
 def _fill_display_fields(keep: dict[str, Any], donor: dict[str, Any]) -> None:
-    """规则锚定时从 LLM 同行回填展示字段。"""
-    for key in ("metric_value", "evidence_page", "evidence"):
+    """规则锚定时从 LLM 同行回填展示信息，不覆盖规则原值与证据。"""
+    empty = (None, "", [], {})
+
+    # metric_value 是规则计算的机器原值。LLM 常在该字段返回更易读的
+    # “指标 + 期间 + 数值”文本，把它迁移到展示字段，不能覆盖规则数值。
+    if keep.get("metric_value") in empty and donor.get("metric_value") not in empty:
+        keep["metric_value"] = donor.get("metric_value")
+    if keep.get("metric_display") in empty:
+        display = donor.get("metric_display")
+        if display in empty and isinstance(donor.get("metric_value"), str):
+            display = donor.get("metric_value")
+        if display not in empty:
+            keep["metric_display"] = str(display)
+
+    # 规则解析得到的证据是可验证的锚；仅在规则侧确实缺失时才用 LLM 回填。
+    for key in ("evidence_page", "evidence"):
         if keep.get(key) in (None, "", [], {}):
             if donor.get(key) not in (None, "", [], {}):
                 keep[key] = donor.get(key)

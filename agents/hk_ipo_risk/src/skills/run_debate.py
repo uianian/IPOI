@@ -58,6 +58,41 @@ def _parse_questions(raw_list: Any, *, cap: int) -> list[DebateQuestion]:
     return out
 
 
+def _ensure_real_market_question(
+    questions: list[DebateQuestion],
+    market_card: dict[str, Any],
+    *,
+    cap: int,
+) -> list[DebateQuestion]:
+    """Do not let an active three-expert debate silently omit real market evidence."""
+    if any(q.target_agent == "market" for q in questions):
+        return questions
+    if market_card.get("agent") != "market" or market_card.get("risk_score") is None or market_card.get("demo"):
+        return questions
+    claims = [c for c in (market_card.get("claims") or []) if isinstance(c, dict)]
+    claim_id = str((claims[0] if claims else {}).get("claim_id") or "") or None
+    market_q = DebateQuestion(
+        question_id="q_market_evidence",
+        target_agent="market",
+        claim_id=claim_id,
+        theme="market_sentiment",
+        question=(
+            "請解釋原生 risk_score、overall_net_support、deterministic_score 與 LLM 評分之間的口徑及"
+            "表面張力，並以不晚於 as_of_date 的上市前市場字段或新聞證據補證首日破發風險結論；"
+            "不得使用上市後行情。"
+        ),
+        required_evidence_types=["market_field", "evidence_id", "as_of_date"],
+        priority="high",
+        search_hints={
+            "pages": [],
+            "keywords": ["overall_net_support", "deterministic_score", "risk_score"],
+        },
+    )
+    if len(questions) < cap:
+        return [*questions, market_q]
+    return [*questions[: max(0, cap - 1)], market_q]
+
+
 def _round_digest(record: DebateRoundRecord) -> str:
     rows = []
     qmap = {q.question_id: q for q in record.questions}
@@ -70,8 +105,9 @@ def _round_digest(record: DebateRoundRecord) -> str:
                 "question": (q.question if q else "")[:180],
                 "status": r.status,
                 "confidence": r.confidence,
-                "reply": (r.reply or "")[:300],
+                "reply": (r.reply or "")[:1200],
                 "search_hit_count": r.search_hit_count,
+                "evidence_pages": [e.page for e in (r.evidence or []) if e.page is not None],
             }
         )
     return json.dumps(rows, ensure_ascii=False)
@@ -126,6 +162,7 @@ class RunDebateSkill(BaseSkill):
             max_tokens=q_tokens,
         )
         pending = _parse_questions((q_out.get("data") or {}).get("questions"), cap=cap)
+        pending = _ensure_real_market_question(pending, cards["market"], cap=cap)
         if master_logger is not None:
             master_logger.master_step(
                 event="debate_plan",

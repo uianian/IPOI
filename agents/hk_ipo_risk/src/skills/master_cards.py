@@ -119,6 +119,40 @@ def reference_weights() -> dict[str, float]:
     }
 
 
+def market_reference_score(market: dict[str, Any] | None) -> tuple[float | None, dict[str, Any]]:
+    """Return the market Agent's audited 0-100 break-risk score for reference.
+
+    Net support describes direction rather than risk magnitude. It is retained
+    in metadata for qualitative judgment, but never replaces ``risk_score`` in
+    the controller's reference formula.
+    """
+    if not market:
+        return None, {"source": "missing_market"}
+    features = market.get("features") if isinstance(market.get("features"), dict) else {}
+    if features.get("demo"):
+        return None, {"source": "demo_market"}
+    sentiment = features.get("sentiment_analysis") if isinstance(features.get("sentiment_analysis"), dict) else {}
+    raw_support = sentiment.get("overall_net_support")
+    try:
+        net_support = float(raw_support)
+    except (TypeError, ValueError):
+        net_support = None
+    try:
+        score = float(market.get("risk_score"))
+    except (TypeError, ValueError):
+        return None, {"source": "missing_market_score"}
+    if net_support is not None:
+        if abs(net_support) > 1.0:
+            net_support = net_support / 100.0
+        net_support = max(-1.0, min(1.0, net_support))
+    return max(0.0, min(100.0, score)), {
+        "source": "market_risk_score",
+        "overall_net_support": net_support,
+        "net_support_scale": "-100%..+100%",
+        "note": "risk_score enters the reference formula; net support is qualitative context only.",
+    }
+
+
 def reference_fundamental(
     finance_score: float,
     legal_score: float,
@@ -140,7 +174,7 @@ def reference_score_note(*, has_market: bool, skip_master: bool = False) -> str:
     base = f"legal*{w['legal']} + finance*{w['finance']}"
     if has_market:
         text = (
-            f"reference_fundamental_score = ({base})*{w['fundamental']} + market*{w['market']} 为对照分；"
+            f"reference_fundamental_score = ({base})*{w['fundamental']} + market_risk_score*{w['market']} 为对照分；"
             "正式等级以总控终裁为准"
         )
     else:
@@ -151,7 +185,7 @@ def reference_score_note(*, has_market: bool, skip_master: bool = False) -> str:
     if skip_master:
         text = (
             f"reference_fundamental_score = "
-            + (f"({base})*{w['fundamental']} + market*{w['market']}" if has_market else base)
+            + (f"({base})*{w['fundamental']} + market_risk_score*{w['market']}" if has_market else base)
             + "；--skip-master，总控未运行"
         )
     return text
@@ -161,7 +195,7 @@ def reference_formula_label(*, has_market: bool) -> str:
     w = reference_weights()
     base = f"legal×{w['legal']} + finance×{w['finance']}"
     if has_market:
-        return f"({base})×{w['fundamental']} + market×{w['market']}"
+        return f"({base})×{w['fundamental']} + market_risk_score×{w['market']}"
     return base
 
 
@@ -257,14 +291,17 @@ def find_claim_card(cards: dict[str, Any] | None, claim_id: str | None) -> dict[
     return claims[0] if claims and isinstance(claims[0], dict) else None
 
 
-def checklist_text() -> str:
+def checklist_text(*, exclude_codes: set[str] | None = None) -> str:
     rules = load_master_rules()
+    excluded = {str(code).upper() for code in (exclude_codes or set())}
     ch5 = rules.get("chapter5_checklist") or {}
     lines = ["高风险触发（任一）："]
     for item in ch5.get("high") or []:
-        lines.append(f"- {item.get('code')}: {item.get('label')}")
+        if str(item.get("code") or "").upper() not in excluded:
+            lines.append(f"- {item.get('code')}: {item.get('label')}")
     lines.append("中风险触发（任一）：")
     for item in ch5.get("medium") or []:
-        lines.append(f"- {item.get('code')}: {item.get('label')}")
+        if str(item.get("code") or "").upper() not in excluded:
+            lines.append(f"- {item.get('code')}: {item.get('label')}")
     lines.append((rules.get("confidence_rubric") or "").strip())
     return "\n".join(lines)
