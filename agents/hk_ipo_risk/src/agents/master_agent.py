@@ -16,7 +16,10 @@ from src.models.master import (
     EmbellishmentResult,
     MasterResult,
     PredictedWindows,
+    PostListingValidation,
+    PricePathForecastItem,
     RiskFactorItem,
+    default_price_path_forecast,
 )
 from src.skills.base import SkillInput
 from src.skills.debate_reply import expert_respond_to_controller
@@ -26,11 +29,13 @@ from src.skills.master_cards import (
     agent_result_dossier_path,
     dossier_to_cards,
     load_dossier_optional,
+    market_reference_score,
     reference_fundamental,
 )
 from src.skills.master_decide import MasterDecideSkill
 from src.skills.run_debate import RunDebateSkill
 from src.skills.score_embellishment import ScoreEmbellishmentSkill
+from src.skills.validate_postlisting_performance import ValidatePostlistingPerformanceSkill
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +52,15 @@ def _as_dict(obj: Any) -> dict[str, Any]:
     return {}
 
 
+def _stock_code_from_market(market: Any) -> str | None:
+    data = _as_dict(market)
+    features = data.get("features") if isinstance(data.get("features"), dict) else {}
+    for value in (features.get("stock_code"), data.get("stock_code")):
+        if value:
+            return str(value)
+    return None
+
+
 class MasterAgent:
     """总控决策 Agent：冲突研判 → 条件辩论 → 粉饰 → 终裁 → 报告排版。"""
 
@@ -60,6 +74,7 @@ class MasterAgent:
         finance_agent: Any | None = None,
         legal_agent: Any | None = None,
         market_agent: Any | None = None,
+        enable_embellishment: bool = True,
         use_langgraph: bool = True,
     ) -> None:
         self._llm = llm
@@ -69,11 +84,13 @@ class MasterAgent:
         self._finance_agent = finance_agent
         self._legal_agent = legal_agent
         self._market_agent = market_agent
+        self._enable_embellishment = bool(enable_embellishment)
         self._use_langgraph = use_langgraph
         self._detect = DetectConflictsSkill()
         self._debate = RunDebateSkill()
         self._embellish = ScoreEmbellishmentSkill()
         self._decide = MasterDecideSkill()
+        self._validate_postlisting = ValidatePostlistingPerformanceSkill()
         self._report = GenerateWarningReportSkill()
 
     async def _respond(self, question: Any, claim_card: dict[str, Any] | None, *, round_no: int = 1):
@@ -163,11 +180,9 @@ class MasterAgent:
                     "demo": True,
                 }
         market_score = None
-        if usable_mkt and mkt.get("risk_score") is not None:
-            try:
-                market_score = float(mkt.get("risk_score"))
-            except (TypeError, ValueError):
-                market_score = None
+        market_reference_meta: dict[str, Any] = {}
+        if usable_mkt:
+            market_score, market_reference_meta = market_reference_score(mkt)
         ref = reference_fundamental(
             float(fin.get("risk_score") or 0),
             float(leg.get("risk_score") or 0),
@@ -183,13 +198,17 @@ class MasterAgent:
             "legal_cards": legal_cards,
             "market_cards": market_cards,
             "reference_score": ref,
+            "market_reference_score": market_score,
+            "market_reference_score_meta": market_reference_meta,
             "need_debate": False,
             "conflicts": [],
             "debate_history": [],
-            "embellishment": {},
+            "embellishment_enabled": self._enable_embellishment,
+            "embellishment": {} if self._enable_embellishment else None,
             "judgment": {},
             "degraded": False,
             "degraded_reasons": [],
+            "stock_code": _stock_code_from_market(mkt),
         }
         if self._use_langgraph:
             try:
@@ -203,13 +222,37 @@ class MasterAgent:
             state = await self.run_pipeline(state)
 
         judgment = CompositeJudgment(**(state.get("judgment") or {})) if state.get("judgment") else CompositeJudgment()
-        emb = EmbellishmentResult(**(state.get("embellishment") or {})) if state.get("embellishment") else EmbellishmentResult()
+        emb = (
+            EmbellishmentResult(**(state.get("embellishment") or {}))
+            if state.get("embellishment_enabled", True) and state.get("embellishment")
+            else None
+        )
         conflicts = [ConflictItem(**c) for c in (state.get("conflicts") or []) if isinstance(c, dict)]
         history = [
             DebateRoundRecord(**h) for h in (state.get("debate_history") or []) if isinstance(h, dict)
         ]
         factors = [RiskFactorItem(**f) for f in (state.get("risk_factors") or []) if isinstance(f, dict)]
         windows = PredictedWindows(**(state.get("predicted_windows") or {})) if state.get("predicted_windows") else PredictedWindows()
+        forecasts = [
+            PricePathForecastItem(**f)
+            for f in (state.get("price_path_forecast") or [])
+            if isinstance(f, dict)
+        ]
+        if not forecasts:
+            label_by_window = {
+                "D1": windows.ipo_day_break_risk,
+                "D5": windows.d5_significant_downside_risk,
+                "D20": windows.d20_downside_risk,
+                "D60": windows.d60_downside_risk,
+            }
+            forecasts = default_price_path_forecast()
+            for item in forecasts:
+                item.risk_label = str(label_by_window.get(item.window) or "medium")
+        post_listing = (
+            PostListingValidation(**(state.get("post_listing") or {}))
+            if state.get("post_listing")
+            else PostListingValidation()
+        )
         result = MasterResult(
             doc_id=doc_id,
             degraded=bool(state.get("degraded")),
@@ -217,15 +260,22 @@ class MasterAgent:
             conflicts=conflicts,
             debate_history=history,
             embellishment=emb,
+            analysis_options={
+                "embellishment_enabled": bool(state.get("embellishment_enabled", True))
+            },
             judgment=judgment,
             risk_factors=factors,
             predicted_windows=windows,
+            price_path_forecast=forecasts,
+            post_listing=post_listing,
             report_sections=state.get("report_sections") or {},
             report_markdown=state.get("report_markdown") or "",
             reference_fundamental_score=ref,
             trace={
                 "elapsed_sec": round(time.time() - t0, 3),
                 "need_debate": state.get("need_debate"),
+                "market_reference_score": state.get("market_reference_score"),
+                "market_reference_score_meta": state.get("market_reference_score_meta"),
                 "run_log": self._run_logger.paths if self._run_logger is not None else {},
             },
         )
@@ -254,6 +304,7 @@ class MasterAgent:
             state = await self.step_debate(state)
         state = await self.step_embellish(state)
         state = await self.step_decide(state)
+        state = await self.step_validate_postlisting(state)
         state = await self.step_report(state)
         return state
 
@@ -302,6 +353,10 @@ class MasterAgent:
         return state
 
     async def step_embellish(self, state: dict[str, Any]) -> dict[str, Any]:
+        if not state.get("embellishment_enabled", True):
+            state["embellishment"] = None
+            state["embellish_prompt_user"] = None
+            return state
         out = await self._embellish.execute(
             SkillInput(
                 doc_id=state.get("doc_id") or "",
@@ -309,6 +364,8 @@ class MasterAgent:
                     "llm": self._llm,
                     "run_logger": self._run_logger,
                     "parse_json": self._parse_json,
+                    "finance_cards": state.get("finance_cards"),
+                    "legal_cards": state.get("legal_cards"),
                 },
             )
         )
@@ -334,6 +391,7 @@ class MasterAgent:
                     "legal_cards": state.get("legal_cards"),
                     "market_cards": state.get("market_cards"),
                     "embellishment": state.get("embellishment"),
+                    "embellishment_enabled": state.get("embellishment_enabled", True),
                     "debate_history": state.get("debate_history"),
                 },
             )
@@ -341,31 +399,44 @@ class MasterAgent:
         state["judgment"] = out.data.get("judgment") or {}
         state["risk_factors"] = out.data.get("risk_factors") or []
         state["predicted_windows"] = out.data.get("predicted_windows") or {}
+        state["price_path_forecast"] = out.data.get("price_path_forecast") or []
         state["report_sections"] = out.data.get("report_sections") or {}
         if out.degraded:
             state["degraded"] = True
             state["degraded_reasons"].append(out.degraded_reason or "decide")
         return state
 
+    async def step_validate_postlisting(self, state: dict[str, Any]) -> dict[str, Any]:
+        out = await self._validate_postlisting.execute(
+            SkillInput(
+                doc_id=state.get("doc_id") or "",
+                params={
+                    "doc_id": state.get("doc_id"),
+                    "stock_code": state.get("stock_code"),
+                    "predicted_windows": state.get("predicted_windows"),
+                    "price_path_forecast": state.get("price_path_forecast"),
+                },
+            )
+        )
+        state["post_listing"] = out.data.get("post_listing") or {}
+        return state
+
     async def step_report(self, state: dict[str, Any]) -> dict[str, Any]:
         payload = {
             "judgment": state.get("judgment"),
             "embellishment": state.get("embellishment"),
+            "analysis_options": {
+                "embellishment_enabled": bool(state.get("embellishment_enabled", True))
+            },
             "debate_history": state.get("debate_history"),
             "report_sections": state.get("report_sections"),
             "predicted_windows": state.get("predicted_windows"),
+            "price_path_forecast": state.get("price_path_forecast"),
             "risk_factors": state.get("risk_factors"),
             "reference_fundamental_score": state.get("reference_score"),
             "degraded": state.get("degraded"),
             "degraded_reason": ";".join(state.get("degraded_reasons") or []) or None,
-            "post_listing": {
-                "day1": None,
-                "day5": None,
-                "day20": None,
-                "day60": None,
-                "hit": None,
-                "note": "上市后真实行情验证本轮未接入",
-            },
+            "post_listing": state.get("post_listing"),
         }
         out = await self._report.execute(
             SkillInput(doc_id=state.get("doc_id") or "", params={"master": payload})

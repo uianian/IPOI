@@ -16,13 +16,13 @@ FIELDS = ["stock_code", "listing_date", "checkpoint", "trading_day", "observatio
 
 
 class PostlistingRiskScorerTest(unittest.TestCase):
-    def test_scores_every_five_days_against_same_age_prior_ipos(self) -> None:
+    def test_scores_d1_and_every_five_days_against_same_age_prior_ipos(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "checkpoints.csv"
             rows = []
             for i in range(12):
                 listing = date(2023, 1, 1) + timedelta(days=i * 20)
-                for day in (5, 10):
+                for day in (1, 5):
                     rows.append({"stock_code": str(i + 1).zfill(5), "listing_date": listing,
                                  "checkpoint": f"D{day}", "trading_day": day,
                                  "observation_date": listing + timedelta(days=day + 2),
@@ -31,7 +31,7 @@ class PostlistingRiskScorerTest(unittest.TestCase):
                                  "issue_price_return": i / 100, "excess_hsi_return": i / 100,
                                  "excess_industry_return": i / 100, "max_drawdown_from_open": -i / 100,
                                  "realized_volatility": i / 100, "turnover_change": i / 100})
-            for day in (5, 10):
+            for day in (1, 5):
                 rows.append({"stock_code": "02451", "listing_date": "2024-01-01",
                              "checkpoint": f"D{day}", "trading_day": day,
                              "observation_date": f"2024-01-{day + 2:02d}",
@@ -42,9 +42,9 @@ class PostlistingRiskScorerTest(unittest.TestCase):
                              "realized_volatility": 0.5, "turnover_change": -0.5})
             with path.open("w", encoding="utf-8", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=FIELDS); writer.writeheader(); writer.writerows(rows)
-            results = PostlistingRiskScorer().load_and_score("2451.HK", checkpoints_csv=path, through_day=10)
+            results = PostlistingRiskScorer().load_and_score("2451.HK", checkpoints_csv=path, through_day=5)
 
-        self.assertEqual([item.trading_day for item in results], [5, 10])
+        self.assertEqual([item.trading_day for item in results], [1, 5])
         self.assertTrue(all(item.below_issue_price for item in results))
         self.assertTrue(all(item.risk_anchor == "issue_price" for item in results))
         primary = next(metric for metric in results[0].metrics if metric.metric == "below_issue_price")
@@ -55,4 +55,3 @@ class PostlistingRiskScorerTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -1,4 +1,4 @@
-"""总控子图：detect → (debate?) → embellish → decide → report。专家探查不进本图。"""
+"""总控子图：detect → (debate?) → [embellish?] → decide → validate_postlisting → report。专家探查不进本图。"""
 
 from __future__ import annotations
 
@@ -10,8 +10,11 @@ class MasterGraphState(TypedDict, total=False):
     need_debate: bool
     conflicts: list[dict[str, Any]]
     debate_history: list[dict[str, Any]]
+    embellishment_enabled: bool
     embellishment: dict[str, Any]
     judgment: dict[str, Any]
+    price_path_forecast: list[dict[str, Any]]
+    post_listing: dict[str, Any]
     degraded: bool
     degraded_reasons: list[str]
 
@@ -38,11 +41,15 @@ async def run_master_subgraph(master: Any, state: dict[str, Any]) -> dict[str, A
     async def report(s: dict[str, Any]) -> dict[str, Any]:
         return await master.step_report(s)
 
+    async def validate_postlisting(s: dict[str, Any]) -> dict[str, Any]:
+        return await master.step_validate_postlisting(s)
+
     g = StateGraph(dict)
     g.add_node("detect", detect)
     g.add_node("debate", debate)
     g.add_node("embellish", embellish)
     g.add_node("decide", decide)
+    g.add_node("validate_postlisting", validate_postlisting)
     g.add_node("report", report)
     g.add_edge(START, "detect")
     g.add_conditional_edges(
@@ -52,7 +59,8 @@ async def run_master_subgraph(master: Any, state: dict[str, Any]) -> dict[str, A
     )
     g.add_edge("debate", "embellish")
     g.add_edge("embellish", "decide")
-    g.add_edge("decide", "report")
+    g.add_edge("decide", "validate_postlisting")
+    g.add_edge("validate_postlisting", "report")
     g.add_edge("report", END)
     app = g.compile()
     return await app.ainvoke(state)

@@ -57,6 +57,9 @@ async def _maybe_search(
     top_k: int,
     section_hint: list[str] | None = None,
     prefer_pages: list[int] | None = None,
+    market_stock_code: str | None = None,
+    market_features_csv: Path | str | None = None,
+    market_news_dir: Path | str | None = None,
 ) -> dict[str, Any]:
     if not query.strip():
         return {"ok": False, "hits": [], "query": query, "n": 0}
@@ -90,9 +93,33 @@ async def _maybe_search(
             prefer_pages=prefer_pages,
         )
     else:
-        from src.skills.market_toolbox import search_market_evidence_standalone
+        from src.tools.market_debate import search_market_evidence_standalone
 
-        raw = await search_market_evidence_standalone(doc_id=doc_id, query=query)
+        if not market_stock_code or not market_features_csv or not market_news_dir:
+            return {"ok": False, "hits": [], "query": query, "n": 0, "error": "缺少市场补证配置"}
+        found = await search_market_evidence_standalone(
+            stock_code=market_stock_code,
+            query=query,
+            features_csv=market_features_csv,
+            news_dir=market_news_dir,
+            limit=top_k,
+        )
+        raw = {
+            "ok": True,
+            "query": query,
+            "hits": [
+                {
+                    "page": None,
+                    "source_type": "unknown",
+                    "excerpt": (
+                        f"as_of_date={found.get('as_of_date')}; cutoff_verified={found.get('cutoff_verified')}; "
+                        f"feature_hits={found.get('feature_hits') or {}}; news_hit={item}"
+                    ),
+                }
+                for item in ((found.get("news_hits") or [])[:top_k] or [None])
+                if item is not None or found.get("feature_hits")
+            ],
+        }
     raw["duration_ms"] = int((time.time() - t0) * 1000)
     return raw
 
@@ -104,6 +131,9 @@ async def _run_search_step(
     parse_json: Path | str | None,
     step: DebateSearchStep,
     top_k: int,
+    market_stock_code: str | None = None,
+    market_features_csv: Path | str | None = None,
+    market_news_dir: Path | str | None = None,
 ) -> dict[str, Any]:
     if step.kind == "page":
         if not parse_json:
@@ -134,6 +164,9 @@ async def _run_search_step(
         intent=step.intent,
         top_k=top_k,
         section_hint=step.section_hint or None,
+        market_stock_code=market_stock_code,
+        market_features_csv=market_features_csv,
+        market_news_dir=market_news_dir,
     )
 
 
@@ -162,6 +195,10 @@ async def expert_respond_to_controller(
     run_logger: Any | None = None,
     round_no: int = 1,
     demo_market: bool = False,
+    market_stock_code: str | None = None,
+    market_features_csv: Path | str | None = None,
+    market_news_dir: Path | str | None = None,
+    agent_context: dict[str, Any] | None = None,
 ) -> ClaimUpdate:
     rules = load_master_rules()
     debate_cfg = rules.get("debate") or {}
@@ -200,6 +237,9 @@ async def expert_respond_to_controller(
                     parse_json=parse_json,
                     step=step,
                     top_k=top_k,
+                    market_stock_code=market_stock_code,
+                    market_features_csv=market_features_csv,
+                    market_news_dir=market_news_dir,
                 )
             except Exception as exc:
                 logger.warning("debate search failed: %s", exc)
@@ -295,6 +335,7 @@ async def expert_respond_to_controller(
     )
     user = (
         f"【总控质询】{question.question}\n"
+        f"【己方已审计结果上下文】{agent_context or {}}\n"
         f"【己方 claim 已有证据】\n{plan.claimed_evidence}\n"
         f"【己方 claim 卡片】{claim_card or {}}\n"
         f"【本轮检索 hits 数】{hit_n}\n"
@@ -326,6 +367,18 @@ async def expert_respond_to_controller(
         reply = "未能解析模型作答；检索未命中或证据不足，维持原主张待决。"
         status = "unresolved"
         conf = min(conf, 0.4)
+    audit_corrections: list[str] = []
+    ctx = agent_context or {}
+    if agent == "finance" and (ctx.get("metrics") or {}).get("cash_burn"):
+        if any(s in reply for s in ("未获得现金及现金等价物", "缺乏现金及现金等价物", "未取得现金及现金等价物")):
+            audit_corrections.append("审计上下文已提供现金余额、月均烧钱率与基础现金跑道，不得认定该等字段缺失。")
+    if agent == "market" and ctx.get("deterministic_score") is not None:
+        if any(s in reply for s in ("无法拆解最终评分", "缺乏构成数据", "无法验证其来源", "不能还原61")):
+            audit_corrections.append("审计上下文已提供 deterministic_score、llm_score 及 score_reconciliation，评分血缘可直接复现。")
+    if audit_corrections:
+        reply += "\n\n【一致性校正】" + "".join(audit_corrections)
+        status = "partially_accepted" if status == "verified" else status
+        conf = min(conf, 0.6)
     ev_out = list(evidence_refs)
     for e in data.get("evidence") or []:
         if isinstance(e, dict) and (e.get("excerpt") or e.get("page") is not None):

@@ -399,7 +399,7 @@ def test_cv_pref_liability_flag() -> None:
     assert _canonical_score_code("PREFERRED_LIABILITY", {}) == "CV_PREF_LIABILITY"
 
 
-def test_theme_merge_keeps_metric_value() -> None:
+def test_theme_merge_keeps_raw_and_display_metric_values() -> None:
     state: dict[str, Any] = {
         "metrics": {
             "NET_LOSS": {"2023": -1.0, "2024": -2.0},
@@ -466,8 +466,18 @@ def test_theme_merge_keeps_metric_value() -> None:
     warnings: list[str] = []
     _merge_rules_floor(report, state, warnings)
     loss = next(b for b in report["score_breakdown"] if b["code"] == "CONTINUOUS_LOSS")
-    assert loss.get("metric_value") == "NET_LOSS 2024=-2"
-    assert loss.get("evidence_page") == 562
+    assert loss.get("metric_value") == -2.0
+    assert loss.get("metric_display") == "NET_LOSS 2024=-2"
+    assert loss.get("evidence_page") == 1
+
+    # 新字段须能穿过结构化模型，并由报告层优先展示；机器原值仍可计算。
+    from scripts.generate_analysis_report import _score_breakdown_md
+    from src.models.evidence import ScoreBreakdownItem
+
+    serialized = ScoreBreakdownItem(**loss).model_dump()
+    assert serialized["metric_value"] == -2.0
+    assert serialized["metric_display"] == "NET_LOSS 2024=-2"
+    assert "NET_LOSS 2024=-2" in _score_breakdown_md([serialized])
 
 
 def test_sanitize_negative_findings() -> None:

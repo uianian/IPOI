@@ -472,7 +472,13 @@ def test_report_reads_legal_sections_from_rule_features() -> None:
                     "redemption_high": True,
                     "evidence": [{"page": 120, "excerpt": "赎回", "source_type": "text"}],
                 },
-                "3.2": {"exists": True, "ratio_pct": 12.5, "evidence_strength": "medium"},
+                "3.2": {
+                    "exists": True,
+                    "ratio_pct": 12.5,
+                    "listing_rule_pct_max": 4.0,
+                    "waiver_pct_threshold": 5.0,
+                    "evidence_strength": "medium",
+                },
                 "3.3": {"exists": False, "evidence_strength": "low"},
                 "3.4": {"owner": "finance", "skipped_by_legal": True},
                 "3.5": {"exists": True, "skipped": False, "pipeline_high": True},
@@ -491,5 +497,7 @@ def test_report_reads_legal_sections_from_rule_features() -> None:
         legal_retrieval=None,
     )
     assert "exists=True" in md
-    assert "ratio_pct=12.5" in md
+    assert "占比=12.5%" in md
+    assert "上市规则最高适用百分比率=4%" in md
+    assert "豁免门槛=5%" in md
     assert "| 3.1 |" in md

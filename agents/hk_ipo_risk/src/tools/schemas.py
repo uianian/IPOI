@@ -155,6 +155,10 @@ FINANCE_TOOL_SCHEMAS: list[dict[str, Any]] = [
                         "delta": {"type": "number"},
                         "rule_ref": {"type": "string"},
                         "metric_value": {"type": "string"},
+                        "metric_display": {
+                            "type": "string",
+                            "description": "面向报告的指标、期间与数值说明；规则合并后不会覆盖可计算的 metric_value",
+                        },
                         "note": {"type": "string"},
                         "evidence_page": {"type": "integer"},
                     },

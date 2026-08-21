@@ -65,6 +65,44 @@ def _good_judgment(**overrides) -> dict:
             "d20_downside_risk": "medium",
             "d60_downside_risk": "medium",
         },
+        "price_path_forecast": [
+            {
+                "window": "D1",
+                "risk_label": "high",
+                "expected_direction": "預計上市首日破發或承壓",
+                "expected_pattern": "首日可能低開後弱勢震盪",
+                "volatility_view": "波動和回撤風險高",
+                "key_drivers": ["市場破發率高", "持續虧損"],
+                "confidence": "medium",
+            },
+            {
+                "window": "D5",
+                "risk_label": "high",
+                "expected_direction": "預計5個交易日內顯著下跌風險高",
+                "expected_pattern": "首日承壓後繼續弱勢",
+                "volatility_view": "高波動下探",
+                "key_drivers": ["創新藥板塊承壓", "贖回壓力"],
+                "confidence": "medium",
+            },
+            {
+                "window": "D20",
+                "risk_label": "medium",
+                "expected_direction": "20日下行風險中等",
+                "expected_pattern": "弱勢整理",
+                "volatility_view": "波動中等",
+                "key_drivers": ["估值壓力"],
+                "confidence": "medium",
+            },
+            {
+                "window": "D60",
+                "risk_label": "medium",
+                "expected_direction": "60日下行風險中等",
+                "expected_pattern": "等待基本面驗證",
+                "volatility_view": "波動中等",
+                "key_drivers": ["融資依賴"],
+                "confidence": "low",
+            },
+        ],
     }
     data.update(overrides)
     return data
@@ -176,3 +214,95 @@ def test_decide_scales_zero_one_score_to_hundred():
     out = asyncio.run(MasterDecideSkill().execute(SkillInput(doc_id="hansiaitai", params=_params(llm))))
     assert out.degraded is False
     assert out.data["judgment"]["overall_score"] == 72
+
+
+def test_decide_preserves_price_path_forecast_and_predicted_windows():
+    good = _good_judgment()
+    llm = SeqLLM(
+        [
+            {
+                "data": good,
+                "content": json.dumps(good, ensure_ascii=False),
+                "finish_reason": "stop",
+                "usage": {},
+            }
+        ]
+    )
+    out = asyncio.run(MasterDecideSkill().execute(SkillInput(doc_id="hansiaitai", params=_params(llm))))
+    assert out.degraded is False
+    assert out.data["predicted_windows"]["ipo_day_break_risk"] == "high"
+    forecasts = out.data["price_path_forecast"]
+    assert [item["window"] for item in forecasts] == ["D1", "D5", "D20", "D60"]
+    assert forecasts[1]["risk_label"] == "high"
+    assert "顯著下跌" in forecasts[1]["expected_direction"]
+
+
+def test_decide_missing_price_path_forecast_falls_back_to_labels():
+    good = _good_judgment()
+    good.pop("price_path_forecast")
+    llm = SeqLLM(
+        [
+            {
+                "data": good,
+                "content": json.dumps(good, ensure_ascii=False),
+                "finish_reason": "stop",
+                "usage": {},
+            }
+        ]
+    )
+    out = asyncio.run(MasterDecideSkill().execute(SkillInput(doc_id="hansiaitai", params=_params(llm))))
+    forecasts = out.data["price_path_forecast"]
+    assert [item["risk_label"] for item in forecasts[:2]] == ["high", "high"]
+    assert "标签级预测" in forecasts[0]["expected_pattern"]
+
+
+def test_partial_embellishment_without_minimum_coverage_cannot_trigger_gate():
+    params = _params(SeqLLM([_truncated(), _truncated(), _truncated()]))
+    params["reference_score"] = 20
+    params["finance"] = {"risk_score": 20, "risk_level": "low", "score_breakdown": []}
+    params["legal"] = {"risk_score": 20, "risk_level": "low", "score_breakdown": []}
+    params["finance_cards"] = {"claims": []}
+    params["legal_cards"] = {"claims": []}
+    params["embellishment"] = {
+        "status": "partial",
+        "score": 8,
+        "reason": "仅复核少量候选",
+        "coverage": {
+            "candidate_count": 10,
+            "evaluated_candidate_count": 2,
+            "sections": ["risk_factors"],
+            "risk_factor_pages": [55],
+        },
+    }
+    out = asyncio.run(MasterDecideSkill().execute(SkillInput(doc_id="partial", params=params)))
+    assert out.degraded is True
+    assert out.data["judgment"]["level"] == "low"
+    assert "EMBELLISHMENT_HIGH" not in out.data["judgment"]["triggered_gates"]
+    prompt = params["llm"].calls[0]["messages"][-1]["content"]
+    assert "usable=false" in prompt
+    assert "score=不可用于门控" in prompt
+
+
+
+def test_disabled_embellishment_is_absent_from_decision_prompt_and_gate():
+    good = _good_judgment(overall_score=25, level="low", triggered_gates=[])
+    llm = SeqLLM(
+        [
+            {
+                "data": good,
+                "content": json.dumps(good, ensure_ascii=False),
+                "finish_reason": "stop",
+                "usage": {},
+            }
+        ]
+    )
+    params = _params(llm)
+    params["embellishment_enabled"] = False
+    params["embellishment"] = {"status": "complete", "score": 10, "reason": "应被忽略"}
+    out = asyncio.run(MasterDecideSkill().execute(SkillInput(doc_id="disabled", params=params)))
+    assert out.degraded is False
+    assert out.data["judgment"]["overall_score"] == 25
+    assert "EMBELLISHMENT_HIGH" not in out.data["judgment"]["triggered_gates"]
+    prompt = " ".join(message["content"] for message in llm.calls[0]["messages"])
+    assert "粉饰" not in prompt
+    assert "EMBELLISHMENT_HIGH" not in prompt

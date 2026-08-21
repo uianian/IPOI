@@ -27,6 +27,7 @@ class AnalysisStartBody(BaseModel):
     isBiotech: Optional[bool] = None
     ticker: Optional[str] = None
     stockCode: Optional[str] = None
+    enableEmbellishment: bool = True
 
 
 def _err(status: int, code: str, message: str) -> JSONResponse:
@@ -113,6 +114,7 @@ async def analysis_start(
     )
     store.update_meta(
         analysis_id,
+        analysisOptions={"embellishmentEnabled": body.enableEmbellishment},
         llmOverride={
             "hasApiKey": bool(str(llm_cfg.get("apiKey") or "").strip()),
             "apiBaseUrl": (str(llm_cfg.get("apiBaseUrl") or "").strip() or None),
@@ -123,6 +125,7 @@ async def analysis_start(
         analysis_id=analysis_id,
         parse_meta=parse_meta,
         llm_config=body.llmConfig,
+        enable_embellishment=body.enableEmbellishment,
     )
     return _ok({"analysisId": analysis_id, "status": "started"}, status=202)
 

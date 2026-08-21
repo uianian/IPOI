@@ -1,4 +1,4 @@
-"""Build D5,D10,...,D60 realized IPO performance checkpoints.
+"""Build D1,D5,D10,...,D60 realized IPO performance checkpoints.
 
 Primary risk anchor: issue price (below_issue_price).
 Secondary-market return base: first trading day's open.
@@ -19,8 +19,9 @@ from config import DATASET_DIR, DERIVED_DIR, EOD_CSV, MACRO_DIR, WIND_DIR, ensur
 
 CATALOG = Path(__file__).resolve().parents[2] / "dataset_analysis" / "output" / "ipo_catalog_with_metrics.csv"
 INDUSTRY_MAP = DERIVED_DIR / "ipo_industry_map.csv"
+IPO_LISTING_STATS = WIND_DIR / "ipo_listing_stats.csv"
 OUT = DERIVED_DIR / "ipo_postlisting_checkpoints.csv"
-CHECKPOINTS = list(range(5, 61, 5))
+CHECKPOINTS = [1] + list(range(5, 61, 5))
 
 
 def _series_return(frame, start_date, end_date, *, code=None):
@@ -54,6 +55,14 @@ def main():
     catalog = catalog.merge(
         imap[["stock_code", "hsics_index_code"]], on="stock_code", how="left"
     )
+    if IPO_LISTING_STATS.is_file():
+        wind_ipo = pd.read_csv(IPO_LISTING_STATS, dtype={"stock_code": str})
+        wind_ipo["stock_code"] = wind_ipo["stock_code"].astype(str).str.zfill(5)
+        wind_ipo = wind_ipo[["stock_code", "issue_price"]].drop_duplicates("stock_code", keep="last")
+        catalog = catalog.merge(wind_ipo, on="stock_code", how="left", suffixes=("", "_wind"))
+        catalog["list_price"] = pd.to_numeric(catalog.get("list_price"), errors="coerce").fillna(
+            pd.to_numeric(catalog.get("issue_price"), errors="coerce")
+        )
     codes = set(catalog["windcode"].dropna().astype(str))
 
     header = pd.read_csv(EOD_CSV, nrows=0).columns
@@ -155,7 +164,7 @@ def main():
         OUT,
         source=f"{EOD_CSV} + hsi.csv + hsics_index_daily.csv",
         note=(
-            "D5..D60 every five trading days; primary anchor=issue price; "
+            "D1,D5..D60 every five trading days; primary anchor=issue price; "
             "secondary return base=first trading day open; point-in-time through checkpoint close"
         ),
     )
@@ -164,4 +173,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

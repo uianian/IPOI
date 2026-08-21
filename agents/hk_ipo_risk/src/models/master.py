@@ -68,13 +68,45 @@ class EmbellishmentHit(BaseModel):
     note: str = ""
 
 
+class EmbellishmentHighRiskExcerpt(BaseModel):
+    candidate_id: str = ""
+    dimension: str = ""
+    tactic: str = ""
+    section: str = ""
+    page: int | None = None
+    excerpt: str = ""
+    context: str = ""
+    reason: str = ""
+    support_status: Literal[
+        "supported", "weakly_supported", "unsupported", "contradictory", "unknown"
+    ] = "unknown"
+    score_contribution: int = 0
+    severity: Literal["high", "medium", "low"] = "low"
+    confidence: Literal["high", "medium", "low"] = "low"
+    cross_evidence: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class EmbellishmentCoverage(BaseModel):
+    first_pages: list[int] = Field(default_factory=list)
+    sections: list[str] = Field(default_factory=list)
+    pages_analyzed: list[int] = Field(default_factory=list)
+    risk_factor_pages: list[int] = Field(default_factory=list)
+    candidate_count: int = 0
+    evaluated_candidate_count: int = 0
+    verified_excerpt_count: int = 0
+
+
 class EmbellishmentResult(BaseModel):
     score: int = 0  # 0–10
     level: Literal["low", "medium", "high"] = "low"
+    status: Literal["complete", "partial", "not_available"] = "not_available"
     reason: str = ""
     hits: list[EmbellishmentHit] = Field(default_factory=list)
     dimensions: dict[str, Any] = Field(default_factory=dict)
     buzzword_hints: list[str] = Field(default_factory=list)
+    coverage: EmbellishmentCoverage = Field(default_factory=EmbellishmentCoverage)
+    high_risk_excerpts: list[EmbellishmentHighRiskExcerpt] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
 
 
 class RiskFactorItem(BaseModel):
@@ -104,14 +136,82 @@ class PredictedWindows(BaseModel):
     d60_downside_risk: str = "medium"
 
 
-class PostListingPlaceholder(BaseModel):
-    day1: float | None = None
-    day5: float | None = None
-    day20: float | None = None
-    day60: float | None = None
-    broke_issue_price: bool | None = None
+class PricePathForecastItem(BaseModel):
+    window: Literal["D1", "D5", "D20", "D60"]
+    risk_label: str = "medium"
+    expected_direction: str = ""
+    expected_pattern: str = ""
+    volatility_view: str = ""
+    key_drivers: list[str] = Field(default_factory=list)
+    confidence: Literal["high", "medium", "low"] = "medium"
+
+
+def default_price_path_forecast() -> list[PricePathForecastItem]:
+    return [
+        PricePathForecastItem(
+            window="D1",
+            risk_label="medium",
+            expected_direction="上市首日破发风险中等",
+            expected_pattern="仅有标签级预测，未生成结构化走势文本",
+            volatility_view="波动风险中等",
+            confidence="medium",
+        ),
+        PricePathForecastItem(
+            window="D5",
+            risk_label="medium",
+            expected_direction="上市后5个交易日显著下跌风险中等",
+            expected_pattern="仅有标签级预测，未生成结构化走势文本",
+            volatility_view="波动风险中等",
+            confidence="medium",
+        ),
+        PricePathForecastItem(
+            window="D20",
+            risk_label="medium",
+            expected_direction="上市后20个交易日下行风险中等",
+            expected_pattern="仅有标签级预测，未生成结构化走势文本",
+            volatility_view="波动风险中等",
+            confidence="medium",
+        ),
+        PricePathForecastItem(
+            window="D60",
+            risk_label="medium",
+            expected_direction="上市后60个交易日下行风险中等",
+            expected_pattern="仅有标签级预测，未生成结构化走势文本",
+            volatility_view="波动风险中等",
+            confidence="medium",
+        ),
+    ]
+
+
+class PostListingCheckpointValidation(BaseModel):
+    window: Literal["D1", "D5", "D20", "D60"]
+    prediction_label: str = "medium"
+    prediction_text: str = ""
+    actual_severity: Literal["severe", "moderate", "benign", "unknown"] = "unknown"
     hit: bool | None = None
-    note: str = "上市后真实行情验证本轮未接入"
+    alignment: Literal["hit", "partial", "miss", "not_available"] = "not_available"
+    observation_date: str | None = None
+    below_issue_price: bool | None = None
+    cumulative_return_from_open: float | None = None
+    issue_price_return: float | None = None
+    max_drawdown_from_open: float | None = None
+    realized_risk_score: float | None = None
+    note: str = ""
+
+
+class PostListingValidation(BaseModel):
+    status: Literal["completed", "partial", "not_available"] = "not_available"
+    source: str = ""
+    summary: str = "上市后真实行情验证未接入"
+    business_value_score: float | None = None
+    weighted_hit_score: float | None = None
+    d5_priority_hit: bool | None = None
+    forecast_alignment_summary: str = ""
+    weights: dict[str, float] = Field(
+        default_factory=lambda: {"D1": 0.30, "D5": 0.35, "D20": 0.20, "D60": 0.15}
+    )
+    checkpoints: list[PostListingCheckpointValidation] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
 
 
 class MasterResult(BaseModel):
@@ -120,11 +220,15 @@ class MasterResult(BaseModel):
     degraded_reason: str | None = None
     conflicts: list[ConflictItem] = Field(default_factory=list)
     debate_history: list[DebateRoundRecord] = Field(default_factory=list)
-    embellishment: EmbellishmentResult = Field(default_factory=EmbellishmentResult)
+    embellishment: EmbellishmentResult | None = Field(default_factory=EmbellishmentResult)
+    analysis_options: dict[str, bool] = Field(
+        default_factory=lambda: {"embellishment_enabled": True}
+    )
     judgment: CompositeJudgment = Field(default_factory=CompositeJudgment)
     risk_factors: list[RiskFactorItem] = Field(default_factory=list)
     predicted_windows: PredictedWindows = Field(default_factory=PredictedWindows)
-    post_listing: PostListingPlaceholder = Field(default_factory=PostListingPlaceholder)
+    price_path_forecast: list[PricePathForecastItem] = Field(default_factory=default_price_path_forecast)
+    post_listing: PostListingValidation = Field(default_factory=PostListingValidation)
     report_sections: dict[str, Any] = Field(default_factory=dict)
     report_markdown: str = ""
     reference_fundamental_score: float | None = None

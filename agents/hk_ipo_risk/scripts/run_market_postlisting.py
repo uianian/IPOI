@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score realized D5,D10,...,D60 market performance for one IPO."""
+"""Score realized D1,D5,D10,...,D60 market performance for one IPO."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def _report(stock_code: str, doc_id: str, results) -> str:
         f"- doc_id：`{doc_id}`",
         "- 主要风险锚点：发行价（检查点收盘价是否低于发行价）",
         "- 二级市场收益基准：上市首日开盘价",
-        "- 检查点：每5个交易日一次，D5至D60",
+        "- 检查点：D1 以及每5个交易日一次，D5至D60",
         "",
         "| 检查点 | 日期 | 真实风险分 | 风险等级 | 开盘基准累计收益 | 是否低于发行价 | 最大回撤 |",
         "|---|---|---:|---|---:|---|---:|",
@@ -57,10 +57,10 @@ def _report(stock_code: str, doc_id: str, results) -> str:
 
 
 async def _amain() -> int:
-    parser = argparse.ArgumentParser(description="上市后每5交易日真实市场风险评分")
+    parser = argparse.ArgumentParser(description="上市后D1及每5交易日真实市场风险评分")
     parser.add_argument("--stock-code", required=True)
     parser.add_argument("--doc-id", required=True)
-    parser.add_argument("--through-day", type=int, choices=list(range(5, 61, 5)), default=60)
+    parser.add_argument("--through-day", type=int, choices=[1] + list(range(5, 61, 5)), default=60)
     parser.add_argument("--config", type=Path, default=None)
     args = parser.parse_args()
 
@@ -119,4 +119,3 @@ async def _amain() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(asyncio.run(_amain()))
-

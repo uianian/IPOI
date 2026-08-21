@@ -606,6 +606,29 @@ class FinanceAgent:
     ):
         from src.skills.debate_reply import expert_respond_to_controller
 
+        audited = getattr(self, "_last_result", None)
+        raw = audited.model_dump(mode="json") if audited is not None else {}
+        metrics = raw.get("metrics") or {}
+        burn = metrics.get("cash_burn") or {}
+        cash = burn.get("END_CASH")
+        monthly = burn.get("BURN_RATE_MONTHLY")
+        redemption = (metrics.get("CV_PREF") or {}).get("2025_i1")
+        stress = {}
+        if cash is not None and monthly and redemption is not None:
+            remaining = float(cash) - float(redemption)
+            stress = {
+                "assumption": "immediate full cash payment; no new financing or inflow",
+                "remaining_cash": remaining,
+                "stressed_runway_months": round(max(0.0, remaining / float(monthly)), 2),
+                "warning": "sensitivity only; legal redemption amount and timing may differ",
+            }
+        context = {
+            "risk_score": raw.get("risk_score"), "risk_level": raw.get("risk_level"),
+            "summary": raw.get("summary"), "metrics": metrics,
+            "score_breakdown": raw.get("score_breakdown") or [],
+            "risk_points": raw.get("risk_points") or [],
+            "redemption_stress_scenario": stress,
+        }
         return await expert_respond_to_controller(
             agent="finance",
             question=question,
@@ -615,4 +638,5 @@ class FinanceAgent:
             parse_json=parse_json or self._parse_json,
             run_logger=self._run_logger,
             round_no=round_no,
+            agent_context=context,
         )

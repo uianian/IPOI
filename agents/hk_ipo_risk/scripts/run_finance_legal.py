@@ -149,7 +149,7 @@ async def _amain() -> int:
         "--max-turns",
         type=int,
         default=None,
-        help="ReAct 最大轮次（默认：财务 8 / 法务 8）",
+        help="ReAct 最大轮次（默认：财务 10 / 法务 10）",
     )
     parser.add_argument(
         "--log-dir",
@@ -166,6 +166,11 @@ async def _amain() -> int:
         "--skip-master",
         action="store_true",
         help="专家探查后不跑总控（旧行为：master=null）",
+    )
+    parser.add_argument(
+        "--skip-embellishment",
+        action="store_true",
+        help="关闭文本粉饰度分析；默认启用。关闭后不调用粉饰模型、不参与总控门控且报告不生成该章节",
     )
     parser.add_argument(
         "--skip-experts",
@@ -353,6 +358,7 @@ async def _amain() -> int:
                 doc_name=args.doc_name,
                 finance_reasoning_effort=finance_effort,
                 legal_reasoning_effort=legal_effort,
+                enable_embellishment=not args.skip_embellishment,
             )
         elif args.agent == "all":
             master_llm = llm
@@ -395,6 +401,7 @@ async def _amain() -> int:
                 legal_reasoning_effort=legal_effort,
                 finance_reasoning_effort=finance_effort,
                 skip_master=args.skip_master,
+                enable_embellishment=not args.skip_embellishment,
             )
         elif args.agent == "market":
             mkt = await MarketAgent(
@@ -544,8 +551,11 @@ async def _amain() -> int:
         )
         if master.get("dossier_path"):
             print(f"  dossier: {master.get('dossier_path')}")
-        emb = master.get("embellishment") or {}
-        print(f"  embellishment: {emb.get('score')} ({emb.get('level')})")
+        if (master.get("analysis_options") or {}).get("embellishment_enabled", True):
+            emb = master.get("embellishment") or {}
+            print(f"  embellishment: {emb.get('score')} ({emb.get('level')})")
+        else:
+            print("  embellishment: disabled")
     elif "master" in result:
         print(f"[master] {master} cross_agent_n={len(result.get('cross_agent_features') or [])}")
     return 0

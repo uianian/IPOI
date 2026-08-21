@@ -11,7 +11,7 @@ from src.agents.legal_agent import LegalAgent
 from src.agents.market_agent import MarketAgent
 from src.agents.master_agent import MasterAgent
 from src.models.evidence import AgentResult
-from src.skills.master_cards import reference_fundamental, reference_score_note
+from src.skills.master_cards import market_reference_score, reference_fundamental, reference_score_note
 
 logger = logging.getLogger(__name__)
 
@@ -19,13 +19,8 @@ logger = logging.getLogger(__name__)
 def _market_score_for_reference(market: AgentResult | None) -> float | None:
     if market is None:
         return None
-    feats = market.features or {}
-    if feats.get("demo"):
-        return None
-    try:
-        return float(market.risk_score)
-    except (TypeError, ValueError):
-        return None
+    score, _meta = market_reference_score(market.model_dump())
+    return score
 
 
 async def _run_finance_legal_experts(
@@ -132,6 +127,8 @@ async def _run_finance_legal_experts(
         return result
 
     finance_result, legal_result = await asyncio.gather(_run_finance(), _run_legal())
+    finance_agent._last_result = finance_result
+    legal_agent._last_result = legal_result
     return finance_result, legal_result, finance_agent, legal_agent
 
 
@@ -166,6 +163,7 @@ async def run_finance_legal_parallel(
     legal_reasoning_effort: str | None = "high",
     finance_reasoning_effort: str | None = "low",
     skip_master: bool = False,
+    enable_embellishment: bool = True,
     include_market: bool = False,
     on_finance_done: Any | None = None,
     on_legal_done: Any | None = None,
@@ -208,6 +206,7 @@ async def run_finance_legal_parallel(
         legal_result,
         market=None,
         skip_master=skip_master,
+        enable_embellishment=enable_embellishment,
         master_llm=mas_llm,
         master_run_logger=master_run_logger,
         parse_json=parse_json,
@@ -239,6 +238,7 @@ async def run_finance_legal_market_parallel(
     finance_legal_kwargs.pop("include_market", None)
     finance_legal_kwargs.pop("market_run_logger", None)
     skip_master = bool(finance_legal_kwargs.pop("skip_master", False))
+    enable_embellishment = bool(finance_legal_kwargs.pop("enable_embellishment", True))
     master_llm = finance_legal_kwargs.pop("master_llm", None)
     master_run_logger = finance_legal_kwargs.pop("master_run_logger", None)
     parse_json = finance_legal_kwargs.get("parse_json")
@@ -295,6 +295,7 @@ async def run_finance_legal_market_parallel(
         legal_result,
         market=market_result,
         skip_master=skip_master,
+        enable_embellishment=enable_embellishment,
         master_llm=mas_llm,
         master_run_logger=master_run_logger,
         parse_json=parse_json,
@@ -314,6 +315,7 @@ async def merge_results(
     *,
     market: AgentResult | None = None,
     skip_master: bool = False,
+    enable_embellishment: bool = True,
     master_llm: Any | None = None,
     master_run_logger: Any | None = None,
     parse_json: Path | str | None = None,
@@ -324,6 +326,9 @@ async def merge_results(
     doc_name: str | None = None,
 ) -> dict[str, Any]:
     market_score = _market_score_for_reference(market)
+    market_reference_meta: dict[str, Any] = {}
+    if market is not None:
+        _score, market_reference_meta = market_reference_score(market.model_dump())
     fundamental = reference_fundamental(
         finance.risk_score,
         legal.risk_score,
@@ -334,8 +339,11 @@ async def merge_results(
         "finance": finance.model_dump(),
         "legal": legal.model_dump(),
         "reference_fundamental_score": fundamental,
+        "market_reference_score": market_score,
+        "market_reference_score_meta": market_reference_meta,
         "cross_agent_features": [],
         "master": None,
+        "analysis_options": {"embellishment_enabled": bool(enable_embellishment)},
         "note": reference_score_note(has_market=market_score is not None, skip_master=skip_master),
     }
     if market is not None:
@@ -351,6 +359,7 @@ async def merge_results(
         finance_agent=finance_agent,
         legal_agent=legal_agent,
         market_agent=market_agent,
+        enable_embellishment=enable_embellishment,
     )
     master_result = await master.run(
         doc_id=out["doc_id"],
@@ -398,6 +407,7 @@ async def run_master_from_saved(
     doc_name: str | None = None,
     finance_reasoning_effort: str | None = "low",
     legal_reasoning_effort: str | None = "high",
+    enable_embellishment: bool = True,
 ) -> dict[str, Any]:
     """跳过专家探查：从已有 merged JSON 直接跑总控（辩论补证仍可用 standalone）。"""
     path = Path(result_path)
@@ -424,6 +434,7 @@ async def run_master_from_saved(
     )
     finance_agent._doc_id = finance.doc_id or doc_id
     finance_agent._parse_json = parse_json
+    finance_agent._last_result = finance
     legal_agent = LegalAgent(
         llm=master_llm,
         run_logger=legal_run_logger,
@@ -434,6 +445,7 @@ async def run_master_from_saved(
     )
     legal_agent._doc_id = legal.doc_id or doc_id
     legal_agent._parse_json = parse_json
+    legal_agent._last_result = legal
     market_agent = MarketAgent(
         llm=master_llm,
         run_logger=market_run_logger,
@@ -454,6 +466,7 @@ async def run_master_from_saved(
         legal,
         market=market,
         skip_master=False,
+        enable_embellishment=enable_embellishment,
         master_llm=master_llm,
         master_run_logger=master_run_logger,
         parse_json=parse_json,

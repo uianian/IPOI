@@ -11,10 +11,16 @@ from src.llm.master_prompts import (
     MASTER_REVISE_USER,
 )
 from src.models.evidence import EvidenceRef
-from src.models.master import CompositeJudgment, PredictedWindows, RiskFactorItem
+from src.models.master import (
+    CompositeJudgment,
+    PredictedWindows,
+    PricePathForecastItem,
+    RiskFactorItem,
+    default_price_path_forecast,
+)
 from src.skills.base import BaseSkill, SkillInput, SkillOutput
 from src.skills.llm_json import dumps_cards, json_payload_usable, llm_json
-from src.skills.master_cards import checklist_text, high_risk_codes_present
+from src.skills.master_cards import checklist_text, high_risk_codes_present, market_reference_score
 
 _DECIDE_JSON_KEYS = ("overall_score", "level")
 
@@ -76,7 +82,63 @@ def _level_to_http(level: str) -> str:
     return m.get(str(level).lower(), "LOW")
 
 
-def _parse_judgment(data: dict[str, Any]) -> tuple[CompositeJudgment, list[RiskFactorItem], PredictedWindows, dict[str, Any]]:
+_WINDOW_TO_PREDICTED_FIELD = {
+    "D1": "ipo_day_break_risk",
+    "D5": "d5_significant_downside_risk",
+    "D20": "d20_downside_risk",
+    "D60": "d60_downside_risk",
+}
+
+
+def _fallback_price_path_forecast(windows: PredictedWindows) -> list[PricePathForecastItem]:
+    defaults = {item.window: item for item in default_price_path_forecast()}
+    labels = {
+        "D1": windows.ipo_day_break_risk,
+        "D5": windows.d5_significant_downside_risk,
+        "D20": windows.d20_downside_risk,
+        "D60": windows.d60_downside_risk,
+    }
+    out: list[PricePathForecastItem] = []
+    for window in ("D1", "D5", "D20", "D60"):
+        item = defaults[window]
+        item.risk_label = str(labels.get(window) or "medium")
+        out.append(item)
+    return out
+
+
+def _parse_price_path_forecast(data: dict[str, Any], windows: PredictedWindows) -> list[PricePathForecastItem]:
+    by_window: dict[str, PricePathForecastItem] = {}
+    for raw in data.get("price_path_forecast") or []:
+        if not isinstance(raw, dict):
+            continue
+        window = str(raw.get("window") or "").upper()
+        if window not in _WINDOW_TO_PREDICTED_FIELD:
+            continue
+        payload = {
+            "window": window,
+            "risk_label": str(raw.get("risk_label") or getattr(windows, _WINDOW_TO_PREDICTED_FIELD[window])),
+            "expected_direction": str(raw.get("expected_direction") or ""),
+            "expected_pattern": str(raw.get("expected_pattern") or ""),
+            "volatility_view": str(raw.get("volatility_view") or ""),
+            "key_drivers": [str(x) for x in (raw.get("key_drivers") or [])],
+            "confidence": str(raw.get("confidence") or "medium").lower(),
+        }
+        if payload["confidence"] not in {"high", "medium", "low"}:
+            payload["confidence"] = "medium"
+        by_window[window] = PricePathForecastItem(**payload)  # type: ignore[arg-type]
+    fallback = _fallback_price_path_forecast(windows)
+    return [by_window.get(item.window, item) for item in fallback]
+
+
+def _parse_judgment(
+    data: dict[str, Any],
+) -> tuple[
+    CompositeJudgment,
+    list[RiskFactorItem],
+    PredictedWindows,
+    list[PricePathForecastItem],
+    dict[str, Any],
+]:
     try:
         score = float(data.get("overall_score") if data.get("overall_score") is not None else 0)
     except (TypeError, ValueError):
@@ -126,8 +188,9 @@ def _parse_judgment(data: dict[str, Any]) -> tuple[CompositeJudgment, list[RiskF
         d20_downside_risk=str(pw_raw.get("d20_downside_risk") or "medium"),
         d60_downside_risk=str(pw_raw.get("d60_downside_risk") or "medium"),
     )
+    forecasts = _parse_price_path_forecast(data, windows)
     sections = data.get("report_sections") if isinstance(data.get("report_sections"), dict) else {}
-    return judgment, factors, windows, sections
+    return judgment, factors, windows, forecasts, sections
 
 
 def _degraded_from_cards(
@@ -135,7 +198,13 @@ def _degraded_from_cards(
     reference_score: float,
     high_codes: list[str],
     embellish_score: int,
-) -> tuple[CompositeJudgment, list[RiskFactorItem], PredictedWindows, dict[str, Any]]:
+) -> tuple[
+    CompositeJudgment,
+    list[RiskFactorItem],
+    PredictedWindows,
+    list[PricePathForecastItem],
+    dict[str, Any],
+]:
     """无 LLM 时：对照分 + 第五章清单脚本。禁止在有 LLM 时走这条。"""
     level = "low"
     gates: list[str] = []
@@ -158,7 +227,8 @@ def _degraded_from_cards(
         verdict_reasoning="規則降級：LLM 不可用，採用對照加權分與第五章清單。",
         score_explanation="degraded_rules_fallback",
     )
-    return judgment, [], PredictedWindows(), {"composite": judgment.verdict_reasoning}
+    windows = PredictedWindows()
+    return judgment, [], windows, _fallback_price_path_forecast(windows), {"composite": judgment.verdict_reasoning}
 
 
 class MasterDecideSkill(BaseSkill):
@@ -179,11 +249,38 @@ class MasterDecideSkill(BaseSkill):
         market = p.get("market") or {}
         ref = p.get("reference_score")
         high_codes = high_risk_codes_present(finance, legal)
+        embellishment_enabled = bool(p.get("embellishment_enabled", True))
         emb = p.get("embellishment") or {}
+        emb_status = str(emb.get("status") or ("complete" if emb.get("score") is not None else "not_available"))
+        emb_coverage = emb.get("coverage") if isinstance(emb.get("coverage"), dict) else {}
+        try:
+            emb_candidates = int(emb_coverage.get("candidate_count") or 0)
+            emb_evaluated = int(emb_coverage.get("evaluated_candidate_count") or 0)
+        except (TypeError, ValueError):
+            emb_candidates = emb_evaluated = 0
+        emb_sections = set(str(value) for value in (emb_coverage.get("sections") or []))
+        emb_partial_usable = (
+            emb_status == "partial"
+            and emb_candidates > 0
+            and emb_evaluated / emb_candidates >= 0.8
+            and bool(emb_coverage.get("risk_factor_pages"))
+            and {"risk_factors", "business", "financial_information"}.issubset(emb_sections)
+        )
+        emb_usable = embellishment_enabled and (emb_status == "complete" or emb_partial_usable)
+        emb_score_for_decision = int(emb.get("score") or 0) if emb_usable else 0
         debate_digest = compact_debate_digest(p.get("debate_history") or [])
+        market_ref_score, market_ref_meta = market_reference_score(market if isinstance(market, dict) else None)
+        market_features = market.get("features") if isinstance(market, dict) and isinstance(market.get("features"), dict) else {}
+        market_sentiment = (
+            market_features.get("sentiment_analysis")
+            if isinstance(market_features.get("sentiment_analysis"), dict)
+            else {}
+        )
         user = MASTER_DECIDE_USER.format(
             reference_score=ref,
-            checklist=checklist_text(),
+            checklist=checklist_text(
+                exclude_codes={"EMBELLISHMENT_HIGH"} if not embellishment_enabled else None
+            ),
             finance_score=(finance.get("risk_score") if isinstance(finance, dict) else None)
             or (p.get("finance_cards") or {}).get("risk_score"),
             finance_level=(finance.get("risk_level") if isinstance(finance, dict) else None)
@@ -196,16 +293,33 @@ class MasterDecideSkill(BaseSkill):
             legal_cards=dumps_cards(p.get("legal_cards") or {}),
             market_score=(market.get("risk_score") if isinstance(market, dict) else None) or 50,
             market_level=(market.get("risk_level") if isinstance(market, dict) else None) or "medium",
+            market_reference_score=market_ref_score,
+            market_reference_source=market_ref_meta.get("source"),
+            market_sentiment_net_support=market_sentiment.get("overall_net_support"),
             market_demo=bool((market.get("features") or {}).get("demo")) if isinstance(market, dict) else True,
             market_cards=dumps_cards(p.get("market_cards") or {}),
-            embellish_score=emb.get("score"),
-            embellish_reason=emb.get("reason") or "",
+            embellishment_block=(
+                f"【粉饰】status={emb_status} usable={str(emb_usable).lower()} "
+                f"score={emb.get('score') if emb_usable else '不可用于门控'} "
+                f"{emb.get('reason') or ''}"
+                if embellishment_enabled
+                else ""
+            ),
             debate_digest=debate_digest,
         )
+        decide_system = MASTER_DECIDE_SYSTEM
+        if not embellishment_enabled:
+            decide_system = decide_system.replace(
+                "三专家结论、辩论摘要与粉饰研判", "三专家结论与辩论摘要"
+            )
+            decide_system = decide_system.replace("卡片/辩论/粉饰", "卡片/辩论")
+            decide_system = "\n".join(
+                line for line in decide_system.splitlines() if "粉饰输入" not in line
+            )
         out = await llm_json(
             llm,
             [
-                {"role": "system", "content": MASTER_DECIDE_SYSTEM},
+                {"role": "system", "content": decide_system},
                 {"role": "user", "content": user},
             ],
             max_tokens=max_tokens,
@@ -216,12 +330,14 @@ class MasterDecideSkill(BaseSkill):
         usable = json_payload_usable(out.get("data") or {}, required_keys=_DECIDE_JSON_KEYS) and bool(out.get("ok"))
         degraded = not usable
         if degraded:
-            judgment, factors, windows, sections = _degraded_from_cards(
+            judgment, factors, windows, forecasts, sections = _degraded_from_cards(
                 reference_score=float(ref or 0),
                 high_codes=high_codes,
-                embellish_score=int(emb.get("score") or 0),
+                embellish_score=emb_score_for_decision,
             )
             sections = _sections_from_judgment(judgment, debate_digest)
+            if not embellishment_enabled:
+                sections.pop("embellishment", None)
             if logger_ is not None:
                 logger_.master_step(
                     event="fusion",
@@ -244,6 +360,7 @@ class MasterDecideSkill(BaseSkill):
                     "judgment": judgment.model_dump(),
                     "risk_factors": [f.model_dump() for f in factors],
                     "predicted_windows": windows.model_dump(),
+                    "price_path_forecast": [f.model_dump() for f in forecasts],
                     "report_sections": sections,
                     "llm_calls": llm_calls,
                     "high_risk_codes": high_codes,
@@ -253,7 +370,7 @@ class MasterDecideSkill(BaseSkill):
                 degraded_reason=out.get("error") or "empty_json",
             )
 
-        judgment, factors, windows, sections = _parse_judgment(out.get("data") or {})
+        judgment, factors, windows, forecasts, sections = _parse_judgment(out.get("data") or {})
         gate_warning = None
         if high_codes and judgment.level == "low":
             gate_warning = (
@@ -286,7 +403,7 @@ class MasterDecideSkill(BaseSkill):
             )
             llm_calls += 1 + int(rev.get("retries") or 0)
             if json_payload_usable(rev.get("data") or {}, required_keys=_DECIDE_JSON_KEYS) and rev.get("ok"):
-                judgment, factors, windows, sections = _parse_judgment(rev.get("data") or {})
+                judgment, factors, windows, forecasts, sections = _parse_judgment(rev.get("data") or {})
                 judgment.revised = True
                 out = rev
             # 禁止 Python 直接改 riskLevel；保留总控（修订后）输出
@@ -294,6 +411,8 @@ class MasterDecideSkill(BaseSkill):
 
         if not (isinstance(sections, dict) and (sections.get("composite") or sections.get("debate_summary"))):
             sections = {**_sections_from_judgment(judgment, debate_digest), **(sections or {})}
+        if not embellishment_enabled:
+            sections.pop("embellishment", None)
 
         if logger_ is not None:
             logger_.master_step(
@@ -318,6 +437,7 @@ class MasterDecideSkill(BaseSkill):
                 "judgment": judgment.model_dump(),
                 "risk_factors": [f.model_dump() for f in factors],
                 "predicted_windows": windows.model_dump(),
+                "price_path_forecast": [f.model_dump() for f in forecasts],
                 "report_sections": sections,
                 "llm_calls": llm_calls,
                 "high_risk_codes": high_codes,

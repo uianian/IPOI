@@ -73,6 +73,7 @@ def _normalize_breakdown(items: list[Any], extracted: dict[str, Any]) -> list[di
             evidence=evid,
             note=str(it.get("note") or "") or None,
             metric_value=it.get("metric_value"),
+            metric_display=str(it.get("metric_display") or "") or None,
             evidence_page=int(page) if page is not None and str(page).isdigit() else None,
         )
         out.append(item.model_dump())
