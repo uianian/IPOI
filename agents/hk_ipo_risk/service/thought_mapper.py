@@ -758,8 +758,26 @@ def map_legal_event(event: dict[str, Any]) -> list[dict[str, Any]]:
     return thoughts
 
 
+_MARKET_STEP_LABELS = {
+    "load_market_snapshot": "加载市场数据",
+    "inspect_public_opinion": "检查本地舆情",
+    "collect_sina_news": "检索新浪财经舆情",
+    "firecrawl_public_opinion": "检索 Firecrawl 舆情",
+    "validate_public_opinion": "校验上市前舆情",
+    "analyze_market_dimensions": "分析市场维度",
+    "validate_llm_assessment": "校验模型市场判断",
+    "score_market_rules": "计算市场风险分",
+    "build_market_report": "生成市场情绪报告",
+}
+
+
 def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
-    """市场 AgentRunLogger / on_progress 事件 → Thought[]。"""
+    """市场 AgentRunLogger / on_progress 事件 → Thought[]。
+
+    Market uses the same public ``meta.kind`` vocabulary as legal. News
+    fields remain optional metadata so structured evidence can be displayed
+    without copying article bodies into the event stream.
+    """
     ev = event.get("event")
     if ev == "react_turn":
         tool_calls = event.get("tool_calls") or []
@@ -786,30 +804,126 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
         name = str(event.get("name") or "market_tool")
         status = str(event.get("status") or "ok")
         output = event.get("output")
-        action = "正在执行" if status == "running" else "已完成"
-        content = f"市场工具 {name} {action}"
+        normalized_status = {
+            "success": "ok",
+            "completed": "ok",
+            "failed": "error",
+        }.get(status, status)
+        action = "正在执行" if normalized_status == "running" else (
+            "已降级" if normalized_status == "degraded" else
+            "已跳过" if normalized_status == "skipped" else
+            "发生错误" if normalized_status == "error" else "已完成"
+        )
+        label = _MARKET_STEP_LABELS.get(name, name)
+        content = f"{label}：{action}"
         if isinstance(output, dict):
-            hint = output.get("summary") or output.get("hint")
+            hint = (
+                output.get("summary")
+                or output.get("hint")
+                or output.get("reason")
+                or output.get("error")
+            )
             if hint:
                 content += "\n" + str(hint)
-        return [
+        terminal = normalized_status != "running"
+        is_conclusion = terminal and name in {
+            "score_market_rules",
+            "build_market_report",
+            "submit_market_report",
+        }
+        thought_type = (
+            "conclusion" if is_conclusion else
+            "finding" if normalized_status in {"degraded", "error"} else
+            "thinking"
+        )
+        thoughts = [
             new_thought(
                 agent_id="market",
-                typ="thinking",
+                typ=thought_type,
                 content=content,
                 meta={
-                    "kind": "tool_call" if status == "running" else "tool_result",
+                    "kind": "tool_call" if not terminal else (
+                        "model_think" if is_conclusion else "tool_result"
+                    ),
                     "toolName": name,
-                    "toolStatus": status,
+                    "toolStatus": normalized_status,
                     "toolArgs": event.get("input_summary"),
                     "durationMs": event.get("duration_ms"),
                 },
             )
         ]
 
+        evidence_src: list[dict[str, Any]] = []
+        for key in ("evidence_hits", "evidence"):
+            value = event.get(key)
+            if isinstance(value, list):
+                evidence_src.extend(x for x in value if isinstance(x, dict))
+        if isinstance(output, dict):
+            for key in ("evidence_hits", "evidence", "evidence_ledger", "hits", "articles"):
+                value = output.get(key)
+                if isinstance(value, list):
+                    evidence_src.extend(x for x in value if isinstance(x, dict))
+        if evidence_src and terminal:
+            snips = _snip_evidence(evidence_src)
+            for source, snip in zip(evidence_src, snips):
+                for source_key, meta_key in (
+                    ("title", "title"),
+                    ("url", "url"),
+                    ("published_at", "date"),
+                    ("publication_date", "date"),
+                    ("date", "date"),
+                ):
+                    if source.get(source_key) is not None and meta_key not in snip:
+                        snip[meta_key] = source[source_key]
+            pages = [s.get("page") for s in snips if s.get("page") is not None]
+            thoughts.append(
+                new_thought(
+                    agent_id="market",
+                    typ="finding",
+                    content=f"市场证据 {len(snips)} 条",
+                    ref=f"p.{pages[0]}" if pages else None,
+                    meta={
+                        "kind": "evidence",
+                        "evidence": snips,
+                        "toolName": name,
+                        "toolStatus": normalized_status,
+                    },
+                )
+            )
+
+        risk_points: list[dict[str, Any]] = []
+        for value in (
+            event.get("risk_points"),
+            output.get("risk_points") if isinstance(output, dict) else None,
+        ):
+            if isinstance(value, list):
+                risk_points.extend(x for x in value if isinstance(x, dict))
+        for risk_point in risk_points:
+            evidence = risk_point.get("evidence") or []
+            snippets = _snip_evidence(evidence) if isinstance(evidence, list) else []
+            page = snippets[0].get("page") if snippets else risk_point.get("evidence_page")
+            thoughts.append(
+                new_thought(
+                    agent_id="market",
+                    typ="finding",
+                    content=str(risk_point.get("description") or risk_point.get("code") or "市场风险点"),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={
+                        "kind": "risk_point",
+                        "toolName": name,
+                        "toolStatus": normalized_status,
+                        "code": risk_point.get("code"),
+                        "level": risk_point.get("level"),
+                        "value": risk_point.get("value"),
+                        "evidence": snippets or None,
+                    },
+                )
+            )
+        return thoughts
+
     if ev == "result":
         payload = event.get("payload") or {}
-        return [
+        thoughts = [
             new_thought(
                 agent_id="market",
                 typ="conclusion",
@@ -820,6 +934,22 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
                 meta={"kind": "model_think"},
             )
         ]
+        for risk_point in payload.get("risk_points") or []:
+            if not isinstance(risk_point, dict):
+                continue
+            evidence = risk_point.get("evidence") or []
+            snippets = _snip_evidence(evidence) if isinstance(evidence, list) else []
+            page = snippets[0].get("page") if snippets else risk_point.get("evidence_page")
+            thoughts.append(
+                new_thought(
+                    agent_id="market",
+                    typ="finding",
+                    content=str(risk_point.get("description") or risk_point.get("code") or "市场风险点"),
+                    ref=f"p.{page}" if page is not None else None,
+                    meta={"kind": "risk_point", "evidence": snippets or None},
+                )
+            )
+        return thoughts
     return []
 
 

@@ -96,30 +96,78 @@ async def _maybe_search(
         from src.tools.market_debate import search_market_evidence_standalone
 
         if not market_stock_code or not market_features_csv or not market_news_dir:
-            return {"ok": False, "hits": [], "query": query, "n": 0, "error": "缺少市场补证配置"}
-        found = await search_market_evidence_standalone(
-            stock_code=market_stock_code,
-            query=query,
-            features_csv=market_features_csv,
-            news_dir=market_news_dir,
-            limit=top_k,
-        )
-        raw = {
-            "ok": True,
-            "query": query,
-            "hits": [
-                {
-                    "page": None,
-                    "source_type": "unknown",
-                    "excerpt": (
-                        f"as_of_date={found.get('as_of_date')}; cutoff_verified={found.get('cutoff_verified')}; "
-                        f"feature_hits={found.get('feature_hits') or {}}; news_hit={item}"
-                    ),
+            # Generic fallback has no market settings/stock code. Let the
+            # local-only helper return a structured unavailable result; never
+            # invent a stock code from doc_id.
+            found = await search_market_evidence_standalone(query=query)
+            raw = {
+                "ok": False,
+                "hits": [],
+                "query": query,
+                "n": 0,
+                "error": found.get("error") or "缺少市场补证配置",
+            }
+        else:
+            found = await search_market_evidence_standalone(
+                stock_code=market_stock_code,
+                query=query,
+                features_csv=market_features_csv,
+                news_dir=market_news_dir,
+                limit=top_k,
+            )
+            if found.get("available") is False:
+                raw = {
+                    "ok": False,
+                    "hits": [],
+                    "query": query,
+                    "n": 0,
+                    "error": found.get("error") or "市场本地证据不可用",
                 }
-                for item in ((found.get("news_hits") or [])[:top_k] or [None])
-                if item is not None or found.get("feature_hits")
-            ],
-        }
+            else:
+                # Local market search already applied query/cutoff filters; mark
+                # matched_terms so hit_is_useful accepts structured market hits
+                # even when news text does not literally repeat the query words.
+                matched = [t for t in str(query).split() if t.strip()] or ["local_market"]
+                hits: list[dict[str, Any]] = []
+                for item in (found.get("news_hits") or [])[:top_k]:
+                    if not isinstance(item, dict):
+                        continue
+                    excerpt = str(
+                        item.get("excerpt")
+                        or item.get("description")
+                        or item.get("summary")
+                        or item.get("title")
+                        or ""
+                    )[:400]
+                    if not excerpt:
+                        continue
+                    hits.append(
+                        {
+                            "page": None,
+                            "source_type": "text",
+                            "excerpt": excerpt,
+                            "matched_terms": matched,
+                            "title": item.get("title"),
+                            "url": item.get("url"),
+                            "as_of_date": found.get("as_of_date"),
+                            "cutoff_verified": found.get("cutoff_verified"),
+                        }
+                    )
+                if not hits and found.get("feature_hits"):
+                    feature_hits = found.get("feature_hits") or {}
+                    hits.append(
+                        {
+                            "page": None,
+                            "source_type": "table",
+                            "excerpt": (
+                                f"as_of_date={found.get('as_of_date')}; cutoff_verified={found.get('cutoff_verified')}; "
+                                f"feature_hits={feature_hits}"
+                            ),
+                            "matched_terms": matched,
+                            "feature_hits": feature_hits,
+                        }
+                    )
+                raw = {"ok": True, "query": query, "hits": hits}
     raw["duration_ms"] = int((time.time() - t0) * 1000)
     return raw
 
@@ -302,8 +350,8 @@ async def expert_respond_to_controller(
             status="unresolved",
             confidence=0.3,
             reply=(
-                "市場情緒 Agent 為 demo stub，本輪無真实行情寬表，"
-                "無法用認購/破發率佐證；检索未命中，confidence 封頂。"
+                "市場情緒 Agent 本輪沒有可驗證的本地上市前證據，"
+                "無法用認購/破發率佐證；維持原確定性分，confidence 封頂。"
             ),
             remaining_uncertainty="等待市場 Agent 正式接入",
             new_queries=queries_done,
