@@ -122,6 +122,28 @@ class MarketAgent:
         except Exception:
             logger.exception("market on_progress failed")
 
+    def _emit_step(
+        self,
+        name: str,
+        status: str,
+        output: dict[str, Any] | None = None,
+    ) -> None:
+        """Emit a bounded, UI-facing market stage event.
+
+        Stage output is deliberately bounded to counters, identifiers and
+        short evidence excerpts; it must never receive article bodies or
+        credentials.
+        """
+        event: dict[str, Any] = {
+            "event": "step",
+            "agent": "market",
+            "name": name,
+            "status": status,
+        }
+        if output:
+            event["output"] = output
+        self._emit(event)
+
     async def run(
         self,
         doc_id: str,
@@ -147,24 +169,38 @@ class MarketAgent:
         loader_kwargs = {key: value for key, value in loader_kwargs.items() if value is not None}
         loader = MarketDataLoader(**loader_kwargs)
 
-        self._emit({"event": "step", "agent": "market", "name": "load_market_snapshot", "status": "running"})
+        self._emit_step("load_market_snapshot", "running")
         snapshot = loader.load_snapshot(stock_code)
-        self._emit(
+        self._emit_step(
+            "load_market_snapshot",
+            "ok",
             {
-                "event": "step",
-                "agent": "market",
-                "name": "load_market_snapshot",
-                "status": "ok",
-                "output": {
-                    "stock_code": snapshot.stock_code,
-                    "as_of_date": snapshot.as_of_date.isoformat(),
-                    "cutoff_verified": snapshot.cutoff_verified,
-                    "missing_fields": len(snapshot.missing_fields),
-                },
-            }
+                "stock_code": snapshot.stock_code,
+                "as_of_date": snapshot.as_of_date.isoformat(),
+                "cutoff_verified": snapshot.cutoff_verified,
+                "missing_fields": len(snapshot.missing_fields),
+            },
         )
 
+        self._emit_step("inspect_public_opinion", "running")
         news_status = loader.inspect_news_availability(snapshot)
+        self._emit_step(
+            "inspect_public_opinion",
+            "ok" if not news_status.get("errors") else "degraded",
+            {
+                "total_rows": news_status.get("total_rows", 0),
+                "in_window_rows": news_status.get("in_window_rows", 0),
+                "before_window_rows": news_status.get("before_window_rows", 0),
+                "after_cutoff_rows": max(
+                    0,
+                    int(news_status.get("total_rows") or 0)
+                    - int(news_status.get("pre_cutoff_rows") or 0),
+                ),
+                "max_articles": news_status.get("max_articles"),
+                "remaining_capacity": news_status.get("remaining_capacity"),
+                "reason": news_status.get("unavailable_reason"),
+            },
+        )
         sina_status = await self._maybe_fetch_sina_news(
             snapshot,
             news_dir=loader.news_dir,
@@ -180,12 +216,28 @@ class MarketAgent:
         if firecrawl_status.get("accepted_articles"):
             news_status = loader.inspect_news_availability(snapshot)
         news_status["firecrawl"] = firecrawl_status
+        self._emit_step("validate_public_opinion", "running")
         opinion = await self._resolve_public_opinion(
             loader,
             snapshot,
             public_opinion,
             news_status=news_status,
         )
+        self._emit_step(
+            "validate_public_opinion",
+            "ok" if opinion.available else "degraded",
+            {
+                "available": opinion.available,
+                "candidate_count": news_status.get("in_window_rows", 0),
+                "date_verified_count": news_status.get("in_window_rows", 0),
+                "llm_verified_count": opinion.relevant_articles if opinion.available else 0,
+                "used_in_score_count": opinion.relevant_articles if opinion.available else 0,
+                "relevant_articles": opinion.relevant_articles,
+                "has_risk_score": opinion.risk_score is not None,
+                "reason": opinion.unavailable_reason,
+            },
+        )
+        self._emit_step("analyze_market_dimensions", "running")
         score_pack = self._scorer.score(snapshot, opinion)
         prelisting_risk = self._historical_scorer.score(
             snapshot,
@@ -201,6 +253,15 @@ class MarketAgent:
             features_file=loader.features_csv,
             news_status=news_status,
         )
+        self._emit_step(
+            "analyze_market_dimensions",
+            "ok",
+            {
+                "modules": sorted(score_pack.module_scores),
+                "public_opinion_used": score_pack.public_opinion_used,
+                "coverage_ratio": score_pack.coverage_ratio,
+            },
+        )
         react_context = {
             "snapshot": snapshot,
             "score_pack": score_pack,
@@ -210,6 +271,7 @@ class MarketAgent:
             "news_status": news_status,
             "firecrawl_status": firecrawl_status,
         }
+        self._emit_step("validate_llm_assessment", "running")
         llm_pack, react_trace = await self._analyze_with_react(
             doc_id=doc_id,
             context=react_context,
@@ -223,15 +285,38 @@ class MarketAgent:
                 prelisting_risk,
             )
             react_trace["fallback"] = "single_call_llm_analysis" if llm_pack else "deterministic_only"
+        self._emit_step(
+            "validate_llm_assessment",
+            "ok" if llm_pack else "degraded",
+            {
+                "used": bool(llm_pack),
+                "fallback": react_trace.get("fallback"),
+                "react_turns": react_trace.get("n_turns"),
+            },
+        )
         llm_assessment = self._validate_llm_risk_assessment(
             llm_pack,
             evidence_ids={item.evidence_id for item in sentiment_analysis.evidence_ledger},
         )
+        self._emit_step("score_market_rules", "running")
         scoring = self._reconcile_scores(
             deterministic_score=prelisting_risk.score,
             deterministic_level=prelisting_risk.risk_level,
             llm_assessment=llm_assessment,
         )
+        self._emit_step(
+            "score_market_rules",
+            "ok",
+            {
+                "deterministic_score": scoring.get("deterministic_score"),
+                "llm_score": scoring.get("llm_score"),
+                "final_score": scoring.get("final_score"),
+                "final_risk_level": scoring.get("final_risk_level"),
+                "scoring_mode": scoring.get("scoring_mode"),
+                "public_opinion_used": score_pack.public_opinion_used,
+            },
+        )
+        self._emit_step("build_market_report", "running")
         self._apply_llm_sentiment_analysis(sentiment_analysis, llm_pack)
         sentiment_analysis.report_markdown = evidence_builder.render_markdown(
             snapshot,
@@ -312,6 +397,47 @@ class MarketAgent:
             + "\n\n## DebateDossier\n\n"
             + f"- 证据档案：`{dossier_path}`\n"
             + "- 第一版未启用 market retrieval package；辩论补证使用独立市场证据工具。\n"
+        )
+        safe_evidence = [
+            {
+                "title": item.label,
+                "url": item.url,
+                "published_at": (
+                    item.observation_date.isoformat()
+                    if item.observation_date is not None
+                    else None
+                ),
+                "excerpt": (item.excerpt or item.claim or item.interpretation)[:500],
+                "source_type": "unknown",
+                "field_code": item.indicator,
+                "section_id": item.module,
+            }
+            for item in sentiment_analysis.evidence_ledger[:12]
+        ]
+        safe_risk_points = [
+            {
+                "code": item.code,
+                "level": item.level,
+                "value": item.value,
+                "description": item.description,
+                "evidence": [
+                    evidence.model_dump(mode="json")
+                    for evidence in item.evidence[:3]
+                ],
+            }
+            for item in risk_points[:12]
+        ]
+        self._emit_step(
+            "build_market_report",
+            "ok",
+            {
+                "summary": summary,
+                "evidence_count": len(sentiment_analysis.evidence_ledger),
+                "risk_point_count": len(risk_points),
+                "report_chars": len(sentiment_analysis.report_markdown or ""),
+                "evidence": safe_evidence,
+                "risk_points": safe_risk_points,
+            },
         )
         result = AgentResult(
             agent="market",
@@ -498,30 +624,44 @@ class MarketAgent:
         news_dir: Path,
         local_news_status: dict[str, Any],
     ) -> dict[str, Any]:
+        self._emit_step("collect_sina_news", "running")
         collector = SinaFinanceNewsCollector(self._sina_settings, client=self._sina_client)
         status = collector.public_status()
         status.update({"attempted": False, "accepted_articles": 0})
         if int(local_news_status.get("pre_cutoff_rows") or 0) > 0:
             status["skip_reason"] = "usable_local_prelisting_news_exists"
+            self._emit_step("collect_sina_news", "skipped", {"reason": status["skip_reason"]})
             return status
         if not self._sina_settings.get("enabled"):
             status["skip_reason"] = (
                 "sina_api_not_configured" if status.get("requested_enabled") else "sina_disabled"
             )
+            self._emit_step("collect_sina_news", "skipped", {"reason": status["skip_reason"]})
             return status
         try:
-            return await collector.collect(
+            status = await collector.collect(
                 company=snapshot.company,
                 stock_code=snapshot.stock_code,
                 as_of_date=snapshot.as_of_date,
                 news_dir=news_dir,
             )
+            self._emit_step(
+                "collect_sina_news",
+                "ok" if not status.get("errors") else "degraded",
+                {
+                    "accepted_articles": status.get("accepted_articles", 0),
+                    "rejected_missing_date": status.get("rejected_missing_date", 0),
+                    "rejected_after_cutoff": status.get("rejected_after_cutoff", 0),
+                },
+            )
+            return status
         except Exception as exc:
             logger.warning("Sina Finance public-opinion collection failed: %s", exc)
             status.update({
                 "attempted": True,
                 "errors": [f"collector_failed:{type(exc).__name__}:{exc}"],
             })
+            self._emit_step("collect_sina_news", "error", {"error": "collector_failed"})
             return status
 
     async def _maybe_fetch_firecrawl_news(
@@ -531,6 +671,11 @@ class MarketAgent:
         news_dir: Path,
         local_news_status: dict[str, Any],
     ) -> dict[str, Any]:
+        self._emit_step(
+            "firecrawl_public_opinion",
+            "running",
+            {"stock_code": snapshot.stock_code, "as_of_date": snapshot.as_of_date.isoformat()},
+        )
         collector = FirecrawlNewsCollector(
             self._firecrawl_settings,
             client=self._firecrawl_client,
@@ -545,6 +690,7 @@ class MarketAgent:
         )
         if policy == "never" and not reusable_raw:
             status["skip_reason"] = "fetch_policy_never"
+            self._emit_step("firecrawl_public_opinion", "skipped", {"reason": status["skip_reason"]})
             return status
         in_window_rows = int(
             local_news_status.get("in_window_rows")
@@ -561,6 +707,7 @@ class MarketAgent:
         status["remaining_capacity"] = max(0, max_articles - in_window_rows)
         if policy == "on_missing" and in_window_rows > 0:
             status["skip_reason"] = "usable_local_news_in_window"
+            self._emit_step("firecrawl_public_opinion", "skipped", {"reason": status["skip_reason"]})
             return status
         if not collector.enabled and not reusable_raw:
             status["skip_reason"] = (
@@ -568,17 +715,8 @@ class MarketAgent:
                 if status.get("requested_enabled") and not status.get("configured")
                 else "firecrawl_disabled"
             )
+            self._emit_step("firecrawl_public_opinion", "skipped", {"reason": status["skip_reason"]})
             return status
-
-        self._emit(
-            {
-                "event": "step",
-                "agent": "market",
-                "name": "firecrawl_public_opinion",
-                "status": "running",
-                "output": {"stock_code": snapshot.stock_code, "as_of_date": snapshot.as_of_date.isoformat()},
-            }
-        )
         try:
             status = await asyncio.to_thread(
                 collector.collect,
@@ -602,22 +740,20 @@ class MarketAgent:
                     ],
                 }
             )
-        self._emit(
+        self._emit_step(
+            "firecrawl_public_opinion",
+            "ok" if not status.get("errors") else "degraded",
             {
-                "event": "step",
-                "agent": "market",
-                "name": "firecrawl_public_opinion",
-                "status": "ok" if not status.get("errors") else "degraded",
-                "output": {
-                    "search_requests": status.get("search_requests", 0),
-                    "scrape_requests": status.get("scrape_requests", 0),
-                    "accepted_articles": status.get("accepted_articles", 0),
-                    "rejected_after_cutoff": status.get("rejected_after_cutoff", 0),
-                    "rejected_missing_date": status.get("rejected_missing_date", 0),
-                    "raw_cache_used": status.get("raw_cache_used", False),
-                    "raw_cache_file": status.get("raw_cache_file"),
-                },
-            }
+                "search_requests": status.get("search_requests", 0),
+                "search_hits": status.get("search_hits", 0),
+                "unique_urls": status.get("unique_urls", 0),
+                "scrape_requests": status.get("scrape_requests", 0),
+                "accepted_articles": status.get("accepted_articles", 0),
+                "rejected_after_cutoff": status.get("rejected_after_cutoff", 0),
+                "rejected_missing_date": status.get("rejected_missing_date", 0),
+                "rejected_before_window": status.get("rejected_before_window", 0),
+                "raw_cache_used": status.get("raw_cache_used", False),
+            },
         )
         return status
 
