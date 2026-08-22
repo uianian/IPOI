@@ -38,6 +38,20 @@ def _parse_questions(raw_list: Any, *, cap: int) -> list[DebateQuestion]:
         question = str(raw.get("question") or "").strip()
         if not question:
             continue
+        required = list(raw.get("required_evidence_types") or [])
+        hints = raw.get("search_hints") if isinstance(raw.get("search_hints"), dict) else None
+        if target == "market":
+            # Enforce the market/prospectus boundary deterministically.
+            question = question.replace("招股書或規則層面的證據", "市場字段、證據ID或規則層面的證據")
+            question = question.replace("招股书或规则层面的证据", "市场字段、证据ID或规则层面的证据")
+            question = question.replace("招股書頁碼", "市場數據來源、字段與截止日")
+            question = question.replace("招股书页码", "市场数据来源、字段与截止日")
+            required = [x for x in required if x != "page_excerpt"]
+            for item in ("market_field", "evidence_id", "as_of_date", "value"):
+                if item not in required:
+                    required.append(item)
+            hints = dict(hints or {})
+            hints["pages"] = []
         try:
             out.append(
                 DebateQuestion(
@@ -46,9 +60,9 @@ def _parse_questions(raw_list: Any, *, cap: int) -> list[DebateQuestion]:
                     claim_id=str(raw.get("claim_id") or "") or None,
                     theme=str(raw.get("theme") or ""),
                     question=question,
-                    required_evidence_types=list(raw.get("required_evidence_types") or []),
+                    required_evidence_types=required,
                     priority=raw.get("priority") or "medium",
-                    search_hints=raw.get("search_hints") if isinstance(raw.get("search_hints"), dict) else None,
+                    search_hints=hints,
                 )
             )
         except Exception:

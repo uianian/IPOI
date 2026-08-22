@@ -6,8 +6,11 @@ sys.path.insert(0, str(PKG_ROOT))
 
 from src.llm.debate_prompts import MARKET_DEBATE_REPLY
 from src.llm.master_prompts import MASTER_CONFLICT_SYSTEM, MASTER_QUESTIONS_SYSTEM
+from src.models.debate import DebateClaim
+from src.models.evidence import EvidenceRef
 from src.models.master import DebateQuestion
-from src.skills.run_debate import _ensure_real_market_question
+from src.skills.master_cards import claim_to_card
+from src.skills.run_debate import _ensure_real_market_question, _parse_questions
 
 
 def test_market_debate_prompt_distinguishes_risk_and_direction_and_forbids_future_data():
@@ -48,3 +51,31 @@ def test_demo_market_is_not_added_to_debate_plan():
         cap=4,
     )
     assert routed == questions
+
+
+def test_market_structured_evidence_counts_without_pdf_pages():
+    claim = DebateClaim(
+        agent="market",
+        code="MARKET_FINAL_SCORE",
+        evidence_ids=["HIST-HSI-20D", "HIST-BREAK-RATE-60D"],
+        evidence_refs=[EvidenceRef(page=None, excerpt="value=43.7", field_code="HIST-HSI-20D")],
+    )
+    card = claim_to_card(claim)
+    assert card["n_evidence"] == 2
+    assert card["evidence_ids"] == ["HIST-HSI-20D", "HIST-BREAK-RATE-60D"]
+
+
+def test_market_question_is_sanitized_away_from_prospectus_pages():
+    questions = _parse_questions([{
+        "question_id": "m1",
+        "target_agent": "market",
+        "question": "请提供招股书页码及招股书或规则层面的证据",
+        "required_evidence_types": ["page_excerpt"],
+        "search_hints": {"pages": [428]},
+    }], cap=4)
+    assert len(questions) == 1
+    q = questions[0]
+    assert "招股书页码" not in q.question
+    assert "市场数据来源" in q.question
+    assert "market_field" in q.required_evidence_types
+    assert q.search_hints["pages"] == []

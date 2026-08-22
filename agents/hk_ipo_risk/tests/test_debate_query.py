@@ -18,7 +18,11 @@ from src.skills.debate_query import (
     looks_like_instruction,
     plan_debate_searches,
 )
-from src.skills.debate_reply import expert_respond_to_controller
+from src.skills.debate_reply import (
+    _context_evidence_refs,
+    _market_structured_fallback,
+    expert_respond_to_controller,
+)
 from src.tools.retrieval_tool import hits_from_prefer_pages
 
 HANSIAITAI_Q1 = (
@@ -91,6 +95,32 @@ def test_dirty_hit_is_not_useful():
     )
     good = {"page": 497, "excerpt": "普通股贖回負債人民幣138.5百萬元", "matched_terms": ["138.5"]}
     assert hit_is_useful(good, pages=[497, 563], keywords=["贖回負債", "138.5"]) is True
+
+
+def test_market_truncated_reply_has_structured_fallback():
+    refs = _context_evidence_refs(
+        "market",
+        {
+            "evidence_catalog": [
+                {
+                    "evidence_id": "MACRO-HSI-5D",
+                    "derived_field": "hsi_return_5d",
+                    "value": -0.0229,
+                    "formatted_value": "-2.29%",
+                    "observation_date": "2025-03-02",
+                }
+            ]
+        },
+        "请提供市场字段、证据ID及as_of_date",
+    )
+    reply = _market_structured_fallback(
+        {"risk_score": 46.0, "deterministic_score": 43.7, "llm_score": 46.0}, refs
+    )
+    assert "最终风险分=46.0" in reply
+    assert "MACRO-HSI-5D" in reply
+    assert "-2.29%" in reply
+    assert "2025-03-02" in reply
+    assert "不要求招股书页码" in reply
 
 
 def test_hits_from_prefer_pages(tmp_path: Path):
@@ -276,3 +306,15 @@ def test_dirty_hits_continue_to_second_search():
     assert "keyword" in calls
     assert upd.search_hit_count >= 1
     assert any(e.page == 80 for e in upd.evidence)
+
+
+def test_finance_context_restores_audited_statement_pages():
+    refs = _context_evidence_refs(
+        "finance",
+        {"evidence_summary": {"table_meta": {
+            "TBL_IS": {"page": 428, "excerpt": "净利润表"},
+            "TBL_CF": {"page": 437, "excerpt": "经营活动现金流量表"},
+        }}},
+        "请列出CFO、经营现金流及净利润并标明页码",
+    )
+    assert {(x.field_code, x.page) for x in refs} == {("TBL_IS", 428), ("TBL_CF", 437)}

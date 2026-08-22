@@ -627,6 +627,9 @@ class FinanceAgent:
             "summary": raw.get("summary"), "metrics": metrics,
             "score_breakdown": raw.get("score_breakdown") or [],
             "risk_points": raw.get("risk_points") or [],
+            # Metrics retain values but not their audited table/page lineage.
+            # Keep table_meta available for page-level controller questions.
+            "evidence_summary": raw.get("evidence_summary") or {},
             "redemption_stress_scenario": stress,
         }
         return await expert_respond_to_controller(

@@ -47,7 +47,7 @@ MASTER_QUESTIONS_SYSTEM = """你是港股 IPO 总控决策 Agent。请根据冲�
 硬性约束：
 1. 每个问题必须点名唯一 target_agent：finance / legal / market。
 2. 现金跑道只问 finance；集中度占比只问 legal；粉饰量化佐证可问 finance。
-3. 问题要具体，要求页码级证据；禁止编造事实。
+3. 问题要具体；finance/legal 要求招股书页码级证据，market 要求市场数据来源、字段、证据 ID、截止日及数值；禁止编造事实。
 3a. 对 market 的质询应要求其区分原生 risk_score、净支持率、历史校准与证据方向，并用上市前时点市场字段或新闻证据补证；市场证据通常没有招股书页码，不得强求或编造页码。
 4. 本轮问题数 ≤ {max_questions}。
 4a. 若输入为真实 market 卡片且本轮已决定开启辩论，questions 中必须至少有一条 target_agent=market；用于复核其风险分、净支持率、历史校准和上市前证据，不得只问财务与法务。
@@ -74,6 +74,7 @@ MASTER_FOLLOWUP_SYSTEM = """你是港股 IPO 总控决策 Agent。专家已回�
 若结束：questions 为空，continue_debate=false。
 
 已到最后一轮时必须 continue_debate=false。
+对 market 的追问不得要求招股书页码；应核验市场数据文件/字段、证据 ID、as_of_date、数值及校准口径。市场回复已有这些要素时，不得仅因 page=null 判为未解决。
 
 只输出 JSON。若继续，questions 同样尽量带 search_hints（页码 + 短关键词，不要整段质询）：
 {{

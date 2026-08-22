@@ -232,6 +232,80 @@ def _log_reply(run_logger: Any, **kwargs: Any) -> None:
         logger.exception("debate_reply log failed")
 
 
+def _context_evidence_refs(
+    agent: str, context: dict[str, Any], question_text: str, limit: int = 4
+) -> list[EvidenceRef]:
+    refs: list[EvidenceRef] = []
+    if agent == "finance":
+        table_meta = ((context.get("evidence_summary") or {}).get("table_meta") or {})
+        q = question_text.lower()
+        wanted: list[str] = []
+        if any(x in q for x in ("cfo", "現金流", "现金流", "經營活動")):
+            wanted.append("TBL_CF")
+        if any(x in q for x in ("淨利潤", "净利润", "盈利", "損益", "损益")):
+            wanted.append("TBL_IS")
+        if not wanted:
+            wanted = list(table_meta)
+        for key in wanted:
+            item = table_meta.get(key) if isinstance(table_meta, dict) else None
+            if not isinstance(item, dict) or item.get("page") is None:
+                continue
+            refs.append(EvidenceRef(
+                page=int(item["page"]),
+                excerpt=str(item.get("excerpt") or "")[:400],
+                source_type="table",
+                field_code=key,
+                confidence=1.0,
+            ))
+    elif agent == "market":
+        catalog = context.get("evidence_catalog") or []
+        rows = list(catalog.values()) if isinstance(catalog, dict) else list(catalog)
+        preferred = list((context.get("historical_risk_calibration") or {}).get("evidence_ids") or [])
+        by_id = {str(x.get("evidence_id") or ""): x for x in rows if isinstance(x, dict)}
+        ordered = [by_id[x] for x in preferred if x in by_id]
+        ordered.extend(x for x in rows if isinstance(x, dict) and x not in ordered)
+        for item in ordered:
+            evidence_id = str(item.get("evidence_id") or "").strip()
+            if not evidence_id:
+                continue
+            value = item.get("formatted_value")
+            if value is None:
+                value = item.get("value")
+            excerpt = (
+                f"evidence_id={evidence_id}; field={item.get('derived_field') or '—'}; "
+                f"value={value if value is not None else '—'}; "
+                f"as_of_date={item.get('observation_date') or item.get('as_of_date') or '—'}; "
+                f"{item.get('interpretation') or item.get('claim') or ''}"
+            )
+            refs.append(EvidenceRef(page=None, excerpt=excerpt[:400], source_type="table", field_code=evidence_id, confidence=1.0))
+            if len(refs) >= limit:
+                break
+    return refs[:limit]
+
+
+def _market_structured_fallback(context: dict[str, Any], refs: list[EvidenceRef]) -> str:
+    """Build a useful market answer when the model JSON is truncated."""
+    if not refs:
+        return ""
+    score_bits: list[str] = []
+    for label, key in (
+        ("最终风险分", "risk_score"),
+        ("规则托底分", "deterministic_score"),
+        ("模型分", "llm_score"),
+    ):
+        value = context.get(key)
+        if value is not None:
+            score_bits.append(f"{label}={value}")
+    evidence_bits = [e.excerpt for e in refs if e.excerpt]
+    prefix = "；".join(score_bits) or "市场评分沿用已审计上下文"
+    return (
+        f"模型结构化作答发生截断，现依据市场 Agent 已审计证据自动回填：{prefix}。"
+        f"可核验证据字段如下：{'；'.join(evidence_bits)}。"
+        "上述证据均按 evidence_id、字段值及 as_of_date 核验，不要求招股书页码；"
+        "未在证据台账注册的字段不作为新增确定性依据。"
+    )
+
+
 async def expert_respond_to_controller(
     *,
     agent: str,
@@ -340,6 +414,13 @@ async def expert_respond_to_controller(
                 break
 
     evidence_refs = _hits_to_evidence(hits_all)
+    context_refs = _context_evidence_refs(agent, agent_context or {}, qtext)
+    seen_refs = {(e.page, e.field_code, e.excerpt) for e in evidence_refs}
+    for ref in context_refs:
+        key = (ref.page, ref.field_code, ref.excerpt)
+        if key not in seen_refs:
+            evidence_refs.append(ref)
+            seen_refs.add(key)
     hit_n = len(hits_all)
 
     if agent == "market" and (demo_market or llm is None or not getattr(llm, "available", False)):
@@ -412,9 +493,21 @@ async def expert_respond_to_controller(
             status = "unresolved"
     reply = str(data.get("reply") or data.get("response") or "").strip()
     if not reply:
-        reply = "未能解析模型作答；检索未命中或证据不足，维持原主张待决。"
-        status = "unresolved"
-        conf = min(conf, 0.4)
+        market_fallback = _market_structured_fallback(agent_context or {}, context_refs) if agent == "market" else ""
+        if market_fallback:
+            reply = market_fallback
+            status = "partially_accepted"
+            conf = max(conf, 0.6)
+        else:
+            reply = "未能解析模型作答；检索未命中或证据不足，维持原主张待决。"
+            status = "unresolved"
+            conf = min(conf, 0.4)
+    if agent == "market" and len(context_refs) >= 2 and status == "unresolved":
+        # Structured market evidence has no prospectus page by design. Once the
+        # audited context supplies IDs/fields/values, a detailed answer must
+        # not remain unresolved merely because the local search added no hit.
+        status = "partially_accepted"
+        conf = max(conf, 0.6)
     audit_corrections: list[str] = []
     ctx = agent_context or {}
     if agent == "finance" and (ctx.get("metrics") or {}).get("cash_burn"):
