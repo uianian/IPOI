@@ -2,7 +2,44 @@
 
 > **用途**：赛题答辩，面向金融领域从业人员  
 > **范围**：`agents/hk_ipo_risk` 现行实现（财务 ‖ 法务 ‖ 市场 三专家并行 → 总控 LangGraph 子图）  
-> **说明**：中文为主，保留 Agent / Tool / Skill / ReAct / DebateDossier 等英文名词；**正式风险等级以总控终裁为准**，对照加权分 `reference_fundamental_score` 仅作参考
+> **正式口径**：正式风险等级与顶层综合风险分以**总控终裁**为准；对照加权分仅作参考，不是正式等级  
+> **字段口径**：图中名称已按《招股书关键信息抽取与风险特征定义》《市场情绪报告概览字段说明》《前端返回格式与后端产物说明》译为中文
+
+---
+
+## 英文字段 → 中文对照（速查）
+
+| 后端 / HTTP 字段 | 中文含义 |
+|------------------|----------|
+| `ticker` / `stockCode` | 股票代码 |
+| `issuerType` / `isBiotech` | 发行人类型 / 是否生物科技（门控等价 18A/18C） |
+| `enableEmbellishment` | 是否启用文本粉饰度分析 |
+| `full_parse.json` | 结构化全文解析结果 |
+| `AgentResult` | 专家结构化结果 |
+| `DebateDossier` | 辩论卷宗（探查结束即落盘，有无辩论都有） |
+| `risk_score`（财务/法务） | 专家风险分（0–100） |
+| `risk_score`（市场） | **最终首日破发风险分**（0–100） |
+| `risk_level`（专家） | 专家风险等级（小写枚举） |
+| `riskLevel`（顶层/总控） | 综合风险等级：`HIGH`/`MEDIUM`/`LOW` → 高/中/低 |
+| `overallScore` | 综合风险分（总控终裁，0–100） |
+| `reference_fundamental_score` | 对照加权分（参考） |
+| `deterministic_score` | 确定性历史校准分 |
+| `llm_score` | LLM 独立风险分 |
+| `overall_net_support` | **综合净支持度**（−100%～+100%，情绪方向） |
+| `overall_state` | 整体状态（支持占优/压制占优/多空交织等） |
+| `score_reconciliation` | 评分合并方法 |
+| `need_debate` / `need_discussion` | 是否开辩 / 单条议题是否需讨论 |
+| `conflict` / `resonance` / `evidence_gap` | 冲突 / 共振 / 证据缺口 |
+| `price_path_forecast` | 价格路径走势预判（D1/D5/D20/D60） |
+| `predicted_windows` | 分窗口风险标签（兼容字段） |
+| `post_listing` / `postListingValidation` | 上市后真实行情验证 |
+| `weighted_hit_score` | 加权命中分 |
+| `d5_priority_hit` | D5 重点预警命中 |
+| `embellishment` / `embellishmentAnalysis` | 文本粉饰度 / 粉饰专项分析 |
+| `CV_PREF` / `CV_PREF_LIABILITY` | 可转换可赎回优先股 / 优先股表内负债风险 |
+| `CASH_RUNWAY_*` / `BURN_YOY_*` | 现金跑道 / 烧钱同比扩大 |
+| `REDEMPTION_*` / `RELATED_PARTY_*` / `CONCENTRATION_*` | 赎回条款 / 关联交易 / 客户供应商集中度 |
+| `report_ready` | 报告已就绪事件 |
 
 ---
 
@@ -10,48 +47,50 @@
 
 ```mermaid
 flowchart TB
-    subgraph INPUT["📥 输入 Input"]
-        I1["招股书 PDF<br/>Prospectus PDF"]
-        I2["股票代码 ticker / stockCode<br/>例：03378.HK"]
-        I3["发行人类型 issuerType<br/>general / 18a / biotech"]
-        I4["LLM 配置 llmConfig<br/>（可选）"]
+    subgraph INPUT["输入"]
+        I1["招股书 PDF"]
+        I2["股票代码<br/>例：03378.HK"]
+        I3["发行人类型<br/>一般 / 18A生物科技"]
+        I4["大模型配置<br/>（可选）"]
+        I5["是否启用粉饰分析<br/>默认开启，可关闭"]
     end
 
-    subgraph PREP["🔧 数据准备层 Data Preparation"]
-        P1["pdf_parsing :9100<br/>Infinity-Parser 解析"]
-        P2["full_parse.json<br/>结构化全文 + 表格"]
-        P3["retrieval :9101<br/>向量索引 + 检索包"]
-        P4["agent_retrieval_{doc}_finance.json<br/>财务整表包 TBL_IS/BS/CF"]
-        P5["agent_retrieval_{doc}_legal.json<br/>法务检索包 + grep 基线"]
-        P6["market/data<br/>宏观/行业/IPO 历史特征 CSV"]
+    subgraph PREP["数据准备层"]
+        P1["解析服务 :9100<br/>Infinity-Parser"]
+        P2["结构化全文解析结果"]
+        P3["检索服务 :9101<br/>向量索引 + 检索包"]
+        P4["财务整表检索包<br/>损益表 / 资产负债表 / 现金流量表"]
+        P5["法务检索包<br/>+ 全书检索基线"]
+        P6["市场特征数据<br/>宏观 / 行业 / IPO 历史 CSV"]
     end
 
-    subgraph EXPERTS["🧠 三专家并行层 Expert Agents :9102"]
+    subgraph EXPERTS["三专家并行层 · 分析服务 :9102"]
         direction LR
-        E1["FinanceAgent<br/>财务穿透 Agent<br/>ReAct + rules_floor"]
-        E2["LegalAgent<br/>法务合规 Agent<br/>ReAct + rules_floor"]
-        E3["MarketAgent<br/>市场情绪 Agent<br/>历史校准 + LLM ReAct"]
+        E1["财务穿透 Agent<br/>推理循环 + 规则托底"]
+        E2["法务合规 Agent<br/>推理循环 + 规则托底"]
+        E3["市场情绪 Agent<br/>历史校准 + 大模型研判"]
     end
 
-    subgraph MASTER["⚖️ 总控决策层 Master Orchestration"]
-        M1["MasterAgent<br/>LangGraph 子图"]
-        M2["detect_conflicts<br/>冲突研判"]
-        M3["run_debate<br/>条件辩论 ≤3 轮"]
-        M4["score_embellishment<br/>前五页粉饰 0–10"]
-        M5["master_decide<br/>终裁 0–100"]
-        M6["validate_postlisting_performance<br/>D1/D5/D20/D60 上市后验证"]
-        M7["generate_warning_report<br/>报告排版"]
+    subgraph MASTER["总控决策层"]
+        M1["总控决策 Agent<br/>LangGraph 子图"]
+        M2["冲突研判"]
+        M3["条件辩论<br/>最多 3 轮"]
+        M4["文本粉饰度<br/>全书扫描 + 重点章节<br/>0–10（可关闭）"]
+        M5["终裁<br/>综合风险分 0–100<br/>+ 走势预判"]
+        M6["上市后验证<br/>D1 / D5 / D20 / D60"]
+        M7["预警报告排版"]
     end
 
-    subgraph OUTPUT["📤 输出 Output"]
-        O1["AgentResult ×3<br/>risk_score / risk_points / evidence"]
-        O2["DebateDossier ×3<br/>claims + evidence_refs + 页码"]
-        O3["reference_fundamental_score<br/>对照加权分（参考）"]
-        O4["master.judgment<br/>overall_score + riskLevel<br/>★ 正式等级"]
-        O5["*_master_*.json + report_markdown"]
-        O6["HTTP result.json<br/>phase / debate / report"]
-        O7["reports/{ticker}_finance|legal|market_report.md<br/>三份独立专家报告"]
-        O8["GET /report JSON + /report/export PDF"]
+    subgraph OUTPUT["输出"]
+        O1["三路专家结构化结果<br/>风险分 / 风险点 / 证据"]
+        O2["三份辩论卷宗<br/>主张 + 证据页码"]
+        O3["对照加权分<br/>（仅参考）"]
+        O4["总控终裁<br/>综合风险分 + 风险等级<br/>★ 正式结论"]
+        O5["走势预判 + 上市后验证"]
+        O6["总控卷宗 + 预警 Markdown"]
+        O7["四份 Markdown<br/>财务 / 法务 / 市场 / IPO 风险预警"]
+        O8["HTTP 完整结果<br/>阶段 / 辩论 / 综合报告"]
+        O9["综合报告 JSON + PDF 导出"]
     end
 
     I1 --> P1 --> P2
@@ -59,26 +98,26 @@ flowchart TB
     P3 --> P4 & P5
     I2 --> E3
     I3 --> E1 & E2
+    I5 --> M4
     P2 --> E1 & E2
     P4 --> E1
     P5 --> E2
     P6 --> E3
 
-    E1 & E2 & E3 -->|"asyncio.gather<br/>三专家并行完成"| M1
+    E1 & E2 & E3 -->|"三专家并行完成后合并"| M1
     M1 --> M2
-    M2 -->|"need_debate?"| M3
-    M2 -->|"无冲突/纯共振"| M4
+    M2 -->|"需要辩论?"| M3
+    M2 -->|"无冲突 / 纯共振"| M4
     M3 --> M4 --> M5 --> M6 --> M7
 
     E1 --> O1 & O2
     E2 --> O1 & O2
     E3 --> O1 & O2
     M1 --> O3
-    M5 --> O4
-    M7 --> O5
-    M1 --> O6
-    M7 --> O8
-    E1 & E2 & E3 --> O7
+    M5 --> O4 & O5
+    M7 --> O6 & O7
+    M1 --> O8
+    M7 --> O9
 
     style O4 fill:#ffe0e0,stroke:#c0392b,stroke-width:2px
     style M5 fill:#ffe0e0,stroke:#c0392b,stroke-width:2px
@@ -88,10 +127,10 @@ flowchart TB
 
 | 层级 | 核心职责 | 关键产物 |
 |------|----------|----------|
-| 数据准备 | PDF → 结构化 JSON → 向量索引 + Agent 检索包 | `full_parse.json`、finance/legal 检索包 |
-| 三专家 | 各自 ReAct 推理 + 规则托底，产出带页码证据的风险分 | `AgentResult` + `DebateDossier` |
-| 总控 | 冲突研判 → 条件辩论 → 粉饰 → **终裁** → 上市后验证 → 报告 | `master.judgment`（正式分）+ `post_listing` |
-| 网关 | 前端只连 `:9100`，反代 `analysis/*`、`report*`、`agents/status` 到 `:9102` | SSE 实时混流 + `result` / `report` / PDF |
+| 数据准备 | PDF → 结构化全文 → 向量索引 + Agent 检索包 | 结构化全文、财务/法务检索包 |
+| 三专家 | 各自推理 + 规则托底，产出带页码证据的风险分 | 专家结果 + 辩论卷宗 |
+| 总控 | 冲突研判 → 条件辩论 → 粉饰（可关）→ **终裁** → 上市后验证 → 报告 | 终裁正式分 + 走势预判 + 上市后验证 |
+| 网关 | 前端只连 `:9100`，反代分析 / 报告 / Agent 状态到 `:9102` | SSE 实时混流 + 完整结果 / 综合报告 / PDF |
 
 ---
 
@@ -99,58 +138,58 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    START(["开始<br/>用户上传招股书 + 填写 ticker"])
+    START(["开始<br/>用户上传招股书 + 填写股票代码"])
 
-    START --> A1["POST /parse/expert/start :9100<br/>输入：PDF + ticker + isBiotech"]
-    A1 --> A2{"解析 stage = READY?"}
+    START --> A1["启动专家解析 :9100<br/>输入：PDF + 股票代码 + 是否生物科技"]
+    A1 --> A2{"解析阶段 = 就绪?"}
     A2 -->|否，轮询| A2
-    A2 -->|是| A3["输出：full_parse.json<br/>+ parse task meta"]
+    A2 -->|是| A3["输出：结构化全文<br/>+ 解析任务元数据"]
 
-    A3 --> B1["内部调用 retrieval/prepare :9101<br/>建 FAISS/BM25 索引"]
-    B1 --> B2{"indexStatus = ready?"}
+    A3 --> B1["内部调用检索准备 :9101<br/>建向量 / 关键词索引"]
+    B1 --> B2{"索引状态 = 就绪?"}
     B2 -->|否，轮询| B2
-    B2 -->|是| B3["输出：finance/legal 检索包<br/>agent_retrieval_{taskId}_*.json"]
+    B2 -->|是| B3["输出：财务 / 法务检索包"]
 
-    B3 --> C1["POST /analysis/start :9100→9102<br/>输入：taskId + ticker + llmConfig"]
-    C1 --> C2["并行启动三专家<br/>run_finance_legal_market_parallel"]
+    B3 --> C1["启动分析 :9100→9102<br/>任务号 + 股票代码 + 大模型配置"]
+    C1 --> C2["并行启动三专家"]
 
-    C2 --> D1["FinanceAgent ReAct"]
-    C2 --> D2["LegalAgent ReAct"]
-    C2 --> D3["MarketAgent<br/>历史分 + LLM ReAct"]
-    D3 -.->|失败| D3E["market_error<br/>不阻断其他 Agent"]
+    C2 --> D1["财务穿透 Agent"]
+    C2 --> D2["法务合规 Agent"]
+    C2 --> D3["市场情绪 Agent<br/>历史分 + 大模型研判"]
+    D3 -.->|失败或无股票代码| D3E["市场跳过 / 市场错误<br/>不阻断财务·法务·总控"]
     D3E --> D4
 
-    D1 --> D4["merge_results<br/>对照分 reference_fundamental_score"]
+    D1 --> D4["合并结果<br/>计算对照加权分"]
     D2 --> D4
     D3 --> D4
 
-    D4 --> E1["MasterAgent 总控子图"]
-    E1 --> E2["① detect_conflicts<br/>输出：conflicts[] + need_debate"]
-    E2 --> E3{"need_debate<br/>或 need_discussion?"}
-    E3 -->|是| E4["② run_debate ≤3 轮<br/>finance/legal/market 补证答辩"]
-    E3 -->|否| E5["③ score_embellishment<br/>前五页文本粉饰 0–10"]
+    D4 --> E1["进入总控子图"]
+    E1 --> E2["① 冲突研判<br/>输出：冲突列表 + 是否开辩"]
+    E2 --> E3{"需要辩论<br/>或单议题需讨论?"}
+    E3 -->|是| E4["② 条件辩论 ≤3 轮<br/>财务 / 法务 / 市场补证答辩"]
+    E3 -->|否| E5["③ 文本粉饰度<br/>全书扫描 + 重点章节 0–10<br/>（可主动关闭则跳过）"]
     E4 --> E5
-    E5 --> E6["④ master_decide<br/>★ 终裁 overall_score + level"]
-    E6 --> E7["⑤ validate_postlisting_performance<br/>对齐 D1/D5/D20/D60 预测与真实行情"]
-    E7 --> E8["⑥ generate_warning_report<br/>ReportData + 总控摘要"]
-    E8 --> E9["⑦ 写三份独立专家 MD<br/>finance / legal / market"]
-    E9 --> E10["⑧ 落盘 report/result.json<br/>并置 status=completed"]
-    E10 --> E11["⑨ report_ready<br/>开放 /report 与 /report/export"]
+    E5 --> E6["④ 终裁<br/>★ 综合风险分 + 等级<br/>+ D1/D5/D20/D60 走势预判"]
+    E6 --> E7["⑤ 上市后验证<br/>对齐预测与真实行情<br/>加权命中分 / D5 重点预警"]
+    E7 --> E8["⑥ 预警报告排版<br/>综合报告数据"]
+    E8 --> E9["⑦ 写四份 Markdown<br/>财务 / 法务 / 市场 / IPO 风险预警"]
+    E9 --> E10["⑧ 落盘综合报告与完整结果<br/>并置状态 = 已完成"]
+    E10 --> E11["⑨ 广播「报告已就绪」<br/>开放综合报告与 PDF 导出"]
 
     E10 --> F1["落盘产物"]
-    F1 --> F2[".runtime/{doc}_finance_legal*.json"]
-    F1 --> F3[".runtime/debate/*_dossier_*.json"]
-    F1 --> F4[".runtime/debate/*_master_*.json"]
-    F1 --> F5["reports/{ticker}_finance|legal|market_report.md"]
-    F1 --> F6[".runtime/analyses/{analysisId}/report.json"]
+    F1 --> F2["合并结果 JSON<br/>含财务 / 法务 / 市场 / 总控"]
+    F1 --> F3["三份专家辩论卷宗"]
+    F1 --> F4["总控卷宗<br/>终裁 / 走势 / 验证 / 辩论史"]
+    F1 --> F5["四份 Markdown 报告"]
+    F1 --> F6["分析目录下综合报告 JSON"]
 
     E11 --> G1["HTTP 输出"]
-    G1 --> G2["SSE：thought / agent_status / agent_report<br/>phase_change / debate_* / report_ready"]
-    G1 --> G3["result.json<br/>overallScore + riskLevel + phase + debate<br/>★ 总控终裁"]
-    G1 --> G4["GET /report<br/>ReportData JSON"]
-    G1 --> G5["GET /report/export<br/>PDF"]
+    G1 --> G2["SSE：思考过程 / Agent 状态 / 专家报告<br/>阶段切换 / 辩论消息 / 报告已就绪"]
+    G1 --> G3["完整结果<br/>综合风险分 + 风险等级<br/>★ 总控终裁"]
+    G1 --> G4["综合报告 JSON"]
+    G1 --> G5["PDF 导出"]
 
-    G2 --> END(["结束<br/>前端展示 Agent 协作 + 证据溯源"])
+    G2 --> END(["结束<br/>前端展示协作过程 + 证据溯源"])
     G3 --> END
     G4 --> END
     G5 --> END
@@ -160,81 +199,95 @@ flowchart TD
     style G3 fill:#ffe0e0,stroke:#c0392b,stroke-width:2px
 ```
 
-**对照分 vs 终裁分**
+**对照加权分 vs 终裁分**
 
 ```
-reference_fundamental_score（参考，非正式等级）
-  = 基本面 legal×0.55 + finance×0.45
-  = 有市场时 (基本面)×0.65 + market×0.35
+对照加权分（参考，非正式等级）
+  = 基本面：法务 × 0.55 + 财务 × 0.45
+  = 有真实市场结果时：基本面 × 0.65 + 市场首日破发风险分 × 0.35
 
-正式 riskLevel / overallScore ← master_decide 终裁
+正式综合风险分 / 风险等级 ← 总控终裁
+
+注意：综合净支持度（−100%～+100%）只描述情绪方向，
+      不参与上述机械换算；与首日破发风险分（0–100）是两套量纲。
 ```
+
+**HTTP 终态发布顺序（强契约）**
+
+```
+专家/总控 Markdown + 综合报告 JSON
+  → 完整结果 JSON
+  → 任务状态 = 已完成、阶段 = 报告
+  → 广播「报告已就绪」
+```
+
+收到「报告已就绪」后可立即拉取完整结果与综合报告，不会出现“事件到了但报告接口短暂 404”。
 
 ---
 
-## 图 3 · 泳道图（Swimlane）：三专家并行 + 总控编排 + 前端回传
+## 图 3 · 泳道图：三专家并行 + 总控编排 + 前端回传
 
 ```mermaid
 flowchart TB
-    subgraph L0["泳道：用户 / 前端 Frontend"]
-        U1["上传 PDF + ticker"]
+    subgraph L0["泳道：用户 / 前端"]
+        U1["上传 PDF + 股票代码"]
         U2["轮询解析 / 索引状态"]
-        U3["订阅 SSE stream"]
-        U4["查看 result + 证据高亮"]
-        U5["拉取 /report JSON 与 PDF"]
+        U3["订阅实时事件流"]
+        U4["查看完整结果 + 证据高亮"]
+        U5["拉取综合报告 JSON 与 PDF"]
     end
 
-    subgraph L1["泳道：网关 Gateway :9100"]
-        G1["解析路由 parse/*"]
-        G2["反代 analysis/* → :9102"]
-        G3["反代 /agents/status /report /report/export → :9102"]
+    subgraph L1["泳道：网关 :9100"]
+        G1["解析路由"]
+        G2["反代分析接口 → :9102"]
+        G3["反代 Agent 状态 / 综合报告 / PDF → :9102"]
     end
 
-    subgraph L2["泳道：数据服务 Data Services"]
-        S1["pdf_parsing 解析"]
-        S2["retrieval 索引 + 检索包"]
+    subgraph L2["泳道：数据服务"]
+        S1["招股书解析"]
+        S2["检索索引 + 检索包"]
     end
 
-    subgraph L3["泳道：财务 Agent FinanceAgent"]
-        F_IN["输入：finance 检索包 + full_parse"]
-        F1["retrieve_finance"]
-        F2["extract_metrics → derive_gates"]
-        F3["run_finance_skill ×4"]
-        F4["run_finance_rule_checks"]
-        F5["submit_finance_report"]
-        F_OUT["输出：AgentResult + DebateDossier<br/>risk_score / 规则码 / 页码证据"]
+    subgraph L3["泳道：财务穿透 Agent"]
+        F_IN["输入：财务检索包 + 结构化全文"]
+        F1["拉取财务整表"]
+        F2["抽取指标 → 推导门控"]
+        F3["运行财务技能包 ×4"]
+        F4["规则交叉核对"]
+        F5["提交财务报告"]
+        F_OUT["输出：专家结果 + 辩论卷宗<br/>风险分 / 规则码 / 页码证据"]
     end
 
-    subgraph L4["泳道：法务 Agent LegalAgent"]
-        L_IN["输入：legal 检索包 + full_parse"]
-        L1["retrieve_legal"]
-        L2["run_legal_skill ×5"]
-        L3["run_rule_checks"]
-        L4["submit_legal_report"]
-        L_OUT["输出：AgentResult + DebateDossier<br/>risk_points + point_kind"]
+    subgraph L4["泳道：法务合规 Agent"]
+        L_IN["输入：法务检索包 + 结构化全文"]
+        L1["拉取法务证据"]
+        L2["运行法务技能包 ×5"]
+        L3["规则核对 + 饱和聚合"]
+        L4["提交法务报告"]
+        L_OUT["输出：专家结果 + 辩论卷宗<br/>风险点 + 点类型（发行人特有/结构性等）"]
     end
 
-    subgraph L5["泳道：市场 Agent MarketAgent"]
-        M_IN["输入：stockCode + 历史特征 CSV"]
-        M1["HistoricalMarketRiskScorer<br/>确定性校准分"]
-        M2["LLM ReAct 四大模块<br/>宏观/行业/IPO/舆情"]
-        M3["Market 内部多空辩论"]
-        M4["submit_market_report"]
-        M_OUT["输出：AgentResult + DebateDossier<br/>day1_break_risk / D5–D60"]
-        M_ERR["market_error（可选）<br/>失败不阻断"]
+    subgraph L5["泳道：市场情绪 Agent"]
+        M_IN["输入：股票代码 + 历史特征"]
+        M1["确定性历史校准分"]
+        M2["大模型四大模块<br/>宏观 / 行业 / IPO 市场 / 舆情"]
+        M3["市场内部多空辩论<br/>（≠ 总控条件辩论）"]
+        M4["提交市场报告"]
+        M_OUT["输出：首日破发风险分<br/>+ 综合净支持度<br/>+ 上市后检查点"]
+        M_ERR["市场错误 / 跳过<br/>失败不阻断"]
     end
 
-    subgraph L6["泳道：总控 Agent MasterAgent / Orchestrator"]
-        O_IN["输入：三路 AgentResult + 短卡片"]
-        O1["dossier_to_cards 压卡片"]
-        O2["detect_conflicts<br/>conflict / resonance / evidence_gap"]
-        O3["run_debate<br/>≤3轮 × ≤4问/轮<br/>search_*_standalone 补证"]
-        O4["score_embellishment"]
-        O5["master_decide ★终裁"]
-        O6["validate_postlisting_performance<br/>D1/D5/D20/D60 验证"]
-        O7["generate_warning_report<br/>ReportData"]
-        O8["写三份独立 MD + report/result<br/>置 completed 后再发 report_ready"]
-        O_OUT["输出：judgment + master dossier<br/>riskLevel HIGH|MEDIUM|LOW"]
+    subgraph L6["泳道：总控决策 Agent"]
+        O_IN["输入：三路专家结果 + 短卡片"]
+        O1["压成短卡片 + 对照加权分"]
+        O2["冲突研判<br/>冲突 / 共振 / 证据缺口"]
+        O3["条件辩论<br/>≤3 轮 × ≤4 问/轮<br/>页码直取 + 短关键词补证"]
+        O4["文本粉饰度专项<br/>（默认可关）"]
+        O5["终裁 ★<br/>综合分 + 走势预判"]
+        O6["上市后验证<br/>D1/D5/D20/D60"]
+        O7["预警报告排版"]
+        O8["写四份 MD + 综合报告/完整结果<br/>已完成后再发「报告已就绪」"]
+        O_OUT["输出：终裁 + 总控卷宗<br/>风险等级 高/中/低"]
     end
 
     U1 --> G1 --> S1
@@ -250,7 +303,7 @@ flowchart TB
 
     F_OUT & L_OUT & M_OUT --> O_IN
     O_IN --> O1 --> O2
-    O2 -->|"need_debate / need_discussion"| O3 --> O4
+    O2 -->|"需要辩论"| O3 --> O4
     O2 -->|"跳过辩论"| O4
     O4 --> O5 --> O6 --> O7 --> O8 --> O_OUT
 
@@ -269,147 +322,194 @@ flowchart TB
 ```
 时间轴 ──────────────────────────────────────────────────────────►
 
-FinanceAgent  ████████████████████ submit_finance_report
-LegalAgent    ████████████████████████ submit_legal_report
-MarketAgent   ██████████████ submit（或 market_error）
-              └──────── asyncio.gather ────────┘
-                                              │
-                                              ▼
-MasterAgent                              detect → debate? → embellish → decide → validate → report
-Runner/UI                                写 MD/report/result → status=completed → report_ready → /report JSON/PDF
+财务穿透 Agent  ████████████████████ 提交财务报告
+法务合规 Agent  ████████████████████████ 提交法务报告
+市场情绪 Agent  ██████████████ 提交（或跳过 / 报错）
+                └──────── 三专家并行汇合 ────────┘
+                                                │
+                                                ▼
+总控决策 Agent                            研判 → 辩论? → 粉饰 → 终裁 → 验证 → 报告
+服务端 / 前端                             写 MD/报告/结果 → 已完成 → 报告已就绪 → 综合报告/PDF
 ```
 
 ---
 
-## 图 4 · 总控 LangGraph 子图（Master Subgraph）
+## 图 4 · 总控 LangGraph 子图
 
-> 专家探查（Finance / Legal / Market ReAct）**不在**此子图内；三专家完成后才进入。
+> 专家探查（财务 / 法务 / 市场）**不在**此子图内；三专家完成后才进入。
 
 ```mermaid
 stateDiagram-v2
-    [*] --> detect: 输入三路短卡片\n+ reference_fundamental_score\n+ 第五章风险清单
+    [*] --> 冲突研判: 输入三路短卡片\n+ 对照加权分\n+ 第五章高风险清单
 
-    detect --> debate: need_debate=true\n或 任一条 need_discussion=true
-    detect --> embellish: 无冲突 / 纯 resonance\n且 need_debate=false
+    冲突研判 --> 条件辩论: 需要开辩\n或任一条议题需讨论
+    冲突研判 --> 文本粉饰: 无冲突 / 纯共振\n且不开辩
 
-    debate --> embellish: 最多 3 轮\n每轮 ≤4 问并行\n补证 search_*_standalone
+    条件辩论 --> 文本粉饰: 最多 3 轮\n每轮 ≤4 问并行\n页码直取优先补证
 
-    embellish --> decide: 前五页粉饰分 0–10\nlow / medium / high
+    文本粉饰 --> 终裁: 全书扫描 + 重点章节\n粉饰分 0–10\n低 / 中 / 高\n（可主动关闭则跳过）
 
-    decide --> validate_postlisting: overall_score 0–100\n+ level + risk_factors\n★ 正式终裁
+    终裁 --> 上市后验证: 综合风险分 0–100\n+ 等级 + 风险因子\n+ D1/D5/D20/D60 走势预判\n★ 正式终裁
 
-    validate_postlisting --> report: 对齐 D1/D5/D20/D60\n计算 weighted_hit_score\n无数据则 not_available
+    上市后验证 --> 报告生成: 对齐四窗口预测与真实行情\n加权命中分 / D5 重点预警\n无数据则标记不可用
 
-    report --> [*]: 输出 master dossier\n+ result.report / report.json
+    报告生成 --> [*]: 输出总控卷宗\n+ 综合报告 JSON\n+ IPO 风险预警 Markdown
 
-    note right of detect
-        conflicts[].kind:
-        • conflict → 应开辩
-        • resonance → 同向印证，非打架
-        • evidence_gap → 可补证开辩
+    note right of 冲突研判
+        冲突类型：
+        • 冲突 → 应开辩
+        • 共振 → 同向印证，非打架
+        • 证据缺口 → 可补证开辩
     end note
 
-    note right of decide
-        闸门 gate_warning:
-        终裁 low 但含
-        CASH_RUNWAY_LT_12 /
-        REDEMPTION_HIGH 等
-        → LLM 修订一次
+    note right of 终裁
+        闸门告警：
+        终裁为低风险但含
+        现金跑道不足12个月 /
+        赎回高风险 /
+        集中度高 /
+        估值倒挂 等
+        → 再让大模型修订一次
+        （程序不直接改等级）
     end note
 ```
 
+**市场参与总控的三层**
+
+| 层级 | 行为 |
+|------|------|
+| 卡片层 | 市场卡片始终进入冲突研判与终裁 |
+| 辩论层 | 市场与财务/法务冲突、证据缺口、或风险分与净支持度分化时，可点名市场答辩 |
+| 补问层 | 模型漏掉已识别的市场议题时，编排器补入一条市场质询 |
+
+市场内部的「多空辩论」属于市场 Agent 自身研判，**不是**总控子图里的条件辩论。
+
 ---
 
-## 图 5 · 单专家 ReAct 内部流程（Tool / Skill 编排）
+## 图 5 · 单专家内部流程（工具 / 技能包编排）
 
-### 5.1 财务 Agent FinanceAgent
+### 5.1 财务穿透 Agent
 
 ```mermaid
 flowchart LR
     subgraph FIN_IN["输入"]
-        FI1["finance 检索包"]
-        FI2["full_parse.json"]
-        FI3["issuerType 门控"]
+        FI1["财务整表检索包"]
+        FI2["结构化全文"]
+        FI3["发行人类型门控"]
     end
 
-    subgraph FIN_REACT["ReAct 循环 max_turns=10"]
-        FT1["retrieve_finance<br/>消费整表包"]
-        FT2["extract_metrics<br/>REV/CFO/NET_LOSS…"]
-        FT3["derive_gates<br/>盈利/3.4/biotech"]
-        FT4["calc_cash_runway<br/>未盈利跑道"]
-        FT5["run_finance_skill ×4<br/>profitability/cash_flow<br/>solvency/business_context"]
-        FT6["search_finance_evidence<br/>配额 ≤2/3"]
-        FT7["run_finance_rule_checks<br/>react+rules_floor"]
-        FT8["submit_finance_report<br/>★ 唯一结束动作"]
+    subgraph FIN_REACT["推理循环 · 上限 10 轮"]
+        FT1["拉取财务整表<br/>不自行切表"]
+        FT2["抽取指标<br/>营收 / 经营现金流 / 净亏损…"]
+        FT3["推导门控<br/>盈利 / 现金消耗 / 生物科技"]
+        FT4["计算现金跑道<br/>未盈利场景"]
+        FT5["财务技能包 ×4<br/>盈利能力 / 现金流<br/>偿债 / 商业语境"]
+        FT6["补证据<br/>配额 ≤2/3"]
+        FT7["规则交叉核对<br/>推理 + 规则托底"]
+        FT8["提交财务报告<br/>★ 唯一结束动作"]
     end
 
     subgraph FIN_OUT["输出"]
-        FO1["risk_score 0–100"]
-        FO2["score_breakdown<br/>CONTINUOUS_LOSS 等规则码"]
-        FO3["evidence_refs 页码+片段"]
-        FO4["DebateDossier 落盘"]
+        FO1["专家风险分 0–100"]
+        FO2["打分明细<br/>连续亏损 / 负现金流 等"]
+        FO3["证据页码 + 片段"]
+        FO4["辩论卷宗落盘"]
     end
 
     FI1 & FI2 & FI3 --> FT1 --> FT2 --> FT3 --> FT4 --> FT5 --> FT6 --> FT7 --> FT8
     FT8 --> FO1 & FO2 & FO3 & FO4
 ```
 
-### 5.2 法务 Agent LegalAgent
+**财务规则码（中文含义）**
+
+| 规则码 | 含义 |
+|--------|------|
+| 连续亏损 / 单年亏损 | 业绩记录期持续或最近完整年亏损 |
+| 经营现金流为负 | 经营活动现金流持续流出 |
+| 毛利率下滑 | 毛利率降幅超过 5 个百分点 |
+| 现金跑道不足 12 / 12–24 个月 | 未盈利企业资金可支撑月数 |
+| 跑道不确定 | 未盈利但缺现金流序列算不出跑道 |
+| 烧钱同比扩大超 30% | 现金消耗率同比上升 |
+| 优先股表内负债 | 可转换可赎回优先股相对资产/现金过高 |
+
+### 5.2 法务合规 Agent
 
 ```mermaid
 flowchart LR
     subgraph LEG_IN["输入"]
-        LI1["legal 检索包"]
-        LI2["full_parse.json"]
-        LI3["issuerType + gates"]
+        LI1["法务检索包"]
+        LI2["结构化全文"]
+        LI3["发行人类型 + 门控"]
     end
 
-    subgraph LEG_REACT["ReAct 循环 max_turns=10"]
-        LT1["retrieve_legal"]
-        LT2["run_legal_skill ×5<br/>governance/shareholder_rights<br/>related_party/contracts_and_ip<br/>regulatory_litigation"]
-        LT3["search_legal_evidence<br/>配额 ≤2/3"]
-        LT4["run_rule_checks<br/>饱和聚合 + point_kind"]
-        LT5["submit_legal_report<br/>★ 唯一结束动作"]
+    subgraph LEG_REACT["推理循环 · 上限 10 轮"]
+        LT1["拉取法务证据"]
+        LT2["法务技能包 ×5<br/>治理 / 股东权利<br/>关联交易 / 合同与知识产权<br/>监管诉讼"]
+        LT3["补证据<br/>配额 ≤2/3"]
+        LT4["规则核对<br/>点类型过滤 + 饱和聚合"]
+        LT5["提交法务报告<br/>★ 唯一结束动作"]
     end
 
     subgraph LEG_OUT["输出"]
-        LO1["risk_score 0–100"]
-        LO2["risk_points[]<br/>issuer_specific / structural"]
-        LO3["3.2 关联交易占比 ratio_pct"]
-        LO4["DebateDossier 落盘"]
+        LO1["专家风险分 0–100"]
+        LO2["风险点列表<br/>发行人特有 / 结构性 / 模板等"]
+        LO3["关联交易占比<br/>同类交易占比或上市规则百分比率"]
+        LO4["辩论卷宗落盘"]
     end
 
     LI1 & LI2 & LI3 --> LT1 --> LT2 --> LT3 --> LT4 --> LT5
     LT5 --> LO1 & LO2 & LO3 & LO4
 ```
 
-### 5.3 市场 Agent MarketAgent
+**法务技能包 ↔ 特征文档映射**
+
+| 技能包 | 文档章节 | 关注点 |
+|--------|----------|--------|
+| 公司治理 | 控股 / 治理 | 控制权 >50%、一致行动、AB 股 |
+| 股东权利 | §3.1 + §3.6 | 对赌赎回 + 上市前权利清理 |
+| 关联交易 | §3.2 | 公允 / 依赖 / 豁免 / **占比** |
+| 合同与知识产权 | +18A 叠 §3.5 | 重大合同 + 核心技术权属 |
+| 监管与诉讼 | 监管 / 诉讼 | 处罚 / 许可 / 仲裁 |
+
+§3.3 客户供应商集中度仍由规则引擎产出（不占独立技能包）；§3.4 现金消耗归财务。
+
+### 5.3 市场情绪 Agent
 
 ```mermaid
 flowchart LR
     subgraph MKT_IN["输入"]
-        MI1["stockCode"]
-        MI2["ipo_sentiment_features.csv"]
-        MI3["Firecrawl / 新浪舆情（可选）"]
+        MI1["股票代码"]
+        MI2["IPO 情绪特征表"]
+        MI3["舆情抓取（可选）"]
     end
 
-    subgraph MKT_PIPE["Pipeline"]
-        MT1["HistoricalMarketRiskScorer<br/>★ 确定性权威分"]
-        MT2["LLM ReAct 四大模块<br/>宏观/行业/IPO市场/舆情"]
-        MT3["Market 内部多空辩论<br/>（非总控 run_debate）"]
-        MT4["submit_market_report"]
+    subgraph MKT_PIPE["流水线"]
+        MT1["确定性历史校准分<br/>★ 规则底线"]
+        MT2["大模型四大模块<br/>宏观 / 行业 / IPO 市场 / 舆情"]
+        MT3["市场内部多空辩论<br/>（非总控条件辩论）"]
+        MT4["提交市场报告"]
     end
 
-    subgraph MKT_OUT["输出"]
-        MO1["risk_score + day1_break_risk"]
-        MO2["deterministic_score + llm_score"]
-        MO3["上市后 D1/D5–D60 检查点"]
-        MO4["DebateDossier 落盘"]
+    subgraph MKT_OUT["输出（两套量纲）"]
+        MO1["最终首日破发风险分 0–100"]
+        MO2["确定性历史校准分 + LLM 独立风险分"]
+        MO3["综合净支持度 −100%～+100%<br/>+ 整体状态"]
+        MO4["上市后 D1 及每 5 个交易日检查点"]
+        MO5["辩论卷宗落盘"]
     end
 
     MI1 & MI2 & MI3 --> MT1 --> MT2 --> MT3 --> MT4
-    MT4 --> MO1 & MO2 & MO3 & MO4
+    MT4 --> MO1 & MO2 & MO3 & MO4 & MO5
 ```
+
+**市场两套量纲（勿混用）**
+
+| 体系 | 字段中文名 | 范围 | 含义 |
+|------|------------|------|------|
+| 情绪方向 | 综合净支持度 | −100%～+100% | 多头多还是空头多 |
+| 风险大小 | 最终首日破发风险分 | 0–100 | 首日收盘低于发行价的风险有多高 |
+
+破发锚点 = **发行价**；二级市场累计收益 / 回撤基准 = **上市首日开盘价**。
 
 ---
 
@@ -417,33 +517,33 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    subgraph THEME["风险主题 Theme"]
-        T1["赎回/优先股<br/>Redemption / CV Pref"]
-        T2["现金跑道<br/>Cash Runway"]
-        T3["客户/供应商集中<br/>Concentration"]
-        T4["关联交易占比<br/>Related Party"]
-        T5["首日破发/板块<br/>Day-1 Break Risk"]
-        T6["文本粉饰<br/>Embellishment"]
+    subgraph THEME["风险主题"]
+        T1["赎回 / 优先股"]
+        T2["现金跑道"]
+        T3["客户 / 供应商集中"]
+        T4["关联交易占比"]
+        T5["首日破发 / 板块情绪"]
+        T6["文本粉饰"]
     end
 
-    subgraph FIN["FinanceAgent"]
-        F_T1["CV_PREF_LIABILITY 表内负债"]
-        F_T2["CASH_RUNWAY_* / BURN_YOY_*"]
+    subgraph FIN["财务穿透"]
+        F_T1["优先股表内负债"]
+        F_T2["现金跑道 / 烧钱同比"]
     end
 
-    subgraph LEG["LegalAgent"]
-        L_T1["REDEMPTION_* 条款/清理"]
-        L_T3["CONCENTRATION_*"]
-        L_T4["RELATED_PARTY_* + ratio_pct"]
+    subgraph LEG["法务合规"]
+        L_T1["赎回条款 / 权利清理"]
+        L_T3["集中度规则码"]
+        L_T4["关联交易规则码 + 占比"]
     end
 
-    subgraph MKT["MarketAgent"]
-        M_T5["day1_break_risk 等"]
+    subgraph MKT["市场情绪"]
+        M_T5["首日破发风险等"]
     end
 
-    subgraph MST["MasterAgent"]
-        MS_T1["同向 → resonance 共振<br/>表内 vs 已清理 → conflict"]
-        MS_T6["score_embellishment 独占"]
+    subgraph MST["总控决策"]
+        MS_T1["同向 → 共振<br/>表内重大 vs 已清理 → 冲突"]
+        MS_T6["粉饰专项独占<br/>默认终裁前运行"]
     end
 
     T1 --> F_T1 & L_T1 --> MS_T1
@@ -454,31 +554,54 @@ flowchart LR
     T6 --> MS_T6
 ```
 
+| 主题 | 财务 | 法务 | 市场 | 总控怎么判 |
+|------|------|------|------|------------|
+| 赎回 / 优先股 | 表内负债 | 条款 / 清理 | 不负责条款 | 同向 = 共振；表内重大 vs 已清理 = 冲突 |
+| 现金跑道 | 跑道 / 烧钱规则 | 不计分 | 不负责跑道 | 财务单方硬门控 |
+| 客户 / 供应商集中 | 只解释钱，不打集中度分 | 集中度规则 | — | 非法务缺席 |
+| 关联交易占比 | 不做独立占比打分 | 关联交易规则 | — | 同上 |
+| 首日破发 / 板块 | — | — | 首日破发风险等 | 与基本面无交叉矛盾则不必开辩 |
+| 文本粉饰 | 不做 | 不做 | — | **总控粉饰专项**（可显式关闭） |
+
 ---
 
 ## 图 7 · 输入 / 输出契约总表（答辩速查）
 
-| 阶段 | 输入 Input | 处理 Process | 输出 Output |
-|------|------------|--------------|-------------|
-| **解析** | PDF、companyName、ticker | Infinity-Parser OCR+表格 | `full_parse.json`、taskId |
-| **检索** | full_parse、doc_id、issuerType | FAISS/BM25 + 整表展开 | finance/legal 检索包 |
-| **财务** | finance 检索包、parse JSON | ReAct + 4 Skills + rules_floor | `AgentResult` + `DebateDossier` |
-| **法务** | legal 检索包、parse JSON | ReAct + 5 Skills + 饱和聚合 | `AgentResult` + `DebateDossier` |
-| **市场** | stockCode、特征 CSV、舆情 | 历史校准 + LLM ReAct | `AgentResult` + `DebateDossier` |
-| **合并** | 三路 AgentResult | `reference_fundamental` 对照分 | merged JSON |
-| **总控** | 短卡片 + 第五章清单 | detect → debate? → embellish → decide → validate_postlisting | `master.judgment` ★ + `post_listing` |
-| **报告** | 终裁 JSON + dossier + 上市后验证 | ReportData 汇总 + 三份独立专家 MD | `*_finance_report.md`、`*_legal_report.md`、`*_market_report.md`、`report.json` |
-| **前端** | analysisId | SSE 实时混流 + `report_ready` 后拉取报告 | `result.json`、`GET /report`、`GET /report/export`、overallScore + riskLevel ★ |
+| 阶段 | 输入 | 处理 | 输出 |
+|------|------|------|------|
+| **解析** | PDF、公司名、股票代码 | Infinity-Parser OCR + 表格 | 结构化全文、解析任务号 |
+| **检索** | 结构化全文、文档标识、发行人类型 | 向量 / 关键词 + 整表展开 | 财务 / 法务检索包 |
+| **财务** | 财务检索包、结构化全文 | 推理循环 + 4 技能包 + 规则托底 | 专家结果 + 辩论卷宗 |
+| **法务** | 法务检索包、结构化全文 | 推理循环 + 5 技能包 + 饱和聚合 | 专家结果 + 辩论卷宗 |
+| **市场** | 股票代码、特征表、舆情 | 历史校准 + 大模型研判 | 首日破发风险分 + 综合净支持度 + 辩论卷宗 |
+| **合并** | 三路专家结果 | 对照加权分（有市场则计入市场风险分） | 合并 JSON |
+| **总控** | 短卡片 + 第五章清单 | 研判 → 辩论? → 粉饰? → 终裁 → 上市后验证 | **终裁正式分** + 走势预判 + 验证结果 |
+| **报告** | 终裁 + 卷宗 + 验证 | 综合报告数据 + 四份 Markdown | 财务 / 法务 / 市场 / IPO 风险预警报告；综合报告 JSON |
+| **前端** | 分析任务号 | SSE 实时混流；「报告已就绪」后拉取 | 完整结果、综合报告、PDF；综合风险分 + 风险等级 ★ |
+
+**前端结果骨架（中文字段含义）**
+
+| 位置 | 含义 |
+|------|------|
+| 顶层综合风险分 / 风险等级 | 总控终裁（高/中/低） |
+| 分析选项·是否启用粉饰 | 本次是否主动做粉饰分析 |
+| Agent 包·财务 / 法务 / 市场 | 各专家风险分、独立 Markdown、打分模式明细 |
+| Agent 包·总控编排器 | 终裁分、对照加权分、总控子结果 |
+| 辩论对象 | 实际轮次与消息；轮次 = 0 表示合法跳过，不算失败 |
+| 综合报告·走势预判 | D1/D5/D20/D60 结构化预测 |
+| 综合报告·上市后验证 | 加权命中分、D5 重点预警、分窗口对齐 |
+| 综合报告·粉饰专项 | 启用时才有；关闭则整段省略 |
 
 ---
 
-## 前端契约更新要点
+## 前端契约要点
 
-1. **前端唯一 Base 仍是 `:9100`**，但除 `analysis/*` 外，现还会经网关访问 `GET /api/v1/agents/status`、`GET .../report`、`GET .../report/export`。
-2. **SSE 不再按 legal → financial → market 顺序缓冲回放**，而是三专家与总控 **实时混流**；谁先产生事件谁先推送。
-3. **`category` 只在真实辩论阶段出现**。初评、冲突研判、粉饰、终裁、skip-debate 都没有 `category`。
-4. **`report_ready` 在三份独立专家 MD、`report.json`、完整 `result.json` 均落盘且任务已置为 `completed` 后才发送**；收到事件后前端可立即拉取 `/report` 和 `/report/export`，不会命中 `REPORT_NOT_READY` 的时序窗口。
-5. **综合章与专家章分离**：总控 `generate_warning_report` 负责 `result.report` / `/report` 的综合输出；财务、法务、市场则分别写成三份独立 Markdown。
+1. **前端唯一入口仍是 `:9100`**，经网关访问 Agent 状态、分析启停/事件流/结果、综合报告与 PDF 导出。
+2. **SSE 三专家与总控实时混流**，不再按法务→财务→市场顺序缓冲回放。
+3. **辩论分类标签只在真实辩论阶段出现**；初评、冲突研判、粉饰、终裁、跳过辩论均无该标签。
+4. **「报告已就绪」在四份 MD、综合报告 JSON、完整结果 JSON 均落盘且任务已完成后才发送**；收到后可立即拉报告，无正常时序下的短暂 404。
+5. **综合章与专家章分离**：总控负责综合报告视图；财务、法务、市场各有独立 Markdown，并写入各 Agent 包的报告字段。
+6. **粉饰为可选字段**：关闭时综合报告不含粉饰维度与粉饰专项分析；主动关闭不等于分析失败，也不降低总控置信度。
 
 ---
 
@@ -487,8 +610,8 @@ flowchart LR
 - **GitHub / GitLab / Typora / Obsidian**：直接预览 Mermaid 代码块
 - **答辩 PPT**：推荐 [Mermaid Live Editor](https://mermaid.live) 导出 SVG/PNG
 - **图 3 泳道图**较宽，导出时建议横向 16:9 画布
-- 红色高亮节点 = **正式终裁输出**，答辩时重点强调「不是简单加权平均，而是证据驱动的总控决策」
+- 红色高亮节点 = **正式终裁输出**，答辩时强调：不是简单加权平均，而是证据驱动的总控决策；市场净支持度与破发风险分是两套量纲，不可混读
 
 ---
 
-*文档版本：2026-08-20 · 对齐 `agents/hk_ipo_risk` 当前实现*
+*文档版本：2026-08-21 · 对齐 `agents/hk_ipo_risk/README.md` 当前实现，并同步字段口径至指标文档与前端契约*
