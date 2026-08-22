@@ -7,7 +7,7 @@
 | 能力 | 状态 |
 |------|------|
 | 财务 / 法务 ReAct + `react+rules_floor` | **已启用**（CLI + HTTP） |
-| DebateDossier 落盘 + 辩论补证 | **已启用**；页码直取 + 短关键词，`search_*_standalone`（`prefer_pages`） |
+| DebateDossier 落盘 + 辩论补证 | **已启用**；财务/法务使用页码直取 + 短关键词，市场使用上市前结构化证据 ID / 字段 / 截止日 |
 | 总控决策 / 多轮辩论编排 | **已启用**（LangGraph 总控子图；终裁为正式分；输出 D1/D5/D20/D60 走势预判） |
 | 上市后真实行情验证 | **已启用**：自动对齐 D1/D5/D20/D60，计算加权命中分与 D5 重点预警 |
 | 市场情绪 Agent | **已启用**：历史校准分 + LLM ReAct + 多空辩论；失败不阻断财务/法务/总控 |
@@ -586,6 +586,7 @@ python scripts/generate_analysis_report.py \
 | `.runtime/hansiaitai_master_improved_no_embellishment_v3_20260821.json` | 财务 **75.0** / 法务 **60.9** / 市场 **61.0** / 对照分 **65.06** / 总控 **63.0 HIGH** | `degraded=false`；改进后辩论 2 轮；财务补出赎回压力跑道 1.55 个月；市场完整复现 59.4/61.0 评分血缘；粉饰分析主动关闭 |
 | `reports/hansiaitai_master_improved_no_embellishment_v3_20260821/` | 四份 Markdown | 总控报告不含粉饰章节；市场净支持率 -12.9% 仅作方向描述，不参与 0–100 风险分机械换算 |
 | 蜜雪 `test_batch` 全链路（2026-08-20） | 财务 **0.0** / 法务 **28.8** / 市场 **43.7** / 总控 **35.0 MEDIUM** | `.runtime/mixue_02097_testbatch_20260820_fullflow.json`；`degraded=false`，辩论 2 轮，上市后 D1/D5/D20/D60 验证完成，四份报告在 `.runtime/mixue_02097_testbatch_20260820_reports/` |
+| 蜜雪系统修复最终回归（2026-08-22，关闭粉饰） | 财务 **0.0** / 法务 **22.2** / 市场 **43.7** / 对照分 **23.23** / 总控 **43.7 MEDIUM** | `.runtime/mixue_02097_system_fix_final_no_embellishment_20260822.json`；`degraded=false`，辩论 2 轮；市场首轮 `verified` 并给出数值/证据 ID，财务答辩携带财务表页码；四份报告在 `reports/mixue_02097_system_fix_final_no_embellishment_20260822/` |
 
 ---
 
@@ -648,7 +649,7 @@ python scripts/run_finance_legal.py --agent all \
 |------|------|----------|
 | `conflict` | 两路主张打架（金额/期限/是否已清理对不上） | 应 `need_discussion=true` → 开辩 |
 | `resonance` | 同向印证，例如财务 `CV_PREF_LIABILITY` 与法务 `REDEMPTION_HIGH` 同指一笔赎回负债 | **不是冲突**；是否写入 `conflicts` 并由 `need_discussion` 开辩，由模型当轮决定 |
-| `evidence_gap` | 主张缺页码级证据 | 可开辩补证 |
+| `evidence_gap` | 主张缺少其职责对应的可核验证据：财务/法务通常为招股书页码，市场为数据源、字段、证据 ID、截止日与数值 | 可开辩补证 |
 
 职责分轨（与 §1 / §9.4 一致）：现金跑道只归财务；集中度/关联交易打分只归法务；赎回**条款**归法务、**表内负债**归财务，同向是共振不是打架。市场卡片参与研判，无交叉矛盾时不必点名市场。
 
@@ -658,19 +659,22 @@ python scripts/run_finance_legal.py --agent all \
 
 最多 **3** 轮；每轮问题一次性打包并行（cap **4**）；可问 `finance` / `legal` / `market`（各自 `respond_to_controller`）。答完再判是否追问。辩论 **不会** 重跑专家 ReAct / `submit_*_report`。
 
-专家答辩以各自已经提交的 `AgentResult` 为第一证据源，standalone 检索只负责补证：`parallel.py` 在专家完成或 `--skip-experts --from-result` 恢复后，将结果绑定到专家实例的 `_last_result`。财务上下文携带 `metrics`、打分项和自动计算的极端赎回敏感性情景；法务携带打分项、风险点、3.x 专项结果及证据摘要；市场携带完整评分血缘与上市前证据账本。不得因本轮检索零命中而把这些既有字段改口为“未披露”。
+专家答辩以各自已经提交的 `AgentResult` 为第一证据源，standalone 检索只负责补证：`parallel.py` 在专家完成或 `--skip-experts --from-result` 恢复后，将结果绑定到专家实例的 `_last_result`。财务上下文携带 `metrics`、打分项、`evidence_summary.table_meta`（`TBL_IS` / `TBL_BS` / `TBL_CF` 等表格页码与摘录）和自动计算的极端赎回敏感性情景；法务携带打分项、风险点、3.x 专项结果及证据摘要；市场携带完整评分血缘与上市前证据账本。不得因本轮检索零命中而把这些既有字段改口为“未披露”。
+
+证据契约按职责分轨：财务/法务分析招股书，质询可要求对应页码；市场分析外部上市前时点数据，不应被要求提供招股书页码。市场质询由编排器规范为 `market_field` / `evidence_id` / `as_of_date` / `value` 等要求，并移除页码提示。市场 EvidenceRef 合法使用 `page=null`，同时携带 `field_code=evidence_id` 以及字段、数值、截止日和解释。
 
 质询 JSON 可带 `search_hints: {pages, keywords}`；不填则规则抽取。追问轮同样。
 
 补证检索（`src/skills/debate_query.py`，词表在 `master_rules.yaml` → `debate.debate_search`）：
 
 1. **质询文本只给人读，不进 BM25。** 禁止把「請財務總監…」整段当 query。
-2. **页码直取优先**：从质询/卡片/`search_hints` 抽页（如第 497/563 页）→ `hits_from_prefer_pages`。
-3. **短关键词其次**：金额、主题词（`贖回負債` / `購回權`）、code 词表；`query_max_chars=32`。
+2. **财务/法务页码直取优先**：从质询/卡片/`search_hints` 抽页（如第 497/563 页）→ `hits_from_prefer_pages`；财务表类质询还会从 `table_meta` 恢复主表页码。
+3. **财务/法务短关键词其次**：金额、主题词（`贖回負債` / `購回權`）、code 词表；`query_max_chars=32`。市场改查本地上市前特征/新闻，并与已审计 `evidence_catalog` 合并。
 4. 脏命中（不在指定页、无关键词）不算成功，打满每问 ≤2 次配额。
 5. 回答前同时注入「己方已审计结果上下文」「己方 claim 已有证据」和 claim 卡片；卡片或 AgentResult 已写明的金额、页码、公式与评分中间值不得改口成未披露。
 6. 财务若已有 `END_CASH`、`BURN_RATE_MONTHLY` 与 `CV_PREF`，自动附加极端情景：即时全额现金赎回、无新增融资或流入；输出剩余现金与压力跑道，并明确其为敏感性分析而非招股书预测。
 7. 答复提交前有一致性门控：若声称现金字段或市场评分构成缺失，而审计上下文实际存在，则追加校正并限制状态/置信度，避免错误的 `verified`。
+8. 市场已有至少两条结构化上下文证据时，不得仅因 `page=null` 或 standalone 零命中维持 `unresolved`；模型 JSON 截断时会从证据账本生成包含 evidence ID、字段值与截止日的实质回复，并以 `partially_accepted` 兜底。
 
 Standalone 入口：`search_finance_evidence_standalone` / `search_legal_evidence_standalone`（均可 `prefer_pages`）以及市场 `search_market_evidence_standalone`。空有效 hits 仍须发言；若 claim 卡片和已审计上下文也无证据，则 `confidence≤0.4` 且禁止 `verified`、禁止编造页码。若已审计上下文有值，必须引用该值并把“本轮未新增命中”与“原结论无证据”区分开。
 
@@ -705,6 +709,7 @@ Standalone 入口：`search_finance_evidence_standalone` / `search_legal_evidenc
 
 - 总控 `generate_warning_report` 排版终裁 JSON、走势预判和上市后验证，写入 dossier / `result.report` 的摘要来源，**不**拼进三份专家 MD。
 - `scripts/generate_analysis_report.py`（CLI）或 HTTP runner 会写专家三份独立报告：`{代码}_finance_report.md` / `_legal_report.md` / `_market_report.md`；有 `master` 时额外写 `{代码}_ipo_risk_warning_report.md`。
+- 总控报告的辩论证据按职责显示：财务/法务使用“证据页”，市场使用“市场证据：<evidence_id...>”，不会把市场的 `page=null` 渲染成缺少招股书页码。
 - 启用粉饰分析时，CLI 总控预警报告包含独立“文本粉饰度专项分析”章节，展示五维评分、覆盖范围及经原文回查的 Top 10 高等级切片；HTTP `report.embellishmentAnalysis.highRiskExcerpts` 返回全量，PDF 同样展示 Top 10。关闭时 Markdown/PDF 不生成该章，ReportData 同时省略粉饰维度和 `embellishmentAnalysis`，后续章节自动连续重编号。
 - 报告中的 HTML 表格切片会先清理为安全纯文本，避免不完整的 `<table>/<tr>` 把后续 Markdown 吞入表格。
 - CLI 总控预警报告会把长段预测/验证拆成「预测要点」「主要触发依据」「验证摘要」「预测文本」「行情指标」等 bullet，并清理 JSON 字段自带句尾标点，避免 `。；` / `。。`。
@@ -1249,10 +1254,12 @@ agents/hk_ipo_risk/
 |------|------|------|
 | 上市前 | `risk_score` = 首日破发风险 0–100 | 确定性历史校准分 + LLM ReAct 研判 + 多空辩论 dossier |
 | 市场情绪 | `overall_net_support` = -100% 至 +100% | 正数表示支持、负数表示不支持；这是市场情绪主口径，不是 0–100 风险分 |
-| 四大模块 | 宏观 / 行业 / IPO 市场 / 舆情 | 舆情仅在 LLM 验证相关性后参与权重 |
+| 四大模块 | 宏观 / 行业 / IPO 市场 / 舆情 | 舆情先按 `as_of_date` 过滤，再经 LLM 验证相关性；无上市前有效新闻时状态为 unavailable、权重为 0，不按负面或缺失证据计分 |
 | 上市后 | D1/D5–D60 检查点 | D1 以及每 5 个交易日；破发锚点为发行价，二级收益以首日开盘价为基准 |
 
 市场分独立写成 `{代码}_market_report.md`；有真实结果时，原始 `market.risk_score` 直接计入 `reference_fundamental_score`，净支持率与整体状态作为不同量纲的上下文供总控研判。总控读取完整 `market` 卡片。总控辩论若点名市场，走 `MarketAgent.respond_to_controller`，使用本地上市前时点数据补证并按 `MARKET_DEBATE_REPLY` 返回结构化回复；市场模块内部的「多空辩论」是市场 Agent 自己的研判，**不是**总控子图里的 `run_debate`。
+
+市场 dossier 的评分主张同时保留 `evidence_ids` 与结构化 `evidence_refs`；这些引用以 `page=null` 表示“非招股书证据”，并携带 `field_code`、字段值、`as_of_date` 与解释。`master_cards.claim_to_card` 会把二者计入 `n_evidence`，因此详细的市场回答不会再因没有招股书页码被误判为无可核验证据。
 
 ### 14.2 主要实现文件
 

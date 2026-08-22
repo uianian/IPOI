@@ -990,6 +990,20 @@ def _pages_from_evidence(evidence: Any) -> str:
     return "、".join(pages) if pages else "未提供页码"
 
 
+def _debate_evidence_label(reply: dict[str, Any]) -> str:
+    evidence = reply.get("evidence") or []
+    if str(reply.get("target_agent") or "") != "market":
+        return f"证据页：{_pages_from_evidence(evidence)}"
+    fields: list[str] = []
+    for ev in evidence:
+        if not isinstance(ev, dict):
+            continue
+        field = str(ev.get("field_code") or "").strip()
+        if field and field not in fields:
+            fields.append(field)
+    return "市场证据：" + ("、".join(fields[:8]) if fields else "见字段/证据ID及截止日")
+
+
 def _reply_status_cn(value: Any) -> str:
     mapping = {
         "verified": "已验证",
@@ -1076,9 +1090,9 @@ def _master_debate_md(master: dict[str, Any], *, section_no: str = "六") -> str
                     status = _reply_status_cn(reply.get("status"))
                     severity = _debate_severity_cn(reply.get("severity"))
                     confidence = reply.get("confidence")
-                    evidence_pages = _pages_from_evidence(reply.get("evidence"))
+                    evidence_label = _debate_evidence_label(reply)
                     confidence_text = _fmt_score(confidence) if confidence is not None else "—"
-                    lines.append(f"- **{target}｜{status}**（风险强度：{severity}；置信度：{confidence_text}；证据页：{evidence_pages}）：{_full_text(reply.get('reply'))}")
+                    lines.append(f"- **{target}｜{status}**（风险强度：{severity}；置信度：{confidence_text}；{evidence_label}）：{_full_text(reply.get('reply'))}")
                     uncertainty = _full_text(reply.get("remaining_uncertainty"))
                     if uncertainty:
                         lines.append(f"  - 保留不确定性：{uncertainty}")

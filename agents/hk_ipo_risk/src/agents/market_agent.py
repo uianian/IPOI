@@ -1136,6 +1136,33 @@ class MarketAgent:
                 retrieval_queries=[{"query": point.description, "intent": "market_evidence"}],
                 metadata={"risk_code": point.code, "rule_ref": point.rule_ref},
             ))
+        score_evidence_ids = list(dict.fromkeys(
+            list(scoring.get("llm_evidence_ids") or [])
+            + [
+                evidence_id
+                for evidence_id, item in ledger.items()
+                if item.get("module") in {"macro", "industry", "ipo_market", "public_opinion"}
+            ]
+        ))
+        score_refs = []
+        for evidence_id in score_evidence_ids:
+            item = ledger.get(evidence_id) or {}
+            value = item.get("formatted_value")
+            if value is None:
+                value = item.get("value")
+            excerpt = (
+                f"evidence_id={evidence_id}; field={item.get('derived_field') or '—'}; "
+                f"value={value if value is not None else '—'}; "
+                f"as_of_date={item.get('observation_date') or item.get('as_of_date') or '—'}; "
+                f"{item.get('interpretation') or item.get('claim') or ''}"
+            )
+            score_refs.append({
+                "page": None,
+                "excerpt": excerpt[:500],
+                "source_type": "table",
+                "field_code": evidence_id,
+                "confidence": 1.0,
+            })
         claims.append(DebateClaim(
             claim_id="MARKET-SCORE-001",
             agent="market",
@@ -1143,7 +1170,8 @@ class MarketAgent:
             code="MARKET_FINAL_SCORE",
             level="high" if final_score >= 60 else ("medium" if final_score >= 40 else "low"),
             confidence="high",
-            evidence_ids=list(scoring.get("llm_evidence_ids") or []),
+            evidence_ids=score_evidence_ids,
+            evidence_refs=score_refs,
             metadata={"scoring": scoring},
         ))
         return DebateDossier(

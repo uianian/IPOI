@@ -42,6 +42,7 @@ def claim_to_card(claim: DebateClaim | dict[str, Any], *, excerpt_max: int = 200
     else:
         d = dict(claim)
     refs = d.get("evidence_refs") or []
+    evidence_ids = [str(x) for x in (d.get("evidence_ids") or []) if str(x).strip()]
     excerpts = []
     for r in refs[:2]:
         if not isinstance(r, dict):
@@ -63,7 +64,13 @@ def claim_to_card(claim: DebateClaim | dict[str, Any], *, excerpt_max: int = 200
         "statement": _trunc(str(d.get("statement") or ""), 220),
         "theme_hint": theme_hint_for_code(code),
         "excerpts": excerpts,
-        "n_evidence": len(refs),
+        # Market claims are backed by structured evidence IDs rather than PDF
+        # pages. Counting only evidence_refs made a fully audited market score
+        # look like an evidence-free claim to the controller.
+        "evidence_ids": evidence_ids[:24],
+        "n_evidence": len(refs) + len([x for x in evidence_ids if x not in {
+            str((r or {}).get("field_code") or "") for r in refs if isinstance(r, dict)
+        }]),
         "retrieval_queries": (d.get("retrieval_queries") or [])[:2],
     }
 
