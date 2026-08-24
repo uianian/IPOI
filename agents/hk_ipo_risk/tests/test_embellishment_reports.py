@@ -8,7 +8,7 @@ sys.path.insert(0, str(PKG_ROOT))
 
 from scripts.generate_analysis_report import build_master_report
 from service.report_data import build_report_data
-from service.report_pdf import render_report_pdf
+from service.report_pdf import _plain_text, _toc_entries, render_report_pdf
 from src.skills.embellishment_reporting import embellishment_report_data, render_embellishment_markdown
 from src.skills.generate_warning_report import render_master_markdown
 
@@ -197,3 +197,74 @@ def test_disabled_embellishment_is_absent_from_all_reports():
     pdf = render_report_pdf(report, ticker="01234")
     assert pdf.startswith(b"%PDF")
     assert len(pdf) > 1000
+
+
+def test_report_data_preserves_complete_master_debate_and_evidence_for_pdf():
+    master = _master()
+    long_reply = "完整辩论回复" * 80
+    master["conflicts"] = [{"theme": "score_conflict", "reason": "专家评分存在分歧"}]
+    master["debate_history"] = [
+        {
+            "round": 1,
+            "questions": [{
+                "question_id": "q1", "target_agent": "finance", "priority": "high",
+                "question": "请解释财务判断。", "required_evidence_types": ["page_excerpt"],
+            }],
+            "replies": [{
+                "question_id": "q1", "status": "verified", "confidence": 0.9,
+                "reply": long_reply, "revision_reason": "补证后修订",
+                "remaining_uncertainty": "仍需跟踪现金消耗",
+                "evidence": [{"page": 12, "excerpt": "完整证据原文"}],
+            }],
+        }
+    ]
+    master["risk_factors"] = [{
+        "title": "测试风险", "source_agent": "finance", "reason": "测试原因",
+        "evidence": [{"page": 12, "excerpt": "证据一"}, {"page": 13, "excerpt": "证据二"}],
+    }]
+    report = build_report_data(
+        {"master": master, "finance": {}, "legal": {}, "market": {}},
+        overall_score=70, risk_level="HIGH",
+        debate={"rounds": 1, "messages": [], "completedAt": "2026-08-22T00:00:00Z"},
+    )
+
+    assert report["masterConclusion"]["verdictReasoning"] == "综合风险较高。"
+    assert report["debate"]["history"][0]["replies"][0]["reply"] == long_reply
+    assert report["debate"]["conflicts"][0]["theme"] == "score_conflict"
+    assert len(report["riskFactors"][0]["evidence"]) == 2
+    pdf = render_report_pdf(report, ticker="01234")
+    assert pdf.startswith(b"%PDF")
+    assert b"/Annots" in pdf
+    assert b"/Dest" in pdf
+    assert len(pdf) > 10_000
+
+
+def test_pdf_text_is_simplified_and_html_tables_become_readable_rows():
+    raw = "<table><tr><th>風險項目</th><th>判斷</th></tr><tr><td>現金流</td><td>較高風險</td></tr></table>"
+    rendered = _plain_text(raw)
+    assert "<table" not in rendered
+    assert "风险项目 ｜ 判断" in rendered
+    assert "现金流 ｜ 较高风险" in rendered
+    assert "風險" not in rendered
+
+
+def test_toc_conditionally_includes_debate_embellishment_and_expert_appendices():
+    base = {"debate": {"rounds": 0, "history": []}, "expertReports": {}}
+    entries = _toc_entries(base)
+    anchors = [entry[0] for entry in entries]
+    assert "debate" not in anchors
+    assert "embellishment" not in anchors
+    assert anchors[-3:] == ["appendix_financial", "appendix_legal", "appendix_market"]
+
+    enabled = {
+        **base,
+        "debate": {"rounds": 2, "history": [{"round": 1}]},
+        "embellishmentAnalysis": {"status": "complete"},
+    }
+    enabled_anchors = [entry[0] for entry in _toc_entries(enabled)]
+    assert "debate" in enabled_anchors
+    assert "embellishment" in enabled_anchors
+
+
+def test_pdf_text_normalizes_agent_label_and_math_minus():
+    assert _plain_text("财务穿透 Agent：−12.9%") == "财务穿透 智能体：-12.9%"

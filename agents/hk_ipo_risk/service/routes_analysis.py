@@ -27,7 +27,7 @@ class AnalysisStartBody(BaseModel):
     isBiotech: Optional[bool] = None
     ticker: Optional[str] = None
     stockCode: Optional[str] = None
-    enableEmbellishment: bool = True
+    enableEmbellishment: Optional[bool] = None
 
 
 def _err(status: int, code: str, message: str) -> JSONResponse:
@@ -45,6 +45,16 @@ def _check_index_ready(meta: dict[str, Any]) -> bool:
     if (meta.get("indexStatus") or "").lower() == "ready":
         return True
     return False
+
+
+def _resolve_enable_embellishment(body_value: Optional[bool], parse_meta: dict[str, Any]) -> bool:
+    """Prefer an explicit compatibility override, otherwise inherit upload mode."""
+    if body_value is not None:
+        return bool(body_value)
+    stored = parse_meta.get("enableEmbellishment", False)
+    if isinstance(stored, bool):
+        return stored
+    return str(stored or "").strip().lower() == "true"
 
 
 @router.post("/{client_project_id}/analysis/start")
@@ -104,6 +114,9 @@ async def analysis_start(
             "ticker": body.ticker or parse_meta.get("ticker") or stock_code,
         }
 
+    # 文本粉饰模式在上传解析时确定；analysis/start 仅保留兼容覆盖。
+    enable_embellishment = _resolve_enable_embellishment(body.enableEmbellishment, parse_meta)
+
     # 记录是否使用前端覆盖的 LLM（不落盘明文 key）
     llm_cfg = body.llmConfig or {}
     store.create(
@@ -114,7 +127,7 @@ async def analysis_start(
     )
     store.update_meta(
         analysis_id,
-        analysisOptions={"embellishmentEnabled": body.enableEmbellishment},
+        analysisOptions={"embellishmentEnabled": enable_embellishment},
         llmOverride={
             "hasApiKey": bool(str(llm_cfg.get("apiKey") or "").strip()),
             "apiBaseUrl": (str(llm_cfg.get("apiBaseUrl") or "").strip() or None),
@@ -125,7 +138,7 @@ async def analysis_start(
         analysis_id=analysis_id,
         parse_meta=parse_meta,
         llm_config=body.llmConfig,
-        enable_embellishment=body.enableEmbellishment,
+        enable_embellishment=enable_embellishment,
     )
     return _ok({"analysisId": analysis_id, "status": "started"}, status=202)
 
@@ -251,6 +264,57 @@ def _completed_result_or_404(
     return result, None
 
 
+def _complete_report_data(request: Request, analysis_id: str, result: dict[str, Any]) -> dict[str, Any] | None:
+    """Upgrade persisted pre-full-report results from their local merged snapshot."""
+    report = result.get("report")
+    if not isinstance(report, dict):
+        return None
+    agents = result.get("agents") if isinstance(result.get("agents"), dict) else {}
+    expert_reports = {
+        "financial": str((agents.get("financial") or {}).get("reportMarkdown") or ""),
+        "legal": str((agents.get("legal") or {}).get("reportMarkdown") or ""),
+        "market": str((agents.get("market") or {}).get("reportMarkdown") or ""),
+    }
+    store: AnalysisStore = request.app.state.analysis_store
+    master_report_markdown = ""
+    master_files = sorted(store.analysis_dir(analysis_id).glob("*_ipo_risk_warning_report.md"))
+    if master_files:
+        try:
+            master_report_markdown = master_files[0].read_text(encoding="utf-8")
+        except OSError as exc:
+            logger.warning("read master report markdown %s failed: %s", analysis_id, exc)
+    orchestrator = agents.get("orchestrator") if isinstance(agents.get("orchestrator"), dict) else {}
+    orchestrator_master = orchestrator.get("master") if isinstance(orchestrator.get("master"), dict) else {}
+    master_report_markdown = master_report_markdown or str(
+        orchestrator.get("reportMarkdown") or orchestrator_master.get("report_markdown") or ""
+    )
+    if isinstance(report.get("masterConclusion"), dict) and isinstance(report.get("debate"), dict):
+        complete = dict(report)
+        complete["expertReports"] = expert_reports
+        complete["masterReportMarkdown"] = master_report_markdown or str(report.get("masterReportMarkdown") or "")
+        return complete
+
+    merged_path = store.analysis_dir(analysis_id) / "merged.json"
+    if not merged_path.is_file():
+        return report
+    try:
+        merged = json.loads(merged_path.read_text(encoding="utf-8"))
+        from service.report_data import build_report_data
+
+        complete = build_report_data(
+            merged,
+            overall_score=int(result.get("overallScore") or report.get("overallScore") or 0),
+            risk_level=str(result.get("riskLevel") or report.get("riskLevel") or "MEDIUM"),
+            debate=result.get("debate") if isinstance(result.get("debate"), dict) else None,
+        )
+        complete["expertReports"] = expert_reports
+        complete["masterReportMarkdown"] = master_report_markdown
+        return complete
+    except Exception as exc:
+        logger.warning("upgrade legacy ReportData %s failed: %s", analysis_id, exc)
+        return report
+
+
 @router.get("/{client_project_id}/report")
 async def analysis_report(
     request: Request,
@@ -260,7 +324,9 @@ async def analysis_report(
     result, err = _completed_result_or_404(request, client_project_id, analysisId)
     if err is not None:
         return err
-    report = (result or {}).get("report")
+    store: AnalysisStore = request.app.state.analysis_store
+    aid = analysisId or store.find_latest_by_project(client_project_id)
+    report = _complete_report_data(request, aid, result or {}) if aid else None
     if not isinstance(report, dict):
         return _err(404, "REPORT_NOT_READY", "报告尚未生成")
     return _ok(report)
@@ -280,17 +346,22 @@ async def analysis_report_export(
     result, err = _completed_result_or_404(request, client_project_id, analysisId)
     if err is not None:
         return err
-    report = (result or {}).get("report")
-    if not isinstance(report, dict):
-        return _err(404, "REPORT_NOT_READY", "报告尚未生成")
     store: AnalysisStore = request.app.state.analysis_store
     aid = analysisId or store.find_latest_by_project(client_project_id)
+    report = _complete_report_data(request, aid, result or {}) if aid else None
+    if not isinstance(report, dict):
+        return _err(404, "REPORT_NOT_READY", "报告尚未生成")
     meta = store.read_meta(aid) if aid else {}
     parse_meta = meta.get("parseMeta") or {}
     ticker = str(parse_meta.get("ticker") or parse_meta.get("stockCode") or "")
+    company_name = str(parse_meta.get("companyName") or parse_meta.get("company_name") or "")
     date_s = datetime.now().strftime("%Y-%m-%d")
     filename = f"IPO风险报告_{ticker or 'unknown'}_{date_s}.pdf"
-    pdf_bytes = render_report_pdf(report, ticker=ticker)
+    pdf_bytes = render_report_pdf(report, ticker=ticker, company_name=company_name)
+    stock_code = resolve_stock_code(ticker=ticker, parse_meta=parse_meta) or "unknown"
+    artifact_path = store.analysis_dir(aid) / f"{stock_code}_ipo_risk_warning_report.pdf"
+    artifact_path.write_bytes(pdf_bytes)
+    logger.info("saved exported PDF artifact: %s", artifact_path)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

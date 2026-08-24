@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from service.analysis_runner import StreamHub, _publish_completed_result
-from service.routes_analysis import AnalysisStartBody
+from service.routes_analysis import AnalysisStartBody, _resolve_enable_embellishment
 from service.analysis_store import AnalysisStore
 
 
@@ -118,10 +118,13 @@ def test_real_store_never_notifies_completed_before_report_ready(tmp_path) -> No
 
 
 
-def test_analysis_start_embellishment_defaults_on_and_accepts_false() -> None:
-    default_body = AnalysisStartBody(clientProjectId="project-test")
+def test_analysis_start_embellishment_inherits_parse_meta_and_accepts_override() -> None:
+    inherited_body = AnalysisStartBody(clientProjectId="project-test")
     disabled_body = AnalysisStartBody(
         clientProjectId="project-test", enableEmbellishment=False
     )
-    assert default_body.enableEmbellishment is True
-    assert disabled_body.enableEmbellishment is False
+    assert inherited_body.enableEmbellishment is None
+    assert _resolve_enable_embellishment(inherited_body.enableEmbellishment, {"enableEmbellishment": True}) is True
+    assert _resolve_enable_embellishment(inherited_body.enableEmbellishment, {"enableEmbellishment": False}) is False
+    assert _resolve_enable_embellishment(inherited_body.enableEmbellishment, {}) is False
+    assert _resolve_enable_embellishment(disabled_body.enableEmbellishment, {"enableEmbellishment": True}) is False

@@ -377,15 +377,21 @@ _DEBATE_THEME_CN = {
 }
 
 _TOOL_CN = {
-    "calc_cash_runway": "现金跑道测算",
-    "retrieve_finance": "财务证据检索",
-    "extract_metrics": "财务指标抽取",
-    "derive_gates": "财务门控判断",
-    "run_finance_skill": "财务专项分析",
-    "run_finance_rule_checks": "财务规则校验",
-    "search_legal_evidence": "法务证据检索",
-    "run_legal_skill": "法务专项分析",
-    "run_legal_rule_checks": "法务规则校验",
+    "calc_cash_runway": "测算现金跑道",
+    "retrieve_finance": "检索财务证据",
+    "extract_metrics": "抽取财务指标",
+    "derive_gates": "判断财务门控",
+    "run_finance_skill": "执行财务专项分析",
+    "run_finance_rule_checks": "执行财务规则校验",
+    "search_finance_evidence": "补充检索财务证据",
+    "submit_finance_report": "提交财务报告",
+    "retrieve_legal": "检索法务证据",
+    "search_legal_evidence": "补充检索法务证据",
+    "run_legal_skill": "执行法务专项分析",
+    "run_legal_rule_checks": "执行法务规则校验",
+    "run_rule_checks": "执行规则校验",
+    "submit_legal_report": "提交法务报告",
+    "submit_market_report": "提交市场报告",
 }
 
 _SKILL_CN = {
@@ -528,6 +534,16 @@ def _postlisting_sidecar(stock_code: str) -> dict[str, Any]:
 
 def _humanize_backend_terms(text: Any) -> str:
     out = str(text or "")
+    protected_paths: dict[str, str] = {}
+
+    def protect_path(match: re.Match[str]) -> str:
+        key = f"§路径{len(protected_paths)}§"
+        protected_paths[key] = match.group(0)
+        return key
+
+    out = re.sub(r"(?:(?:[A-Za-z]:)?/)?(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_./-]+", protect_path, out)
+    for src, name in sorted(_METRIC_CN.items(), key=lambda item: len(item[0]), reverse=True):
+        out = re.sub(rf"(?<![A-Za-z0-9_]){re.escape(src)}(?![A-Za-z0-9_])", name, out)
     for src, (name, _definition) in sorted(
         globals().get("_RISK_TERM_DEFINITIONS", {}).items(),
         key=lambda item: len(item[0]),
@@ -535,6 +551,59 @@ def _humanize_backend_terms(text: Any) -> str:
     ):
         out = out.replace(src, name)
     replacements = {
+        "TBL_BS_COMPANY": "公司资产负债表",
+        "TBL_IS": "合并损益表",
+        "TBL_BS": "合并资产负债表",
+        "TBL_CF": "合并现金流量表",
+        "hsi_ret_5d": "恒生指数5日收益",
+        "hsi_ret_20d": "恒生指数20日收益",
+        "hsi_ret_60d": "恒生指数60日收益",
+        "hstech_ret_5d": "恒生科技指数5日收益",
+        "hstech_ret_20d": "恒生科技指数20日收益",
+        "hstech_ret_60d": "恒生科技指数60日收益",
+        "hsi_vol_20d": "恒生指数20日实现波动率",
+        "vhsi_avg_5d": "香港恒生波动率指数5日均值",
+        "mkt_turnover_avg_20d": "港股20日平均成交额",
+        "mkt_turnover_chg_20d": "港股成交额20日变化",
+        "southbound_net_20d": "南向资金20日净额",
+        "dff_level": "联邦基金利率",
+        "dff_chg_30cd": "联邦基金利率30日变化",
+        "dxy_ret_20d": "美元指数20日收益",
+        "us10y_level": "美国10年期国债收益率",
+        "us10y_chg_20d": "美国10年期国债收益率20日变化",
+        "ind_ret_5d": "行业5日收益",
+        "ind_ret_20d": "行业20日收益",
+        "ind_ret_60d": "行业60日收益",
+        "ind_excess_20d": "行业相对恒生指数20日超额收益",
+        "ind_amount_chg_20d": "行业成交额20日变化",
+        "ind_newhigh_ratio": "行业创新高比例",
+        "ind_net_inflow_20d": "行业20日资金净流入",
+        "ind_ipo_count_365d": "同行业近365日新股数量",
+        "ind_avg_day1_return_365d": "同行业新股首日平均收益",
+        "ind_break_rate_365d": "同行业新股破发率",
+        "ipo_count_30d": "近30日新股数量",
+        "ipo_count_90d": "近90日新股数量",
+        "avg_day1_return_60d": "近期新股首日平均收益",
+        "avg_day5_return_60d": "近期新股5日平均收益",
+        "avg_day20_return_60d": "近期新股20日平均收益",
+        "break_rate_60d": "近期新股破发率",
+        "avg_mdd20_60d": "近期新股20日平均最大回撤",
+        "issue_price": "发行价",
+        "subscription_multiple": "整体超额认购倍数",
+        "public_offer_multiple": "公开发售认购倍数",
+        "international_placing_multiple": "国际配售认购倍数",
+        "support": "支持",
+        "pressure": "压制",
+        "neutral": "中性",
+        "unavailable": "不可用",
+        "confidence": "置信度",
+        "risk_score": "风险分",
+        "rules_level": "规则等级",
+        "observation_date": "观察日期",
+        "hits": "命中数",
+        "source value": "源数据值",
+        "asof": "按截止日取值",
+        "n/a": "不适用",
         "CONCENTRATION_HIGH": "单一客户或供应商集中度高风险",
         "CONCENTRATION_TOP5": "前五大客户或供应商集中度风险",
         "VALUATION_INVERSION": "首次公开发售估值倒挂风险",
@@ -574,19 +643,26 @@ def _humanize_backend_terms(text: Any) -> str:
         "alignment=partial": "方向部分吻合",
         "alignment=miss": "预警偏离",
         "alignment=not_available": "暂无法验证",
-        "high": "高风险",
-        "medium": "中等风险",
-        "low": "低风险",
         "severe": "显著下跌或深度破发",
         "moderate": "中度承压",
         "benign": "表现相对平稳",
         "not_available": "暂无法验证",
+        "exists": "存在状态",
+        "skipped": "跳过状态",
+        "True": "是",
+        "False": "否",
+        "None": "无",
     }
     for src, dst in replacements.items():
         out = out.replace(src, dst)
     out = re.sub(r"\[[A-Z][A-Z0-9_-]*(?:-[A-Z0-9]+)*\]", "", out)
     out = re.sub(r"\([A-Z][A-Z0-9_-]*(?:-[A-Z0-9]+)*\)", "", out)
     out = re.sub(r"\bOPINION-STATUS\b", "舆情可用性状态", out)
+    out = re.sub(r"(?<![A-Za-z])high(?![A-Za-z])", "高风险", out, flags=re.I)
+    out = re.sub(r"(?<![A-Za-z])medium(?![A-Za-z])", "中等风险", out, flags=re.I)
+    out = re.sub(r"(?<![A-Za-z])low(?![A-Za-z])", "低风险", out, flags=re.I)
+    for key, path in protected_paths.items():
+        out = out.replace(key, path)
     return _to_simplified(out)
 
 
@@ -891,7 +967,10 @@ def _debate_theme_cn(value: Any) -> str:
 
 def _tool_cn(value: Any) -> str:
     text = str(value or "").strip()
-    return _TOOL_CN.get(text, _full_text(text) or "—")
+    if not text:
+        return "—"
+    label = _TOOL_CN.get(text)
+    return f"{text} {label}" if label else _full_text(text)
 
 
 def _skill_cn(value: Any) -> str:
@@ -1126,7 +1205,9 @@ def _master_debate_md(master: dict[str, Any], *, section_no: str = "六") -> str
         )
         lines.append(
             f"对终裁的影响：总控吸收上述质询与补证后，"
-            f"最终判定为{score}分（{level}，{confidence}）。{_sentence(verdict)}"
+            f"最终判定为{score}分（{level}，{confidence}）。"
+            f"终裁理由：{_sentence(verdict, '总控未提供额外终裁理由')}"
+            "补证结果已纳入总控评分、核心风险排序和后续复核建议，完整终裁依据见本报告第二部分。"
         )
         lines.append("")
     return "\n".join(lines)
@@ -1557,7 +1638,7 @@ def _cash_burn_md(finance: dict[str, Any]) -> str:
     if not cb:
         return "_无 cash_burn 结果_\n"
     return (
-        f"- skipped=`{cb.get('skipped')}` reason=`{cb.get('reason')}`\n"
+        f"- 是否跳过：{_bool_cn(cb.get('skipped'))}；原因：{_full_text(cb.get('reason')) or '无'}\n"
         f"- END_CASH=`{_fmt_num(cb.get('END_CASH'))}` "
         f"BURN_RATE_MONTHLY=`{_fmt_num(cb.get('BURN_RATE_MONTHLY'))}` "
         f"runway=`{_fmt_num(cb.get('CASH_RUNWAY_MONTHS'))}` 月 "
@@ -1978,7 +2059,7 @@ def build_finance_report(
             parts.append(f"- {note}")
         parts.append("")
     parts.extend(_footer())
-    return "\n".join(parts)
+    return _humanize_backend_terms("\n".join(parts))
 
 
 def build_legal_report(
@@ -2020,14 +2101,14 @@ def build_legal_report(
     parts.append("## 2. 得分与分解\n")
     parts.append(_score_breakdown_md(legal.get("score_breakdown") or []))
     parts.append("## 3. 章节特征摘要\n")
-    parts.append("| 章节 | exists/skipped | 强度 | 关键字段 |")
+    parts.append("| 章节 | 存在或跳过状态 | 强度 | 关键字段 |")
     parts.append("|------|----------------|------|----------|")
     for sec in ("3.1", "3.2", "3.3", "3.4", "3.5", "3.6"):
         feat = _legal_section_feat(legal, sec)
         status = (
-            f"skipped={feat.get('skipped')}"
+            f"是否跳过：{_bool_cn(feat.get('skipped'))}"
             if feat.get("skipped")
-            else f"exists={feat.get('exists')}"
+            else f"是否存在：{_bool_cn(feat.get('exists'))}"
         )
         extra = []
         for k in (
@@ -2107,11 +2188,81 @@ def build_legal_report(
         parts.append(f"- {n}")
     parts.append("")
     parts.extend(_footer())
-    return "\n".join(parts)
+    return _humanize_backend_terms("\n".join(parts))
+
+
+def _humanize_market_evidence_ids(text: str, catalog_markdown: str) -> str:
+    """Replace backend evidence IDs with their adjacent human-readable indicator names."""
+    mapping: dict[str, str] = {}
+    for line in str(catalog_markdown or "").splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 2:
+            continue
+        evidence_id, indicator = cells[0], _clean_sentence(cells[1])
+        if re.fullmatch(r"[A-Z][A-Z0-9_-]{3,}", evidence_id) and indicator:
+            mapping[evidence_id] = f"市场证据：{indicator}"
+    out = str(text or "")
+    for evidence_id, label in sorted(mapping.items(), key=lambda item: len(item[0]), reverse=True):
+        out = out.replace(evidence_id, label)
+    return out
 
 
 def build_market_report(result: dict[str, Any]) -> str:
-    return _humanize_backend_terms(market_report_markdown(result))
+    raw = market_report_markdown(result)
+    return _humanize_backend_terms(_humanize_market_evidence_ids(raw, raw))
+
+
+def _master_conclusion_paragraphs(result: dict[str, Any], master: dict[str, Any]) -> list[str]:
+    """Build a connected, reader-facing conclusion instead of repeating raw model prose."""
+    judgment = master.get("judgment") if isinstance(master.get("judgment"), dict) else {}
+    score = _fmt_score(judgment.get("overall_score"))
+    level = _risk_label_cn(judgment.get("risk_level_http") or judgment.get("level"))
+    confidence = _confidence_cn(judgment.get("confidence"))
+    reference_score = result.get("reference_fundamental_score")
+    if reference_score is None:
+        reference_score = master.get("reference_fundamental_score")
+    lead = (
+        f"总控最终风险评分为{score}分，风险等级为{level}，判断置信度为{confidence}。"
+        f"三位专家的对照加权分为{_fmt_score(reference_score)}分；该分数用于校验终裁的一致性，"
+        "不替代总控对证据强度、风险共振和门控条件的综合判断。"
+    )
+
+    factors = [item for item in (master.get("risk_factors") or []) if isinstance(item, dict)]
+    factor_sentences: list[str] = []
+    for item in factors[:4]:
+        title = _clean_sentence(item.get("title"), "未命名风险")
+        reason = _clean_sentence(item.get("reason"))
+        if title and reason:
+            factor_sentences.append(f"在{title}方面，{reason}")
+        elif title:
+            factor_sentences.append(f"需重点关注{title}")
+    if factor_sentences:
+        evidence = "综合研判显示，" + "；".join(factor_sentences) + "。"
+    else:
+        evidence = _sentence(
+            _humanize_backend_terms(
+                ((master.get("report_sections") or {}).get("composite"))
+                or judgment.get("verdict_reasoning")
+            ),
+            "当前结构化结果未提供可展开的核心风险依据",
+        )
+
+    finance = result.get("finance") if isinstance(result.get("finance"), dict) else {}
+    legal = result.get("legal") if isinstance(result.get("legal"), dict) else {}
+    market = result.get("market") if isinstance(result.get("market"), dict) else {}
+    expert_scores = (
+        f"财务、法务和市场智能体的独立风险分分别为{_fmt_score(finance.get('risk_score'))}分、"
+        f"{_fmt_score(legal.get('risk_score'))}分和{_fmt_score(market.get('risk_score'))}分。"
+    )
+    impact = (
+        expert_scores
+        + "三方证据共同指向持续经营、特殊股东权利及上市初期承接力等压力。"
+        "因此，本报告将融资进展、赎回权是否彻底终止、经营现金流改善和行业交易情绪列为后续复核重点；"
+        "若这些条件未出现实质改善，高风险判断仍具有延续性。"
+    )
+    return [lead, evidence, impact]
 
 
 def build_master_report(
@@ -2142,14 +2293,7 @@ def build_master_report(
         "上市后验证中的“预警命中”表示上市前判断与真实表现高度一致；“方向部分吻合”表示方向一致但强弱程度存在差异；“预警偏离”表示上市前判断与真实表现明显不一致。报告引用的页码均按原 PDF 页码表述，不使用招股书目录页码。招股书原文证据保留繁体中文，并用引号标示。",
         "",
         "## 二、总控结论\n",
-        (
-            f"系统给出的总控风险分为{_score_sentence(judgment.get('overall_score'))}，"
-            f"综合风险标签为{risk_level}，判断置信度为{confidence}。"
-            f"用于对照的基础加权分为{_score_sentence(reference_score)}。"
-        ),
-        _full_text(((master.get("report_sections") or {}).get("composite")) or judgment.get("verdict_reasoning") or "当前结果未提供总控终裁说明。"),
-        "",
-        "评分说明：" + _full_text(((master.get("report_sections") or {}).get("confidence_note")) or judgment.get("score_explanation") or "当前结果未提供评分说明。"),
+        *_master_conclusion_paragraphs(result, master),
         "",
     ]
     parts.append(_agent_expert_judgment_md(result))
@@ -2191,7 +2335,8 @@ def build_master_report(
     ).replace("## 当前时间窗的风险预测", f"## {prediction_no}、当前时间窗的风险预测").replace("## 上市后真实行情验证", f"## {postlisting_no}、上市后真实行情验证")
     parts.append(prediction_md)
     parts.extend(_footer())
-    return "\n".join(parts)
+    master_text = "\n".join(parts)
+    return _humanize_market_evidence_ids(master_text, market_report_markdown(result))
 
 
 def write_agent_reports(

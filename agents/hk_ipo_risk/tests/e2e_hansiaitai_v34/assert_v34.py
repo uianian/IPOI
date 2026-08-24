@@ -139,8 +139,11 @@ def main() -> int:
 
     legal_md = ((data.get("agents") or {}).get("legal") or {}).get("reportMarkdown") or ""
     fin_md = ((data.get("agents") or {}).get("financial") or {}).get("reportMarkdown") or ""
+    master_md = ((data.get("agents") or {}).get("orchestrator") or {}).get("reportMarkdown") or ""
     if not legal_md or not fin_md:
         raise SystemExit("missing independent reportMarkdown")
+    if not master_md:
+        raise SystemExit("missing orchestrator.reportMarkdown")
     if legal_md == fin_md:
         raise SystemExit("legal.reportMarkdown == financial.reportMarkdown")
 

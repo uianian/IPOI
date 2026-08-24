@@ -6,6 +6,23 @@ from src.skills.market_presets import MARKET_SKILL_PRESETS
 from src.tools.schemas import MARKET_TOOL_SCHEMAS, ToolRegistry
 
 
+def _known_market_evidence_ids(context: dict[str, Any]) -> set[str]:
+    """Union narrative ledger IDs with historical-calibration indicator IDs."""
+    known = {
+        str(item.evidence_id)
+        for item in context["sentiment_analysis"].evidence_ledger
+        if getattr(item, "evidence_id", None)
+    }
+    prelisting = context.get("prelisting_risk")
+    known.update(str(value) for value in (getattr(prelisting, "evidence_ids", None) or []) if value)
+    for module in (getattr(prelisting, "module_scores", None) or {}).values():
+        for indicator in getattr(module, "indicators", None) or []:
+            evidence_id = getattr(indicator, "evidence_id", None)
+            if evidence_id:
+                known.add(str(evidence_id))
+    return known
+
+
 def build_market_tool_registry(agent: Any) -> ToolRegistry:
     """Build the market ReAct tools around the audited pipeline state.
 
@@ -98,12 +115,18 @@ def build_market_tool_registry(agent: Any) -> ToolRegistry:
     async def score_market_with_llm(args: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
         emit("score_market_with_llm", "running")
         context = await agent._prepare_react_context(state)
-        known = {item.evidence_id for item in context["sentiment_analysis"].evidence_ledger}
+        known = _known_market_evidence_ids(context)
         supplied = list(args.get("evidence_ids") or [])
         unknown = sorted(set(supplied) - known)
         reason = str(args.get("score_reason") or "")
-        if unknown or not supplied or not all(evidence_id in reason for evidence_id in supplied):
-            return {"ok": False, "error": "llm_score_requires_known_evidence_ids_in_reason", "unknown": unknown}
+        missing_in_reason = sorted(evidence_id for evidence_id in supplied if evidence_id not in reason)
+        if unknown or not supplied or missing_in_reason:
+            return {
+                "ok": False,
+                "error": "llm_score_requires_known_evidence_ids_in_reason",
+                "unknown": unknown,
+                "missing_in_reason": missing_in_reason,
+            }
         state["react_llm_assessment"] = {
             "risk_score": agent._bounded_score(args.get("risk_score"), default=0),
             "confidence": max(0.0, min(1.0, float(args.get("confidence") or 0))),
