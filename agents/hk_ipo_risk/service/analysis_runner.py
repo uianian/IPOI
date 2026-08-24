@@ -233,6 +233,7 @@ def _write_split_reports(
     from scripts.generate_analysis_report import (
         build_finance_report,
         build_legal_report,
+        build_master_report,
         build_market_report,
         resolve_report_stock_code,
         write_agent_reports,
@@ -246,6 +247,7 @@ def _write_split_reports(
         merged, doc_name=doc_name, pdf_name=pdf_name, legal_retrieval=None
     )
     market_md = build_market_report(merged) if merged.get("market") else ""
+    master_md = build_master_report(merged, doc_name=doc_name, pdf_name=pdf_name)
     for d in dest_dirs:
         try:
             write_agent_reports(
@@ -257,7 +259,13 @@ def _write_split_reports(
             )
         except Exception as exc:
             logger.warning("write_agent_reports %s failed: %s", d, exc)
-    return {"finance": finance_md, "legal": legal_md, "market": market_md, "stock_code": code}
+    return {
+        "finance": finance_md,
+        "legal": legal_md,
+        "market": market_md,
+        "master": master_md,
+        "stock_code": code,
+    }
 
 
 def _read_text(path: Optional[Path]) -> str:
@@ -560,6 +568,10 @@ class AnalysisRunner:
                 hub.emit("agent_status", {"agentId": "market", "status": "failed" if stock_code else "skipped"})
                 return
             dumped = _dump_agent(result)
+            hub.handle_expert_event(
+                {"event": "result", "agent": "market", "payload": dumped},
+                map_market_event,
+            )
             try:
                 from scripts.generate_analysis_report import build_market_report
 
@@ -732,6 +744,7 @@ class AnalysisRunner:
         finance_md = split.get("finance") or early_reports.get("finance") or ""
         legal_md = split.get("legal") or early_reports.get("legal") or ""
         market_md = split.get("market") or early_reports.get("market") or ""
+        master_md = split.get("master") or str(master.get("report_markdown") or "")
         (ad / "merged.json").write_text(
             json.dumps(merged, ensure_ascii=False, indent=2, default=str),
             encoding="utf-8",
@@ -761,6 +774,12 @@ class AnalysisRunner:
             risk_level=risk_level,
             debate=debate_block,
         )
+        report["expertReports"] = {
+            "financial": finance_md,
+            "legal": legal_md,
+            "market": market_md,
+        }
+        report["masterReportMarkdown"] = master_md
         (ad / "report.json").write_text(
             json.dumps(report, ensure_ascii=False, indent=2, default=str),
             encoding="utf-8",
@@ -863,6 +882,7 @@ class AnalysisRunner:
                 "status": "completed",
                 "overallScore": overall,
                 "riskLevel": risk_level,
+                "reportMarkdown": master_md,
                 "note": "master_verdict",
                 "degraded": bool((merged.get("master") or {}).get("degraded")),
                 "referenceFundamentalScore": merged.get("reference_fundamental_score"),

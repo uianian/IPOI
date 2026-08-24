@@ -28,6 +28,89 @@ PREDICTED_FIELDS = {
 }
 
 
+WINDOW_LABELS = {
+    "D1": "上市首日",
+    "D5": "上市后5个交易日内",
+    "D20": "上市后20个交易日内",
+    "D60": "上市后60个交易日内",
+}
+
+
+def _join_chinese(items: list[str]) -> str:
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    return "、".join(items[:-1]) + "和" + items[-1]
+
+
+def _checkpoint_value(checkpoint: Any, field: str) -> Any:
+    if isinstance(checkpoint, dict):
+        aliases = {
+            "below_issue_price": "belowIssuePrice",
+            "issue_price_return": "issuePriceReturn",
+        }
+        value = checkpoint.get(field)
+        return value if value is not None else checkpoint.get(aliases.get(field, ""))
+    return getattr(checkpoint, field, None)
+
+
+def build_postlisting_summary(
+    checkpoints: list[Any] | None,
+    *,
+    weighted_hit_score: Any = None,
+    d5_priority_hit: bool | None = None,
+    status: str = "completed",
+) -> str:
+    """Generate a reader-facing Chinese summary without backend window codes."""
+    available = [
+        checkpoint for checkpoint in (checkpoints or [])
+        if str(_checkpoint_value(checkpoint, "alignment") or "") != "not_available"
+    ]
+    if status == "not_available" or not available:
+        return "尚未取得可用于验证的上市后行情数据，当前无法评估事前预测与实际表现的一致程度。"
+
+    labels = [
+        WINDOW_LABELS.get(str(_checkpoint_value(item, "window") or "").upper(), "上市后对应交易日")
+        for item in available
+    ]
+    sentences = [f"本次上市后表现验证覆盖{_join_chinese(labels)}，共{len(available)}个检查点。"]
+    score = _safe_float(weighted_hit_score)
+    if score is not None:
+        sentences.append(f"预测加权命中分为{score:g}分。")
+
+    alignment_phrases = []
+    for alignment, phrase in (("hit", "一致"), ("partial", "部分一致"), ("miss", "不一致")):
+        matched = [
+            WINDOW_LABELS.get(str(_checkpoint_value(item, "window") or "").upper(), "上市后对应交易日")
+            for item in available
+            if str(_checkpoint_value(item, "alignment") or "") == alignment
+        ]
+        if matched:
+            alignment_phrases.append(f"{_join_chinese(matched)}的预测与实际表现{phrase}")
+    if alignment_phrases:
+        sentences.append("；".join(alignment_phrases) + "。")
+
+    if any(str(_checkpoint_value(item, "window") or "").upper() == "D5" for item in available):
+        priority = "命中" if d5_priority_hit is True else "未命中" if d5_priority_hit is False else "暂无法判断"
+        sentences.append(f"上市后5个交易日重点预警{priority}。")
+
+    below_count = sum(_checkpoint_value(item, "below_issue_price") is True for item in available)
+    returns = [
+        (item, _safe_float(_checkpoint_value(item, "issue_price_return")))
+        for item in available
+    ]
+    returns = [(item, value) for item, value in returns if value is not None]
+    if below_count:
+        price_sentence = f"{below_count}个检查点的实际价格低于发行价"
+        if returns:
+            worst_item, worst_return = min(returns, key=lambda pair: pair[1])
+            worst_label = WINDOW_LABELS.get(str(_checkpoint_value(worst_item, "window") or "").upper(), "上市后对应交易日")
+            price_sentence += f"，其中{worst_label}相对发行价跌幅最大，为{abs(worst_return):.2%}"
+        sentences.append(price_sentence + "。")
+    return "".join(sentences)
+
+
 def _safe_float(value: Any) -> float | None:
     try:
         number = float(value)
@@ -245,12 +328,13 @@ class ValidatePostlistingPerformanceSkill(BaseSkill):
 
         status = "completed" if present_weight >= 0.999 else "partial" if present_weight > 0 else "not_available"
         weighted_hit_score = round(weighted / present_weight * 100.0, 2) if present_weight else None
-        d5 = next((item for item in checkpoints if item.window == "D5"), None)
         summary = "上市后真实行情验证未接入"
         if status != "not_available":
-            summary = (
-                f"已对齐 D1/D5/D20/D60 中 {len([c for c in checkpoints if c.alignment != 'not_available'])} 个检查点；"
-                f"加权命中分={weighted_hit_score}；D5重点预警={'命中' if d5_priority_hit else '未命中' if d5_priority_hit is False else '不可用'}。"
+            summary = build_postlisting_summary(
+                checkpoints,
+                weighted_hit_score=weighted_hit_score,
+                d5_priority_hit=d5_priority_hit,
+                status=status,
             )
         result = PostListingValidation(
             status=status,  # type: ignore[arg-type]
@@ -259,7 +343,7 @@ class ValidatePostlistingPerformanceSkill(BaseSkill):
             business_value_score=weighted_hit_score,
             weighted_hit_score=weighted_hit_score,
             d5_priority_hit=d5_priority_hit,
-            forecast_alignment_summary=summary if d5 is None else f"D5 alignment={d5.alignment}; {summary}",
+            forecast_alignment_summary=summary,
             weights=WINDOW_WEIGHTS,
             checkpoints=checkpoints,
             limitations=sorted({item for item in limitations if item}),

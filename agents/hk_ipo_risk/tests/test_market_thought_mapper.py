@@ -88,15 +88,14 @@ def test_market_skipped_reason_and_report_conclusion_are_visible() -> None:
             "output": {"summary": "市场风险中等"},
         }
     )
-    assert report[0]["type"] == "conclusion"
-    assert report[0]["meta"]["kind"] == "model_think"
+    assert report == []
 
 
 def test_market_risk_points_and_score_are_findings_and_conclusion() -> None:
     thoughts = map_market_event(
         {
             "event": "step",
-            "name": "score_market_rules",
+            "name": "validate_public_opinion",
             "status": "ok",
             "output": {
                 "final_score": 72,
@@ -110,9 +109,9 @@ def test_market_risk_points_and_score_are_findings_and_conclusion() -> None:
             },
         }
     )
-    assert "model_think" in _kinds(thoughts)
+    assert "model_think" not in _kinds(thoughts)
     risk = next(item for item in thoughts if (item.get("meta") or {}).get("kind") == "risk_point")
-    assert risk["ref"] == "p.3"
+    assert "ref" not in risk
     assert risk["agentId"] == "market"
 
 
@@ -128,4 +127,72 @@ def test_market_result_maps_risk_points() -> None:
         }
     )
     assert thoughts[0]["type"] == "conclusion"
-    assert any((item.get("meta") or {}).get("kind") == "risk_point" for item in thoughts)
+    assert thoughts[0]["content"] in {"市场风险中等", "市場風險中等"}
+    assert thoughts[0]["meta"]["sourceField"] == "agents.market.summary"
+    assert len(thoughts) == 1
+
+
+def test_market_dimension_evidence_is_compact_chinese_only_and_has_no_pages() -> None:
+    thoughts = map_market_event(
+        {
+            "event": "step",
+            "name": "run_market_skill",
+            "status": "ok",
+            "output": {
+                "module": "industry",
+                "result": {"risk_score": 78.32},
+                "evidence": [
+                    {
+                        "evidence_id": "INDUSTRY-RETURN-20D",
+                        "module": "industry",
+                        "indicator": "ind_ret_20d",
+                        "label": "行业20日收益",
+                        "display_value": "-4.94%",
+                        "direction": "pressure",
+                        "interpretation": "所属行业中期下跌",
+                        "as_of_date": "2025-12-22",
+                        "page": 99,
+                    },
+                    *[
+                        {
+                            "evidence_id": f"INDUSTRY-{index}",
+                            "label": f"行业指标{index}",
+                            "display_value": f"{index}%",
+                            "direction": "support",
+                            "interpretation": "对发行形成支持",
+                            "as_of_date": "2025-12-22",
+                        }
+                        for index in range(2, 7)
+                    ],
+                ],
+            },
+        }
+    )
+    assert len(thoughts) == 1
+    thought = thoughts[0]
+    assert thought["meta"]["kind"] == "market_dimension_evidence"
+    assert thought["meta"]["riskScore"] == 78.32
+    assert thought["meta"]["evidence"][0]["evidenceId"] == "INDUSTRY-RETURN-20D"
+    assert "page" not in thought["meta"]["evidence"][0]
+    assert thought["meta"]["evidenceCount"] == 6
+    assert thought["meta"]["displayEvidenceCount"] == 4
+    assert "展示 4/6 条" in thought["content"] or "展示 4/6 條" in thought["content"]
+    assert "所属行业情绪" in thought["content"] or "所屬行業情緒" in thought["content"]
+    assert "行业20日收益：-4.94%" in thought["content"] or "行業20日收益：-4.94%" in thought["content"]
+    assert "压制" in thought["content"] or "壓制" in thought["content"]
+    assert "Industry" not in thought["content"]
+    assert "ind_ret_20d" not in thought["content"]
+    assert "Pressure" not in thought["content"]
+    assert "行业指标5" not in thought["content"] and "行業指標5" not in thought["content"]
+    assert "ref" not in thought
+
+
+def test_market_internal_scoring_and_submit_steps_are_hidden() -> None:
+    for name in ("score_market_with_llm", "score_market_rules", "submit_market_report", "build_market_report"):
+        assert map_market_event({"event": "step", "name": name, "status": "ok", "output": {}}) == []
+    assert map_market_event({
+        "event": "step",
+        "name": "build_market_report",
+        "status": "ok",
+        "output": {"evidence": [{"evidence_id": "MACRO-HSI-5D", "label": "恒指5日收益"}]},
+    }) == []

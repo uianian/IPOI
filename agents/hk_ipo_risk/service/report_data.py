@@ -5,14 +5,15 @@ from __future__ import annotations
 from typing import Any
 
 from src.skills.embellishment_reporting import embellishment_enabled, embellishment_report_data
+from src.skills.validate_postlisting_performance import build_postlisting_summary
 
 
 _LEVEL_LABEL = {
     "HIGH": "高风险",
-    "MEDIUM": "关注",
+    "MEDIUM": "中等风险",
     "LOW": "低风险",
     "high": "高风险",
-    "medium": "关注",
+    "medium": "中等风险",
     "low": "低风险",
 }
 
@@ -123,6 +124,7 @@ def build_report_data(
                 "weight": f.get("weight"),
                 "evidencePage": page,
                 "evidenceExcerpt": excerpt,
+                "evidence": [item for item in evs if isinstance(item, dict)],
             }
         )
 
@@ -165,6 +167,14 @@ def build_report_data(
         ],
         "limitations": post.get("limitations") or [],
     }
+    post_summary = build_postlisting_summary(
+        post_validation["checkpoints"],
+        weighted_hit_score=post_validation["weightedHitScore"],
+        d5_priority_hit=post_validation["d5PriorityHit"],
+        status=str(post_validation["status"]),
+    )
+    post_validation["summary"] = post_summary
+    post_validation["forecastAlignmentSummary"] = post_summary
 
     dimensions = [
         {"id": "legal", "name": "法务合规", "score": round(leg_s, 1)},
@@ -180,7 +190,8 @@ def build_report_data(
             }
         )
 
-    debate_msgs = (debate or {}).get("messages") or []
+    debate_block = debate or {}
+    debate_msgs = [m for m in (debate_block.get("messages") or []) if isinstance(m, dict)]
     highlights = [
         {
             "agentId": m.get("agentId"),
@@ -189,8 +200,28 @@ def build_report_data(
             "category": m.get("category"),
         }
         for m in debate_msgs[:12]
-        if isinstance(m, dict)
     ]
+    debate_data = {
+        "rounds": debate_block.get("rounds") or len(master.get("debate_history") or []),
+        "completedAt": debate_block.get("completedAt"),
+        "messages": debate_msgs,
+        "history": [item for item in (master.get("debate_history") or []) if isinstance(item, dict)],
+        "conflicts": [item for item in (master.get("conflicts") or []) if isinstance(item, dict)],
+    }
+    master_conclusion = {
+        "overallScore": int(overall_score),
+        "riskLevel": level,
+        "riskLabel": _LEVEL_LABEL.get(level, "关注"),
+        "confidence": judgment.get("confidence") or "",
+        "verdictReasoning": judgment.get("verdict_reasoning") or "",
+        "scoreExplanation": judgment.get("score_explanation") or "",
+        "triggeredGates": judgment.get("triggered_gates") or [],
+        "revised": bool(judgment.get("revised")),
+        "gateWarning": judgment.get("gate_warning"),
+        "referenceFundamentalScore": merged.get("reference_fundamental_score"),
+        "degraded": bool(master.get("degraded")),
+        "degradedReason": master.get("degraded_reason") or "",
+    }
 
     exec_md = str(
         (master.get("report_sections") or {}).get("composite")
@@ -218,6 +249,8 @@ def build_report_data(
             {"axis": "市场", "value": round(mkt_s, 1)},
         ],
         "executiveSummary": exec_md,
+        "masterConclusion": master_conclusion,
+        "debate": debate_data,
         "debateHighlights": highlights,
         "agentScores": {
             "legal": round(leg_s, 1),

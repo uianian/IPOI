@@ -8,10 +8,11 @@ from typing import Optional
 from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-from service.config import MAX_UPLOAD_BYTES, PARSE_DEFAULTS, QUEUE_FULL_LIMIT, STUB_MODE
+from service.config import BACKEND_PARSE_ENABLED, MAX_UPLOAD_BYTES, PARSE_DEFAULTS, QUEUE_FULL_LIMIT
 from service.preview_clean import slice_markdown_by_pages
 from service.sample_catalog import SampleCatalog
 from service.stub_runner import StubRunner
+from service.real_runner import RealRunner
 from service.task_store import TaskStore
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,9 @@ def get_catalog(request: Request) -> SampleCatalog:
 def get_runner(request: Request) -> StubRunner:
     return request.app.state.runner
 
+def get_real_runner(request: Request) -> RealRunner:
+    return request.app.state.real_runner
+
 
 @router.post("/start")
 async def start_parse(
@@ -50,21 +54,15 @@ async def start_parse(
     clientProjectId: str = Form(...),
     fileName: str = Form(...),
     isBiotech: str = Form(...),
+    enableEmbellishment: str = Form(...),
     companyName: Optional[str] = Form(""),
     listDate: Optional[str] = Form(""),
     maxPages: Optional[int] = Form(None),
     forceReparse: Optional[str] = Form(None),
 ):
-    if not STUB_MODE:
-        return _err(
-            503,
-            "NO_GPU_CAPACITY",
-            "真实解析尚未启用，且当前无空闲 GPU；请使用桩模式样本。",
-        )
-
     store = get_store(request)
     catalog = get_catalog(request)
-    runner = get_runner(request)
+    catalog.reload()  # 纳入服务运行期间刚完成的 realtime 解析产物
 
     # 粗略队列限制
     running = sum(
@@ -83,6 +81,11 @@ async def start_parse(
     if biotech_raw not in ("true", "false", "1", "0"):
         return _err(400, "MISSING_FIELD", 'isBiotech 须为 "true" 或 "false"')
     is_biotech = biotech_raw in ("true", "1")
+
+    embellishment_raw = (enableEmbellishment or "").strip().lower()
+    if embellishment_raw not in ("true", "false"):
+        return _err(400, "MISSING_FIELD", "enableEmbellishment 须为 true 或 false")
+    enable_embellishment = embellishment_raw == "true"
 
     from service.index_trigger import (
         issuer_type_from_biotech,
@@ -115,15 +118,13 @@ async def start_parse(
         if sample is not None:
             matched_by = "ticker/fileName"
         else:
-            sample = catalog.default()
-            matched_by = "default"
+            sample = None
+            matched_by = "miss"
 
-    if sample is None:
-        return _err(
-            503,
-            "NO_SAMPLE",
-            "桩模式无可用解析样本；请先在 output/samples_batch 准备 preview.md 与 parse_summary.json",
-        )
+    force_reparse = (forceReparse or "").lower() in ("true", "1")
+    use_cached = sample is not None and not force_reparse
+    if not use_cached and not BACKEND_PARSE_ENABLED:
+        return _err(503, "REAL_PARSE_DISABLED", "pdf_parsing/output 未找到该 PDF 的完整解析结果，且后端实时解析开关未开启")
 
     task_id = store.next_task_id()
     store.create_task(
@@ -132,10 +133,11 @@ async def start_parse(
         ticker=ticker,
         file_name=fileName,
         is_biotech=is_biotech,
+        enable_embellishment=enable_embellishment,
         pdf_sha256=sha,
-        sample_key=sample.key,
-        page_count=sample.page_count,
-        stub=True,
+        sample_key=sample.key if use_cached else None,
+        page_count=sample.page_count if use_cached else 0,
+        stub=use_cached,
         company_name=company_name,
         list_date=(listDate or "").strip(),
         stock_code=stock_code,
@@ -144,7 +146,7 @@ async def start_parse(
         params={
             **PARSE_DEFAULTS,
             "maxPages": maxPages,
-            "forceReparse": (forceReparse or "").lower() in ("true", "1"),
+            "forceReparse": force_reparse,
             "matchedBy": matched_by,
         },
     )
@@ -152,27 +154,31 @@ async def start_parse(
     store.link_cache(sha, task_id)
 
     # ETA：桩模式几秒；真解析时按页数估算
-    estimated = int(max(sample.page_count * 3.5, 60)) if not STUB_MODE else 3
-
-    runner.start(task_id, sample, client_project_id=clientProjectId)
+    if use_cached:
+        estimated = 3
+        get_runner(request).start(task_id, sample, client_project_id=clientProjectId)
+    else:
+        estimated = 0
+        get_real_runner(request).start(task_id, client_project_id=clientProjectId)
 
     logger.info(
-        "start %s ticker=%s sample=%s matchedBy=%s project=%s",
+        "start %s ticker=%s sample=%s matchedBy=%s project=%s embellishment=%s",
         task_id,
         ticker,
-        sample.key,
+        sample.key if use_cached else None,
         matched_by,
         clientProjectId,
+        enable_embellishment,
     )
     return _ok(
         {
             "taskId": task_id,
             "status": "parsing",
-            "cached": False,
+            "cached": use_cached,
             "queuePosition": 0,
             "estimatedSeconds": estimated,
-            "sampleKey": sample.key,
-            "stub": True,
+            "sampleKey": sample.key if use_cached else None,
+            "stub": use_cached,
         },
         status=202,
     )

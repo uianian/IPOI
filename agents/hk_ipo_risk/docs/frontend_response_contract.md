@@ -196,6 +196,7 @@ data: {"thought":{"id":"...","agentId":"financial","type":"thinking","content":"
         "status": "completed",
         "overallScore": 66,
         "riskLevel": "HIGH",
+        "reportMarkdown": "…独立总控 IPO 风险预警 MD…",
         "note": "master_verdict",
         "degraded": false,
         "referenceFundamentalScore": 62.3,
@@ -238,6 +239,22 @@ data: {"thought":{"id":"...","agentId":"financial","type":"thinking","content":"
     "postListingValidation": {},
     "radarData": [],
     "executiveSummary": "...",
+    "masterConclusion": {
+      "overallScore": 66,
+      "riskLevel": "HIGH",
+      "confidence": "high",
+      "verdictReasoning": "...",
+      "scoreExplanation": "...",
+      "triggeredGates": [],
+      "revised": false
+    },
+    "debate": {
+      "rounds": 2,
+      "completedAt": "...",
+      "messages": [],
+      "history": ["完整逐轮 questions/replies/evidence"],
+      "conflicts": []
+    },
     "debateHighlights": [],
     "agentScores": {"legal": 60.9, "financial": 75.0, "market": 62.0},
     "degraded": false,
@@ -255,7 +272,7 @@ GET /report 的 response.data === GET /analysis/result 的 response.data.report
 
 启用粉饰时，`dimensions` 增加 `embellishment`，并增加 `embellishmentAnalysis`；关闭时两个位置均省略，前端必须按可选字段处理。`comparableIPOs` 当前固定为空数组。
 
-`GET /report/export` 返回 `application/pdf`，文件名为 `IPO风险报告_{ticker}_{YYYY-MM-DD}.pdf`，不是 JSON。
+`GET /report/export` 返回 `application/pdf`，文件名为 `IPO风险报告_{ticker}_{YYYY-MM-DD}.pdf`，不是 JSON。PDF 标题为“IPO风险穿透预警报告”，带可点击目录；正文包含执行摘要、总控终裁、维度评分图、风险因子与完整证据、条件辩论、可选文本粉饰专项、上市首日/5/20/60个交易日行情预测、上市后真实行情验证对照图及后续关注事项。总控未实际开辩时目录和正文均省略辩论章节；文本粉饰未启用时省略粉饰章节并连续编号。报告末尾固定附录三章，分别渲染财务、法务、市场专家的独立 Markdown 报告。
 
 ## 7. 后端 CLI 产物位置
 
@@ -313,7 +330,7 @@ HTTP runner 还会把同名四份 Markdown 再写一份到全局 `agents/hk_ipo_
 | `merged.json` | 四 Agent 内部完整聚合结果，不直接作为前端契约 |
 | `result.json` | `/analysis/result` 的 `data` |
 | `report.json` | `/report` 的 `data`，也等于 `result.json.report` |
-| 四份 Markdown | 专家独立报告与总控风险预警报告；专家三份嵌入 `agents.*.reportMarkdown` |
+| 四份 Markdown | 专家独立报告与总控风险预警报告；分别嵌入 `agents.financial|legal|market|orchestrator.reportMarkdown` |
 | PDF | 不固定落盘；`/report/export` 请求时由 `report.json` 同构数据即时渲染并返回 |
 
 ## 9. 前端推荐状态机

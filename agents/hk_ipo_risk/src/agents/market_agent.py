@@ -355,7 +355,13 @@ class MarketAgent:
                         level="high" if module.risk_score >= 80 else "medium",
                         rule_ref=f"market/{name}",
                         value=module.risk_score,
-                        description=f"{name}历史校准风险分 {module.risk_score:.2f}",
+                        description=(
+                            f"所属行业情绪维度 / Industry Sentiment：历史校准风险分 "
+                            f"{module.risk_score:.2f}/100。该分数衡量行业走势、相对大盘表现、"
+                            f"成交活跃度、资金流向及同行业IPO历史表现，不是市场智能体最终风险分。"
+                            if name == "industry" else
+                            f"{name}市场维度历史校准风险分 {module.risk_score:.2f}/100"
+                        ),
                     )
                 )
 

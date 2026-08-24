@@ -61,6 +61,7 @@ def main() -> int:
             "clientProjectId": proj,
             "fileName": PDF.name,
             "isBiotech": "true",
+            "enableEmbellishment": "false",
             "companyName": "翰思艾泰",
             "listDate": "2025-12-15",
         }

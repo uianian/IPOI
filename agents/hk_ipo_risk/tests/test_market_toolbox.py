@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 
+from src.skills.market_toolbox import _known_market_evidence_ids
 from src.tools.schemas import MARKET_TOOL_SCHEMAS, ToolRegistry
 
 
@@ -17,6 +19,25 @@ class MarketToolSchemaTest(unittest.TestCase):
             "submit_market_report",
         })
         self.assertNotIn("retrieve_market", names)
+
+    def test_known_market_evidence_ids_include_historical_calibration(self) -> None:
+        context = {
+            "sentiment_analysis": SimpleNamespace(
+                evidence_ledger=[SimpleNamespace(evidence_id="INDUSTRY-RETURN-20D")]
+            ),
+            "prelisting_risk": SimpleNamespace(
+                evidence_ids=["HIST-IND-RET-20D"],
+                module_scores={
+                    "industry": SimpleNamespace(
+                        indicators=[SimpleNamespace(evidence_id="HIST-IND-EXCESS-20D")]
+                    )
+                },
+            ),
+        }
+        self.assertEqual(
+            _known_market_evidence_ids(context),
+            {"INDUSTRY-RETURN-20D", "HIST-IND-RET-20D", "HIST-IND-EXCESS-20D"},
+        )
 
     def test_tool_registry_returns_structured_unknown_tool_error(self) -> None:
         registry = ToolRegistry()

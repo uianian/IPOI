@@ -52,7 +52,7 @@ Git 协作流程（clone / 功能分支 / 网页 PR）：仓库根目录 [`READM
              冲突研判 →（仅 need_debate）辩论≤3 轮 →（默认启用、可关闭）粉饰 → 终裁/走势预判 → 上市后验证 → 报告
   → 合并结果 JSON + 三专家 DebateDossier + 总控 `*_master_*.json`
     + 四份 MD（`{代码}_finance|legal|market_report.md` + `{代码}_ipo_risk_warning_report.md`）
-    + HTTP `result.report` / `/report` JSON + `/report/export` PDF
+    + HTTP `result.report` / `/report` JSON + `/report/export` PDF（同时落盘到对应 analysis 任务目录）
 ```
 
 ### 分层
@@ -342,9 +342,11 @@ HTTP 路径下由 9101 prepare 生成；CLI 可离线 JSON 或 `--use-live-retri
 | 合并结果 JSON | `.runtime/{name}_finance_legal*.json`（文件名沿用；内含 `finance` / `legal` / `market` / `master`） |
 | 财务 / 法务 / 市场 dossier | `.runtime/debate/{doc_id}_{finance\|legal\|market}_dossier_{ts}.json` |
 | 总控 dossier | `.runtime/debate/{doc_id}_master_{ts}.json`（含 `judgment`、`price_path_forecast`、`post_listing`、`debate_history`、`report_markdown`） |
-| 四份 MD | `reports/{五位代码}_finance_report.md` / `_legal_report.md` / `_market_report.md` / `_ipo_risk_warning_report.md` |
-| HTTP result | `.runtime/analyses/{analysisId}/result.json`（`agents.*.reportMarkdown` 三份独立；含 `debate` / `report`） |
-| HTTP 总控报告 | `.runtime/analyses/{analysisId}/report.json` ≡ `GET .../report`；含 `pricePathForecast` / `postListingValidation`，PDF 由同一 ReportData 渲染 |
+| 四份 MD（CLI / 通用报告目录） | `reports/{五位代码}_finance_report.md` / `_legal_report.md` / `_market_report.md` / `_ipo_risk_warning_report.md` |
+| 四份 MD（HTTP 任务目录） | `.runtime/analyses/{analysisId}/{五位代码}_finance_report.md` / `_legal_report.md` / `_market_report.md` / `_ipo_risk_warning_report.md` |
+| HTTP result | `.runtime/analyses/{analysisId}/result.json`（`agents.*.reportMarkdown` 四份独立，含总控；含 `debate` / `report`） |
+| HTTP 总控报告数据 | `.runtime/analyses/{analysisId}/report.json`；新任务与 `GET .../report` / `result.report` 一致，旧任务读取时可由路由补全；包含 `masterConclusion`、`masterReportMarkdown`、`expertReports`、`pricePathForecast`、`postListingValidation` 等完整 ReportData |
+| HTTP PDF | 首次调用 `GET .../report/export` 时由完整 ReportData 渲染；二进制返回前同步保存到 `.runtime/analyses/{analysisId}/{五位代码}_ipo_risk_warning_report.pdf`，与四份 MD 同目录；后续调用会按当前数据重新生成并覆盖该文件 |
 
 HTTP 终态发布顺序是强契约：先写专家/总控 MD 与 `report.json`，再写完整 `result.json`，随后以不提前唤醒 SSE 的方式将 meta 更新为 `status=completed, phase=report`，最后才写入并广播 `report_ready`。因此客户端收到 `report_ready` 后可立即读取 `/analysis/result` 与 `/report`，不会再出现“事件已到但报告接口短暂 404”的窗口。
 
@@ -682,7 +684,7 @@ Standalone 入口：`search_finance_evidence_standalone` / `search_legal_evidenc
 
 ### 9.3 粉饰与终裁
 
-粉饰：默认启用，采用“全书规则扫描 + 重点章节深度分析”，0–10（low/medium/high），不替代终裁。CLI 可传 `--skip-embellishment`，HTTP 可传 `enableEmbellishment=false` 主动关闭。关闭会跳过 `ScoreEmbellishmentSkill`，从终裁 Prompt 与 `EMBELLISHMENT_HIGH` 门控中移除粉饰输入，并在结果中记录 `analysis_options.embellishment_enabled=false`、`master.embellishment=null`；主动关闭不会按 `not_available` 处理，也不会作为证据缺失降低置信度。前五页只判断首页营销与信息后置；风险因素章节完整扫描，概要、业务、行业概览用于发现宣传/排名/概念候选，财务资料和财务/法务卡片用于核验量化支撑与风险弱化。普通法定风险措辞不单独计分。
+粉饰：CLI 默认启用；HTTP 前端默认使用标准模式（关闭），并在 `POST /api/v1/parse/expert/start` 上传阶段以必填表单字段 `enableEmbellishment="true"/"false"` 确定。该值写入解析任务 `meta.json`，后续 `analysis/start` 自动继承；分析启动请求中的同名字段仅保留为兼容覆盖。分析采用“全书规则扫描 + 重点章节深度分析”，0–10（low/medium/high），不替代终裁。CLI 可传 `--skip-embellishment` 主动关闭。关闭会跳过 `ScoreEmbellishmentSkill`，从终裁 Prompt 与 `EMBELLISHMENT_HIGH` 门控中移除粉饰输入，并在结果中记录 `analysis_options.embellishment_enabled=false`、`master.embellishment=null`；主动关闭不会按 `not_available` 处理，也不会作为证据缺失降低置信度。前五页只判断首页营销与信息后置；风险因素章节完整扫描，概要、业务、行业概览用于发现宣传/排名/概念候选，财务资料和财务/法务卡片用于核验量化支撑与风险弱化。普通法定风险措辞不单独计分。
 
 粉饰结果保留兼容字段 `score/level/reason/hits/dimensions`，并新增 `status`、`coverage`、`high_risk_excerpts`、`limitations`。LLM 只能判断程序生成的 `candidate_id`；正式页码和原文由 `full_parse.json` 回填。无法回查的引用不会进入报告；解析或模型复核不完整时为 `partial/not_available`，不得解释为低粉饰。
 
@@ -703,6 +705,7 @@ Standalone 入口：`search_finance_evidence_standalone` / `search_legal_evidenc
 - 优先读取 `configs/market_agent.yaml` 的 `output.postlisting_json_filename`，现行为 `{doc_id}_{stock_code}_postlisting.json`；也兼容 `{doc_id}_postlisting.json`。显式 `postlisting_json` 可覆盖。
 - 无 JSON 时尝试从 `data.postlisting_checkpoints_csv` 通过 `PostlistingRiskScorer` 评分生成 D1/D5/D20/D60；仍失败则 `status=not_available` 并记录 `limitations`。
 - 窗口权重固定：D1 0.30、D5 0.35、D20 0.20、D60 0.15。`weighted_hit_score` / `business_value_score` 为已对齐窗口的加权命中分；`d5_priority_hit` 只在 D5 预测为 high 且真实显著下行时为 true。
+- `summary` 与 `forecast_alignment_summary` 均由检查点动态生成完整中文自然语言，不输出窗口代码、英文对齐枚举或键值拼接；HTTP `report_data` 会对历史任务再次生成同口径摘要。
 - 真实严重度规则：低于发行价、开盘基准累计收益≤-10%、最大回撤≤-15% 或真实风险分≥70 → `severe`；累计收益≤-5%、最大回撤≤-10% 或真实风险分≥50 → `moderate`；其余 `benign`。
 
 报告分层：
@@ -710,10 +713,16 @@ Standalone 入口：`search_finance_evidence_standalone` / `search_legal_evidenc
 - 总控 `generate_warning_report` 排版终裁 JSON、走势预判和上市后验证，写入 dossier / `result.report` 的摘要来源，**不**拼进三份专家 MD。
 - `scripts/generate_analysis_report.py`（CLI）或 HTTP runner 会写专家三份独立报告：`{代码}_finance_report.md` / `_legal_report.md` / `_market_report.md`；有 `master` 时额外写 `{代码}_ipo_risk_warning_report.md`。
 - 总控报告的辩论证据按职责显示：财务/法务使用“证据页”，市场使用“市场证据：<evidence_id...>”，不会把市场的 `page=null` 渲染成缺少招股书页码。
-- 启用粉饰分析时，CLI 总控预警报告包含独立“文本粉饰度专项分析”章节，展示五维评分、覆盖范围及经原文回查的 Top 10 高等级切片；HTTP `report.embellishmentAnalysis.highRiskExcerpts` 返回全量，PDF 同样展示 Top 10。关闭时 Markdown/PDF 不生成该章，ReportData 同时省略粉饰维度和 `embellishmentAnalysis`，后续章节自动连续重编号。
+- 启用粉饰分析时，CLI 总控预警报告包含独立“文本粉饰度专项分析”章节，展示五维评分、覆盖范围及经原文回查的 Top 10 高等级切片；HTTP `report.embellishmentAnalysis.highRiskExcerpts` 返回全量，PDF 逐项展示结构化结果中的全部可用高等级切片。关闭时 Markdown/PDF 不生成该章，ReportData 同时省略粉饰维度和 `embellishmentAnalysis`，后续章节自动连续重编号。
 - 报告中的 HTML 表格切片会先清理为安全纯文本，避免不完整的 `<table>/<tr>` 把后续 Markdown 吞入表格。
 - CLI 总控预警报告会把长段预测/验证拆成「预测要点」「主要触发依据」「验证摘要」「预测文本」「行情指标」等 bullet，并清理 JSON 字段自带句尾标点，避免 `。；` / `。。`。
-- 前端综合页走 `GET .../report`（ReportData JSON，与 `result.report` 同一对象）和 `GET .../report/export`（PDF）。ReportData 透传 `pricePathForecast` / `postListingValidation`，启用时以可选字段 `embellishmentAnalysis` 返回粉饰状态、覆盖范围、五维分项及全量高等级原文，并在 `dimensions` 保留粉饰汇总分；关闭时这两处均省略。
+- 前端综合页走 `GET .../report`（ReportData JSON；新任务与 `result.report` 同一对象，旧任务可在读取时补全）和 `GET .../report/export`（PDF）。ReportData 透传完整 `masterConclusion`、`masterReportMarkdown`、`expertReports`、`debate.history/conflicts/messages`、`pricePathForecast` / `postListingValidation`。新任务直接把最终总控 Markdown 写入 `masterReportMarkdown`；兼容旧任务时，路由优先读取任务目录中的 `{五位代码}_ipo_risk_warning_report.md`，再回退到 orchestrator 的 `reportMarkdown` / `master.report_markdown`。
+- PDF 标题为“IPO风险穿透预警报告”，封面显示公司全称、五位数字股票代码和生成时间；目录为 PDF 内部链接，可点击跳转到实际章节页。正文按执行摘要、总控终裁、维度评分图、风险因子与证据、条件辩论、可选粉饰、行情预测/验证及关注事项排版。`D1/D5/D20/D60` 在读者界面统一显示为上市首日/上市后 5/20/60 个交易日，已知历史字段代码转换为中文。
+- 执行摘要不直接倾倒总控 Markdown：渲染器从最终总控 Markdown 的“终裁理由/最终结论”抽取内容，转换为“总控最终判断”卡片，并分层展示评分依据、前三项优先风险、逐检查点行情判断和验证摘要；缺少总控 Markdown 时回退到结构化 `masterConclusion.verdictReasoning` / `executiveSummary`。
+- 未实际开辩时不生成辩论章节；存在辩论时才展示轮次、完成时间、问题、专家回复、补充证据和收束结论。文本粉饰未启用或无 `embellishmentAnalysis` 时不生成粉饰章节，后续章节与目录自动连续重编号。
+- 启用粉饰时，PDF 单独生成“文本粉饰度专项分析”章节：展示总体分、覆盖范围、五维彩色评分条及发现卡片，并列出经回查的高风险原文。五维分数按风险程度使用蓝/黄/橙/红色；ReportData 的 `highRiskExcerpts` 保留全量，PDF 当前同样逐项渲染可用切片。
+- 附录 A/B/C 分别对应财务、法务、市场三份专家独立报告。PDF 不原样打印 Markdown 语法，而是将标题、段落、列表和引用转换为 PDF 原生组件，将管道表格转换为风险明细卡、HTML 表格转换为安全可读文本、代码块转换为结构化数据区；每个附录额外展示专家独立风险分条形图，并在报告存在评分分解时展示主要风险贡献图。附录中的繁体中文、常见英文状态/字段与 HTML 内容沿用正文的清理和中文化规则。
+- `/report/export` 仍返回同一份 `application/pdf` 二进制，同时将 `{五位代码}_ipo_risk_warning_report.pdf` 保存到对应 `.runtime/analyses/{analysisId}/` 目录，与四份 Markdown 并列。文件名中的股票代码使用五位数字（例如 `02097`，不带 `.HK`）。
 
 ### 9.4 Dossier
 
@@ -775,18 +784,43 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
 | GET | `/health` 或 `/api/v1/health` | 探活 |
 | GET | `/api/v1/agents/status` | 四 Agent `ready`（不在 `/projects` 下） |
 | POST | `/api/v1/projects/:id/analysis/start` | 启动分析 → **202** `{analysisId, status}` |
-| GET | `.../analysis/stream?analysisId=` | SSE：见 §10.4 |
+| GET | `.../analysis/stream?analysisId=` | SSE：见 §10.5 |
 | GET | `.../analysis/result?analysisId=` | 完整结果或进行中快照（含 `phase` / `debate`） |
-| GET | `.../report` | ReportData JSON；分析未完成 → **404**；≡ `result.report` |
-| GET | `.../report/export` | PDF 二进制；`Content-Disposition: IPO风险报告_{ticker}_{date}.pdf` |
+| GET | `.../report` | ReportData JSON；分析未完成 → **404**；新任务与 `result.report` 一致，旧任务可能在读取时补全 |
+| GET | `.../report/export` | 返回完整 PDF 二进制（`application/pdf`）；响应文件名为 `IPO风险报告_{ticker}_{date}.pdf`，并同步持久化 `.runtime/analyses/{analysisId}/{五位代码}_ipo_risk_warning_report.pdf` |
 
-不实现已删除的 `/rag/query`、`/parse/quick`、bbox `/evidence`。运维逃生口 `GET /capacity`（在 9100）、解析 `result/content.md` 不写入前端契约。
+不实现已删除的 `/rag/query`、`/parse/quick`、bbox `/evidence`。运维诊断口 `GET /capacity`（在 9100）和解析 `result/content.md` 不写入前端契约；当前 `/capacity` 的 GPU 数、运行数和并发数仍是静态占位，不能作为真实 GPU 调度或队列状态来源。
 
 实现：`service/app.py`、`service/routes_analysis.py`、`service/analysis_runner.py`、`service/thought_mapper.py`、`service/report_data.py`、`service/report_pdf.py`。
 
 法务 Thought 映射（`map_legal_event`）与财务对齐：消费 pipeline 顶层 `evidence_hits`、工具 `output.hits`/`evidence`、以及 `output.risk_points`；ReAct 默认 `translate_think=True`（繁中展示 + `meta.rawThink`）。辩论补证/作答走 `map_debate_expert_event`（记到专家 `agentId`，禁止记成 orchestrator）。
 
-### 10.3 start 输入
+### 10.3 PDF 上传解析输入（9100）
+
+前端统一调用 `POST /api/v1/parse/expert/start`，请求类型为 `multipart/form-data`。解析结果包含 Markdown 与统计，不返回 images。
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `file` | 是 | PDF 二进制 |
+| `ticker` | 是 | Wind 格式港股代码，如 `9988.HK`；前端提交前统一规范化 |
+| `clientProjectId` | 是 | 项目唯一编号，格式 `proj-{hex}`；每次创建项目生成新值 |
+| `fileName` | 是 | 原始文件名 |
+| `isBiotech` | 是 | 字符串 `"true"` / `"false"`；写入解析任务供 Agent 使用 |
+| `enableEmbellishment` | 是 | 字符串 `"true"` / `"false"`；标准模式为 `false`，专业模式为 `true`，前端默认标准模式 |
+| `companyName` | 否 | 公司中文名称；lookup 未命中传空字符串 |
+| `listDate` | 否 | 上市日期 `YYYY-MM-DD`；lookup 未命中传空字符串 |
+| `forceReparse` | 否 | `"true"` / `"1"` 时跳过已有缓存；若 `BACKEND_PARSE_ENABLED` 未开启则返回 `REAL_PARSE_DISABLED` |
+| `maxPages` | 否 | 当前仅写入任务 `meta.params`，尚未透传给 `batch_parse_samples.py`，因此不会限制真解析页数 |
+
+`enableEmbellishment` 会持久化到解析任务 `meta.json`。分析服务默认继承该值，确保上传弹窗选择与最终 Markdown、JSON、PDF 是否包含文本粉饰度章节保持一致。历史解析任务没有该字段时按标准模式 `false` 处理。
+
+解析执行采用缓存优先：9100 先在 `pdf_parsing/output` 查找完整的 `full_parse.json`、`preview.md` 与 `parse_summary.json`；命中时返回模拟进度，未命中且 `BACKEND_PARSE_ENABLED=1` 时调用 `batch_parse_samples.py` 做真解析，关闭时返回 `REAL_PARSE_DISABLED`。真解析默认 `gpus=auto`、`min_free_mib=20000`、`page_workers=2`、`batch_size=2`，产物写入 `pdf_parsing/output/realtime/{taskId}/`。
+
+真解析进度由各 GPU shard 在每个推理 batch 完成后原子上报，9100 每 0.5 秒汇总到 `progress.json`。前端沿用 `GET /api/v1/parse/expert/tasks/{taskId}/progress`，可获得实时 `pagesDone` / `pagesTotal` / `etaSeconds`；默认 `batch_size=2`，所以单个 shard 的已完成页数通常每次增加 2。`stageDetail` 依次为 `PREPARING`、`MODEL_LOADING`、`PAGE_PARSING`、`MERGING`、`QA`、`COMPLETE`、`READY`，百分比区间分别约为 3%、5%、5–88%、92%、96%、98%、100%。页面推理全部完成后仍为合并和 QA 预留进度，不会提前返回 100%。
+
+当前解析限制：`PARSE_DEFAULTS["skip_qa"]=True` 尚未接入批处理器，真解析仍固定执行 Pass2 QA；`maxPages` 同样尚未生效。运行状态以任务 `progress` 为准，不要依据 `/capacity` 的静态占位字段判断空闲 GPU。
+
+### 10.4 分析 start 输入
 
 ```json
 {
@@ -798,8 +832,7 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
     "apiKey": "sk-...",
     "model": "deepseek-v4-flash"
   },
-  "isBiotech": true,
-  "enableEmbellishment": true
+  "isBiotech": true
 }
 ```
 
@@ -811,7 +844,7 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
 | `stockCode` | 否 | `ticker` 的别名 |
 | `llmConfig` | 否 | 覆盖后端默认模型 |
 | `isBiotech` | 否 | 覆盖发行人类型 → `biotech` / `general`；`true` 与 CLI `18a`/`18c` **门控等价** |
-| `enableEmbellishment` | 否 | 是否启用文本粉饰度分析，默认 `true`；传 `false` 时跳过分析及门控，并从 Markdown/JSON/PDF 移除粉饰章节/字段 |
+| `enableEmbellishment` | 否 | 兼容覆盖字段；正常前端流程无需重复传，默认继承解析任务中的上传模式；历史任务缺失时按 `false` |
 
 前置：解析任务存在且 `indexStatus=ready`，否则 **409** `INDEX_NOT_READY`。
 
@@ -824,7 +857,7 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
 - `issuerType` / `companyName` / `fileName`
 - `stockCode` / `ticker`（可被 start body 覆盖）
 
-### 10.4 stream / result 输出
+### 10.5 stream / result 输出
 
 **SSE 事件**
 
@@ -855,6 +888,23 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
 | `finance_tables` / `finance_metrics` | 仅财务 |
 
 规则链（`LEGAL_RULES_ONLY` / 无 LLM 回退）与 ReAct 均会在中段推送 `evidence`，不只在终局 `result`。`result.data.thoughts` 与 stream 落盘一致。
+
+**市场情绪 Thought（前端独立分析卡）**
+
+- `run_market_skill` 完成宏观市场、所属行业情绪、新股市场供需、公司舆情任一维度后，各返回一条 `type=finding`、`meta.kind=market_dimension_evidence` 的独立展开结果。
+- 展开正文只显示中文维度名、中文指标名、数值、中文方向、截止日和解释；不显示招股书页码、原文引用、后端指标代码或英文方向。每个维度正文最多展示 4 条关键证据，并用“关键证据（展示 4/总数 条）”说明截断情况。
+- 完整证据不丢失，保存在 `thought.meta.evidence`；`meta.evidenceCount` 为完整数量，`meta.displayEvidenceCount` 为正文展示数量。市场证据保留 `evidenceId/module/indicator/value/direction/interpretation/asOfDate/source` 等结构化血缘，供详情抽屉或调试使用，但前端主卡片无需直接显示这些后端字段。
+- 四个维度完成后，市场 Agent 额外发送且只发送一条 `type=conclusion` 结论，正文直接采用 `agents.market.summary`，并以 `meta.sourceField=agents.market.summary` 标记来源。内部 `score_market_with_llm`、`score_market_rules`、`submit_market_report`、`build_market_report` 不进入前端 Thought 列表，也不会再被误显示为“发现”或“结论”。
+
+维度 Thought 的关键结构：
+
+```json
+{
+  "type": "finding",
+  "content": "所属行业情绪\n历史校准风险分：78.32/100\n关键证据（展示 4/10 条）\n…",
+  "meta": { "kind": "market_dimension_evidence", "module": "industry", "riskScore": 78.32, "evidenceCount": 10, "displayEvidenceCount": 4, "evidence": [] }
+}
+```
 
 **result.data（完成时）**
 
@@ -917,6 +967,7 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
       "status": "completed",
       "overallScore": 66,
       "riskLevel": "HIGH",
+      "reportMarkdown": "…独立总控 IPO 风险预警 MD…",
       "note": "master_verdict",
       "logText": "…",
       "logEvents": []
@@ -927,6 +978,19 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
   "report": {
     "overallScore": 66,
     "riskLevel": "HIGH",
+    "masterReportMarkdown": "…最终总控 IPO 风险预警 Markdown；PDF 摘要的优先来源…",
+    "expertReports": {
+      "financial": "…财务专家独立 Markdown…",
+      "legal": "…法务专家独立 Markdown…",
+      "market": "…市场专家独立 Markdown…"
+    },
+    "masterConclusion": {
+      "overallScore": 66,
+      "riskLabel": "高风险",
+      "verdictReasoning": "…",
+      "scoreExplanation": "…",
+      "triggeredGates": []
+    },
     "comparableIPOs": [],
     "pricePathForecast": [
       {
@@ -952,10 +1016,11 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
     },
     "postListingValidation": {
       "status": "completed",
-      "weightedHitScore": 82.5,
-      "businessValueScore": 82.5,
+      "summary": "本次上市后表现验证覆盖上市首日、上市后5个交易日内、上市后20个交易日内和上市后60个交易日内，共4个检查点。预测加权命中分为72.5分。……",
+      "weightedHitScore": 72.5,
+      "businessValueScore": 72.5,
       "d5PriorityHit": false,
-      "forecastAlignmentSummary": "…",
+      "forecastAlignmentSummary": "与 summary 相同的中文自然语言摘要",
       "weights": { "D1": 0.3, "D5": 0.35, "D20": 0.2, "D60": 0.15 },
       "checkpoints": [
         {
@@ -975,11 +1040,18 @@ DebateDossier（专家探查结束即落盘，有无辩论都有）
 }
 ```
 
+**`postListingValidation` 前端展示约定**
+
+- 完整根路径为 `response.data.postListingValidation`；`checkpoints[]` 仍保留机器可读窗口和枚举，前端展示时将 `D1/D5/D20/D60` 转为“上市首日/上市后5/20/60个交易日内”，将 `high/medium/low`、`severe/moderate/benign`、`hit/partial/miss/not_available` 转为对应中文。
+- `summary` 是可直接展示的完整自然语言摘要，由后端根据检查点动态生成；不含 `D1/D5/D20/D60`、`alignment=partial` 等英文或后端字段。摘要包含验证范围、加权命中分、逐窗口对齐结果、上市后5个交易日重点预警，以及低于发行价和最大跌幅等实际表现。
+- `forecastAlignmentSummary` 与 `summary` 使用同一自然语言文案，保留该字段仅为兼容现有前端。历史任务请求 `/report` 时也会即时重建摘要，无需重跑分析；新任务从 `validate_postlisting_performance` 源头保存同一文案。
+- 收益与回撤字段 `cumulativeReturnFromOpen`、`issuePriceReturn`、`maxDrawdownFromOpen` 返回小数比例，前端须乘 100 后显示百分比；例如 `-0.500625` 显示为 `-50.06%`。
+
 要点：顶层 `overallScore` / `riskLevel` 为 **总控终裁**（`HIGH|MEDIUM|LOW`）；`reference_fundamental_score` 仍作对照加权分写入 `agents.orchestrator`，市场项直接使用市场 `risk_score`，净支持率单独供终裁研判。`agents.*.riskLevel` 为 Agent 小写枚举；`rulesFloor` 财务/法务字段不对称。
 
 Thought / EvidenceSnippet 类型见契约（`interface_protocol_v3.4.md`）。
 
-已实现：`GET /api/v1/agents/status`、`GET .../report`（与 `result.report` 同对象）、`GET .../report/export`（PDF）。不实现已删除的 `/rag/query`、`/parse/quick`。总控无独立 HTTP，走 `analysis/stream` 的 `orchestrator`。上市后 D1/D5/D20/D60 验证写入 `postListingValidation`；`comparableIPOs=[]` 暂仍为空对照列表。
+已实现：`GET /api/v1/agents/status`、`GET .../report`（与 `result.report` 同对象）、`GET .../report/export`（返回 PDF 并在 analysis 任务目录留档）。不实现已删除的 `/rag/query`、`/parse/quick`。总控无独立 HTTP，走 `analysis/stream` 的 `orchestrator`。上市后 D1/D5/D20/D60 验证写入 `postListingValidation`；`comparableIPOs=[]` 暂仍为空对照列表。
 
 ---
 
@@ -990,7 +1062,7 @@ Thought / EvidenceSnippet 类型见契约（`interface_protocol_v3.4.md`）。
 ### 11.1 启动三件套
 
 ```bash
-cd /nfs/users/wuqianqian/IPOI/pdf_parsing && ./scripts/start_expert_parse_service.sh   # 9100
+cd /nfs/users/wuqianqian/IPOI/pdf_parsing && BACKEND_PARSE_ENABLED=1 ./scripts/start_expert_parse_service.sh # 9100：缓存未命中时真解析
 cd /nfs/users/wuqianqian/IPOI/retrieval && ./scripts/start_retrieval_service.sh         # 9101
 cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk && ./scripts/start_analysis_service.sh # 9102
 ```
@@ -1020,6 +1092,7 @@ RESP=$(curl -s -X POST "$BASE/api/v1/parse/expert/start" \
   -F "clientProjectId=${PROJ}" \
   -F "fileName=翰思艾泰.pdf" \
   -F "isBiotech=true" \
+  -F "enableEmbellishment=false" \
   -F "companyName=翰思艾泰" \
   -F "listDate=2025-12-15")
 TASK=$(echo "$RESP" | jq -r .data.taskId)
@@ -1077,9 +1150,9 @@ python scripts/assert_legal_stream_parity.py --events /tmp/analysis_stream.sse
 python scripts/assert_legal_stream_parity.py --self-check
 ```
 
-期望：start **202**；stream 三路 thought **实时交错**（财务 thought 不必等法务 `completed`）；初评 / detect / 粉饰 / 终裁 / skip-debate **无** `category`；仅实际开辩才有 `phase=debate` 与 `category`；`debate.rounds=0`（跳过辩论）**不算失败**；result 含三份独立 `reportMarkdown`、`phase` / `debate` / `report`；`report.pricePathForecast` 与 `report.postListingValidation` 存在；`/report` 与 `result.report` 同一对象；`/report/export` 为非空 PDF。
+期望：start **202**；stream 三路 thought **实时交错**（财务 thought 不必等法务 `completed`）；初评 / detect / 粉饰 / 终裁 / skip-debate **无** `category`；仅实际开辩才有 `phase=debate` 与 `category`；`debate.rounds=0`（跳过辩论）**不算失败**；result 含三份独立 `reportMarkdown`、`phase` / `debate` / `report`；`report.pricePathForecast` 与 `report.postListingValidation` 存在；新任务的 `/report` 与 `result.report` 同一对象；`/report/export` 为非空 PDF。
 
-翰思全链路（桩解析 `STUB_MODE=True`，只打 9100，日志在 `tests/e2e_hansiaitai_v34/logs/`）：
+翰思全链路（测试脚本按默认 `BACKEND_PARSE_ENABLED=0` 启动 9100，因此健康响应为 `STUB_MODE=True`、只复用缓存样本；只打 9100，日志在 `tests/e2e_hansiaitai_v34/logs/`）：
 
 ```bash
 cd /nfs/users/wuqianqian/IPOI/agents/hk_ipo_risk
@@ -1178,7 +1251,7 @@ python -m pytest tests/test_legal_react.py tests/test_legal_thought_mapper.py \
 python scripts/assert_legal_stream_parity.py --self-check
 # 全量回归：
 python -m pytest tests -q
-# 翰思 HTTP E2E（会重启 9100/9101/9102；解析保持 STUB_MODE=True）
+# 翰思 HTTP E2E（会重启 9100/9101/9102；测试不设置 BACKEND_PARSE_ENABLED，故解析保持缓存模式 STUB_MODE=True）
 # bash tests/e2e_hansiaitai_v34/run_e2e.sh
 ```
 

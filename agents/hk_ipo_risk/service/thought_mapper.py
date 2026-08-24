@@ -758,6 +758,92 @@ def map_legal_event(event: dict[str, Any]) -> list[dict[str, Any]]:
     return thoughts
 
 
+_MARKET_MODULE_LABELS = {
+    "macro": "宏观市场",
+    "industry": "所属行业情绪",
+    "ipo_market": "新股市场供需",
+    "public_opinion": "公司舆情",
+}
+
+_MARKET_DIRECTION_LABELS = {
+    "support": "支持",
+    "pressure": "压制",
+    "neutral": "中性",
+    "mixed": "多空交织",
+    "unavailable": "暂无数据",
+}
+
+
+def _market_evidence_items(items: list[dict[str, Any]] | None, limit: int = 20) -> list[dict[str, Any]]:
+    """Preserve structured market provenance without prospectus page fields."""
+    out: list[dict[str, Any]] = []
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        out.append({
+            "evidenceId": item.get("evidence_id") or item.get("evidenceId"),
+            "module": item.get("module"),
+            "indicator": item.get("indicator") or item.get("field"),
+            "label": item.get("label") or item.get("title"),
+            "value": item.get("display_value") or item.get("value") or item.get("raw_value"),
+            "direction": item.get("direction"),
+            "interpretation": item.get("interpretation") or item.get("claim") or item.get("excerpt"),
+            "asOfDate": item.get("as_of_date") or item.get("date") or item.get("observation_date"),
+            "source": item.get("derived_file") or item.get("source") or item.get("url"),
+            "url": item.get("url"),
+            # Compatibility keys consumed by the existing evidence drawer.
+            "title": item.get("title") or item.get("label"),
+            "date": item.get("published_at") or item.get("publication_date") or item.get("date") or item.get("as_of_date"),
+            "excerpt": item.get("excerpt") or item.get("interpretation") or item.get("claim") or "",
+            "sourceType": "market_data" if item.get("indicator") or item.get("evidence_id") else "news",
+        })
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _market_dimension_thought(name: str, status: str, output: dict[str, Any]) -> dict[str, Any] | None:
+    evidence = _market_evidence_items(output.get("evidence") or output.get("evidence_ledger"))
+    if not evidence:
+        return None
+    module = str(output.get("module") or "")
+    module_label = _MARKET_MODULE_LABELS.get(module, "市场维度")
+    result = output.get("result") if isinstance(output.get("result"), dict) else {}
+    score = result.get("risk_score")
+    display_evidence = evidence[:4]
+    lines = [module_label]
+    if isinstance(score, (int, float)):
+        lines.append(f"历史校准风险分：{float(score):.2f}/100")
+    lines.append(f"关键证据（展示 {len(display_evidence)}/{len(evidence)} 条）")
+    for item in display_evidence:
+        label = str(item.get("label") or "市场指标")
+        value = item.get("value") if item.get("value") not in (None, "") else "—"
+        direction = _MARKET_DIRECTION_LABELS.get(str(item.get("direction") or ""), str(item.get("direction") or "—"))
+        explanation = str(item.get("interpretation") or "").strip()
+        cutoff = str(item.get("asOfDate") or "—")
+        line = f"\n• {label}：{value}（{direction}）\n  截止日：{cutoff}"
+        if explanation:
+            line += f"\n  {explanation}"
+        lines.append(line)
+    return new_thought(
+        agent_id="market",
+        typ="finding",
+        content="\n".join(lines),
+        meta={
+            "kind": "market_dimension_evidence",
+            "module": module,
+            "moduleLabel": module_label,
+            "riskScore": score,
+            "evidenceCount": len(evidence),
+            "displayEvidenceCount": len(display_evidence),
+            "evidence": evidence,
+            "toolName": name,
+            "toolNameDisplay": "分析市场维度",
+            "toolStatus": status,
+        },
+    )
+
+
 _MARKET_STEP_LABELS = {
     "load_market_snapshot": "加载市场数据",
     "inspect_public_opinion": "检查本地舆情",
@@ -809,6 +895,20 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
             "completed": "ok",
             "failed": "error",
         }.get(status, status)
+        terminal = normalized_status != "running"
+        if name == "run_market_skill" and terminal and isinstance(output, dict):
+            dimension_thought = _market_dimension_thought(name, normalized_status, output)
+            if dimension_thought:
+                return [dimension_thought]
+        hidden_process_steps = {
+            "score_market_with_llm",
+            "submit_market_report",
+            "score_market_rules",
+            "build_market_report",
+        }
+        hide_process_step = name in hidden_process_steps
+        if hide_process_step:
+            return []
         action = "正在执行" if normalized_status == "running" else (
             "已降级" if normalized_status == "degraded" else
             "已跳过" if normalized_status == "skipped" else
@@ -825,26 +925,19 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
             )
             if hint:
                 content += "\n" + str(hint)
-        terminal = normalized_status != "running"
-        is_conclusion = terminal and name in {
-            "score_market_rules",
-            "build_market_report",
-            "submit_market_report",
-        }
+        is_conclusion = False
         thought_type = (
             "conclusion" if is_conclusion else
             "finding" if normalized_status in {"degraded", "error"} else
             "thinking"
         )
-        thoughts = [
+        thoughts = [] if hide_process_step else [
             new_thought(
                 agent_id="market",
                 typ=thought_type,
                 content=content,
                 meta={
-                    "kind": "tool_call" if not terminal else (
-                        "model_think" if is_conclusion else "tool_result"
-                    ),
+                    "kind": "tool_call" if not terminal else "tool_result",
                     "toolName": name,
                     "toolStatus": normalized_status,
                     "toolArgs": event.get("input_summary"),
@@ -863,25 +956,13 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
                 value = output.get(key)
                 if isinstance(value, list):
                     evidence_src.extend(x for x in value if isinstance(x, dict))
-        if evidence_src and terminal:
-            snips = _snip_evidence(evidence_src)
-            for source, snip in zip(evidence_src, snips):
-                for source_key, meta_key in (
-                    ("title", "title"),
-                    ("url", "url"),
-                    ("published_at", "date"),
-                    ("publication_date", "date"),
-                    ("date", "date"),
-                ):
-                    if source.get(source_key) is not None and meta_key not in snip:
-                        snip[meta_key] = source[source_key]
-            pages = [s.get("page") for s in snips if s.get("page") is not None]
+        if evidence_src and terminal and not hide_process_step:
+            snips = _market_evidence_items(evidence_src)
             thoughts.append(
                 new_thought(
                     agent_id="market",
                     typ="finding",
-                    content=f"市场证据 {len(snips)} 条",
-                    ref=f"p.{pages[0]}" if pages else None,
+                    content=f"市场证据 / Market Evidence：{len(snips)} 条",
                     meta={
                         "kind": "evidence",
                         "evidence": snips,
@@ -900,14 +981,12 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
                 risk_points.extend(x for x in value if isinstance(x, dict))
         for risk_point in risk_points:
             evidence = risk_point.get("evidence") or []
-            snippets = _snip_evidence(evidence) if isinstance(evidence, list) else []
-            page = snippets[0].get("page") if snippets else risk_point.get("evidence_page")
+            snippets = _market_evidence_items(evidence) if isinstance(evidence, list) else []
             thoughts.append(
                 new_thought(
                     agent_id="market",
                     typ="finding",
                     content=str(risk_point.get("description") or risk_point.get("code") or "市场风险点"),
-                    ref=f"p.{page}" if page is not None else None,
                     meta={
                         "kind": "risk_point",
                         "toolName": name,
@@ -923,32 +1002,18 @@ def map_market_event(event: dict[str, Any]) -> list[dict[str, Any]]:
 
     if ev == "result":
         payload = event.get("payload") or {}
+        summary = str(payload.get("summary") or "").strip()
+        if not summary:
+            score = payload.get("risk_score")
+            summary = f"上市首日破发风险分为 {score}。" if score is not None else "市场情绪分析已完成。"
         thoughts = [
             new_thought(
                 agent_id="market",
                 typ="conclusion",
-                content=(
-                    f"上市首日破发风险分 {payload.get('risk_score')}。"
-                    + str(payload.get("summary") or "")
-                ),
-                meta={"kind": "model_think"},
+                content=summary,
+                meta={"kind": "model_think", "sourceField": "agents.market.summary"},
             )
         ]
-        for risk_point in payload.get("risk_points") or []:
-            if not isinstance(risk_point, dict):
-                continue
-            evidence = risk_point.get("evidence") or []
-            snippets = _snip_evidence(evidence) if isinstance(evidence, list) else []
-            page = snippets[0].get("page") if snippets else risk_point.get("evidence_page")
-            thoughts.append(
-                new_thought(
-                    agent_id="market",
-                    typ="finding",
-                    content=str(risk_point.get("description") or risk_point.get("code") or "市场风险点"),
-                    ref=f"p.{page}" if page is not None else None,
-                    meta={"kind": "risk_point", "evidence": snippets or None},
-                )
-            )
         return thoughts
     return []
 
