@@ -195,6 +195,14 @@ def run_qa(
     return report
 
 
+def _write_progress(path: Path, data: Dict[str, Any]) -> None:
+    """跨进程进度采用每 shard 独立文件，再由服务端汇总。"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def _page_shard_worker(payload: Dict[str, Any]) -> str:
     """同卡页分片子进程：绑 GPU → 载模型 → 解析指定页 → 返回 shard full_parse 路径。"""
     gpu_id = int(payload["gpu_id"])
@@ -214,7 +222,11 @@ def _page_shard_worker(payload: Dict[str, Any]) -> str:
         f"pages {pages[0]}..{pages[-1]} ({len(pages)} 页)",
         flush=True,
     )
+    progress_path = Path(payload["progress_path"])
+    _write_progress(progress_path, {"done": 0, "total": len(pages), "stage": "MODEL_LOADING"})
     model, processor = load_model(payload["model"], device_map="cuda:0")
+    def report_done(done: int) -> None:
+        _write_progress(progress_path, {"done": done, "total": len(pages), "stage": "PAGE_PARSING"})
     doc, preview = parse_pdf(
         Path(payload["pdf"]),
         model,
@@ -230,7 +242,9 @@ def _page_shard_worker(payload: Dict[str, Any]) -> str:
         rotate_pages=None,
         rotate_degrees=90,
         rotate_fallback=payload["rotate_fallback"],
+        progress_callback=report_done,
     )
+    _write_progress(progress_path, {"done": len(pages), "total": len(pages), "stage": "SHARD_COMPLETE"})
     save_outputs(shard_out, doc, preview, save_risk_chunks=False)
     return str(shard_out / "full_parse.json")
 
@@ -268,6 +282,8 @@ def parse_pdf_sharded(
     out_dir.mkdir(parents=True, exist_ok=True)
     figures_dir = out_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
+    progress_dir = out_dir / "_progress"
+    _write_progress(progress_dir / "status.json", {"stage": "PAGE_PARSING", "pagesTotal": len(page_numbers)})
 
     import multiprocessing as mp
 
@@ -292,6 +308,7 @@ def parse_pdf_sharded(
                 "rotate_mode": rotate_mode,
                 "rotate_fallback": rotate_fallback,
                 "save_figures": save_figures,
+                "progress_path": str(progress_dir / f"shard{sid}.json"),
             }
         )
 
@@ -316,6 +333,7 @@ def parse_pdf_sharded(
             for page in json.loads(shard_json.read_text(encoding="utf-8")):
                 merged_map[int(page["page"])] = page
 
+    _write_progress(progress_dir / "status.json", {"stage": "MERGING", "pagesDone": len(merged_map), "pagesTotal": len(page_numbers)})
     return [merged_map[k] for k in sorted(merged_map)]
 
 
@@ -432,6 +450,8 @@ def process_one(
         }
 
     # ── Pass2: QA ───────────────────────────────────────────
+    progress_dir = out_dir / "_progress"
+    _write_progress(progress_dir / "status.json", {"stage": "QA", "pagesDone": n_pages, "pagesTotal": n_pages})
     print(f"[{stem}] Pass2 QA", flush=True)
     qa1 = run_qa(full_parse, suffix="")
     record["qa_pass1"] = {
@@ -444,6 +464,7 @@ def process_one(
     record["elapsed_sec"] = round(time.time() - t0, 1)
     record["finished_at"] = datetime.now().isoformat(timespec="seconds")
     record["status"] = "ok"
+    _write_progress(progress_dir / "status.json", {"stage": "COMPLETE", "pagesDone": n_pages, "pagesTotal": n_pages})
     return record
 
 

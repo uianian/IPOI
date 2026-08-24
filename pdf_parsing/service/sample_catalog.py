@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from service.config import PDF_DIR, SAMPLES_DIR
+from service.config import OUTPUT_DIR, PDF_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -129,20 +129,34 @@ def _resolve_parse_dir(child: Path) -> Optional[Path]:
     return None
 
 
-def discover_samples(samples_dir: Path = SAMPLES_DIR) -> List[SampleEntry]:
+def _is_complete_parse(parse_dir: Path) -> bool:
+    paths = [parse_dir / name for name in ("full_parse.json", "preview.md", "parse_summary.json")]
+    if not all(path.is_file() for path in paths):
+        return False
+    try:
+        summary = json.loads(paths[2].read_text(encoding="utf-8"))
+        # 启动时不反序列化数百 MB 的 full_parse；解析器只在全部页合并后写 summary。
+        return paths[0].stat().st_size > 2 and int(summary.get("total_pages") or 0) > 0
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return False
+
+
+def discover_samples(samples_dir: Path = OUTPUT_DIR) -> List[SampleEntry]:
     entries: List[SampleEntry] = []
     if not samples_dir.is_dir():
         logger.warning("样本目录不存在: %s", samples_dir)
         return entries
 
-    for child in sorted(samples_dir.iterdir()):
-        if not child.is_dir() or child.name.endswith("-reparse"):
+    seen: set[Path] = set()
+    for full_parse in sorted(samples_dir.rglob("full_parse.json")):
+        parse_dir = full_parse.parent
+        if parse_dir in seen or not _is_complete_parse(parse_dir):
             continue
-        parse_dir = _resolve_parse_dir(child)
-        if parse_dir is None:
+        seen.add(parse_dir)
+        if any("reparse" in part.lower() or part.lower().startswith("_shard") for part in parse_dir.parts):
             continue
 
-        key = child.name
+        key = parse_dir.name
         ticker = None
         m = _TICKER_RE.match(key)
         if m:
@@ -175,7 +189,7 @@ def discover_samples(samples_dir: Path = SAMPLES_DIR) -> List[SampleEntry]:
 
 
 class SampleCatalog:
-    def __init__(self, samples_dir: Path = SAMPLES_DIR) -> None:
+    def __init__(self, samples_dir: Path = OUTPUT_DIR) -> None:
         self.samples_dir = samples_dir
         self.entries: List[SampleEntry] = []
         self.by_sha: Dict[str, SampleEntry] = {}

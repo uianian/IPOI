@@ -24,6 +24,7 @@ from service.routes_gateway import (
 from service.routes_projects import router as projects_router
 from service.sample_catalog import SampleCatalog
 from service.stub_runner import StubRunner
+from service.real_runner import RealRunner
 from service.task_store import TaskStore
 
 logging.basicConfig(
@@ -40,9 +41,11 @@ async def lifespan(app: FastAPI):
     store = TaskStore()
     catalog = SampleCatalog()
     runner = StubRunner(store)
+    real_runner = RealRunner(store)
     app.state.store = store
     app.state.catalog = catalog
     app.state.runner = runner
+    app.state.real_runner = real_runner
     logger.info(
         "expert-parse-service v%s stub=%s samples=%d analysisUpstream=%s",
         SERVICE_VERSION,

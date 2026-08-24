@@ -211,6 +211,7 @@ def parse_pages_batch(
     prompt: str = PARSE_PROMPT,
     batch_size: int = DEFAULT_BATCH_SIZE,
     max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+    progress_callback=None,
 ) -> List[str]:
     results: List[str] = []
 
@@ -278,6 +279,8 @@ def parse_pages_batch(
             clean_up_tokenization_spaces=False,
         )
         results.extend(batch_text)
+        if progress_callback is not None:
+            progress_callback(end)
 
     return results
 
@@ -489,6 +492,7 @@ def parse_pdf(
     rotate_pages: Optional[set[int]] = None,
     rotate_degrees: int = 0,
     rotate_fallback: bool = False,
+    progress_callback=None,
 ) -> Tuple[List[dict], str]:
     pdf_path = Path(pdf_path)
     print(f"正在渲染 PDF: {pdf_path} (PyMuPDF, {dpi} DPI)")
@@ -523,6 +527,7 @@ def parse_pdf(
         processor,
         batch_size=batch_size,
         max_new_tokens=max_new_tokens,
+        progress_callback=progress_callback,
     )
 
     if out_dir is None:

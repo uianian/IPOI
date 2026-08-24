@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -9,6 +10,7 @@ RUNTIME_DIR = ROOT / ".runtime"
 TASKS_DIR = RUNTIME_DIR / "tasks"
 CACHE_DIR = RUNTIME_DIR / "cache"
 SAMPLES_DIR = ROOT / "output" / "samples_batch"
+OUTPUT_DIR = ROOT / "output"
 PDF_DIR = ROOT / "pdf"
 
 HOST = "0.0.0.0"
@@ -35,8 +37,11 @@ PARSE_DEFAULTS = {
     "skip_qa": True,
 }
 
-# 当前无空闲 GPU：仅用现有解析结果
-STUB_MODE = True
+# 实时解析开关；关闭时仍会优先复用 output 中的完整解析结果。
+BACKEND_PARSE_ENABLED = os.getenv("BACKEND_PARSE_ENABLED", "0").strip().lower() in (
+    "1", "true", "yes", "on",
+)
+STUB_MODE = not BACKEND_PARSE_ENABLED
 # 桩模式模拟进度总时长（秒），便于前端看到进度条
 STUB_PROGRESS_SECONDS = 3.0
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024

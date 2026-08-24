@@ -333,7 +333,7 @@ python benchmark_rotation.py \
 
 前端契约见 [`dataset/interface_new.md`](../dataset/interface_new.md)（v3.2）；设计说明见 `docs/expert_parse_api_design.md`。
 
-当前为 **桩模式**（`STUB_MODE=True`）：不占 GPU，按上传 PDF 的 sha256 / ticker / 文件名匹配 `output/samples_batch` 现有产物，模拟进度后返回清洗后的 `preview.md` + `parse_summary.json`。
+`POST /api/v1/parse/expert/start` 采用 **缓存优先**：先按上传 PDF 的 sha256 / ticker / 文件名递归查找 `output/` 中同时包含 `full_parse.json`、`preview.md`、`parse_summary.json` 的完整产物；命中则直接复用。未命中时，仅在 `BACKEND_PARSE_ENABLED=1` 时调用 `batch_parse_samples.py` 执行实时批量解析，否则返回 `REAL_PARSE_DISABLED`，不会再回退到无关的默认样本。实时产物写入 `output/realtime/<taskId>/`，后续请求可继续复用。
 
 **解析完成后自动建索引**：任务 `READY` 后异步调用本机 **9101** `POST /internal/retrieval/prepare`；前端轮询：
 
