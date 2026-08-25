@@ -3148,7 +3148,10 @@
     "table_quality_score": 505,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 26
   },
   {
     "page": 27,
@@ -3224,7 +3227,10 @@
     "table_quality_score": 3187,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 27
   },
   {
     "page": 28,
@@ -3490,7 +3496,10 @@
     "table_quality_score": 747,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 30
   },
   {
     "page": 31,
@@ -5342,7 +5351,10 @@
     "table_quality_score": 412,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 52
   },
   {
     "page": 53,
@@ -11208,7 +11220,10 @@
     "table_quality_score": 421,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 114
   },
   {
     "page": 115,
@@ -12302,7 +12317,10 @@
     "table_quality_score": 418,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 124
   },
   {
     "page": 125,
@@ -12448,7 +12466,10 @@
     "table_quality_score": 627,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 125
   },
   {
     "page": 126,
@@ -12565,7 +12586,10 @@
     "table_quality_score": 623,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 126
   },
   {
     "page": 127,
@@ -12741,7 +12765,10 @@
     "table_quality_score": 626,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 127
   },
   {
     "page": 128,
@@ -12994,7 +13021,10 @@
     "table_quality_score": 735,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 129
   },
   {
     "page": 130,
@@ -13348,7 +13378,10 @@
     "table_quality_score": 623,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 132
   },
   {
     "page": 133,
@@ -13551,7 +13584,10 @@
     "table_quality_score": 626,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 134
   },
   {
     "page": 135,
@@ -13658,7 +13694,10 @@
     "table_quality_score": 623,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 135
   },
   {
     "page": 136,
@@ -13804,7 +13843,10 @@
     "table_quality_score": 631,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 136
   },
   {
     "page": 137,
@@ -14229,7 +14271,10 @@
     "table_quality_score": 415,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 140
   },
   {
     "page": 141,
@@ -17593,7 +17638,10 @@
     "table_quality_score": 520,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 175
   },
   {
     "page": 176,
@@ -18213,7 +18261,10 @@
     "table_quality_score": 645,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 181
   },
   {
     "page": 182,
@@ -21665,7 +21716,10 @@
     "table_quality_score": 1113,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 213
   },
   {
     "page": 214,
@@ -21889,80 +21943,79 @@
     "elements": [
       {
         "bbox": [
-          1136,
-          125,
-          1339,
-          188
-        ],
-        "category": "header",
-        "text": "業務"
-      },
-      {
-        "bbox": [
-          483,
-          281,
-          1203,
-          2725
-        ],
-        "category": "table",
-        "text": "<table><tr><td>截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td>2021年</td><td colspan=\"2\">2022年</td><td colspan=\"2\">2023年</td><td colspan=\"2\">2024年</td></tr><tr><td>收入</td><td>毛利</td><td>收入</td><td>毛利率</td><td>收入</td><td>毛利率</td><td>收入</td><td>毛利率</td></tr><tr><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td></tr></table>",
-        "table_structure_confidence": "medium",
-        "table_quality_score": 438,
-        "table_quality_notes": [
-          "sparse_table"
-        ]
-      },
-      {
-        "bbox": [
-          342,
-          1534,
-          414,
-          2891
+          403,
+          349,
+          1766,
+          406
         ],
         "category": "text",
         "text": "下表載列按現有及新開加盟門店劃分的收入、毛利及毛利率明細。"
       },
       {
         "bbox": [
-          927,
-          277,
-          1734,
-          3026
+          1194,
+          491,
+          1425,
+          538
+        ],
+        "category": "table_caption",
+        "text": "截至12月31日止年度"
+      },
+      {
+        "bbox": [
+          2418,
+          488,
+          2659,
+          540
+        ],
+        "category": "table_caption",
+        "text": "截至9月30日止九個月"
+      },
+      {
+        "bbox": [
+          281,
+          533,
+          3013,
+          1195
         ],
         "category": "table",
-        "text": "<table><tr><td>現有加盟門店……</td><td>7,111,741</td><td>2,336,371</td><td>32.9</td><td>10,055,804</td><td>2,994,166</td><td>29.8</td><td>16,194,026</td><td>4,945,299</td><td>30.5</td><td>12,568,472</td><td>3,851,976</td><td>30.6</td><td>15,465,422</td><td>5,134,155</td><td>33.2</td></tr><tr><td>新開加盟門店……</td><td>2,919,636</td><td>876,557</td><td>30.0</td><td>3,046,149</td><td>815,904</td><td>26.8</td><td>3,381,281</td><td>947,050</td><td>28.0</td><td>2,290,988</td><td>639,380</td><td>27.9</td><td>2,737,228</td><td>833,330</td><td>30.4</td></tr><tr><td>加盟門店總數……</td><td>10,031,377</td><td>3,212,928</td><td>32.0</td><td>13,101,953</td><td>3,810,070</td><td>29.1</td><td>19,575,307</td><td>5,892,349</td><td>30.1</td><td>14,859,460</td><td>4,491,356</td><td>30.2</td><td>18,202,650</td><td>5,967,485</td><td>32.8</td></tr></table>",
-        "table_structure_confidence": "medium",
-        "table_quality_score": 491,
+        "text": "<table><tr><td colspan=\"9\">截至12月31日止年度</td><td colspan=\"9\">截至9月30日止九個月</td></tr><tr><td></td><td colspan=\"3\">2021年</td><td colspan=\"3\">2022年</td><td colspan=\"3\">2023年</td><td colspan=\"3\">2023年</td><td colspan=\"3\">2024年</td></tr><tr><td>收入</td><td>毛利</td><td>毛利率</td><td>收入</td><td>毛利</td><td>毛利率</td><td>收入</td><td>毛利</td><td>毛利率</td><td>收入</td><td>毛利</td><td>毛利率</td></tr><tr><td>人民幣</td><td>人民幣</td><td>%</td><td>人民幣</td><td>人民幣</td><td>%</td><td>人民幣</td><td>人民幣</td><td>%</td><td>人民幣</td><td>人民幣</td><td>%</td></tr><tr><td colspan=\"12\">(以千元計，百分比除外)</td></tr><tr><td>現有加盟門店……</td><td>7,111,741</td><td>2,336,371</td><td>32.9</td><td>10,055,804</td><td>2,994,166</td><td>29.8</td><td>16,194,026</td><td>4,945,299</td><td>30.5</td><td>12,568,472</td><td>3,851,976</td><td>30.6</td><td>15,465,422</td><td>5,134,155</td><td>33.2</td></tr><tr><td>新開加盟門店……</td><td>2,919,636</td><td>876,557</td><td>30.0</td><td>3,046,149</td><td>815,904</td><td>26.8</td><td>3,381,281</td><td>947,050</td><td>28.0</td><td>2,290,988</td><td>639,380</td><td>27.9</td><td>2,737,228</td><td>833,330</td><td>30.4</td></tr><tr><td>加盟門店總數……</td><td>10,031,377</td><td>3,212,928</td><td>32.0</td><td>13,101,953</td><td>3,810,070</td><td>29.1</td><td>19,575,307</td><td>5,892,349</td><td>30.1</td><td>14,859,460</td><td>4,491,356</td><td>30.2</td><td>18,202,650</td><td>5,967,485</td><td>32.8</td></tr></table>",
+        "table_structure_confidence": "low",
+        "table_quality_score": 1044,
         "table_quality_notes": [
-          "sparse_table"
+          "rotated_table_structure_unstable"
         ]
       },
       {
         "bbox": [
-          1245,
-          271,
-          1791,
-          2911
+          277,
+          1267,
+          3023,
+          1791
         ],
         "category": "text",
-        "text": "附註：於業績記錄期，我們亦通過自營門店及多個電商零售渠道的銷售以及向部分非加盟商客戶（主要為食品及飲料行業的企業客戶）銷售若干商品及設備產生少量收入。截至2021年、2022年、2023年12月31日止年度以及2024年前九個月，自營門店銷售產生的收入分別為人民幣82.8百萬元、人民幣72.3百萬元、人民幣107.6百萬元及人民幣38.5百萬元。同期，通過電商零售渠道產生的銷售收入分別為人民幣180.4百萬元、人民幣271.3百萬元、人民幣341.8百萬元及人民幣208.7百萬元。同期，自非加盟商客戶產生的銷售收入分別為人民幣56.4百萬元、人民幣130.0百萬元、人民幣277.7百萬元及人民幣209.8百萬元。自營門店的銷售而言，截至2021年及2022年12月31日止年度，我們分別產生毛損人民幣1.9百萬元及人民幣7.3百萬元，而截至2023年12月31日止年度及2024年前九個月，則分別產生毛利人民幣8.4百萬元及人民幣5.3百萬元，毛利率分別為7.8%及13.8%。截至2021年、2022年、2023年12月31日止年度以及2024年前九個月，通過電商零售渠道產生的銷售毛利分別為人民幣32.2百萬元、人民幣40.8百萬元和人民幣45.8百萬元，毛利率分別為17.9%、15.0%、22.4%及21.9%。同期，自有關非加盟商客戶產生的銷售毛利分別為人民幣0.6百萬元、人民幣3.3百萬元、人民幣21.7百萬元及人民幣21.8百萬元，毛利率分別為1.1%、2.6%、7.8%及10.4%。"
+        "text": "附註：於業績記錄期，我們亦通過自營門店及多個電商零售渠道的銷售以及向部分非加盟商客戶（主要為食品及飲料行業的企業客戶）銷售若干商品及設備產生少量收入。截至2021年、2022年、2023年12月31日止年度以及2024年前九個月，自營門店銷售產生的收入分別為人民幣82.8百萬元、人民幣72.3百萬元、人民幣107.6百萬元及人民幣38.5百萬元。同期，通過電商零售渠道產生的銷售收入分別為人民幣180.4百萬元、人民幣271.3百萬元、人民幣341.8百萬元及人民幣208.7百萬元。同期，自非加盟商客戶產生的銷售收入分別為人民幣56.4百萬元、人民幣130.0百萬元、人民幣277.7百萬元及人民幣209.8百萬元。就自營門店的銷售而言，截至2021年及2022年12月31日止年度，我們分別產生毛損人民幣1.9百萬元及人民幣7.3百萬元，而截至2023年12月31日止年度及2024年前九個月，則分別產生毛利人民幣8.4百萬元及人民幣5.3百萬元，毛利率分別為7.8%及13.8%。截至2021年、2022年、2023年12月31日止年度以及2024年前九個月，通過電商零售渠道產生的銷售毛利分別為人民幣32.2百萬元、人民幣40.8百萬元、人民幣76.6百萬元和人民幣45.8百萬元，毛利率分別為17.9%、15.0%、22.4%及21.9%。同期，自有關非加盟商客戶產生的銷售毛利分別為人民幣0.6百萬元、人民幣3.3百萬元、人民幣21.7百萬元及人民幣21.8百萬元，毛利率分別為1.1%、2.6%、7.8%及10.4%。"
       },
       {
         "bbox": [
-          1195,
-          3119,
-          1280,
-          3169
+          3109,
+          1138,
+          3182,
+          1337
         ],
-        "category": "footer",
-        "text": "208"
+        "category": "text",
+        "text": "業務"
       }
     ],
-    "table_structure_confidence": "medium",
-    "table_quality_score": 491,
+    "rotation_applied": 90,
+    "table_structure_confidence": "low",
+    "table_quality_score": 1044,
     "table_quality_notes": [
-      "sparse_table"
-    ]
+      "rotated_table_structure_unstable"
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 217
   },
   {
     "page": 218,
@@ -22229,7 +22282,10 @@
     "table_quality_score": 744,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 220
   },
   {
     "page": 221,
@@ -24860,7 +24916,10 @@
     "table_quality_score": 1458,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 242
   },
   {
     "page": 243,
@@ -28079,7 +28138,10 @@
     "table_quality_score": 688,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 273
   },
   {
     "page": 274,
@@ -28184,7 +28246,10 @@
     "table_quality_score": 689,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 274
   },
   {
     "page": 275,
@@ -28292,7 +28357,10 @@
     "table_quality_score": 688,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 275
   },
   {
     "page": 276,
@@ -29744,7 +29812,10 @@
     "table_quality_score": 554,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 290
   },
   {
     "page": 291,
@@ -30138,7 +30209,10 @@
     "table_quality_score": 451,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 294
   },
   {
     "page": 295,
@@ -32165,7 +32239,10 @@
     "table_quality_score": 535,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 313
   },
   {
     "page": 314,
@@ -33361,7 +33438,10 @@
     "table_quality_score": 612,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 325
   },
   {
     "page": 326,
@@ -33533,7 +33613,10 @@
     "table_quality_score": 2874,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 327
   },
   {
     "page": 328,
@@ -33754,7 +33837,10 @@
     "table_quality_score": 1321,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 329
   },
   {
     "page": 330,
@@ -33862,7 +33948,10 @@
     "table_quality_score": 1347,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 330
   },
   {
     "page": 331,
@@ -33976,7 +34065,10 @@
     "table_quality_notes": [
       "sparse_table",
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 331
   },
   {
     "page": 332,
@@ -34142,7 +34234,10 @@
     "table_quality_score": 1483,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 333
   },
   {
     "page": 334,
@@ -34238,7 +34333,10 @@
     "table_quality_score": 1605,
     "table_quality_notes": [
       "complex_colspan_header"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 334
   },
   {
     "page": 335,
@@ -35998,7 +36096,10 @@
     "table_quality_score": 827,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 349
   },
   {
     "page": 350,
@@ -36494,7 +36595,10 @@
     "table_quality_score": 1054,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 354
   },
   {
     "page": 355,
@@ -37544,7 +37648,10 @@
     "table_quality_score": 747,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 365
   },
   {
     "page": 366,
@@ -38048,7 +38155,10 @@
     "table_quality_score": 756,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 369
   },
   {
     "page": 370,
@@ -41760,7 +41870,10 @@
     "table_quality_score": 339,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 407
   },
   {
     "page": 408,
@@ -42824,7 +42937,10 @@
     "table_quality_score": 871,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 415
   },
   {
     "page": 416,
@@ -43212,7 +43328,10 @@
     "table_quality_score": 545,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 418
   },
   {
     "page": 419,
@@ -46203,7 +46322,10 @@
     "table_quality_score": 612,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 446
   },
   {
     "page": 447,
@@ -49269,7 +49391,10 @@
     "table_quality_score": 909,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 466
   },
   {
     "page": 467,
@@ -50202,7 +50327,10 @@
     "table_quality_score": 1583,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 477
   },
   {
     "page": 478,
@@ -50722,7 +50850,10 @@
     "table_quality_score": 1098,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 481
   },
   {
     "page": 482,
@@ -50830,7 +50961,10 @@
     "table_quality_score": 2198,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 482
   },
   {
     "page": 483,
@@ -51276,7 +51410,10 @@
     "table_quality_score": 710,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 485
   },
   {
     "page": 486,
@@ -51466,7 +51603,10 @@
     "table_quality_score": 1480,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 487
   },
   {
     "page": 488,
@@ -52420,7 +52560,10 @@
     "table_quality_notes": [
       "sparse_table",
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 494
   },
   {
     "page": 495,
@@ -52697,7 +52840,10 @@
     "table_quality_score": 930,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 496
   },
   {
     "page": 497,
@@ -52817,7 +52963,10 @@
     "table_quality_score": 1123,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 497
   },
   {
     "page": 498,
@@ -52910,7 +53059,10 @@
     "table_quality_score": 1247,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 498
   },
   {
     "page": 499,
@@ -53038,7 +53190,10 @@
     "table_quality_score": 1248,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 499
   },
   {
     "page": 500,
@@ -53846,7 +54001,10 @@
     "table_quality_score": 632,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 507
   },
   {
     "page": 508,
@@ -59804,7 +59962,10 @@
     "table_quality_score": 877,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 547
   },
   {
     "page": 548,
@@ -59956,7 +60117,10 @@
     "table_quality_notes": [
       "sparse_table",
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 548
   },
   {
     "page": 549,
@@ -60042,7 +60206,10 @@
     "table_quality_score": 646,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 549
   },
   {
     "page": 550,
@@ -60178,7 +60345,10 @@
     "table_quality_score": 422,
     "table_quality_notes": [
       "truncated_or_header_only"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 550
   },
   {
     "page": 551,
@@ -60556,7 +60726,10 @@
     "table_quality_score": 734,
     "table_quality_notes": [
       "sparse_table"
-    ]
+    ],
+    "parse_pass": "reparse_rotate_low_conf",
+    "merged_at": "2026-08-10T19:07:24",
+    "merged_from_page": 553
   },
   {
     "page": 554,

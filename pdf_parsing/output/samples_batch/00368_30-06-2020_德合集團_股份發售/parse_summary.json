@@ -1,14 +1,14 @@
 {
   "total_pages": 420,
-  "total_elements": 4770,
+  "total_elements": 4750,
   "categories": {
-    "text": 2806,
-    "title": 838,
-    "footer": 411,
-    "header": 409,
+    "text": 2779,
+    "title": 841,
+    "footer": 417,
+    "header": 413,
     "table": 182,
-    "table_footnote": 49,
     "table_caption": 46,
+    "table_footnote": 43,
     "figure": 29
   },
   "failed_pages": [],
@@ -16,8 +16,8 @@
   "html_tables": 182,
   "markdown_tables": 0,
   "table_structure_confidence_pages": {
-    "high": 66,
+    "high": 67,
     "medium": 37,
-    "low": 28
+    "low": 27
   }
 }

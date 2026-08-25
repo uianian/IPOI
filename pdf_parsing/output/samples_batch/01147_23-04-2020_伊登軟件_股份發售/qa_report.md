@@ -2,15 +2,15 @@
 
 - 输入: `/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01147_23-04-2020_伊登軟件_股份發售/full_parse.json`
 - 总页数: 458
-- 问题条数: 49
-- 建议重跑: `30,120,131,160,185,216,222,281,306,336,337,392,393,439`
+- 问题条数: 48
+- 建议重跑: `30,120,131,185,216,222,281,306,336,337,392,393,439`
 
 ## 按标签统计
 
 | 标签 | 次数 |
 | --- | ---: |
 | `table_structure_medium` | 34 |
-| `vertical_table_low_structure` | 13 |
+| `vertical_table_low_structure` | 12 |
 | `truncated` | 1 |
 | `missing_table_high_numeric` | 1 |
 
@@ -25,8 +25,7 @@
 - **p131** `vertical_table_low_structure` [high] score=330, notes=['truncated_or_header_only']
 - **p154** `table_structure_medium` [low] score=775, notes=['sparse_table']
 - **p156** `table_structure_medium` [low] score=770, notes=['sparse_table']
-- **p159** `table_structure_medium` [low] score=463, notes=['sparse_table']
-- **p160** `vertical_table_low_structure` [high] score=2549, notes=['rotated_table_structure_unstable']
+- **p159** `table_structure_medium` [low] score=458, notes=['sparse_table']
 - **p178** `table_structure_medium` [low] score=778, notes=['sparse_table']
 - **p179** `table_structure_medium` [low] score=778, notes=['sparse_table']
 - **p180** `table_structure_medium` [low] score=772, notes=['sparse_table']

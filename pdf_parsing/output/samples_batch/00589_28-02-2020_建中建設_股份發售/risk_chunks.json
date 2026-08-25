@@ -88,7 +88,7 @@
     "bbox": [
       396,
       1882,
-      2190,
+      2193,
       3010
     ],
     "type": "table",
@@ -125,7 +125,7 @@
       277,
       674,
       2190,
-      1468
+      1472
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td></td><td>2016年</td><td>2017年</td><td>2018年</td><td>2019年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>非流動資產</td><td>223,449</td><td>432,335</td><td>477,011</td><td>466,750</td></tr><tr><td>流動資產</td><td>91,177</td><td>339,160</td><td>767,967</td><td>1,091,225</td></tr><tr><td>流動負債</td><td>244,153</td><td>404,816</td><td>676,903</td><td>768,884</td></tr><tr><td>流動(負債)／資產淨額</td><td>(152,976)</td><td>(65,656)</td><td>91,064</td><td>322,341</td></tr><tr><td>總資產減流動負債</td><td>70,473</td><td>366,679</td><td>568,075</td><td>789,091</td></tr><tr><td>非流動負債</td><td>15,128</td><td>53,785</td><td>11,087</td><td>9,209</td></tr><tr><td>資產淨值</td><td>55,345</td><td>312,894</td><td>556,988</td><td>779,882</td></tr></table>",
@@ -339,7 +339,7 @@
     "page": 56,
     "bbox": [
       277,
-      1630,
+      1627,
       2195,
       2517
     ],
@@ -375,7 +375,7 @@
     "page": 60,
     "bbox": [
       277,
-      277,
+      274,
       2193,
       416
     ],
@@ -689,7 +689,7 @@
       401,
       416,
       2193,
-      1551
+      1548
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td>截至2019年9月30日止九個月</td></tr><tr><td></td><td>2016年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>人民幣千元</td></tr><tr><td>建築服務</td><td></td><td></td><td></td><td></td></tr><tr><td>－地基工程</td><td>40,088</td><td>333,272</td><td>874,308</td><td>732,919</td></tr><tr><td>－模板及腳手架工程</td><td>35,153</td><td>91,091</td><td>139,990</td><td>340,126</td></tr><tr><td>－污水處理基礎設施建設</td><td>–</td><td>–</td><td>42,254</td><td>748</td></tr><tr><td>－其他建築工程</td><td>–</td><td>–</td><td>31,344</td><td>76,091</td></tr><tr><td>小計</td><td>75,241</td><td>424,363</td><td>1,087,896</td><td>1,149,884</td></tr><tr><td>建築機械、設備及工具</td><td></td><td></td><td></td><td></td></tr><tr><td>租賃</td><td>81,393</td><td>72,409</td><td>91,414</td><td>71,919</td></tr><tr><td>污水處理業務</td><td>–</td><td>–</td><td>2,373</td><td>3,947</td></tr><tr><td>其他(附註)</td><td>120</td><td>2,085</td><td>11,067</td><td>3,992</td></tr><tr><td>總收益</td><td>156,754</td><td>498,857</td><td>1,192,750</td><td>1,229,737</td></tr></table>",
@@ -855,7 +855,7 @@
     "page": 183,
     "bbox": [
       396,
-      297,
+      301,
       2185,
       1723
     ],
@@ -866,7 +866,7 @@
   {
     "page": 183,
     "bbox": [
-      516,
+      518,
       2308,
       2163,
       2712
@@ -879,9 +879,9 @@
     "page": 184,
     "bbox": [
       518,
-      294,
+      297,
       2185,
-      1915
+      1912
     ],
     "type": "table",
     "content": "<table><tr><td>項目</td><td>說明</td></tr><tr><td>處理量</td><td>該污水處理廠的設計污水處理總量為每日50,000噸污水</td></tr><tr><td>暫定單價</td><td>暫定單價為人民幣0.793元／立方米污水處理，視乎有關機關的最終調整</td></tr><tr><td>單價調整機制</td><td>每日處理的污水量最低為40,000噸。如果每日實際處理的污水量超過40,000噸，則價格應根據已處理污水量的單價決定</td></tr><tr><td>污泥處置的環境標準</td><td>污水處理廠須按照以下指引運營：(i)《城鎮污水處理廠污泥處置－園林綠化用泥質》(GB/T 23486-2009)；及(ii)《城鎮污水處理廠污染物排放標準》(GB 8918-2002)</td></tr><tr><td>經處理後的廢水的水質標準</td><td>污水處理業務須遵守下列規定：<br>(i) 運營商須根據有關環境部門制定的規則及規例設立水質監測設備；<br>(ii) 運營商須定期向有關環境部門提交水質控制報告；<br>(iii) 運營商須設立線上水質監測系統，以評估進水和出水以及處理後的廢水的水質；及<br>(iv) 污水處理廠應根據有關指引進行運營，即(a)《水質採樣方案設計技術規定》(HJ495-2009)；(b)《水質採樣質素指導》(GB12998-91)；(c)《地表水和污水監測技術規範》(HJ/T91-2002)；及(d)《水質採樣樣品的保存和管理技術規定》(G112999-91)</td></tr></table>",
@@ -917,10 +917,10 @@
       272,
       681,
       2208,
-      2170
+      2173
     ],
     "type": "table",
-    "content": "<table><tr><td>項目代碼</td><td>所在地</td><td>建築工程類型</td><td>動工日期 (附註1)</td><td>完工日期 (附註2)</td><td>合約總金額 (人民幣百萬元)</td><td>於截至 2016 年 12 月 31 日止年度確認的收益 (人民幣百萬元)</td><td>於截至 2017 年 12 月 31 日止年度確認的收益 (人民幣百萬元)</td><td>於截至 2018 年 12 月 31 日止年度確認的收益 (人民幣百萬元)</td><td>於截至 2019 年 9 月 30 日止九個月確認的收益 (人民幣百萬元)</td></tr><tr><td>1.</td><td>BM000829</td><td>福建省</td><td>地基工程</td><td>2017年6月</td><td>2019年10月</td><td>163.2</td><td>–</td><td>36.1</td><td>115.4</td><td>11.7</td></tr><tr><td>2.</td><td>BM000002</td><td>甘肅省</td><td>模板及腳手架工程</td><td>2016年9月</td><td>2018年12月</td><td>84.5</td><td>24.3</td><td>57.1</td><td>3.1</td><td>–</td></tr><tr><td>3.</td><td>BM000077</td><td>福建省</td><td>地基工程</td><td>2018年1月</td><td>2019年2月</td><td>54.3</td><td>–</td><td>–</td><td>53.3</td><td>1.0</td></tr><tr><td>4.</td><td>BM000125</td><td>浙江省</td><td>地基工程</td><td>2018年5月</td><td>2019年9月</td><td>53.7</td><td>–</td><td>–</td><td>45.9</td><td>7.8</td></tr><tr><td>5.</td><td>BM000121</td><td>福建省</td><td>地基工程</td><td>2018年6月</td><td>2019年5月</td><td>45.2</td><td>–</td><td>–</td><td>44.9</td><td>0.3</td></tr><tr><td>6.</td><td>BM000089</td><td>福建省</td><td>污水處理基礎設施建設</td><td>2018年1月</td><td>2018年6月</td><td>42.3</td><td>–</td><td>–</td><td>42.3</td><td>–</td></tr><tr><td>7.</td><td>BM000014</td><td>江蘇省</td><td>地基工程</td><td>2018年1月</td><td>2019年4月</td><td>40.0</td><td>–</td><td>–</td><td>40.0</td><td>–</td></tr><tr><td>8.</td><td>BM000037</td><td>福建省</td><td>地基工程</td><td>2016年12月</td><td>2018年12月</td><td>35.8</td><td>–</td><td>32.6</td><td>3.2</td><td>–</td></tr><tr><td>9.</td><td>BM000115</td><td>福建省</td><td>地基工程</td><td>2018年6月</td><td>2019年5月</td><td>35.2</td><td>–</td><td>–</td><td>34.6</td><td>0.6</td></tr><tr><td>10.</td><td>BM000001</td><td>甘肅省</td><td>地基工程</td><td>2016年9月</td><td>2017年6月</td><td>34.8</td><td>21.2</td><td>13.6</td><td>–</td><td>–</td></tr></table>",
+    "content": "<table><tr><td>項目代碼</td><td>所在地</td><td>建築工程類型</td><td>動工日期 (附註1)</td><td>完工日期 (附註2)</td><td>合約總金額 (人民幣百萬元)</td><td>於截至 2016年 12月31日止年度確認的收益 (人民幣百萬元)</td><td>於截至 2017年 12月31日止年度確認的收益 (人民幣百萬元)</td><td>於截至 2018年 12月31日止年度確認的收益 (人民幣百萬元)</td><td>於截至 2019年9月 30日止九個月確認的收益 (人民幣百萬元)</td></tr><tr><td>1.</td><td>BM000829</td><td>福建省</td><td>地基工程</td><td>2017年6月</td><td>2019年10月</td><td>163.2</td><td>–</td><td>36.1</td><td>115.4</td><td>11.7</td></tr><tr><td>2.</td><td>BM000002</td><td>甘肅省</td><td>模板及腳手架工程</td><td>2016年9月</td><td>2018年12月</td><td>84.5</td><td>24.3</td><td>57.1</td><td>3.1</td><td>–</td></tr><tr><td>3.</td><td>BM000077</td><td>福建省</td><td>地基工程</td><td>2018年1月</td><td>2019年2月</td><td>54.3</td><td>–</td><td>–</td><td>53.3</td><td>1.0</td></tr><tr><td>4.</td><td>BM000125</td><td>浙江省</td><td>地基工程</td><td>2018年5月</td><td>2019年9月</td><td>53.7</td><td>–</td><td>–</td><td>45.9</td><td>7.8</td></tr><tr><td>5.</td><td>BM000121</td><td>福建省</td><td>地基工程</td><td>2018年6月</td><td>2019年5月</td><td>45.2</td><td>–</td><td>–</td><td>44.9</td><td>0.3</td></tr><tr><td>6.</td><td>BM000089</td><td>福建省</td><td>污水處理基礎設施建設</td><td>2018年1月</td><td>2018年6月</td><td>42.3</td><td>–</td><td>–</td><td>42.3</td><td>–</td></tr><tr><td>7.</td><td>BM000014</td><td>江蘇省</td><td>地基工程</td><td>2018年1月</td><td>2019年4月</td><td>40.0</td><td>–</td><td>–</td><td>40.0</td><td>–</td></tr><tr><td>8.</td><td>BM000037</td><td>福建省</td><td>地基工程</td><td>2016年12月</td><td>2018年12月</td><td>35.8</td><td>–</td><td>32.6</td><td>3.2</td><td>–</td></tr><tr><td>9.</td><td>BM000115</td><td>福建省</td><td>地基工程</td><td>2018年6月</td><td>2019年5月</td><td>35.2</td><td>–</td><td>–</td><td>34.6</td><td>0.6</td></tr><tr><td>10.</td><td>BM000001</td><td>甘肅省</td><td>地基工程</td><td>2016年9月</td><td>2017年6月</td><td>34.8</td><td>21.2</td><td>13.6</td><td>–</td><td>–</td></tr></table>",
     "source_tag": "p187_table"
   },
   {
@@ -950,7 +950,7 @@
   {
     "page": 189,
     "bbox": [
-      399,
+      396,
       1640,
       2195,
       2179
@@ -1023,7 +1023,7 @@
     "page": 201,
     "bbox": [
       396,
-      694,
+      691,
       2195,
       1230
     ],
@@ -1060,7 +1060,7 @@
     "bbox": [
       272,
       403,
-      2185,
+      2183,
       2332
     ],
     "type": "table",
@@ -1119,7 +1119,7 @@
     "page": 222,
     "bbox": [
       277,
-      608,
+      605,
       2193,
       1726
     ],
@@ -1133,7 +1133,7 @@
       277,
       1931,
       2193,
-      2437
+      2441
     ],
     "type": "table",
     "content": "<table><tr><td>排名</td><td>分包商</td><td>主營業務</td><td>向本集團提供的服務</td><td>業務關係起始年份</td><td>分包金額</td><td>分包費總額佔比</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td>(人民幣百萬元)</td><td></td></tr><tr><td>1.</td><td>分包商C</td><td>建築勞務分包附註3</td><td>勞務分包</td><td>2017年</td><td>129.6</td><td>67.2%</td></tr><tr><td>2.</td><td>分包商A</td><td>建築勞務分包附註1</td><td>勞務分包</td><td>2016年</td><td>22.8</td><td>11.8%</td></tr></table>",
@@ -1250,10 +1250,10 @@
   {
     "page": 244,
     "bbox": [
-      277,
+      275,
       879,
       2195,
-      1243
+      1247
     ],
     "type": "text",
     "content": "於往績記錄期間及直至最後實際可行日期，我們並不知悉我們的知識產權遭受來自第三方的任何重大侵權或我們侵犯其他方擁有的知識產權，我們亦無面臨有關知識產權侵權的任何訴訟、仲裁或糾紛。且董事相信，我們已採取一切合理措施，以防止我們的知識產權被侵權。於最後實際可行日期，我們亦不知悉有任何針對我們或我們任何附屬公司提起的侵犯第三方任何知識產權的申索懸而未決或擬將進行。",
@@ -1356,18 +1356,6 @@
     "source_tag": "p249_text"
   },
   {
-    "page": 252,
-    "bbox": [
-      284,
-      426,
-      1786,
-      1091
-    ],
-    "type": "table",
-    "content": "<table><tr><td>不合規事件及其原因</td><td>不合規事件的後果</td></tr><tr><td>(1) 社會保險金及住房公積金</td><td></td></tr><tr><td>於往績記錄期間，我們並未根據中國法律法規基於僱員的實際收入足額繳納社會保險金及住房公積金。我們預計，截至2018年12月31日止三個年度各年以及截至2019年9月30日止九個月，未繳納的社會保險金及住房公積金分別約為人民幣3.5百萬元、人民幣3.4百萬元、人民幣5.9百萬元及人民幣4.6百萬元。</td><td>根據中華人民共和國社會保險法，用人單位未按時足額繳納社會保險費的，由社會保險費徵收機構責令限期繳納或者補足，並自欠繳之日起，按日加收萬分之五的滯納金；逾期仍不繳納的，由有關行政部門處欠繳數額一倍以上三倍以下的罰款。</td></tr><tr><td>發生不合規事件主要是由於各地方政府對中國法律法規的執行或詮釋不統一，以及我們的人力資源部人員對中國相關法律法規的理解不夠充分。</td><td>根據住房公積金管理條例，違反本條例的規定，單位不辦理住房公積金繳存登記或者不為本單位職工辦理住房公積金賬戶設立手續的，由住房公積金管理中心責令限期辦理；逾期不辦理的，處人民幣1萬元以上人民幣5萬元以下的罰款。</td></tr></table>",
-    "source_tag": "p252_table"
-  },
-  {
     "page": 256,
     "bbox": [
       277,
@@ -1468,7 +1456,7 @@
     "bbox": [
       277,
       760,
-      2158,
+      2160,
       2633
     ],
     "type": "table",
@@ -1612,7 +1600,7 @@
     "bbox": [
       277,
       1829,
-      2195,
+      2193,
       1964
     ],
     "type": "text",
@@ -1685,7 +1673,7 @@
       399,
       1075,
       2190,
-      1690
+      1687
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td></td><td colspan=\"2\">2016年</td><td colspan=\"2\">2017年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2019年</td></tr><tr><td></td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td></tr><tr><td>建築服務</td><td>75,241</td><td>48.0</td><td>424,363</td><td>85.1</td><td>1,087,896</td><td>91.2</td><td>782,733</td><td>91.6</td><td>1,149,884</td><td>93.5</td></tr><tr><td>建築機械、設備及</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>工具租賃</td><td>81,393</td><td>51.9</td><td>72,409</td><td>14.5</td><td>91,414</td><td>7.7</td><td>63,058</td><td>7.4</td><td>71,914</td><td>5.8</td></tr><tr><td>污水處理業務</td><td>–</td><td>–</td><td>–</td><td>–</td><td>2,373</td><td>0.2</td><td>977</td><td>0.1</td><td>3,947</td><td>0.3</td></tr><tr><td>其他</td><td>120</td><td>0.1</td><td>2,085</td><td>0.4</td><td>11,067</td><td>0.9</td><td>7,342</td><td>0.9</td><td>3,992</td><td>0.4</td></tr><tr><td></td><td>156,754</td><td>100</td><td>498,857</td><td>100</td><td>1,192,750</td><td>100</td><td>854,110</td><td>100</td><td>1,229,737</td><td>100</td></tr></table>",
@@ -1696,7 +1684,7 @@
     "bbox": [
       396,
       410,
-      2190,
+      2193,
       1022
     ],
     "type": "table",
@@ -1707,7 +1695,7 @@
     "page": 305,
     "bbox": [
       277,
-      1515,
+      1511,
       2193,
       2692
     ],
@@ -1724,7 +1712,7 @@
       1349
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"9\">截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td rowspan=\"2\">項目代碼</td><td rowspan=\"2\">建築服務分部的子類別</td><td colspan=\"2\">2016年</td><td colspan=\"2\">2017年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2019年</td></tr><tr><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td></tr><tr><td>20</td><td>BM001217 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>–</td><td>745</td><td>0.1%</td><td>–</td><td>–</td><td>31,199²</td><td>2.7%</td></tr><tr><td>21</td><td>BM001263 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>2,325</td><td>0.2%</td><td>1,786</td><td>0.2%</td><td>24,346²</td><td>2.1%</td></tr><tr><td>22</td><td>BM001230 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>93</td><td>0.0%</td><td>–</td><td>–</td><td>92,716²</td><td>8.1%</td></tr><tr><td>23</td><td>BM001257 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>24,178²</td><td>2.1%</td></tr><tr><td>24</td><td>BM001275 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>79,943²</td><td>7.0%</td></tr><tr><td>25</td><td>BM000002 …… 模板及腳手架工程</td><td>24,330²</td><td>32.3%</td><td>57,080²</td><td>13.5%</td><td>3,098</td><td>0.3%</td><td>2,270</td><td>0.3%</td><td>–</td><td>–</td></tr><tr><td>26</td><td>BM000019 …… 模板及腳手架工程</td><td>10,823²</td><td>14.4%</td><td>15,944²</td><td>3.8%</td><td>463</td><td>0.0%</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><td>27</td><td>BM000054 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>6,235</td><td>1.5%</td><td>9,077</td><td>0.8%</td><td>3,023</td><td>0.4%</td><td>23,011²</td><td>2.0%</td></tr><tr><td>28</td><td>BM000068 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>4,388</td><td>1.0%</td><td>8,711</td><td>0.8%</td><td>4,348</td><td>0.6%</td><td>23,672²</td><td>2.1%</td></tr><tr><td>29</td><td>BM000072 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>13,128</td><td>1.2%</td><td>7,610</td><td>1.0%</td><td>37,820²</td><td>3.3%</td></tr><tr><td>30</td><td>BM000890 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>3,175</td><td>0.3%</td><td>252</td><td>0.0%</td><td>32,752²</td><td>2.8%</td></tr><tr><td>31</td><td>BM000089 …… 污水處理基礎設施建設</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>42,254²</td><td>3.9%</td><td>42,254²</td><td>5.4%</td><td>–</td><td>–</td></tr><tr><td colspan=\"2\">上述建築工程項目的收益貢獻</td><td>74,763</td><td>99.4%</td><td>263,942</td><td>62.2%</td><td>536,929</td><td>49.4%</td><td>430,610</td><td>55.0%</td><td>446,809</td><td>38.9%</td></tr><tr><td colspan=\"2\">其他建築工程項目貢獻的收益</td><td>478</td><td>0.6%</td><td>160,421</td><td>37.8%</td><td>550,967</td><td>50.6%</td><td>352,123</td><td>45.0%</td><td>703,075</td><td>61.1%</td></tr><tr><td colspan=\"2\"></td><td>75,241</td><td>100%</td><td>424,363</td><td>100%</td><td>1,087,896</td><td>100%</td><td>782,733</td><td>100%</td><td>1,149,884</td><td>100%</td></tr></table>",
+    "content": "<table><tr><td colspan=\"10\">截至12月31日止年度</td><td colspan=\"10\">截至9月30日止九個月</td></tr><tr><td rowspan=\"2\">項目代碼</td><td rowspan=\"2\">建築服務分部的子類別</td><td colspan=\"2\">2016年</td><td colspan=\"2\">2017年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2019年</td></tr><tr><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td></tr><tr><td>20</td><td>BM001217 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>–</td><td>745</td><td>0.1%</td><td>–</td><td>–</td><td>31,199²</td><td>2.7%</td></tr><tr><td>21</td><td>BM001263 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>2,325</td><td>0.2%</td><td>1,786</td><td>0.2%</td><td>24,346²</td><td>2.1%</td></tr><tr><td>22</td><td>BM001230 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>93</td><td>0.0%</td><td>–</td><td>–</td><td>92,716²</td><td>8.1%</td></tr><tr><td>23</td><td>BM001257 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>24,178²</td><td>2.1%</td></tr><tr><td>24</td><td>BM001275 …… 地基工程</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>79,943²</td><td>7.0%</td></tr><tr><td>25</td><td>BM000002 …… 模板及腳手架工程</td><td>24,330²</td><td>32.3%</td><td>57,080²</td><td>13.5%</td><td>3,098</td><td>0.3%</td><td>2,270</td><td>0.3%</td><td>–</td><td>–</td></tr><tr><td>26</td><td>BM000019 …… 模板及腳手架工程</td><td>10,823²</td><td>14.4%</td><td>15,944²</td><td>3.8%</td><td>463</td><td>0.0%</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><td>27</td><td>BM000054 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>6,235</td><td>1.5%</td><td>9,077</td><td>0.8%</td><td>3,023</td><td>0.4%</td><td>23,011²</td><td>2.0%</td></tr><tr><td>28</td><td>BM000068 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>4,388</td><td>1.0%</td><td>8,711</td><td>0.8%</td><td>4,348</td><td>0.6%</td><td>23,672²</td><td>2.1%</td></tr><tr><td>29</td><td>BM000072 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>13,128</td><td>1.2%</td><td>7,610</td><td>1.0%</td><td>37,820²</td><td>3.3%</td></tr><tr><td>30</td><td>BM000890 …… 模板及腳手架工程</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>3,175</td><td>0.3%</td><td>252</td><td>0.0%</td><td>32,752²</td><td>2.8%</td></tr><tr><td>31</td><td>BM000089 …… 污水處理基礎設施建設</td><td>–</td><td>–</td><td>–</td><td>0.0%</td><td>42,254²</td><td>3.9%</td><td>42,254²</td><td>5.4%</td><td>–</td><td>–</td></tr><tr><td colspan=\"2\">上述建築工程項目的收益貢獻</td><td>74,763</td><td>99.4%</td><td>263,942</td><td>62.2%</td><td>536,929</td><td>49.4%</td><td>430,610</td><td>55.0%</td><td>446,809</td><td>38.9%</td></tr><tr><td colspan=\"2\">其他建築工程項目貢獻的收益</td><td>478</td><td>0.6%</td><td>160,421</td><td>37.8%</td><td>550,967</td><td>50.6%</td><td>352,123</td><td>45.0%</td><td>703,075</td><td>61.1%</td></tr><tr><td colspan=\"2\"></td><td>75,241</td><td>100%</td><td>424,363</td><td>100%</td><td>1,087,896</td><td>100%</td><td>782,733</td><td>100%</td><td>1,149,884</td><td>100%</td></tr></table>",
     "source_tag": "p306_table"
   },
   {
@@ -1748,7 +1736,7 @@
       1935
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td></td><td colspan=\"2\">2016年</td><td colspan=\"2\">2017年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2019年</td></tr><tr><td></td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td></tr><tr><td></td><td colspan=\"8\">(未經審核)</td></tr><tr><td>材料成本</td><td>30,174</td><td>25.4</td><td>114,208</td><td>31.0</td><td>457,135</td><td>50.4</td><td>345,538</td><td>51.9</td><td>383,999</td><td>40.6</td></tr><tr><td>勞務分包費</td><td>18,272</td><td>15.4</td><td>86,133</td><td>23.3</td><td>172,767</td><td>19.0</td><td>103,343</td><td>15.5</td><td>349,265</td><td>36.9</td></tr><tr><td>折舊</td><td>29,443</td><td>24.8</td><td>62,725</td><td>17.0</td><td>87,490</td><td>9.6</td><td>76,034</td><td>11.4</td><td>81,771</td><td>8.6</td></tr><tr><td>其他</td><td>40,729</td><td>34.4</td><td>105,933</td><td>28.7</td><td>189,836</td><td>21.0</td><td>140,685</td><td>21.2</td><td>131,854</td><td>13.9</td></tr><tr><td></td><td>118,618</td><td>100</td><td>368,999</td><td>100</td><td>907,228</td><td>100</td><td>665,600</td><td>100</td><td>946,889</td><td>100</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td></td><td colspan=\"2\">2016年</td><td colspan=\"2\">2017年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2019年</td></tr><tr><td></td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td><td>人民幣千元</td><td>%</td></tr><tr><td></td><td colspan=\"9\">(未經審核)</td></tr><tr><td>材料成本</td><td>30,174</td><td>25.4</td><td>114,208</td><td>31.0</td><td>457,135</td><td>50.4</td><td>345,538</td><td>51.9</td><td>383,999</td><td>40.6</td></tr><tr><td>勞務分包費</td><td>18,272</td><td>15.4</td><td>86,133</td><td>23.3</td><td>172,767</td><td>19.0</td><td>103,343</td><td>15.5</td><td>349,265</td><td>36.9</td></tr><tr><td>折舊</td><td>29,443</td><td>24.8</td><td>62,725</td><td>17.0</td><td>87,490</td><td>9.6</td><td>76,034</td><td>11.4</td><td>81,771</td><td>8.6</td></tr><tr><td>其他</td><td>40,729</td><td>34.4</td><td>105,933</td><td>28.7</td><td>189,836</td><td>21.0</td><td>140,685</td><td>21.2</td><td>131,854</td><td>13.9</td></tr><tr><td></td><td>118,618</td><td>100</td><td>368,999</td><td>100</td><td>907,228</td><td>100</td><td>665,600</td><td>100</td><td>946,889</td><td>100</td></tr></table>",
     "source_tag": "p309_table"
   },
   {
@@ -1780,7 +1768,7 @@
     "bbox": [
       399,
       555,
-      2193,
+      2190,
       1455
     ],
     "type": "table",
@@ -1814,7 +1802,7 @@
   {
     "page": 315,
     "bbox": [
-      399,
+      396,
       1789,
       2193,
       2355
@@ -1892,7 +1880,7 @@
       1802
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2018年 人民幣千元 (未經審核)</td><td>2019年 人民幣千元</td></tr><tr><td>除稅前利潤</td><td>22,676</td><td>89,560</td><td>176,981</td><td>104,631</td><td>182,830</td></tr><tr><td>按適用於有關稅務司法權區之稅率</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>計算之除稅前利潤名義稅款</td><td>5,669</td><td>22,390</td><td>44,245</td><td>26,158</td><td>45,849</td></tr><tr><td>不可抵扣開支的稅務影響</td><td>95</td><td>338</td><td>903</td><td>788</td><td>1,545</td></tr><tr><td>研發費加計扣除的稅務影響¹</td><td>–</td><td>(784)</td><td>(8,742)</td><td>–</td><td>–</td></tr><tr><td>未確認未動用稅項虧損的</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>稅務影響</td><td>–</td><td>67</td><td>81</td><td>71</td><td>441</td></tr><tr><td>實際稅項開支</td><td>5,764</td><td>22,011</td><td>36,487</td><td>27,017</td><td>47,835</td></tr><tr><td>實際稅率²</td><td>25.4%</td><td>24.6%</td><td>20.6%</td><td>25.8%</td><td>26.2%</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2018年 人民幣千元 (未經審核)</td><td>2019年 人民幣千元</td></tr><tr><td>除稅前利潤</td><td>22,676</td><td>89,560</td><td>176,981</td><td>104,631</td><td>182,830</td></tr><tr><td>按適用於有關稅務司法權區之稅率</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>計算之除稅前利潤名義稅款</td><td>5,669</td><td>22,390</td><td>44,245</td><td>26,158</td><td>45,849</td></tr><tr><td>不可抵扣開支的稅務影響</td><td>95</td><td>338</td><td>903</td><td>788</td><td>1,545</td></tr><tr><td>研發費加計扣除的稅務影響<sup>1</sup></td><td>–</td><td>(784)</td><td>(8,742)</td><td>–</td><td>–</td></tr><tr><td>未確認未動用稅項虧損的</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>稅務影響</td><td>–</td><td>67</td><td>81</td><td>71</td><td>441</td></tr><tr><td>實際稅項開支</td><td>5,764</td><td>22,011</td><td>36,487</td><td>27,017</td><td>47,835</td></tr><tr><td>實際稅率<sup>2</sup></td><td>25.4%</td><td>24.6%</td><td>20.6%</td><td>25.8%</td><td>26.2%</td></tr></table>",
     "source_tag": "p320_table"
   },
   {
@@ -1900,7 +1888,7 @@
     "bbox": [
       396,
       1538,
-      2193,
+      2190,
       2586
     ],
     "type": "table",
@@ -1985,7 +1973,7 @@
       401,
       1008,
       2195,
-      1604
+      1607
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td></td><td>2016年</td><td>2017年</td><td>2018年</td><td>2019年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>合約資產總值</td><td>15,668</td><td>145,638</td><td>263,993</td><td>451,331</td></tr><tr><td>信貸損失撥備</td><td>(696)</td><td>(5,606)</td><td>(9,151)</td><td>(11,744)</td></tr><tr><td></td><td>14,972</td><td>140,032</td><td>254,842</td><td>439,587</td></tr><tr><td>預計將在一年多以後收回的合約資產總值</td><td>15,061</td><td>90,420</td><td>124,200</td><td>221,878</td></tr><tr><td>預計將在一年多以後收回的</td><td></td><td></td><td></td><td></td></tr><tr><td>合約資產總值的佔比<sup>附註</sup></td><td>96.1%</td><td>62.1%</td><td>47.0%</td><td>49.2%</td></tr></table>",
@@ -2068,7 +2056,7 @@
     "bbox": [
       277,
       1551,
-      2193,
+      2195,
       1769
     ],
     "type": "text",
@@ -2084,7 +2072,7 @@
       2355
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td>2016年</td><td>2017年</td><td>2018年</td><td>2019年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>1個月內</td><td>15,841</td><td>55,835</td><td>72,211</td><td>117,804</td></tr><tr><td>1至3個月</td><td>11,534</td><td>57,069</td><td>113,222</td><td>162,311</td></tr><tr><td>3至6個月</td><td>852</td><td>7,112</td><td>72,526</td><td>89,359</td></tr><tr><td>6至12個月</td><td>1,911</td><td>2,958</td><td>45,741</td><td>90,908</td></tr><tr><td>超過12個月</td><td>—</td><td>2,198</td><td>15,368</td><td>21,833</td></tr><tr><td></td><td>30,138</td><td>125,172</td><td>319,068</td><td>482,215</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td></td><td>2016年</td><td>2017年</td><td>2018年</td><td>2019年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>1個月內</td><td>15,841</td><td>55,835</td><td>72,211</td><td>117,804</td></tr><tr><td>1至3個月</td><td>11,534</td><td>57,069</td><td>113,222</td><td>162,311</td></tr><tr><td>3至6個月</td><td>852</td><td>7,112</td><td>72,526</td><td>89,359</td></tr><tr><td>6至12個月</td><td>1,911</td><td>2,958</td><td>45,741</td><td>90,908</td></tr><tr><td>超過12個月</td><td>—</td><td>2,198</td><td>15,368</td><td>21,833</td></tr><tr><td></td><td>30,138</td><td>125,172</td><td>319,068</td><td>482,215</td></tr></table>",
     "source_tag": "p333_table"
   },
   {
@@ -2199,7 +2187,7 @@
     "page": 337,
     "bbox": [
       277,
-      588,
+      592,
       2203,
       926
     ],
@@ -2312,7 +2300,7 @@
       1134
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td>2016年</td><td>2017年</td><td>2018年</td><td>2019年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>11,320</td><td>14,772</td><td>8,704</td><td>8,232</td></tr><tr><td>－</td><td>3,511</td><td>4,272</td><td>3,700</td></tr><tr><td>－</td><td>1,141</td><td>1,875</td><td>1,044</td></tr><tr><td>202</td><td>1,318</td><td>6,656</td><td>6,769</td></tr><tr><td>11,522</td><td>20,742</td><td>21,507</td><td>19,745</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td></td><td>2016年</td><td>2017年</td><td>2018年</td><td>2019年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>可扣減進項增值稅</td><td>11,320</td><td>14,772</td><td>8,704</td><td>8,232</td></tr><tr><td>履約保證金</td><td>—</td><td>3,511</td><td>4,272</td><td>3,700</td></tr><tr><td>投標保證金</td><td>—</td><td>1,141</td><td>1,875</td><td>1,044</td></tr><tr><td>其他</td><td>202</td><td>1,318</td><td>6,656</td><td>6,769</td></tr><tr><td></td><td>11,522</td><td>20,742</td><td>21,507</td><td>19,745</td></tr></table>",
     "source_tag": "p339_table"
   },
   {
@@ -2355,7 +2343,7 @@
     "page": 342,
     "bbox": [
       396,
-      602,
+      605,
       2190,
       1108
     ],
@@ -2384,7 +2372,7 @@
       1515
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td><td>於12月31日</td></tr><tr><td></td><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2019年 人民幣千元</td><td>2019年 人民幣千元 (未經審核)</td></tr><tr><td>銀行貸款－有擔保之餘額</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>－以若干物業作為抵押擔保及保證 附註</td><td>13,000</td><td>35,000</td><td>63,880</td><td>82,000</td><td>44,000</td></tr><tr><td>－以若干物業作為抵押擔保但無保證 附註</td><td>–</td><td>–</td><td>–</td><td>–</td><td>71,210</td></tr><tr><td>－以相同金額的貿易應收款項提供質押擔保...</td><td>–</td><td>74,187</td><td>58,434</td><td>–</td><td>–</td></tr><tr><td></td><td>13,000</td><td>109,187</td><td>122,314</td><td>82,000</td><td>115,210</td></tr><tr><td>銀行貸款－無擔保之餘額</td><td>–</td><td>–</td><td>437</td><td>–</td><td>–</td></tr><tr><td></td><td>13,000</td><td>109,187</td><td>122,751</td><td>82,000</td><td>115,210</td></tr><tr><td>銀行貸款的實際利率概況</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>固定利率</td><td>6.5% - 7.2%</td><td>7.2%</td><td>7.2% - 7.8%</td><td>6.8% - 7.8%</td><td>6.35% - 6.8%</td></tr><tr><td>浮動利率</td><td>–</td><td>4.6% - 6.9%</td><td>5.2% - 6.1%</td><td>不適用</td><td>不適用</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td><td>於12月31日</td></tr><tr><td></td><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2019年 人民幣千元</td><td>2019年 人民幣千元 (未經審核)</td></tr><tr><td>銀行貸款－有擔保之餘額</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>－以若干物業作為抵押擔保及保證 附註</td><td>13,000</td><td>35,000</td><td>63,880</td><td>82,000</td><td>44,000</td></tr><tr><td>－以若干物業作為抵押擔保但無保證 附註</td><td>–</td><td>–</td><td>–</td><td>–</td><td>71,210</td></tr><tr><td>－以相同金額的貿易應收款項提供質押擔保</td><td>–</td><td>74,187</td><td>58,434</td><td>–</td><td>–</td></tr><tr><td></td><td>13,000</td><td>109,187</td><td>122,314</td><td>82,000</td><td>115,210</td></tr><tr><td>銀行貸款－無擔保之餘額</td><td>–</td><td>–</td><td>437</td><td>–</td><td>–</td></tr><tr><td></td><td>13,000</td><td>109,187</td><td>122,751</td><td>82,000</td><td>115,210</td></tr><tr><td>銀行貸款的實際利率概況</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>固定利率</td><td>6.5% - 7.2%</td><td>7.2%</td><td>7.2% - 7.8%</td><td>6.8% - 7.8%</td><td>6.35% - 6.8%</td></tr><tr><td>浮動利率</td><td>–</td><td>4.6% - 6.9%</td><td>5.2% - 6.1%</td><td>不適用</td><td>不適用</td></tr></table>",
     "source_tag": "p344_table"
   },
   {
@@ -2392,7 +2380,7 @@
     "bbox": [
       277,
       1584,
-      2195,
+      2193,
       1852
     ],
     "type": "text",
@@ -2585,7 +2573,7 @@
       391,
       1412,
       2193,
-      2712
+      2709
     ],
     "type": "table",
     "content": "<table><tr><td></td><td></td><td></td><td></td><td colspan=\"5\">預計現金流錯配(附註)</td></tr><tr><td></td><td>項目代碼</td><td>所在地</td><td>建築工程類型</td><td>開工日期/預計項目開工日期</td><td>預計項目完工日期</td><td>合約總金額</td><td>2020年第一季度</td><td>2020年第二季度</td><td>2020年第三季度</td><td>總計</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>人民幣百萬元</td><td>人民幣百萬元</td><td>人民幣百萬元</td><td>人民幣百萬元</td></tr><tr><td>1.</td><td>BM001230</td><td>福建省</td><td>地基工程／模板及腳手架工程</td><td>2018年12月</td><td>2020年5月</td><td>207.8</td><td>4.0</td><td>3.0</td><td>–</td><td>7.0</td></tr><tr><td>2.</td><td>BM001337</td><td>甘肅省</td><td>地基工程</td><td>2019年6月</td><td>2020年12月</td><td>183.5</td><td>–</td><td>21.7</td><td>–</td><td>21.7</td></tr><tr><td>3.</td><td>BM001278/BM001282/BM001286/BM001297/BM001299</td><td>福建省</td><td>模板及腳手架工程／機電工程／建築機械租賃</td><td>2019年3月</td><td>2020年12月</td><td>97.5</td><td>–</td><td>15.0</td><td>–</td><td>15.0</td></tr><tr><td>4.</td><td>BM001308</td><td>廣東省</td><td>地基工程</td><td>2020年5月</td><td>2020年12月</td><td>21.9</td><td>–</td><td>6.0</td><td>–</td><td>6.0</td></tr></table>",
@@ -2768,7 +2756,7 @@
       2705
     ],
     "type": "table",
-    "content": "<table><tr><td rowspan=\"2\"></td><td rowspan=\"2\">附註</td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td>2016年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2018年人民幣千元（未經審核）</td><td>2019年人民幣千元</td></tr><tr><td>收益</td><td>4</td><td>156,754</td><td>498,857</td><td>1,192,750</td><td>854,110</td><td>1,229,737</td></tr><tr><td>銷售成本</td><td></td><td>(118,618)</td><td>(368,999)</td><td>(907,228)</td><td>(665,600)</td><td>(946,889)</td></tr><tr><td>毛利</td><td></td><td>38,136</td><td>129,858</td><td>285,522</td><td>188,510</td><td>282,848</td></tr><tr><td>其他淨收入</td><td>5</td><td>336</td><td>812</td><td>1,762</td><td>136</td><td>3,007</td></tr><tr><td>行政開支</td><td></td><td>(12,441)</td><td>(25,655)</td><td>(80,820)</td><td>(58,951)</td><td>(77,077)</td></tr><tr><td>其他經營開支</td><td></td><td>(2,455)</td><td>(10,016)</td><td>(20,362)</td><td>(18,290)</td><td>(13,017)</td></tr><tr><td>經營利潤</td><td></td><td>23,576</td><td>94,999</td><td>186,102</td><td>111,405</td><td>195,761</td></tr><tr><td>融資成本</td><td>6(a)</td><td>(900)</td><td>(5,439)</td><td>(9,121)</td><td>(6,774)</td><td>(12,931)</td></tr><tr><td>税前利潤</td><td></td><td>22,676</td><td>89,560</td><td>176,981</td><td>104,631</td><td>182,830</td></tr><tr><td>所得税</td><td>7(a)</td><td>(5,764)</td><td>(22,011)</td><td>(36,487)</td><td>(27,017)</td><td>(47,835)</td></tr><tr><td>年／期內利潤</td><td></td><td>16,912</td><td>67,549</td><td>140,494</td><td>77,614</td><td>134,995</td></tr><tr><td>年／期內其他全面收入</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>其後可能重新分類至損益的項目：</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>換算中國內地以外財務報表的匯兌差額</td><td></td><td>–</td><td>–</td><td>–</td><td>–</td><td>(1)</td></tr><tr><td>年／期內全面收入總額</td><td></td><td>16,912</td><td>67,549</td><td>140,494</td><td>77,614</td><td>134,994</td></tr></table>",
+    "content": "<table><tr><td rowspan=\"2\"></td><td rowspan=\"2\">附註</td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2018年 人民幣千元 (未經審核)</td><td>2019年 人民幣千元</td></tr><tr><td>收益</td><td>4</td><td>156,754</td><td>498,857</td><td>1,192,750</td><td>854,110</td><td>1,229,737</td></tr><tr><td>銷售成本</td><td></td><td>(118,618)</td><td>(368,999)</td><td>(907,228)</td><td>(665,600)</td><td>(946,889)</td></tr><tr><td>毛利</td><td></td><td>38,136</td><td>129,858</td><td>285,522</td><td>188,510</td><td>282,848</td></tr><tr><td>其他淨收入</td><td>5</td><td>336</td><td>812</td><td>1,762</td><td>136</td><td>3,007</td></tr><tr><td>行政開支</td><td></td><td>(12,441)</td><td>(25,655)</td><td>(80,820)</td><td>(58,951)</td><td>(77,077)</td></tr><tr><td>其他經營開支</td><td></td><td>(2,455)</td><td>(10,016)</td><td>(20,362)</td><td>(18,290)</td><td>(13,017)</td></tr><tr><td>經營利潤</td><td></td><td>23,576</td><td>94,999</td><td>186,102</td><td>111,405</td><td>195,761</td></tr><tr><td>融資成本</td><td>6(a)</td><td>(900)</td><td>(5,439)</td><td>(9,121)</td><td>(6,774)</td><td>(12,931)</td></tr><tr><td>税前利潤</td><td></td><td>22,676</td><td>89,560</td><td>176,981</td><td>104,631</td><td>182,830</td></tr><tr><td>所得税</td><td>7(a)</td><td>(5,764)</td><td>(22,011)</td><td>(36,487)</td><td>(27,017)</td><td>(47,835)</td></tr><tr><td>年／期內利潤</td><td></td><td>16,912</td><td>67,549</td><td>140,494</td><td>77,614</td><td>134,995</td></tr><tr><td>年／期內其他全面收入</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>其後可能重新分類至損益的項目：</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>換算中國內地以外財務報表的匯兌差額</td><td></td><td>–</td><td>–</td><td>–</td><td>–</td><td>(1)</td></tr><tr><td>年／期內全面收入總額</td><td></td><td>16,912</td><td>67,549</td><td>140,494</td><td>77,614</td><td>134,994</td></tr></table>",
     "source_tag": "p422_table"
   },
   {
@@ -2799,7 +2787,7 @@
     "page": 426,
     "bbox": [
       277,
-      301,
+      297,
       2198,
       1951
     ],
@@ -2980,7 +2968,7 @@
     "bbox": [
       635,
       2772,
-      2193,
+      2195,
       2987
     ],
     "type": "text",
@@ -3015,7 +3003,7 @@
     "page": 438,
     "bbox": [
       635,
-      499,
+      496,
       2190,
       602
     ],
@@ -3101,7 +3089,7 @@
       518,
       2553,
       2193,
-      2719
+      2715
     ],
     "type": "text",
     "content": "利息收入採用實際利率法按累計基準確認，並採用將金融工具於其預計年期估計未來現金收入準確貼現至金融資產賬面淨值的利率。就存在信貸減值的金融資產而言，資產的經攤銷成本（即賬面總值扣除虧損撥備）採用實際利率（見附註2(h)(i)）。",
@@ -3149,7 +3137,7 @@
       632,
       1141,
       2190,
-      2166
+      2163
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2016年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2018年人民幣千元（未經審核）</td><td>2019年人民幣千元</td></tr><tr><td>香港財務報告準則第15號範圍</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>內來自客戶合約的收益</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>按主要產品或服務線劃分</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>－建築服務收益</td><td>75,241</td><td>424,363</td><td>1,087,896</td><td>782,733</td><td>1,149,884</td></tr><tr><td>－污水處理服務收益</td><td>–</td><td>–</td><td>2,373</td><td>977</td><td>3,947</td></tr><tr><td>－其他*</td><td>120</td><td>2,085</td><td>11,067</td><td>7,342</td><td>3,992</td></tr><tr><td></td><td>75,361</td><td>426,448</td><td>1,101,336</td><td>791,052</td><td>1,157,823</td></tr><tr><td>其他來源的收益</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>－建築機械、設備及工具</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>租賃收益</td><td>81,393</td><td>72,409</td><td>91,414</td><td>63,058</td><td>71,914</td></tr><tr><td></td><td>156,754</td><td>498,857</td><td>1,192,750</td><td>854,110</td><td>1,229,737</td></tr></table>",
@@ -3200,7 +3188,7 @@
       1971
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"5\">污水處理</td></tr><tr><td></td><td>地基工程</td><td>模板及腳手架工程</td><td>基礎設施建造</td><td>其他建築工程</td><td>總計</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>截至2016年12月31日止年度</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益</td><td>40,088</td><td>35,153</td><td>–</td><td>–</td><td>75,241</td></tr><tr><td>銷售成本</td><td>(31,976)</td><td>(32,694)</td><td>–</td><td>–</td><td>(64,670)</td></tr><tr><td>毛利</td><td>8,112</td><td>2,459</td><td>–</td><td>–</td><td>10,571</td></tr><tr><td>截至2017年12月31日止年度</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益</td><td>333,272</td><td>91,091</td><td>–</td><td>–</td><td>424,363</td></tr><tr><td>銷售成本</td><td>(234,438)</td><td>(83,051)</td><td>–</td><td>–</td><td>(317,489)</td></tr><tr><td>毛利</td><td>98,834</td><td>8,040</td><td>–</td><td>–</td><td>106,874</td></tr><tr><td>截至2018年12月31日止年度</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益</td><td>874,308</td><td>139,990</td><td>42,254</td><td>31,344</td><td>1,087,896</td></tr><tr><td>銷售成本</td><td>(663,502)</td><td>(117,878)</td><td>(32,714)</td><td>(21,460)</td><td>(835,554)</td></tr><tr><td>毛利</td><td>210,806</td><td>22,112</td><td>9,540</td><td>9,884</td><td>252,342</td></tr><tr><td>截至2018年9月30日止九個月（未經審核）</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益</td><td>652,598</td><td>70,690</td><td>42,254</td><td>17,191</td><td>782,733</td></tr><tr><td>銷售成本</td><td>(511,925)</td><td>(59,078)</td><td>(32,714)</td><td>(10,407)</td><td>(614,124)</td></tr><tr><td>毛利</td><td>140,673</td><td>11,612</td><td>9,540</td><td>6,784</td><td>168,609</td></tr><tr><td>截至2019年9月30日止九個月</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益</td><td>732,919</td><td>340,126</td><td>748</td><td>76,091</td><td>1,149,884</td></tr><tr><td>銷售成本</td><td>(567,454)</td><td>(277,837)</td><td>(748)</td><td>(48,937)</td><td>(894,976)</td></tr><tr><td>毛利</td><td>165,465</td><td>62,289</td><td>–</td><td>27,154</td><td>254,908</td></tr></table>",
+    "content": "<table><tr><td></td><td>地基工程</td><td>模板及腳手架工程</td><td>污水處理基礎設施建造</td><td>其他建築工程</td><td>總計</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>截至2016年12月31日止年度收益</td><td>40,088</td><td>35,153</td><td>–</td><td>–</td><td>75,241</td></tr><tr><td>銷售成本</td><td>(31,976)</td><td>(32,694)</td><td>–</td><td>–</td><td>(64,670)</td></tr><tr><td>毛利</td><td>8,112</td><td>2,459</td><td>–</td><td>–</td><td>10,571</td></tr><tr><td>截至2017年12月31日止年度收益</td><td>333,272</td><td>91,091</td><td>–</td><td>–</td><td>424,363</td></tr><tr><td>銷售成本</td><td>(234,438)</td><td>(83,051)</td><td>–</td><td>–</td><td>(317,489)</td></tr><tr><td>毛利</td><td>98,834</td><td>8,040</td><td>–</td><td>–</td><td>106,874</td></tr><tr><td>截至2018年12月31日止年度收益</td><td>874,308</td><td>139,990</td><td>42,254</td><td>31,344</td><td>1,087,896</td></tr><tr><td>銷售成本</td><td>(663,502)</td><td>(117,878)</td><td>(32,714)</td><td>(21,460)</td><td>(835,554)</td></tr><tr><td>毛利</td><td>210,806</td><td>22,112</td><td>9,540</td><td>9,884</td><td>252,342</td></tr><tr><td>截至2018年9月30日止九個月（未經審核）</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益</td><td>652,598</td><td>70,690</td><td>42,254</td><td>17,191</td><td>782,733</td></tr><tr><td>銷售成本</td><td>(511,925)</td><td>(59,078)</td><td>(32,714)</td><td>(10,407)</td><td>(614,124)</td></tr><tr><td>毛利</td><td>140,673</td><td>11,612</td><td>9,540</td><td>6,784</td><td>168,609</td></tr><tr><td>截至2019年9月30日止九個月收益</td><td>732,919</td><td>340,126</td><td>748</td><td>76,091</td><td>1,149,884</td></tr><tr><td>銷售成本</td><td>(567,454)</td><td>(277,837)</td><td>(748)</td><td>(48,937)</td><td>(894,976)</td></tr><tr><td>毛利</td><td>165,465</td><td>62,289</td><td>–</td><td>27,154</td><td>254,908</td></tr></table>",
     "source_tag": "p447_table"
   },
   {
@@ -3212,13 +3200,13 @@
       2904
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td>2016年</td><td>2017年</td><td>2018年</td><td>2018年</td><td>2019年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元（未經審核）</td><td>人民幣千元</td></tr><tr><td>利息收益</td><td>236</td><td>196</td><td>959</td><td>506</td><td>1,422</td></tr><tr><td>政府補助</td><td>500</td><td>616</td><td>1,692</td><td>222</td><td>785</td></tr><tr><td>出售物業、廠房及設備的（虧損）／收益</td><td>(401)</td><td>–</td><td>(907)</td><td>(609)</td><td>799</td></tr><tr><td>其他</td><td>1</td><td>–</td><td>18</td><td>17</td><td>1</td></tr><tr><td></td><td>336</td><td>812</td><td>1,762</td><td>136</td><td>3,007</td></tr></table>",
+    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td>2016年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2018年人民幣千元（未經審核）</td><td>2019年人民幣千元</td></tr><tr><td>利息收益</td><td>236</td><td>196</td><td>959</td><td>506</td><td>1,422</td></tr><tr><td>政府補助</td><td>500</td><td>616</td><td>1,692</td><td>222</td><td>785</td></tr><tr><td>出售物業、廠房及設備的（虧損）／收益</td><td>(401)</td><td>–</td><td>(907)</td><td>(609)</td><td>799</td></tr><tr><td>其他</td><td>1</td><td>–</td><td>18</td><td>17</td><td>1</td></tr><tr><td></td><td>336</td><td>812</td><td>1,762</td><td>136</td><td>3,007</td></tr></table>",
     "source_tag": "p447_table"
   },
   {
     "page": 448,
     "bbox": [
-      401,
+      396,
       489,
       2195,
       2447
@@ -3243,7 +3231,7 @@
     "page": 449,
     "bbox": [
       516,
-      1207,
+      1204,
       2193,
       1955
     ],
@@ -3398,7 +3386,7 @@
   {
     "page": 457,
     "bbox": [
-      516,
+      518,
       1253,
       2190,
       1766
@@ -3572,7 +3560,7 @@
       1703
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2016年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2018年人民幣千元（未經審核）</td><td>2019年人民幣千元</td></tr><tr><td>經營現金流量</td><td>(3,138)</td><td>(11,073)</td><td>(33,546)</td><td>(25,052)</td><td>(33,209)</td></tr><tr><td>融資現金流量</td><td>(881)</td><td>(2,138)</td><td>(864)</td><td>(171)</td><td>(1,785)</td></tr><tr><td></td><td>(4,019)</td><td>(13,211)</td><td>(34,410)</td><td>(25,223)</td><td>(34,994)</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2018年 人民幣千元（未經審核）</td><td>2019年 人民幣千元</td></tr><tr><td>經營現金流量</td><td>(3,138)</td><td>(11,073)</td><td>(33,546)</td><td>(25,052)</td><td>(33,209)</td></tr><tr><td>融資現金流量</td><td>(881)</td><td>(2,138)</td><td>(864)</td><td>(171)</td><td>(1,785)</td></tr><tr><td></td><td>(4,019)</td><td>(13,211)</td><td>(34,410)</td><td>(25,223)</td><td>(34,994)</td></tr></table>",
     "source_tag": "p467_table"
   },
   {
@@ -3584,7 +3572,7 @@
       2725
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td></td><td>2016年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2019年人民幣千元</td></tr><tr><td>貿易應付款項</td><td></td><td></td><td></td><td></td></tr><tr><td>－應付第三方</td><td>50,219</td><td>136,882</td><td>265,871</td><td>325,569</td></tr><tr><td>－應付關聯方(附註28(c))</td><td>17,508</td><td>8,619</td><td>13</td><td>64</td></tr><tr><td>應付票據</td><td>5,772</td><td>9,866</td><td>19,851</td><td>47,639</td></tr><tr><td>應付物業、廠房及設備供應商款項．以分期付款購入設備的應付款項</td><td>55,364</td><td>66,719</td><td>70,920</td><td>45,416</td></tr><tr><td>－即期部分</td><td>15,457</td><td>27,843</td><td>29,488</td><td>22,027</td></tr><tr><td>其他應付款項及應計款項</td><td>4,827</td><td>21,154</td><td>40,336</td><td>96,347</td></tr><tr><td>具追索權的背書票據責任</td><td>–</td><td>–</td><td>58,145</td><td>70,483</td></tr><tr><td>應付利息</td><td>16</td><td>68</td><td>105</td><td>308</td></tr><tr><td>應付關聯方款項(附註28(c))</td><td>72,956</td><td>1,951</td><td>13,872</td><td>720</td></tr><tr><td></td><td>222,119</td><td>273,102</td><td>498,601</td><td>608,573</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">於12月31日</td><td>於9月30日</td></tr><tr><td></td><td>2016年 人民幣千元</td><td>2017年 人民幣千元</td><td>2018年 人民幣千元</td><td>2019年 人民幣千元</td></tr><tr><td>貿易應付款項</td><td></td><td></td><td></td><td></td></tr><tr><td>－應付第三方</td><td>50,219</td><td>136,882</td><td>265,871</td><td>325,569</td></tr><tr><td>－應付關聯方(附註28(c))</td><td>17,508</td><td>8,619</td><td>13</td><td>64</td></tr><tr><td>應付票據</td><td>5,772</td><td>9,866</td><td>19,851</td><td>47,639</td></tr><tr><td>應付物業、廠房及設備供應商款項．以分期付款購入設備的應付款項</td><td>55,364</td><td>66,719</td><td>70,920</td><td>45,416</td></tr><tr><td>－即期部分</td><td>15,457</td><td>27,843</td><td>29,488</td><td>22,027</td></tr><tr><td>其他應付款項及應計款項</td><td>4,827</td><td>21,154</td><td>40,336</td><td>96,347</td></tr><tr><td>具追索權的背書票據責任</td><td>–</td><td>–</td><td>58,145</td><td>70,483</td></tr><tr><td>應付利息</td><td>16</td><td>68</td><td>105</td><td>308</td></tr><tr><td>應付關聯方款項(附註28(c))</td><td>72,956</td><td>1,951</td><td>13,872</td><td>720</td></tr><tr><td></td><td>222,119</td><td>273,102</td><td>498,601</td><td>608,573</td></tr></table>",
     "source_tag": "p467_table"
   },
   {
@@ -3616,7 +3604,7 @@
     "bbox": [
       516,
       2292,
-      2190,
+      2193,
       2742
     ],
     "type": "table",
@@ -3675,7 +3663,7 @@
     "page": 470,
     "bbox": [
       516,
-      380,
+      383,
       2190,
       830
     ],
@@ -3977,7 +3965,7 @@
       1399,
       1137,
       2193,
-      1928
+      1925
     ],
     "type": "table",
     "content": "<table><tr><td colspan=\"3\">於2018年12月31日</td></tr><tr><td>實際利率</td><td></td><td></td></tr><tr><td>%</td><td>人民幣千元</td></tr><tr><td>6.9</td><td>3,963</td></tr><tr><td>7.2</td><td>13,961</td></tr><tr><td>7.2–7.8</td><td>57,437</td></tr><tr><td>7.2</td><td>34,948</td><td>110,309</td></tr><tr><td>5.2–6.1</td><td>65,314</td></tr><tr><td></td><td>175,623</td></tr><tr><td></td><td>62.8%</td></tr></table>",
@@ -3989,7 +3977,7 @@
       1399,
       1978,
       2193,
-      2765
+      2762
     ],
     "type": "table",
     "content": "<table><tr><td colspan=\"3\">於2019年9月30日</td></tr><tr><td>實際利率</td><td></td><td></td></tr><tr><td>%</td><td>人民幣千元</td></tr><tr><td>6.9</td><td>2,060</td></tr><tr><td>7.2</td><td>6,906</td></tr><tr><td>6.8–7.8</td><td>82,000</td></tr><tr><td>7.2</td><td>30,748</td><td>121,714</td></tr><tr><td>不適用</td><td>–</td></tr><tr><td></td><td>121,714</td></tr><tr><td></td><td>100%</td></tr></table>",
@@ -4083,7 +4071,7 @@
     "page": 488,
     "bbox": [
       401,
-      1243,
+      1247,
       2190,
       1915
     ],
@@ -4094,7 +4082,7 @@
   {
     "page": 499,
     "bbox": [
-      516,
+      518,
       2229,
       2193,
       2368
@@ -4130,7 +4118,7 @@
   {
     "page": 515,
     "bbox": [
-      396,
+      399,
       1938,
       2195,
       2378
@@ -4202,10 +4190,10 @@
   {
     "page": 531,
     "bbox": [
-      632,
+      630,
       291,
       2163,
-      1508
+      1511
     ],
     "type": "table",
     "content": "<table><tr><td>編號</td><td>商標</td><td>註冊擁有人</td><td>註冊地點</td><td>類別</td><td>註冊編號</td><td>有效期限</td></tr><tr><td>4.</td><td></td><td>建中科技(平潭)</td><td>中國</td><td>37<sup>4</sup></td><td>27859772</td><td>2018.11.7-2028.11.6</td></tr><tr><td>5.</td><td></td><td>建中科技(平潭)</td><td>中國</td><td>42<sup>5</sup></td><td>27859070</td><td>2019.4.7–2029.4.6</td></tr><tr><td>6.</td><td>JIANZHONG</td><td>本公司</td><td>香港</td><td>6、7、37、42<sup>1</sup></td><td>304915738</td><td>2019.5.7-2029.5.6</td></tr><tr><td>7.</td><td>建中</td><td>本公司</td><td>香港</td><td>6、7、37、42</td><td>304915765</td><td>2019.5.7-2029.5.6</td></tr><tr><td>8.</td><td>A</td><td>本公司</td><td>香港</td><td>6、7、37、42</td><td>304915774</td><td>2019.5.7-2029.5.6</td></tr><tr><td></td><td>B</td><td></td><td></td><td></td><td></td><td></td></tr></table>",
@@ -4286,7 +4274,7 @@
   {
     "page": 537,
     "bbox": [
-      630,
+      627,
       645,
       2178,
       2782
@@ -4394,13 +4382,13 @@
   {
     "page": 544,
     "bbox": [
-      635,
+      632,
       1392,
       2188,
       1829
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td></td><td colspan=\"4\">緊隨資本化發行及股份發售後</td></tr><tr><td>董事／行政總裁姓名</td><td>身份／權益性質</td><td>於本招股章程日期</td><td>股份數目^(1)</td><td>股權概約百分比</td></tr><tr><td>荀名紅先生……</td><td>於受控制法團的權益^(2)</td><td>6,805股(L)</td><td>68.05%</td><td>318,984,375股(L)</td><td>51.04%</td></tr><tr><td>荀良寶先生……</td><td>於受控制法團的權益^(3)</td><td>999股(L)</td><td>9.99%</td><td>46,828,125股(L)</td><td>7.49%</td></tr></table>",
+    "content": "<table><tr><td></td><td></td><td></td><td colspan=\"4\">緊隨資本化發行及股份發售後</td></tr><tr><td>董事／行政總裁姓名</td><td>身份／權益性質</td><td>於本招股章程日期</td><td>股份數目^(1)</td><td>股權概約百分比</td></tr><tr><td>荀名紅先生……</td><td>於受控制法團的權益^(2)</td><td>6,805股(L)</td><td>68.05%</td><td>318,984,375股(L)</td><td>51.04%</td></tr><tr><td>荀良寶先生……</td><td>於受控制法團的權益^(3)</td><td>999股(L)</td><td>9.99%</td><td>46,828,125股(L)</td><td>7.49%</td></tr></table>",
     "source_tag": "p544_table"
   },
   {
