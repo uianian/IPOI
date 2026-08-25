@@ -3,10 +3,10 @@
   "total_elements": 5764,
   "categories": {
     "text": 3180,
-    "title": 932,
-    "header": 656,
-    "footer": 562,
-    "table": 236,
+    "title": 930,
+    "header": 658,
+    "footer": 563,
+    "table": 235,
     "table_footnote": 115,
     "figure": 56,
     "table_caption": 19,
@@ -15,11 +15,11 @@
   },
   "failed_pages": [],
   "empty_pages": [],
-  "html_tables": 236,
+  "html_tables": 235,
   "markdown_tables": 0,
   "table_structure_confidence_pages": {
     "high": 97,
     "medium": 68,
-    "low": 16
+    "low": 15
   }
 }

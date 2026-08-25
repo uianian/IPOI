@@ -1,16 +1,16 @@
 {
   "total_pages": 566,
-  "issue_count": 87,
+  "issue_count": 86,
   "issues_by_tag": {
     "table_structure_medium": 68,
-    "vertical_table_low_structure": 16,
+    "vertical_table_low_structure": 15,
     "truncated": 1,
     "missing_table_high_numeric": 2
   },
   "table_structure_confidence_pages": {
     "medium": 68,
     "high": 97,
-    "low": 16
+    "low": 15
   },
   "reparse_pages": [
     21,
@@ -22,7 +22,6 @@
     183,
     222,
     224,
-    252,
     271,
     272,
     274,
@@ -32,7 +31,7 @@
     531,
     543
   ],
-  "reparse_pages_csv": "21,126,137,166,167,180,183,222,224,252,271,272,274,358,454,455,531,543",
+  "reparse_pages_csv": "21,126,137,166,167,180,183,222,224,271,272,274,358,454,455,531,543",
   "review_pages": [
     21,
     126,
@@ -44,7 +43,6 @@
     207,
     222,
     224,
-    252,
     271,
     272,
     274,
@@ -297,13 +295,6 @@
       "detail": "score=658, notes=['sparse_table']"
     },
     {
-      "page": 252,
-      "tag": "vertical_table_low_structure",
-      "severity": "high",
-      "detail": "score=438, notes=['truncated_or_header_only']",
-      "suggest_reparse": true
-    },
-    {
       "page": 264,
       "tag": "table_structure_medium",
       "severity": "low",
@@ -388,7 +379,7 @@
       "page": 309,
       "tag": "table_structure_medium",
       "severity": "low",
-      "detail": "score=1110, notes=['complex_colspan_header']"
+      "detail": "score=1112, notes=['complex_colspan_header']"
     },
     {
       "page": 312,

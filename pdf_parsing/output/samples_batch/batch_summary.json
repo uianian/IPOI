@@ -1,84 +1,2786 @@
 {
-  "generated_at": "2026-07-24T17:46:02",
-  "n_docs": 1,
-  "ok": 1,
+  "generated_at": "2026-08-10T03:13:03",
+  "n_docs": 54,
+  "ok": 54,
   "failed": 0,
   "records": [
     {
-      "pdf": "/nfs/users/wuqianqian/IPOI/pdf_parsing/pdf/03378_15-12-2025_翰思艾泰－Ｂ_全球發售.pdf",
-      "stem": "03378_15-12-2025_翰思艾泰－Ｂ_全球發售",
-      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03378_15-12-2025_翰思艾泰－Ｂ_全球發售",
-      "started_at": "2026-07-24T17:04:50",
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/00368_30-06-2020_德合集團_股份發售.pdf",
+      "stem": "00368_30-06-2020_德合集團_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/00368_30-06-2020_德合集團_股份發售",
+      "started_at": "2026-08-08T23:22:21",
       "page_workers": 2,
       "gpu_ids": [
-        0,
-        1,
-        2,
-        3,
-        4
+        2
       ],
       "pass1": {
-        "pages": 704,
-        "elapsed_sec": 2471.4,
-        "sec_per_page": 3.51,
+        "pages": 420,
+        "elapsed_sec": 5614.7,
+        "sec_per_page": 13.37,
         "page_workers": 2,
         "batch_size": 2
       },
       "qa_pass1": {
-        "issue_count": 104,
+        "issue_count": 65,
         "issues_by_tag": {
-          "table_structure_medium": 70,
-          "vertical_table_low_structure": 25,
-          "truncated": 1,
-          "missing_table_high_numeric": 8
+          "vertical_table_low_structure": 26,
+          "table_structure_medium": 39
         },
-        "reparse_pages_csv": "35,149,181,191,241,250,251,263,273,308,311,312,314,360,365,385,394,429,459,491,548,562,563,564,572,595,596,613,614,618,620,688,698",
+        "reparse_pages_csv": "14,23,92,131,152,153,163,182,184,187,189,195,196,200,202,220,228,235,237,287,336,345,353,356,398,399",
         "reparse_pages": [
-          35,
-          149,
-          181,
-          191,
-          241,
-          250,
-          251,
-          263,
-          273,
-          308,
-          311,
-          312,
-          314,
-          360,
-          365,
-          385,
-          394,
-          429,
-          459,
-          491,
-          548,
-          562,
-          563,
-          564,
-          572,
-          595,
-          596,
-          613,
-          614,
-          618,
-          620,
-          688,
-          698
+          14,
+          23,
+          92,
+          131,
+          152,
+          153,
+          163,
+          182,
+          184,
+          187,
+          189,
+          195,
+          196,
+          200,
+          202,
+          220,
+          228,
+          235,
+          237,
+          287,
+          336,
+          345,
+          353,
+          356,
+          398,
+          399
         ]
       },
-      "elapsed_sec": 2471.5,
-      "finished_at": "2026-07-24T17:46:02",
+      "elapsed_sec": 5614.8,
+      "finished_at": "2026-08-09T00:55:56",
       "status": "ok",
-      "gpu_id": [
-        0,
-        1,
-        2,
-        3,
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/00589_28-02-2020_建中建設_股份發售.pdf",
+      "stem": "00589_28-02-2020_建中建設_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/00589_28-02-2020_建中建設_股份發售",
+      "started_at": "2026-08-08T23:22:21",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 566,
+        "elapsed_sec": 8183.8,
+        "sec_per_page": 14.46,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 86,
+        "issues_by_tag": {
+          "table_structure_medium": 69,
+          "vertical_table_low_structure": 14,
+          "truncated": 1,
+          "missing_table_high_numeric": 2
+        },
+        "reparse_pages_csv": "21,126,137,166,167,183,222,224,271,272,274,358,454,455,531,543",
+        "reparse_pages": [
+          21,
+          126,
+          137,
+          166,
+          167,
+          183,
+          222,
+          224,
+          271,
+          272,
+          274,
+          358,
+          454,
+          455,
+          531,
+          543
+        ]
+      },
+      "elapsed_sec": 8183.9,
+      "finished_at": "2026-08-09T01:38:45",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01024_26-01-2021_快手－Ｗ_全球發售.pdf",
+      "stem": "01024_26-01-2021_快手－Ｗ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01024_26-01-2021_快手－Ｗ_全球發售",
+      "started_at": "2026-08-08T23:22:21",
+      "page_workers": 2,
+      "gpu_ids": [
         4
-      ]
+      ],
+      "pass1": {
+        "pages": 848,
+        "elapsed_sec": 10886.3,
+        "sec_per_page": 12.84,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 54,
+        "issues_by_tag": {
+          "table_structure_medium": 42,
+          "vertical_table_low_structure": 5,
+          "missing_table_high_numeric": 6,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "44,171,326,412,583,627,666,673,686,687,840",
+        "reparse_pages": [
+          44,
+          171,
+          326,
+          412,
+          583,
+          627,
+          666,
+          673,
+          686,
+          687,
+          840
+        ]
+      },
+      "elapsed_sec": 10886.4,
+      "finished_at": "2026-08-09T02:23:47",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01147_23-04-2020_伊登軟件_股份發售.pdf",
+      "stem": "01147_23-04-2020_伊登軟件_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01147_23-04-2020_伊登軟件_股份發售",
+      "started_at": "2026-08-08T23:22:21",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 458,
+        "elapsed_sec": 6882.1,
+        "sec_per_page": 15.03,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 48,
+        "issues_by_tag": {
+          "truncated": 1,
+          "table_structure_medium": 34,
+          "vertical_table_low_structure": 12,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "30,120,131,185,216,222,281,306,336,337,392,393,439",
+        "reparse_pages": [
+          30,
+          120,
+          131,
+          185,
+          216,
+          222,
+          281,
+          306,
+          336,
+          337,
+          392,
+          393,
+          439
+        ]
+      },
+      "elapsed_sec": 6882.2,
+      "finished_at": "2026-08-09T01:17:03",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01156_30-06-2020_CHINANEWENERGY_全球發售.pdf",
+      "stem": "01156_30-06-2020_CHINANEWENERGY_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01156_30-06-2020_CHINANEWENERGY_全球發售",
+      "started_at": "2026-08-08T23:22:21",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 498,
+        "elapsed_sec": 6849.5,
+        "sec_per_page": 13.75,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 73,
+        "issues_by_tag": {
+          "table_structure_medium": 59,
+          "vertical_table_low_structure": 14
+        },
+        "reparse_pages_csv": "25,91,167,194,229,230,267,269,304,327,395,396,409,493",
+        "reparse_pages": [
+          25,
+          91,
+          167,
+          194,
+          229,
+          230,
+          267,
+          269,
+          304,
+          327,
+          395,
+          396,
+          409,
+          493
+        ]
+      },
+      "elapsed_sec": 6849.5,
+      "finished_at": "2026-08-09T01:16:31",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01167_09-12-2020_加科思－Ｂ_全球發售.pdf",
+      "stem": "01167_09-12-2020_加科思－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01167_09-12-2020_加科思－Ｂ_全球發售",
+      "started_at": "2026-08-09T00:55:56",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 520,
+        "elapsed_sec": 7094.5,
+        "sec_per_page": 13.64,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 59,
+        "issues_by_tag": {
+          "table_structure_medium": 45,
+          "vertical_table_low_structure": 13,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "25,243,246,259,266,269,323,354,442,461,471,500,510,512",
+        "reparse_pages": [
+          25,
+          243,
+          246,
+          259,
+          266,
+          269,
+          323,
+          354,
+          442,
+          461,
+          471,
+          500,
+          510,
+          512
+        ]
+      },
+      "elapsed_sec": 7094.6,
+      "finished_at": "2026-08-09T02:54:10",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01179_11-09-2020_華住集團－Ｓ_全球發售.pdf",
+      "stem": "01179_11-09-2020_華住集團－Ｓ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01179_11-09-2020_華住集團－Ｓ_全球發售",
+      "started_at": "2026-08-09T01:38:45",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 599,
+        "elapsed_sec": 9046.5,
+        "sec_per_page": 15.1,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 80,
+        "issues_by_tag": {
+          "table_structure_medium": 63,
+          "missing_table_high_numeric": 3,
+          "vertical_table_low_structure": 13,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "28,220,221,222,254,266,370,388,396,432,454,457,458,459,541,583",
+        "reparse_pages": [
+          28,
+          220,
+          221,
+          222,
+          254,
+          266,
+          370,
+          388,
+          396,
+          432,
+          454,
+          457,
+          458,
+          459,
+          541,
+          583
+        ]
+      },
+      "elapsed_sec": 9046.6,
+      "finished_at": "2026-08-09T04:09:31",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01276_15-05-2025_恒瑞醫藥_全球發售.pdf",
+      "stem": "01276_15-05-2025_恒瑞醫藥_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01276_15-05-2025_恒瑞醫藥_全球發售",
+      "started_at": "2026-08-09T02:23:47",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 683,
+        "elapsed_sec": 10446.9,
+        "sec_per_page": 15.3,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 81,
+        "issues_by_tag": {
+          "truncated": 4,
+          "table_structure_medium": 52,
+          "vertical_table_low_structure": 16,
+          "missing_table_high_numeric": 9
+        },
+        "reparse_pages_csv": "140,261,303,327,330,332,426,427,439,460,476,489,490,491,492,531,544,551,564,565,566,570,576,658,669",
+        "reparse_pages": [
+          140,
+          261,
+          303,
+          327,
+          330,
+          332,
+          426,
+          427,
+          439,
+          460,
+          476,
+          489,
+          490,
+          491,
+          492,
+          531,
+          544,
+          551,
+          564,
+          565,
+          566,
+          570,
+          576,
+          658,
+          669
+        ]
+      },
+      "elapsed_sec": 10447.0,
+      "finished_at": "2026-08-09T05:17:54",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01343_25-02-2020_偉源控股_股份發售.pdf",
+      "stem": "01343_25-02-2020_偉源控股_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01343_25-02-2020_偉源控股_股份發售",
+      "started_at": "2026-08-09T01:17:03",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 482,
+        "elapsed_sec": 7033.9,
+        "sec_per_page": 14.59,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 62,
+        "issues_by_tag": {
+          "table_structure_medium": 37,
+          "vertical_table_low_structure": 24,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "10,11,12,19,79,83,119,120,121,136,143,147,150,171,221,227,230,271,273,285,292,387,406,462,463",
+        "reparse_pages": [
+          10,
+          11,
+          12,
+          19,
+          79,
+          83,
+          119,
+          120,
+          121,
+          136,
+          143,
+          147,
+          150,
+          171,
+          221,
+          227,
+          230,
+          271,
+          273,
+          285,
+          292,
+          387,
+          406,
+          462,
+          463
+        ]
+      },
+      "elapsed_sec": 7033.9,
+      "finished_at": "2026-08-09T03:14:17",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01351_28-10-2020_輝煌明天_股份發售.pdf",
+      "stem": "01351_28-10-2020_輝煌明天_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01351_28-10-2020_輝煌明天_股份發售",
+      "started_at": "2026-08-09T01:16:31",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 487,
+        "elapsed_sec": 7095.3,
+        "sec_per_page": 14.57,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 57,
+        "issues_by_tag": {
+          "table_structure_medium": 46,
+          "vertical_table_low_structure": 10,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "22,303,304,305,353,397,398,467,468,469",
+        "reparse_pages": [
+          22,
+          303,
+          304,
+          305,
+          353,
+          397,
+          398,
+          467,
+          468,
+          469
+        ]
+      },
+      "elapsed_sec": 7095.4,
+      "finished_at": "2026-08-09T03:14:46",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01364_04-02-2025_古茗_全球發售.pdf",
+      "stem": "01364_04-02-2025_古茗_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01364_04-02-2025_古茗_全球發售",
+      "started_at": "2026-08-09T02:54:10",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 592,
+        "elapsed_sec": 8453.5,
+        "sec_per_page": 14.28,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 56,
+        "issues_by_tag": {
+          "table_structure_medium": 45,
+          "truncated": 1,
+          "vertical_table_low_structure": 10
+        },
+        "reparse_pages_csv": "32,290,291,417,434,437,514,571,575,576",
+        "reparse_pages": [
+          32,
+          290,
+          291,
+          417,
+          434,
+          437,
+          514,
+          571,
+          575,
+          576
+        ]
+      },
+      "elapsed_sec": 8453.6,
+      "finished_at": "2026-08-09T05:15:04",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01376_21-04-2020_RAFFLESINTERIOR_股份發售.pdf",
+      "stem": "01376_21-04-2020_RAFFLESINTERIOR_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01376_21-04-2020_RAFFLESINTERIOR_股份發售",
+      "started_at": "2026-08-09T04:09:31",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 454,
+        "elapsed_sec": 5803.1,
+        "sec_per_page": 12.78,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 63,
+        "issues_by_tag": {
+          "table_structure_medium": 46,
+          "vertical_table_low_structure": 15,
+          "parse_failed": 1,
+          "empty_page": 1
+        },
+        "reparse_pages_csv": "24,92,104,106,138,222,226,227,243,293,326,370,389,428,431,454",
+        "reparse_pages": [
+          24,
+          92,
+          104,
+          106,
+          138,
+          222,
+          226,
+          227,
+          243,
+          293,
+          326,
+          370,
+          389,
+          428,
+          431,
+          454
+        ]
+      },
+      "elapsed_sec": 5803.2,
+      "finished_at": "2026-08-09T05:46:15",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01379_11-12-2020_温嶺工量刃具_全球發售.pdf",
+      "stem": "01379_11-12-2020_温嶺工量刃具_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01379_11-12-2020_温嶺工量刃具_全球發售",
+      "started_at": "2026-08-09T05:17:54",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 510,
+        "elapsed_sec": 6220.2,
+        "sec_per_page": 12.2,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 60,
+        "issues_by_tag": {
+          "table_structure_medium": 45,
+          "vertical_table_low_structure": 13,
+          "missing_table_high_numeric": 2
+        },
+        "reparse_pages_csv": "32,117,135,136,214,221,222,223,224,256,361,369,372,373,390",
+        "reparse_pages": [
+          32,
+          117,
+          135,
+          136,
+          214,
+          221,
+          222,
+          223,
+          224,
+          256,
+          361,
+          369,
+          372,
+          373,
+          390
+        ]
+      },
+      "elapsed_sec": 6220.3,
+      "finished_at": "2026-08-09T07:01:35",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01384_20-10-2025_滴普科技_全球發售.pdf",
+      "stem": "01384_20-10-2025_滴普科技_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01384_20-10-2025_滴普科技_全球發售",
+      "started_at": "2026-08-09T03:14:17",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 628,
+        "elapsed_sec": 8028.6,
+        "sec_per_page": 12.78,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 106,
+        "issues_by_tag": {
+          "table_structure_medium": 83,
+          "vertical_table_low_structure": 21,
+          "missing_table_high_numeric": 2
+        },
+        "reparse_pages_csv": "35,108,117,119,141,142,143,152,154,233,260,262,264,297,298,320,406,443,492,495,510,527,600",
+        "reparse_pages": [
+          35,
+          108,
+          117,
+          119,
+          141,
+          142,
+          143,
+          152,
+          154,
+          233,
+          260,
+          262,
+          264,
+          297,
+          298,
+          320,
+          406,
+          443,
+          492,
+          495,
+          510,
+          527,
+          600
+        ]
+      },
+      "elapsed_sec": 8028.6,
+      "finished_at": "2026-08-09T05:28:06",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01406_31-01-2022_清晰醫療_全球發售.pdf",
+      "stem": "01406_31-01-2022_清晰醫療_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01406_31-01-2022_清晰醫療_全球發售",
+      "started_at": "2026-08-09T03:14:46",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 482,
+        "elapsed_sec": 7158.7,
+        "sec_per_page": 14.85,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 68,
+        "issues_by_tag": {
+          "truncated": 1,
+          "vertical_table_low_structure": 39,
+          "table_structure_medium": 28
+        },
+        "reparse_pages_csv": "10,11,12,25,32,112,113,114,115,117,146,167,170,171,175,178,179,180,197,206,207,214,243,244,245,260,283,306,308,310,324,326,327,383,403,406,408,415,458",
+        "reparse_pages": [
+          10,
+          11,
+          12,
+          25,
+          32,
+          112,
+          113,
+          114,
+          115,
+          117,
+          146,
+          167,
+          170,
+          171,
+          175,
+          178,
+          179,
+          180,
+          197,
+          206,
+          207,
+          214,
+          243,
+          244,
+          245,
+          260,
+          283,
+          306,
+          308,
+          310,
+          324,
+          326,
+          327,
+          383,
+          403,
+          406,
+          408,
+          415,
+          458
+        ]
+      },
+      "elapsed_sec": 7158.8,
+      "finished_at": "2026-08-09T05:14:05",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01408_31-08-2020_濠江機電_全球發售.pdf",
+      "stem": "01408_31-08-2020_濠江機電_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01408_31-08-2020_濠江機電_全球發售",
+      "started_at": "2026-08-09T05:15:04",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 503,
+        "elapsed_sec": 6370.2,
+        "sec_per_page": 12.66,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 70,
+        "issues_by_tag": {
+          "table_structure_medium": 58,
+          "vertical_table_low_structure": 12
+        },
+        "reparse_pages_csv": "226,228,247,249,284,285,323,335,366,397,480,481",
+        "reparse_pages": [
+          226,
+          228,
+          247,
+          249,
+          284,
+          285,
+          323,
+          335,
+          366,
+          397,
+          480,
+          481
+        ]
+      },
+      "elapsed_sec": 6370.3,
+      "finished_at": "2026-08-09T07:01:14",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01433_28-02-2020_常達控股_全球發售.pdf",
+      "stem": "01433_28-02-2020_常達控股_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01433_28-02-2020_常達控股_全球發售",
+      "started_at": "2026-08-09T05:46:15",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 486,
+        "elapsed_sec": 6841.5,
+        "sec_per_page": 14.08,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 53,
+        "issues_by_tag": {
+          "table_structure_medium": 41,
+          "vertical_table_low_structure": 11,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "20,130,164,187,193,248,344,345,383,405,469",
+        "reparse_pages": [
+          20,
+          130,
+          164,
+          187,
+          193,
+          248,
+          344,
+          345,
+          383,
+          405,
+          469
+        ]
+      },
+      "elapsed_sec": 6841.6,
+      "finished_at": "2026-08-09T07:40:16",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01449_27-07-2020_立德教育_全球發售.pdf",
+      "stem": "01449_27-07-2020_立德教育_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01449_27-07-2020_立德教育_全球發售",
+      "started_at": "2026-08-09T07:01:35",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 611,
+        "elapsed_sec": 8031.4,
+        "sec_per_page": 13.14,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 75,
+        "issues_by_tag": {
+          "truncated": 1,
+          "table_structure_medium": 51,
+          "vertical_table_low_structure": 20,
+          "missing_table_high_numeric": 3
+        },
+        "reparse_pages_csv": "24,133,163,223,224,267,279,296,301,302,392,433,468,492,515,516,520,534,537,576,589,590,591",
+        "reparse_pages": [
+          24,
+          133,
+          163,
+          223,
+          224,
+          267,
+          279,
+          296,
+          301,
+          302,
+          392,
+          433,
+          468,
+          492,
+          515,
+          516,
+          520,
+          534,
+          537,
+          576,
+          589,
+          590,
+          591
+        ]
+      },
+      "elapsed_sec": 8031.5,
+      "finished_at": "2026-08-09T09:15:26",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01455_31-08-2020_科利實業控股_全球發售.pdf",
+      "stem": "01455_31-08-2020_科利實業控股_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01455_31-08-2020_科利實業控股_全球發售",
+      "started_at": "2026-08-09T05:28:06",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 494,
+        "elapsed_sec": 6507.5,
+        "sec_per_page": 13.17,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 77,
+        "issues_by_tag": {
+          "table_structure_medium": 48,
+          "vertical_table_low_structure": 29
+        },
+        "reparse_pages_csv": "17,27,89,143,169,187,196,216,234,250,251,252,255,259,265,302,303,306,310,312,349,377,391,413,414,416,430,472,473",
+        "reparse_pages": [
+          17,
+          27,
+          89,
+          143,
+          169,
+          187,
+          196,
+          216,
+          234,
+          250,
+          251,
+          252,
+          255,
+          259,
+          265,
+          302,
+          303,
+          306,
+          310,
+          312,
+          349,
+          377,
+          391,
+          413,
+          414,
+          416,
+          430,
+          472,
+          473
+        ]
+      },
+      "elapsed_sec": 6507.6,
+      "finished_at": "2026-08-09T07:16:33",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01463_17-03-2020_C-LINK SQ_股份發售.pdf",
+      "stem": "01463_17-03-2020_C-LINK SQ_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01463_17-03-2020_C-LINK SQ_股份發售",
+      "started_at": "2026-08-09T05:14:05",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 508,
+        "elapsed_sec": 7010.6,
+        "sec_per_page": 13.8,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 61,
+        "issues_by_tag": {
+          "table_structure_medium": 48,
+          "vertical_table_low_structure": 12,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "25,133,244,246,266,269,396,398,399,429,439,485",
+        "reparse_pages": [
+          25,
+          133,
+          244,
+          246,
+          266,
+          269,
+          396,
+          398,
+          399,
+          429,
+          439,
+          485
+        ]
+      },
+      "elapsed_sec": 7010.7,
+      "finished_at": "2026-08-09T07:10:55",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01472_28-02-2020_生興控股_股份發售.pdf",
+      "stem": "01472_28-02-2020_生興控股_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01472_28-02-2020_生興控股_股份發售",
+      "started_at": "2026-08-09T07:01:14",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 454,
+        "elapsed_sec": 6637.9,
+        "sec_per_page": 14.62,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 51,
+        "issues_by_tag": {
+          "truncated": 2,
+          "vertical_table_low_structure": 22,
+          "table_structure_medium": 27
+        },
+        "reparse_pages_csv": "56,65,70,71,107,152,154,174,175,176,177,178,185,214,215,220,238,243,247,383,428,431",
+        "reparse_pages": [
+          56,
+          65,
+          70,
+          71,
+          107,
+          152,
+          154,
+          174,
+          175,
+          176,
+          177,
+          178,
+          185,
+          214,
+          215,
+          220,
+          238,
+          243,
+          247,
+          383,
+          428,
+          431
+        ]
+      },
+      "elapsed_sec": 6638.0,
+      "finished_at": "2026-08-09T08:51:52",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01477_29-06-2020_歐康維視生物－Ｂ_全球發售.pdf",
+      "stem": "01477_29-06-2020_歐康維視生物－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01477_29-06-2020_歐康維視生物－Ｂ_全球發售",
+      "started_at": "2026-08-09T07:40:16",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 578,
+        "elapsed_sec": 7669.7,
+        "sec_per_page": 13.27,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 59,
+        "issues_by_tag": {
+          "truncated": 1,
+          "table_structure_medium": 44,
+          "vertical_table_low_structure": 13,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "26,152,159,265,368,392,402,481,487,498,510,554,555,556",
+        "reparse_pages": [
+          26,
+          152,
+          159,
+          265,
+          368,
+          392,
+          402,
+          481,
+          487,
+          498,
+          510,
+          554,
+          555,
+          556
+        ]
+      },
+      "elapsed_sec": 7669.8,
+      "finished_at": "2026-08-09T09:48:06",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01490_31-12-2020_CHESHI_全球發售.pdf",
+      "stem": "01490_31-12-2020_CHESHI_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01490_31-12-2020_CHESHI_全球發售",
+      "started_at": "2026-08-09T09:15:26",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 531,
+        "elapsed_sec": 7857.3,
+        "sec_per_page": 14.8,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 57,
+        "issues_by_tag": {
+          "table_structure_medium": 46,
+          "vertical_table_low_structure": 6,
+          "missing_table_high_numeric": 3,
+          "parse_failed": 1,
+          "empty_page": 1
+        },
+        "reparse_pages_csv": "25,105,269,396,438,449,461,507,508,531",
+        "reparse_pages": [
+          25,
+          105,
+          269,
+          396,
+          438,
+          449,
+          461,
+          507,
+          508,
+          531
+        ]
+      },
+      "elapsed_sec": 7857.4,
+      "finished_at": "2026-08-09T11:26:24",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01597_29-09-2020_納泉能源科技_全球發售.pdf",
+      "stem": "01597_29-09-2020_納泉能源科技_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01597_29-09-2020_納泉能源科技_全球發售",
+      "started_at": "2026-08-09T07:16:33",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 550,
+        "elapsed_sec": 7502.5,
+        "sec_per_page": 13.64,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 92,
+        "issues_by_tag": {
+          "truncated": 2,
+          "vertical_table_low_structure": 58,
+          "table_structure_medium": 32
+        },
+        "reparse_pages_csv": "10,17,18,105,113,114,117,118,121,122,123,132,134,136,164,173,200,202,218,219,234,249,262,263,264,273,277,278,280,302,310,312,313,316,317,323,344,348,351,354,362,413,444,445,465,468,469,472,475,478,485,494,496,497,498,500,540,542",
+        "reparse_pages": [
+          10,
+          17,
+          18,
+          105,
+          113,
+          114,
+          117,
+          118,
+          121,
+          122,
+          123,
+          132,
+          134,
+          136,
+          164,
+          173,
+          200,
+          202,
+          218,
+          219,
+          234,
+          249,
+          262,
+          263,
+          264,
+          273,
+          277,
+          278,
+          280,
+          302,
+          310,
+          312,
+          313,
+          316,
+          317,
+          323,
+          344,
+          348,
+          351,
+          354,
+          362,
+          413,
+          444,
+          445,
+          465,
+          468,
+          469,
+          472,
+          475,
+          478,
+          485,
+          494,
+          496,
+          497,
+          498,
+          500,
+          540,
+          542
+        ]
+      },
+      "elapsed_sec": 7502.5,
+      "finished_at": "2026-08-09T09:21:36",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01643_31-12-2020_現代中藥集團_全球發售.pdf",
+      "stem": "01643_31-12-2020_現代中藥集團_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01643_31-12-2020_現代中藥集團_全球發售",
+      "started_at": "2026-08-09T07:10:55",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 563,
+        "elapsed_sec": 7613.1,
+        "sec_per_page": 13.52,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 89,
+        "issues_by_tag": {
+          "truncated": 1,
+          "vertical_table_low_structure": 27,
+          "table_structure_medium": 61
+        },
+        "reparse_pages_csv": "10,28,97,146,152,177,187,229,268,290,306,311,312,313,319,323,325,326,335,380,381,413,530,532,533,534,560",
+        "reparse_pages": [
+          10,
+          28,
+          97,
+          146,
+          152,
+          177,
+          187,
+          229,
+          268,
+          290,
+          306,
+          311,
+          312,
+          313,
+          319,
+          323,
+          325,
+          326,
+          335,
+          380,
+          381,
+          413,
+          530,
+          532,
+          533,
+          534,
+          560
+        ]
+      },
+      "elapsed_sec": 7613.2,
+      "finished_at": "2026-08-09T09:17:49",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01645_20-05-2020_海納智能_股份發售.pdf",
+      "stem": "01645_20-05-2020_海納智能_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01645_20-05-2020_海納智能_股份發售",
+      "started_at": "2026-08-09T08:51:52",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 430,
+        "elapsed_sec": 5936.2,
+        "sec_per_page": 13.81,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 64,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 38,
+          "table_structure_medium": 26
+        },
+        "reparse_pages_csv": "9,17,110,118,120,127,132,134,141,142,180,196,197,201,204,223,225,226,228,231,239,242,245,246,254,279,311,329,334,336,339,340,343,348,355,357,362,402",
+        "reparse_pages": [
+          9,
+          17,
+          110,
+          118,
+          120,
+          127,
+          132,
+          134,
+          141,
+          142,
+          180,
+          196,
+          197,
+          201,
+          204,
+          223,
+          225,
+          226,
+          228,
+          231,
+          239,
+          242,
+          245,
+          246,
+          254,
+          279,
+          311,
+          329,
+          334,
+          336,
+          339,
+          340,
+          343,
+          348,
+          355,
+          357,
+          362,
+          402
+        ]
+      },
+      "elapsed_sec": 5936.2,
+      "finished_at": "2026-08-09T10:30:49",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01828_26-06-2025_富衛集團_全球發售.pdf",
+      "stem": "01828_26-06-2025_富衛集團_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01828_26-06-2025_富衛集團_全球發售",
+      "started_at": "2026-08-09T09:48:06",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 963,
+        "elapsed_sec": 13633.3,
+        "sec_per_page": 14.16,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 103,
+        "issues_by_tag": {
+          "parse_failed": 2,
+          "empty_page": 2,
+          "table_structure_medium": 76,
+          "vertical_table_low_structure": 20,
+          "missing_table_high_numeric": 3
+        },
+        "reparse_pages_csv": "1,139,218,380,456,463,487,491,510,512,540,626,627,628,629,663,714,715,751,752,784,810,888,889,963",
+        "reparse_pages": [
+          1,
+          139,
+          218,
+          380,
+          456,
+          463,
+          487,
+          491,
+          510,
+          512,
+          540,
+          626,
+          627,
+          628,
+          629,
+          663,
+          714,
+          715,
+          751,
+          752,
+          784,
+          810,
+          888,
+          889,
+          963
+        ]
+      },
+      "elapsed_sec": 13633.5,
+      "finished_at": "2026-08-09T13:35:20",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01940_16-12-2020_CGII HLDGS_全球發售.pdf",
+      "stem": "01940_16-12-2020_CGII HLDGS_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01940_16-12-2020_CGII HLDGS_全球發售",
+      "started_at": "2026-08-09T11:26:24",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 553,
+        "elapsed_sec": 7627.8,
+        "sec_per_page": 13.79,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 74,
+        "issues_by_tag": {
+          "table_structure_medium": 69,
+          "vertical_table_low_structure": 5
+        },
+        "reparse_pages_csv": "97,158,159,208,375",
+        "reparse_pages": [
+          97,
+          158,
+          159,
+          208,
+          375
+        ]
+      },
+      "elapsed_sec": 7627.9,
+      "finished_at": "2026-08-09T13:33:32",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01950_27-02-2020_深藍科技控股_全球發售.pdf",
+      "stem": "01950_27-02-2020_深藍科技控股_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01950_27-02-2020_深藍科技控股_全球發售",
+      "started_at": "2026-08-09T09:21:36",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 580,
+        "elapsed_sec": 7035.3,
+        "sec_per_page": 12.13,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 64,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 10,
+          "table_structure_medium": 52,
+          "parse_failed": 1,
+          "empty_page": 1
+        },
+        "reparse_pages_csv": "21,90,172,197,291,353,354,386,453,470,580",
+        "reparse_pages": [
+          21,
+          90,
+          172,
+          197,
+          291,
+          353,
+          354,
+          386,
+          453,
+          470,
+          580
+        ]
+      },
+      "elapsed_sec": 7035.4,
+      "finished_at": "2026-08-09T11:18:51",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/01952_25-09-2020_雲頂新耀－Ｂ_全球發售.pdf",
+      "stem": "01952_25-09-2020_雲頂新耀－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01952_25-09-2020_雲頂新耀－Ｂ_全球發售",
+      "started_at": "2026-08-09T09:17:49",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 553,
+        "elapsed_sec": 8522.5,
+        "sec_per_page": 15.41,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 69,
+        "issues_by_tag": {
+          "table_structure_medium": 46,
+          "vertical_table_low_structure": 14,
+          "missing_table_high_numeric": 9
+        },
+        "reparse_pages_csv": "26,140,147,182,295,332,333,334,400,402,405,435,438,439,441,442,443,456,477,516,517,522,523",
+        "reparse_pages": [
+          26,
+          140,
+          147,
+          182,
+          295,
+          332,
+          333,
+          334,
+          400,
+          402,
+          405,
+          435,
+          438,
+          439,
+          441,
+          442,
+          443,
+          456,
+          477,
+          516,
+          517,
+          522,
+          523
+        ]
+      },
+      "elapsed_sec": 8522.6,
+      "finished_at": "2026-08-09T11:39:51",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02097_21-02-2025_蜜雪集團_全球發售.pdf",
+      "stem": "02097_21-02-2025_蜜雪集團_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02097_21-02-2025_蜜雪集團_全球發售",
+      "started_at": "2026-08-09T10:30:49",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 558,
+        "elapsed_sec": 7229.6,
+        "sec_per_page": 12.96,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 61,
+        "issues_by_tag": {
+          "table_structure_medium": 48,
+          "vertical_table_low_structure": 11,
+          "missing_table_high_numeric": 2
+        },
+        "reparse_pages_csv": "52,114,124,140,273,274,275,415,430,431,494,548,550",
+        "reparse_pages": [
+          52,
+          114,
+          124,
+          140,
+          273,
+          274,
+          275,
+          415,
+          430,
+          431,
+          494,
+          548,
+          550
+        ]
+      },
+      "elapsed_sec": 7229.7,
+      "finished_at": "2026-08-09T12:31:18",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02121_17-01-2022_創新奇智_全球發售.pdf",
+      "stem": "02121_17-01-2022_創新奇智_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02121_17-01-2022_創新奇智_全球發售",
+      "started_at": "2026-08-09T13:35:20",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 546,
+        "elapsed_sec": 8129.0,
+        "sec_per_page": 14.89,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 74,
+        "issues_by_tag": {
+          "table_structure_medium": 65,
+          "vertical_table_low_structure": 6,
+          "missing_table_high_numeric": 3
+        },
+        "reparse_pages_csv": "24,167,181,219,366,391,425,433,535",
+        "reparse_pages": [
+          24,
+          167,
+          181,
+          219,
+          366,
+          391,
+          425,
+          433,
+          535
+        ]
+      },
+      "elapsed_sec": 8129.1,
+      "finished_at": "2026-08-09T15:50:49",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02126_22-10-2020_藥明巨諾－Ｂ_全球發售.pdf",
+      "stem": "02126_22-10-2020_藥明巨諾－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02126_22-10-2020_藥明巨諾－Ｂ_全球發售",
+      "started_at": "2026-08-09T13:33:32",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 840,
+        "elapsed_sec": 11123.5,
+        "sec_per_page": 13.24,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 95,
+        "issues_by_tag": {
+          "table_structure_medium": 63,
+          "vertical_table_low_structure": 14,
+          "missing_table_high_numeric": 15,
+          "truncated": 1,
+          "parse_failed": 1,
+          "empty_page": 1
+        },
+        "reparse_pages_csv": "204,257,259,337,339,355,398,399,421,435,473,474,475,504,593,595,596,632,648,651,675,678,682,700,701,739,740,747,749,840",
+        "reparse_pages": [
+          204,
+          257,
+          259,
+          337,
+          339,
+          355,
+          398,
+          399,
+          421,
+          435,
+          473,
+          474,
+          475,
+          504,
+          593,
+          595,
+          596,
+          632,
+          648,
+          651,
+          675,
+          678,
+          682,
+          700,
+          701,
+          739,
+          740,
+          747,
+          749,
+          840
+        ]
+      },
+      "elapsed_sec": 11123.6,
+      "finished_at": "2026-08-09T16:38:55",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02142_30-11-2020_和鉑醫藥－Ｂ_全球發售.pdf",
+      "stem": "02142_30-11-2020_和鉑醫藥－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02142_30-11-2020_和鉑醫藥－Ｂ_全球發售",
+      "started_at": "2026-08-09T11:18:51",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 654,
+        "elapsed_sec": 9234.0,
+        "sec_per_page": 14.12,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 68,
+        "issues_by_tag": {
+          "table_structure_medium": 58,
+          "vertical_table_low_structure": 8,
+          "truncated": 2
+        },
+        "reparse_pages_csv": "32,186,203,211,344,514,557,608",
+        "reparse_pages": [
+          32,
+          186,
+          203,
+          211,
+          344,
+          514,
+          557,
+          608
+        ]
+      },
+      "elapsed_sec": 9234.1,
+      "finished_at": "2026-08-09T13:52:45",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02263_31-01-2020_富石金融_股份發售.pdf",
+      "stem": "02263_31-01-2020_富石金融_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02263_31-01-2020_富石金融_股份發售",
+      "started_at": "2026-08-09T11:39:51",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 530,
+        "elapsed_sec": 7216.7,
+        "sec_per_page": 13.62,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 57,
+        "issues_by_tag": {
+          "table_structure_medium": 44,
+          "vertical_table_low_structure": 13
+        },
+        "reparse_pages_csv": "104,191,224,227,228,229,237,311,405,438,503,504,505",
+        "reparse_pages": [
+          104,
+          191,
+          224,
+          227,
+          228,
+          229,
+          237,
+          311,
+          405,
+          438,
+          503,
+          504,
+          505
+        ]
+      },
+      "elapsed_sec": 7216.8,
+      "finished_at": "2026-08-09T13:40:08",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02482_27-02-2023_維天運通_全球發售.pdf",
+      "stem": "02482_27-02-2023_維天運通_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02482_27-02-2023_維天運通_全球發售",
+      "started_at": "2026-08-09T12:31:18",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 709,
+        "elapsed_sec": 9374.7,
+        "sec_per_page": 13.22,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 68,
+        "issues_by_tag": {
+          "truncated": 1,
+          "table_structure_medium": 56,
+          "vertical_table_low_structure": 11
+        },
+        "reparse_pages_csv": "237,238,242,316,319,320,321,354,361,422,523",
+        "reparse_pages": [
+          237,
+          238,
+          242,
+          316,
+          319,
+          320,
+          321,
+          354,
+          361,
+          422,
+          523
+        ]
+      },
+      "elapsed_sec": 9374.8,
+      "finished_at": "2026-08-09T15:07:33",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02535_29-02-2024_泓基集團_股份發售.pdf",
+      "stem": "02535_29-02-2024_泓基集團_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02535_29-02-2024_泓基集團_股份發售",
+      "started_at": "2026-08-09T15:50:49",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 530,
+        "elapsed_sec": 6833.9,
+        "sec_per_page": 12.89,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 55,
+        "issues_by_tag": {
+          "table_structure_medium": 36,
+          "vertical_table_low_structure": 19
+        },
+        "reparse_pages_csv": "14,25,80,189,190,209,223,224,246,249,274,275,289,300,302,304,383,455,505",
+        "reparse_pages": [
+          14,
+          25,
+          80,
+          189,
+          190,
+          209,
+          223,
+          224,
+          246,
+          249,
+          274,
+          275,
+          289,
+          300,
+          302,
+          304,
+          383,
+          455,
+          505
+        ]
+      },
+      "elapsed_sec": 6834.0,
+      "finished_at": "2026-08-09T17:44:43",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02540_29-02-2024_樂思集團_全球發售.pdf",
+      "stem": "02540_29-02-2024_樂思集團_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02540_29-02-2024_樂思集團_全球發售",
+      "started_at": "2026-08-09T16:38:55",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 513,
+        "elapsed_sec": 6849.4,
+        "sec_per_page": 13.35,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 51,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 29,
+          "table_structure_medium": 22
+        },
+        "reparse_pages_csv": "13,17,20,104,162,190,269,272,278,279,280,297,304,312,326,334,346,377,416,418,419,422,423,424,425,432,437,438,482",
+        "reparse_pages": [
+          13,
+          17,
+          20,
+          104,
+          162,
+          190,
+          269,
+          272,
+          278,
+          279,
+          280,
+          297,
+          304,
+          312,
+          326,
+          334,
+          346,
+          377,
+          416,
+          418,
+          419,
+          422,
+          423,
+          424,
+          425,
+          432,
+          437,
+          438,
+          482
+        ]
+      },
+      "elapsed_sec": 6849.4,
+      "finished_at": "2026-08-09T18:33:05",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/02589_28-04-2025_滬上阿姨_全球發售.pdf",
+      "stem": "02589_28-04-2025_滬上阿姨_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02589_28-04-2025_滬上阿姨_全球發售",
+      "started_at": "2026-08-09T13:52:45",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 571,
+        "elapsed_sec": 7180.8,
+        "sec_per_page": 12.58,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 69,
+        "issues_by_tag": {
+          "table_structure_medium": 56,
+          "vertical_table_low_structure": 7,
+          "missing_table_high_numeric": 6
+        },
+        "reparse_pages_csv": "82,107,109,279,280,286,322,414,416,417,423,457,458",
+        "reparse_pages": [
+          82,
+          107,
+          109,
+          279,
+          280,
+          286,
+          322,
+          414,
+          416,
+          417,
+          423,
+          457,
+          458
+        ]
+      },
+      "elapsed_sec": 7180.9,
+      "finished_at": "2026-08-09T15:52:26",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/03288_11-06-2025_海天味業_全球發售.pdf",
+      "stem": "03288_11-06-2025_海天味業_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03288_11-06-2025_海天味業_全球發售",
+      "started_at": "2026-08-09T13:40:08",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 562,
+        "elapsed_sec": 7814.4,
+        "sec_per_page": 13.9,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 82,
+        "issues_by_tag": {
+          "table_structure_medium": 49,
+          "vertical_table_low_structure": 24,
+          "missing_table_high_numeric": 8,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "26,102,103,105,106,108,109,111,136,139,161,163,237,242,251,268,269,272,333,355,372,377,388,390,391,423,426,427,463,464,549,551",
+        "reparse_pages": [
+          26,
+          102,
+          103,
+          105,
+          106,
+          108,
+          109,
+          111,
+          136,
+          139,
+          161,
+          163,
+          237,
+          242,
+          251,
+          268,
+          269,
+          272,
+          333,
+          355,
+          372,
+          377,
+          388,
+          390,
+          391,
+          423,
+          426,
+          427,
+          463,
+          464,
+          549,
+          551
+        ]
+      },
+      "elapsed_sec": 7814.5,
+      "finished_at": "2026-08-09T15:50:23",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/03347_28-07-2020_泰格醫藥_全球發售.pdf",
+      "stem": "03347_28-07-2020_泰格醫藥_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03347_28-07-2020_泰格醫藥_全球發售",
+      "started_at": "2026-08-09T15:07:33",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 692,
+        "elapsed_sec": 10014.1,
+        "sec_per_page": 14.47,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 90,
+        "issues_by_tag": {
+          "truncated": 2,
+          "table_structure_medium": 61,
+          "vertical_table_low_structure": 25,
+          "missing_table_high_numeric": 2
+        },
+        "reparse_pages_csv": "32,133,152,153,155,158,203,238,300,317,380,469,558,560,563,566,570,572,574,576,577,579,584,671,672,683,687",
+        "reparse_pages": [
+          32,
+          133,
+          152,
+          153,
+          155,
+          158,
+          203,
+          238,
+          300,
+          317,
+          380,
+          469,
+          558,
+          560,
+          563,
+          566,
+          570,
+          572,
+          574,
+          576,
+          577,
+          579,
+          584,
+          671,
+          672,
+          683,
+          687
+        ]
+      },
+      "elapsed_sec": 10014.2,
+      "finished_at": "2026-08-09T17:54:27",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/03750_12-05-2025_寧德時代_全球發售.pdf",
+      "stem": "03750_12-05-2025_寧德時代_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/03750_12-05-2025_寧德時代_全球發售",
+      "started_at": "2026-08-09T17:44:43",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 626,
+        "elapsed_sec": 8994.0,
+        "sec_per_page": 14.37,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 69,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 13,
+          "table_structure_medium": 45,
+          "missing_table_high_numeric": 10,
+          "truncated": 1
+        },
+        "reparse_pages_csv": "25,118,151,174,233,235,292,307,342,348,373,374,409,420,478,479,480,483,505,603,605,607,611",
+        "reparse_pages": [
+          25,
+          118,
+          151,
+          174,
+          233,
+          235,
+          292,
+          307,
+          342,
+          348,
+          373,
+          374,
+          409,
+          420,
+          478,
+          479,
+          480,
+          483,
+          505,
+          603,
+          605,
+          607,
+          611
+        ]
+      },
+      "elapsed_sec": 8994.1,
+      "finished_at": "2026-08-09T20:14:37",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/06031_20-10-2025_三一重工_全球發售.pdf",
+      "stem": "06031_20-10-2025_三一重工_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/06031_20-10-2025_三一重工_全球發售",
+      "started_at": "2026-08-09T18:33:05",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 906,
+        "elapsed_sec": 14628.2,
+        "sec_per_page": 16.15,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 110,
+        "issues_by_tag": {
+          "table_structure_medium": 67,
+          "vertical_table_low_structure": 19,
+          "missing_table_high_numeric": 20,
+          "truncated": 4
+        },
+        "reparse_pages_csv": "33,202,245,317,352,354,361,363,466,467,510,518,520,545,555,556,638,709,710,711,712,713,714,719,726,727,758,759,769,775,778,779,781,782,783,791,792,886,891",
+        "reparse_pages": [
+          33,
+          202,
+          245,
+          317,
+          352,
+          354,
+          361,
+          363,
+          466,
+          467,
+          510,
+          518,
+          520,
+          545,
+          555,
+          556,
+          638,
+          709,
+          710,
+          711,
+          712,
+          713,
+          714,
+          719,
+          726,
+          727,
+          758,
+          759,
+          769,
+          775,
+          778,
+          779,
+          781,
+          782,
+          783,
+          791,
+          792,
+          886,
+          891
+        ]
+      },
+      "elapsed_sec": 14628.4,
+      "finished_at": "2026-08-09T22:36:53",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/06668_14-01-2021_星盛商業_全球發售.pdf",
+      "stem": "06668_14-01-2021_星盛商業_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/06668_14-01-2021_星盛商業_全球發售",
+      "started_at": "2026-08-09T15:52:26",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 594,
+        "elapsed_sec": 7623.4,
+        "sec_per_page": 12.83,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 43,
+        "issues_by_tag": {
+          "table_structure_medium": 36,
+          "vertical_table_low_structure": 7
+        },
+        "reparse_pages_csv": "22,187,286,412,471,480,570",
+        "reparse_pages": [
+          22,
+          187,
+          286,
+          412,
+          471,
+          480,
+          570
+        ]
+      },
+      "elapsed_sec": 7623.5,
+      "finished_at": "2026-08-09T17:59:30",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/06688_26-10-2020_螞蟻集團_H股首次公開發售.pdf",
+      "stem": "06688_26-10-2020_螞蟻集團_H股首次公開發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/06688_26-10-2020_螞蟻集團_H股首次公開發售",
+      "started_at": "2026-08-09T15:50:23",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 752,
+        "elapsed_sec": 11921.6,
+        "sec_per_page": 15.85,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 67,
+        "issues_by_tag": {
+          "truncated": 2,
+          "table_structure_medium": 45,
+          "vertical_table_low_structure": 20
+        },
+        "reparse_pages_csv": "31,132,133,166,198,202,237,316,333,335,337,338,342,343,344,350,352,473,519,560",
+        "reparse_pages": [
+          31,
+          132,
+          133,
+          166,
+          198,
+          202,
+          237,
+          316,
+          333,
+          335,
+          337,
+          338,
+          342,
+          343,
+          344,
+          350,
+          352,
+          473,
+          519,
+          560
+        ]
+      },
+      "elapsed_sec": 11921.8,
+      "finished_at": "2026-08-09T19:09:04",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/06978_29-06-2020_永泰生物－Ｂ_全球發售.pdf",
+      "stem": "06978_29-06-2020_永泰生物－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/06978_29-06-2020_永泰生物－Ｂ_全球發售",
+      "started_at": "2026-08-09T17:54:27",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 575,
+        "elapsed_sec": 7111.5,
+        "sec_per_page": 12.37,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 59,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 20,
+          "table_structure_medium": 38,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "22,109,119,131,170,254,256,257,282,310,311,315,415,416,467,472,501,507,550,551,552",
+        "reparse_pages": [
+          22,
+          109,
+          119,
+          131,
+          170,
+          254,
+          256,
+          257,
+          282,
+          310,
+          311,
+          315,
+          415,
+          416,
+          467,
+          472,
+          501,
+          507,
+          550,
+          551,
+          552
+        ]
+      },
+      "elapsed_sec": 7111.6,
+      "finished_at": "2026-08-09T19:52:59",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/06996_09-11-2020_德琪醫藥－Ｂ_全球發售.pdf",
+      "stem": "06996_09-11-2020_德琪醫藥－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/06996_09-11-2020_德琪醫藥－Ｂ_全球發售",
+      "started_at": "2026-08-09T20:14:37",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 628,
+        "elapsed_sec": 8840.7,
+        "sec_per_page": 14.08,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 64,
+        "issues_by_tag": {
+          "truncated": 2,
+          "table_structure_medium": 44,
+          "vertical_table_low_structure": 18
+        },
+        "reparse_pages_csv": "36,185,229,232,235,243,246,247,267,277,278,291,297,298,336,510,537,620",
+        "reparse_pages": [
+          36,
+          185,
+          229,
+          232,
+          235,
+          243,
+          246,
+          247,
+          267,
+          277,
+          278,
+          291,
+          297,
+          298,
+          336,
+          510,
+          537,
+          620
+        ]
+      },
+      "elapsed_sec": 8840.8,
+      "finished_at": "2026-08-09T22:41:58",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/06998_23-09-2020_嘉和生物－Ｂ_全球發售.pdf",
+      "stem": "06998_23-09-2020_嘉和生物－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/06998_23-09-2020_嘉和生物－Ｂ_全球發售",
+      "started_at": "2026-08-09T22:36:53",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 703,
+        "elapsed_sec": 9280.6,
+        "sec_per_page": 13.2,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 68,
+        "issues_by_tag": {
+          "table_structure_medium": 49,
+          "vertical_table_low_structure": 17,
+          "missing_table_high_numeric": 2
+        },
+        "reparse_pages_csv": "191,214,322,335,339,396,408,417,418,421,422,459,525,554,590,594,650,663,665",
+        "reparse_pages": [
+          191,
+          214,
+          322,
+          335,
+          339,
+          396,
+          408,
+          417,
+          418,
+          421,
+          422,
+          459,
+          525,
+          554,
+          590,
+          594,
+          650,
+          663,
+          665
+        ]
+      },
+      "elapsed_sec": 9280.7,
+      "finished_at": "2026-08-10T01:11:34",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/09636_28-02-2023_九方財富_全球發售.pdf",
+      "stem": "09636_28-02-2023_九方財富_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/09636_28-02-2023_九方財富_全球發售",
+      "started_at": "2026-08-09T17:59:30",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 632,
+        "elapsed_sec": 9184.6,
+        "sec_per_page": 14.53,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 53,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 8,
+          "truncated": 2,
+          "table_structure_medium": 43
+        },
+        "reparse_pages_csv": "4,45,236,237,318,366,545,612",
+        "reparse_pages": [
+          4,
+          45,
+          236,
+          237,
+          318,
+          366,
+          545,
+          612
+        ]
+      },
+      "elapsed_sec": 9184.7,
+      "finished_at": "2026-08-09T20:32:34",
+      "status": "ok",
+      "gpu_id": 5
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/09688_17-09-2020_再鼎醫藥－ＳＢ_全球發售.pdf",
+      "stem": "09688_17-09-2020_再鼎醫藥－ＳＢ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/09688_17-09-2020_再鼎醫藥－ＳＢ_全球發售",
+      "started_at": "2026-08-09T19:09:04",
+      "page_workers": 2,
+      "gpu_ids": [
+        6
+      ],
+      "pass1": {
+        "pages": 597,
+        "elapsed_sec": 8045.0,
+        "sec_per_page": 13.48,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 31,
+        "issues_by_tag": {
+          "table_structure_medium": 24,
+          "truncated": 1,
+          "vertical_table_low_structure": 5,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "212,307,395,445,521,549",
+        "reparse_pages": [
+          212,
+          307,
+          395,
+          445,
+          521,
+          549
+        ]
+      },
+      "elapsed_sec": 8045.1,
+      "finished_at": "2026-08-09T21:23:09",
+      "status": "ok",
+      "gpu_id": 6
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/09926_14-04-2020_康方生物－Ｂ_全球發售.pdf",
+      "stem": "09926_14-04-2020_康方生物－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/09926_14-04-2020_康方生物－Ｂ_全球發售",
+      "started_at": "2026-08-09T19:52:59",
+      "page_workers": 2,
+      "gpu_ids": [
+        2
+      ],
+      "pass1": {
+        "pages": 600,
+        "elapsed_sec": 8184.6,
+        "sec_per_page": 13.64,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 69,
+        "issues_by_tag": {
+          "truncated": 1,
+          "vertical_table_low_structure": 20,
+          "table_structure_medium": 47,
+          "missing_table_high_numeric": 1
+        },
+        "reparse_pages_csv": "16,20,150,161,162,165,178,181,216,251,280,316,333,373,376,383,403,453,527,528,579",
+        "reparse_pages": [
+          16,
+          20,
+          150,
+          161,
+          162,
+          165,
+          178,
+          181,
+          216,
+          251,
+          280,
+          316,
+          333,
+          373,
+          376,
+          383,
+          403,
+          453,
+          527,
+          528,
+          579
+        ]
+      },
+      "elapsed_sec": 8184.7,
+      "finished_at": "2026-08-09T22:09:24",
+      "status": "ok",
+      "gpu_id": 2
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/09929_31-01-2020_澳達控股_股份發售.pdf",
+      "stem": "09929_31-01-2020_澳達控股_股份發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/09929_31-01-2020_澳達控股_股份發售",
+      "started_at": "2026-08-09T22:41:58",
+      "page_workers": 2,
+      "gpu_ids": [
+        3
+      ],
+      "pass1": {
+        "pages": 472,
+        "elapsed_sec": 5945.4,
+        "sec_per_page": 12.6,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 101,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 44,
+          "table_structure_medium": 57
+        },
+        "reparse_pages_csv": "8,9,16,80,133,138,141,143,145,158,161,164,170,173,175,183,186,203,204,207,209,211,212,213,240,242,259,267,274,285,289,290,326,327,372,377,381,389,392,399,447,448,449,450",
+        "reparse_pages": [
+          8,
+          9,
+          16,
+          80,
+          133,
+          138,
+          141,
+          143,
+          145,
+          158,
+          161,
+          164,
+          170,
+          173,
+          175,
+          183,
+          186,
+          203,
+          204,
+          207,
+          209,
+          211,
+          212,
+          213,
+          240,
+          242,
+          259,
+          267,
+          274,
+          285,
+          289,
+          290,
+          326,
+          327,
+          372,
+          377,
+          381,
+          389,
+          392,
+          399,
+          447,
+          448,
+          449,
+          450
+        ]
+      },
+      "elapsed_sec": 5945.5,
+      "finished_at": "2026-08-10T00:21:03",
+      "status": "ok",
+      "gpu_id": 3
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/09939_12-05-2020_開拓藥業－Ｂ_全球發售.pdf",
+      "stem": "09939_12-05-2020_開拓藥業－Ｂ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/09939_12-05-2020_開拓藥業－Ｂ_全球發售",
+      "started_at": "2026-08-10T01:11:34",
+      "page_workers": 2,
+      "gpu_ids": [
+        4
+      ],
+      "pass1": {
+        "pages": 512,
+        "elapsed_sec": 7288.6,
+        "sec_per_page": 14.24,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 49,
+        "issues_by_tag": {
+          "truncated": 1,
+          "vertical_table_low_structure": 12,
+          "table_structure_medium": 36
+        },
+        "reparse_pages_csv": "20,118,122,316,317,326,330,334,433,434,439,479",
+        "reparse_pages": [
+          20,
+          118,
+          122,
+          316,
+          317,
+          326,
+          330,
+          334,
+          433,
+          434,
+          439,
+          479
+        ]
+      },
+      "elapsed_sec": 7288.7,
+      "finished_at": "2026-08-10T03:13:02",
+      "status": "ok",
+      "gpu_id": 4
+    },
+    {
+      "pdf": "/nfs/users/wuqianqian/IPOI/dataset/samples/09999_02-06-2020_網易－Ｓ_全球發售.pdf",
+      "stem": "09999_02-06-2020_網易－Ｓ_全球發售",
+      "out_dir": "/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/09999_02-06-2020_網易－Ｓ_全球發售",
+      "started_at": "2026-08-09T20:32:34",
+      "page_workers": 2,
+      "gpu_ids": [
+        5
+      ],
+      "pass1": {
+        "pages": 458,
+        "elapsed_sec": 6381.0,
+        "sec_per_page": 13.93,
+        "page_workers": 2,
+        "batch_size": 2
+      },
+      "qa_pass1": {
+        "issue_count": 27,
+        "issues_by_tag": {
+          "vertical_table_low_structure": 5,
+          "table_structure_medium": 22
+        },
+        "reparse_pages_csv": "117,155,208,250,285",
+        "reparse_pages": [
+          117,
+          155,
+          208,
+          250,
+          285
+        ]
+      },
+      "elapsed_sec": 6381.0,
+      "finished_at": "2026-08-09T22:18:55",
+      "status": "ok",
+      "gpu_id": 5
     }
   ]
 }

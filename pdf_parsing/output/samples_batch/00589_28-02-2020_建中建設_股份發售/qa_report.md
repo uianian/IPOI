@@ -2,15 +2,15 @@
 
 - 输入: `/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/00589_28-02-2020_建中建設_股份發售/full_parse.json`
 - 总页数: 566
-- 问题条数: 87
-- 建议重跑: `21,126,137,166,167,180,183,222,224,252,271,272,274,358,454,455,531,543`
+- 问题条数: 86
+- 建议重跑: `21,126,137,166,167,180,183,222,224,271,272,274,358,454,455,531,543`
 
 ## 按标签统计
 
 | 标签 | 次数 |
 | --- | ---: |
 | `table_structure_medium` | 68 |
-| `vertical_table_low_structure` | 16 |
+| `vertical_table_low_structure` | 15 |
 | `missing_table_high_numeric` | 2 |
 | `truncated` | 1 |
 
@@ -55,7 +55,6 @@
 - **p236** `table_structure_medium` [low] score=641, notes=['sparse_table']
 - **p246** `table_structure_medium` [low] score=867, notes=['sparse_table']
 - **p247** `table_structure_medium` [low] score=658, notes=['sparse_table']
-- **p252** `vertical_table_low_structure` [high] score=438, notes=['truncated_or_header_only']
 - **p264** `table_structure_medium` [low] score=664, notes=['sparse_table']
 - **p267** `table_structure_medium` [low] score=653, notes=['sparse_table']
 - **p271** `vertical_table_low_structure` [high] score=207, notes=['truncated_or_header_only']
@@ -69,7 +68,7 @@
 - **p302** `table_structure_medium` [low] score=1187, notes=['complex_colspan_header']
 - **p305** `table_structure_medium` [low] score=2727, notes=['complex_colspan_header']
 - **p306** `table_structure_medium` [low] score=2245, notes=['complex_colspan_header']
-- **p309** `table_structure_medium` [low] score=1110, notes=['complex_colspan_header']
+- **p309** `table_structure_medium` [low] score=1112, notes=['complex_colspan_header']
 - **p312** `table_structure_medium` [low] score=1693, notes=['complex_colspan_header']
 - **p334** `table_structure_medium` [low] score=434, notes=['sparse_table']
 - **p335** `table_structure_medium` [low] score=537, notes=['sparse_table']

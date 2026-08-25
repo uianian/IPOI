@@ -1,13 +1,13 @@
 {
   "total_pages": 420,
-  "issue_count": 65,
+  "issue_count": 64,
   "issues_by_tag": {
-    "vertical_table_low_structure": 28,
+    "vertical_table_low_structure": 27,
     "table_structure_medium": 37
   },
   "table_structure_confidence_pages": {
-    "high": 66,
-    "low": 28,
+    "high": 67,
+    "low": 27,
     "medium": 37
   },
   "reparse_pages": [
@@ -15,8 +15,7 @@
     23,
     92,
     114,
-    115,
-    117,
+    131,
     152,
     153,
     163,
@@ -40,14 +39,13 @@
     398,
     399
   ],
-  "reparse_pages_csv": "14,23,92,114,115,117,152,153,163,182,184,187,189,195,196,200,202,220,228,235,237,287,336,345,353,356,398,399",
+  "reparse_pages_csv": "14,23,92,114,131,152,153,163,182,184,187,189,195,196,200,202,220,228,235,237,287,336,345,353,356,398,399",
   "review_pages": [
     14,
     23,
     92,
     114,
-    115,
-    117,
+    131,
     152,
     153,
     163,
@@ -107,24 +105,17 @@
       "suggest_reparse": true
     },
     {
-      "page": 115,
-      "tag": "vertical_table_low_structure",
-      "severity": "high",
-      "detail": "score=865, notes=['rotated_table_structure_unstable']",
-      "suggest_reparse": true
-    },
-    {
-      "page": 117,
-      "tag": "vertical_table_low_structure",
-      "severity": "high",
-      "detail": "score=998, notes=['rotated_table_structure_unstable']",
-      "suggest_reparse": true
-    },
-    {
       "page": 118,
       "tag": "table_structure_medium",
       "severity": "low",
       "detail": "score=346, notes=['sparse_table']"
+    },
+    {
+      "page": 131,
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=796, notes=['colspan_year_mismatch']",
+      "suggest_reparse": true
     },
     {
       "page": 134,
@@ -148,7 +139,7 @@
       "page": 140,
       "tag": "table_structure_medium",
       "severity": "low",
-      "detail": "score=771, notes=['sparse_table']"
+      "detail": "score=772, notes=['sparse_table']"
     },
     {
       "page": 141,
@@ -417,7 +408,7 @@
       "page": 342,
       "tag": "table_structure_medium",
       "severity": "low",
-      "detail": "score=1080, notes=['sparse_table']"
+      "detail": "score=978, notes=['sparse_table']"
     },
     {
       "page": 345,
