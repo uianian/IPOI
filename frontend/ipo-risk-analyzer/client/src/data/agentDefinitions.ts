@@ -1,0 +1,48 @@
+import type { AgentDefinition } from "@/types";
+
+export const AGENTS: AgentDefinition[] = [
+  {
+    id: "legal",
+    name: "法务合规Agent",
+    nameEn: "LEGAL COMPLIANCE",
+    icon: "Scale",
+    color: "oklch(0.65 0.15 270)",
+    colorClass: "text-[oklch(0.65_0.15_270)]",
+    borderClass: "border-[oklch(0.65_0.15_270)/0.4]",
+    bgClass: "bg-[oklch(0.65_0.15_270)/0.08]",
+    role: "审查招股书法律条款、股权结构、VIE架构风险及监管合规性",
+  },
+  {
+    id: "financial",
+    name: "财务穿透Agent",
+    nameEn: "FINANCIAL ANALYSIS",
+    icon: "TrendingUp",
+    color: "oklch(0.72 0.18 55)",
+    colorClass: "text-[oklch(0.72_0.18_55)]",
+    borderClass: "border-[oklch(0.72_0.18_55)/0.4]",
+    bgClass: "bg-[oklch(0.72_0.18_55)/0.08]",
+    role: "穿透分析财务报表、现金流、盈利质量及关联交易",
+  },
+  {
+    id: "market",
+    name: "市场情绪Agent",
+    nameEn: "MARKET SENTIMENT",
+    icon: "Globe",
+    color: "oklch(0.75 0.18 195)",
+    colorClass: "text-[oklch(0.75_0.18_195)]",
+    borderClass: "border-[oklch(0.75_0.18_195)/0.4]",
+    bgClass: "bg-[oklch(0.75_0.18_195)/0.08]",
+    role: "分析市场情绪、行业估值、同类IPO表现及破发风险",
+  },
+  {
+    id: "orchestrator",
+    name: "风险融合总控Agent",
+    nameEn: "RISK ORCHESTRATOR",
+    icon: "ShieldAlert",
+    color: "oklch(0.65 0.22 25)",
+    colorClass: "text-[oklch(0.65_0.22_25)]",
+    borderClass: "border-[oklch(0.65_0.22_25)/0.4]",
+    bgClass: "bg-[oklch(0.65_0.22_25)/0.08]",
+    role: "综合各Agent分析结果，生成最终风险评分与预警报告",
+  },
+];

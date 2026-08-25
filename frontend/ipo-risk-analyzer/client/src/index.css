@@ -1,0 +1,373 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@source "../../node_modules/streamdown/dist/index.js";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom brand colors */
+  --color-cyan-brand: var(--cyan-brand);
+  --color-risk-high: var(--risk-high);
+  --color-risk-medium: var(--risk-medium);
+  --color-risk-low: var(--risk-low);
+  --color-panel: var(--panel);
+}
+
+:root {
+  /* Light Quant Terminal Theme — base */
+  --radius: 0.5rem;
+
+  /* Brand colors — desaturated for light bg */
+  --cyan-brand: oklch(0.50 0.16 195);
+  --risk-high: oklch(0.52 0.20 25);
+  --risk-medium: oklch(0.58 0.16 55);
+  --risk-low: oklch(0.50 0.14 145);
+  --panel: oklch(0.97 0.005 240);
+
+  /* Core palette - Light */
+  --background: oklch(0.96 0.005 250);
+  --foreground: oklch(0.15 0.01 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 250);
+  --primary: oklch(0.50 0.16 195);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.94 0.01 250);
+  --secondary-foreground: oklch(0.25 0.01 250);
+  --muted: oklch(0.94 0.005 250);
+  --muted-foreground: oklch(0.15 0.01 250);
+  --accent: oklch(0.90 0.03 200);
+  --accent-foreground: oklch(0.45 0.14 195);
+  --destructive: oklch(0.52 0.20 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.88 0.02 240);
+  --input: oklch(0.96 0.01 240);
+  --ring: oklch(0.50 0.16 195);
+
+  /* Charts */
+  --chart-1: oklch(0.50 0.16 195);
+  --chart-2: oklch(0.52 0.20 25);
+  --chart-3: oklch(0.58 0.16 55);
+  --chart-4: oklch(0.50 0.14 145);
+  --chart-5: oklch(0.55 0.14 270);
+
+  /* Sidebar */
+  --sidebar: oklch(0.94 0.01 250);
+  --sidebar-foreground: oklch(0.15 0.01 250);
+  --sidebar-primary: oklch(0.50 0.16 195);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.90 0.02 240);
+  --sidebar-accent-foreground: oklch(0.45 0.14 195);
+  --sidebar-border: oklch(0.85 0.02 240);
+  --sidebar-ring: oklch(0.50 0.16 195);
+}
+
+.dark {
+  /* Dark Quant Terminal Theme — overrides */
+  --cyan-brand: oklch(0.75 0.18 195);
+  --risk-high: oklch(0.65 0.22 25);
+  --risk-medium: oklch(0.72 0.18 55);
+  --risk-low: oklch(0.72 0.15 145);
+  --panel: oklch(0.14 0.015 240);
+
+  --background: oklch(0.10 0.012 240);
+  --foreground: oklch(0.92 0.005 240);
+  --card: oklch(0.13 0.015 240);
+  --card-foreground: oklch(0.92 0.005 240);
+  --popover: oklch(0.15 0.015 240);
+  --popover-foreground: oklch(0.92 0.005 240);
+  --primary: oklch(0.75 0.18 195);
+  --primary-foreground: oklch(0.10 0.012 240);
+  --secondary: oklch(0.18 0.02 240);
+  --secondary-foreground: oklch(0.75 0.01 240);
+  --muted: oklch(0.16 0.015 240);
+  --muted-foreground: oklch(0.92 0.005 240);
+  --accent: oklch(0.20 0.04 200);
+  --accent-foreground: oklch(0.75 0.18 195);
+  --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.25 0.04 210);
+  --input: oklch(0.18 0.02 240);
+  --ring: oklch(0.75 0.18 195);
+
+  --chart-1: oklch(0.75 0.18 195);
+  --chart-2: oklch(0.65 0.22 25);
+  --chart-3: oklch(0.72 0.18 55);
+  --chart-4: oklch(0.72 0.15 145);
+  --chart-5: oklch(0.65 0.15 270);
+
+  --sidebar: oklch(0.11 0.015 240);
+  --sidebar-foreground: oklch(0.92 0.005 240);
+  --sidebar-primary: oklch(0.75 0.18 195);
+  --sidebar-primary-foreground: oklch(0.10 0.012 240);
+  --sidebar-accent: oklch(0.18 0.02 240);
+  --sidebar-accent-foreground: oklch(0.75 0.18 195);
+  --sidebar-border: oklch(0.22 0.04 210);
+  --sidebar-ring: oklch(0.75 0.18 195);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    font-size: 18px;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1400px;
+    }
+  }
+
+  /* Terminal scan line effect */
+  .scanlines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      oklch(0 0 0 / 0.03) 2px,
+      oklch(0 0 0 / 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Cyan glow effect */
+  .glow-cyan {
+    box-shadow: 0 0 20px oklch(0.75 0.18 195 / 0.3), 0 0 40px oklch(0.75 0.18 195 / 0.1);
+  }
+
+  .glow-cyan-text {
+    text-shadow: 0 0 10px oklch(0.75 0.18 195 / 0.8);
+  }
+
+  /* Risk glow effects */
+  .glow-red {
+    box-shadow: 0 0 20px oklch(0.65 0.22 25 / 0.4), 0 0 40px oklch(0.65 0.22 25 / 0.15);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 20px oklch(0.72 0.18 55 / 0.4);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px oklch(0.72 0.15 145 / 0.4);
+  }
+
+  /* Panel glass effect — uses CSS variables for theme adaptation */
+  .panel-glass {
+    background: var(--panel, oklch(0.13 0.015 240 / 0.85));
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border, oklch(0.25 0.04 210));
+  }
+
+  /* Mono font for data */
+  .font-mono-data {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* Animated border */
+  @keyframes border-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .border-animated {
+    background: linear-gradient(90deg, oklch(0.75 0.18 195), oklch(0.65 0.15 270), oklch(0.75 0.18 195));
+    background-size: 200% 200%;
+    animation: border-flow 3s ease infinite;
+  }
+
+  /* Typing cursor */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .cursor-blink::after {
+    content: '|';
+    animation: blink 1s step-end infinite;
+    color: oklch(0.75 0.18 195);
+    margin-left: 2px;
+  }
+
+  /* Data flow animation */
+  @keyframes data-flow {
+    0% { transform: translateY(-100%); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100%); opacity: 0; }
+  }
+
+  /* Pulse ring */
+  @keyframes pulse-ring {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 oklch(0.75 0.18 195 / 0.4); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px oklch(0.75 0.18 195 / 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 oklch(0.75 0.18 195 / 0); }
+  }
+
+  .pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+
+  /* Number counter animation */
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Shimmer loading */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, oklch(0.16 0.015 240) 25%, oklch(0.22 0.03 210) 50%, oklch(0.16 0.015 240) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Agent status indicator */
+  @keyframes agent-active {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .agent-active {
+    animation: agent-active 1.5s ease-in-out infinite;
+  }
+
+  /* Parse page: Markdown + HTML mixed content */
+  .parse-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .parse-markdown th,
+  .parse-markdown td {
+    border: 1px solid oklch(0.3 0.02 240);
+    padding: 0.375rem 0.625rem;
+    text-align: left;
+  }
+
+  .parse-markdown th {
+    background: oklch(0.2 0.02 240);
+    font-weight: 600;
+  }
+
+  .parse-markdown tr:nth-child(even) td {
+    background: oklch(0.16 0.015 240 / 0.5);
+  }
+
+  /* Agent 专项报告：宽表格横向滚动 */
+  .agent-report-markdown {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .agent-report-markdown table {
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
+  }
+
+  .agent-report-markdown th,
+  .agent-report-markdown td {
+    max-width: 22rem;
+    word-break: break-word;
+    vertical-align: top;
+  }
+
+  .agent-report-markdown pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .agent-report-markdown pre code {
+    white-space: pre;
+  }
+}
