@@ -30,6 +30,8 @@ interface AgentDebatePanelProps {
   messages: DebateMessage[];
   phase?: AnalysisPhase;
   isLive?: boolean;
+  /** 分析已完成（含从缓存恢复） */
+  isDone?: boolean;
   phaseMessage?: string;
 }
 
@@ -37,14 +39,25 @@ export default function AgentDebatePanel({
   messages,
   phase,
   isLive = false,
+  isDone = false,
   phaseMessage,
 }: AgentDebatePanelProps) {
   const endRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(0);
   const agentMap = Object.fromEntries(AGENTS.map((a) => [a.id, a]));
 
+  // 仅在 LIVE 辩论阶段、有新消息时滚到底部；结束后允许自由翻看
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLive, phase]);
+    const count = messages.length;
+    if (count === 0) {
+      prevMessageCountRef.current = 0;
+      return;
+    }
+    if (isLive && phase === "debate" && count > prevMessageCountRef.current) {
+      endRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+    prevMessageCountRef.current = count;
+  }, [messages.length, isLive, phase]);
 
   const showWaiting =
     isLive && phase !== "debate" && phase !== "report" && messages.length === 0;
@@ -54,6 +67,20 @@ export default function AgentDebatePanel({
     !showWaiting &&
     !showDebateLoading &&
     (phase === "report" || (!isLive && phase != null));
+
+  const phaseSubtitle = (() => {
+    if (showNoDebate) return "总控已判定无需辩论";
+    if (
+      isDone ||
+      (!isLive && phase === "report" && messages.length > 0)
+    ) {
+      return "辩论已结束，综合报告已生成";
+    }
+    if (isLive && phaseMessage) return phaseMessage;
+    if (phase === "debate") return "四位 Agent 正在就风险分歧进行辩论（只读）";
+    if (phase === "report") return "辩论已结束，正在生成综合报告";
+    return "完成三 Agent 初评后将进入辩论环节";
+  })();
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background/50">
@@ -70,18 +97,11 @@ export default function AgentDebatePanel({
           )}
         </div>
         <p className="text-[10px] text-muted-foreground mt-0.5">
-          {phaseMessage ??
-            (phase === "debate"
-              ? "四位 Agent 正在就风险分歧进行辩论（只读）"
-              : phase === "report"
-              ? showNoDebate
-                ? "总控已判定无需辩论"
-                : "辩论已结束，正在生成综合报告"
-              : "完成三 Agent 初评后将进入辩论环节")}
+          {phaseSubtitle}
         </p>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1 p-4">
+      <ScrollArea className="min-h-0 flex-1 overflow-hidden p-4">
         <div className="space-y-3">
           {showWaiting && (
             <div className="py-8 text-center text-[11px] text-muted-foreground">
