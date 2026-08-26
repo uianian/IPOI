@@ -235,6 +235,7 @@ export function AnalysisSessionProvider({ children }: { children: ReactNode }) {
         debateMessages: finalRecord.debate?.messages ?? [],
         debateRounds: finalRecord.debate?.rounds,
         phase: "report",
+        phaseMessage: undefined,
         agentStatuses: { ...DONE_STATUSES },
         overallScore: finalRecord.overallScore,
         riskLevel: finalRecord.riskLevel,
@@ -403,6 +404,7 @@ export function AnalysisSessionProvider({ children }: { children: ReactNode }) {
               overallScore: data.overallScore,
               riskLevel: data.riskLevel,
               phase: "report",
+              phaseMessage: undefined,
             });
 
             await finishSession(projectId, streamRecord, buf.pendingReport);

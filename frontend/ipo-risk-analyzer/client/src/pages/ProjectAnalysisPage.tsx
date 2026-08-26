@@ -479,6 +479,7 @@ export default function ProjectAnalysisPage() {
               messages={debateMessages}
               phase={analysisPhase}
               isLive={isAnalysisStarted && !isAnalysisDone}
+              isDone={isAnalysisDone}
               phaseMessage={phaseMessage}
             />
           </div>
