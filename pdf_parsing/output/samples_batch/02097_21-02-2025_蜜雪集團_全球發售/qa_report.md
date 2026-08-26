@@ -3,14 +3,14 @@
 - 输入: `/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/02097_21-02-2025_蜜雪集團_全球發售/full_parse.json`
 - 总页数: 558
 - 问题条数: 61
-- 建议重跑: `52,114,124,140,273,274,275,415,430,431,494,548,550`
+- 建议重跑: `52,114,124,140,217,273,274,275,415,430,431,494,548,550`
 
 ## 按标签统计
 
 | 标签 | 次数 |
 | --- | ---: |
-| `table_structure_medium` | 48 |
-| `vertical_table_low_structure` | 11 |
+| `table_structure_medium` | 47 |
+| `vertical_table_low_structure` | 12 |
 | `missing_table_high_numeric` | 2 |
 
 ## 问题明细
@@ -33,7 +33,7 @@
 - **p175** `table_structure_medium` [low] score=520, notes=['sparse_table']
 - **p181** `table_structure_medium` [low] score=645, notes=['sparse_table']
 - **p213** `table_structure_medium` [low] score=1113, notes=['complex_colspan_header']
-- **p217** `table_structure_medium` [low] score=491, notes=['sparse_table']
+- **p217** `vertical_table_low_structure` [high] score=1044, notes=['rotated_table_structure_unstable']
 - **p220** `table_structure_medium` [low] score=744, notes=['sparse_table']
 - **p242** `table_structure_medium` [low] score=1458, notes=['complex_colspan_header']
 - **p273** `vertical_table_low_structure` [high] score=688, notes=['truncated_or_header_only']

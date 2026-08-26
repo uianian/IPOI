@@ -2,20 +2,21 @@
   "total_pages": 558,
   "issue_count": 61,
   "issues_by_tag": {
-    "table_structure_medium": 48,
-    "vertical_table_low_structure": 11,
+    "table_structure_medium": 47,
+    "vertical_table_low_structure": 12,
     "missing_table_high_numeric": 2
   },
   "table_structure_confidence_pages": {
     "high": 101,
-    "medium": 48,
-    "low": 11
+    "medium": 47,
+    "low": 12
   },
   "reparse_pages": [
     52,
     114,
     124,
     140,
+    217,
     273,
     274,
     275,
@@ -26,12 +27,13 @@
     548,
     550
   ],
-  "reparse_pages_csv": "52,114,124,140,273,274,275,415,430,431,494,548,550",
+  "reparse_pages_csv": "52,114,124,140,217,273,274,275,415,430,431,494,548,550",
   "review_pages": [
     52,
     114,
     124,
     140,
+    217,
     273,
     274,
     275,
@@ -155,9 +157,10 @@
     },
     {
       "page": 217,
-      "tag": "table_structure_medium",
-      "severity": "low",
-      "detail": "score=491, notes=['sparse_table']"
+      "tag": "vertical_table_low_structure",
+      "severity": "high",
+      "detail": "score=1044, notes=['rotated_table_structure_unstable']",
+      "suggest_reparse": true
     },
     {
       "page": 220,

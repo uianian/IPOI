@@ -2,24 +2,24 @@
   "total_pages": 558,
   "total_elements": 5651,
   "categories": {
-    "text": 3179,
+    "text": 3180,
     "title": 838,
-    "header": 661,
-    "footer": 554,
-    "table": 236,
+    "header": 660,
+    "footer": 553,
+    "table": 235,
     "figure": 94,
     "table_footnote": 63,
-    "table_caption": 13,
+    "table_caption": 15,
     "figure_caption": 12,
     "page_footnote": 1
   },
   "failed_pages": [],
   "empty_pages": [],
-  "html_tables": 236,
+  "html_tables": 235,
   "markdown_tables": 0,
   "table_structure_confidence_pages": {
     "high": 101,
-    "medium": 48,
-    "low": 11
+    "medium": 47,
+    "low": 12
   }
 }

@@ -2,16 +2,16 @@
 
 - 输入: `/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/01024_26-01-2021_快手－Ｗ_全球發售/full_parse.json`
 - 总页数: 848
-- 问题条数: 55
-- 建议重跑: `44,171,326,412,583,627,642,666,673,686,687,840`
+- 问题条数: 54
+- 建议重跑: `44,171,326,412,583,627,666,673,686,687,840`
 
 ## 按标签统计
 
 | 标签 | 次数 |
 | --- | ---: |
 | `table_structure_medium` | 42 |
-| `vertical_table_low_structure` | 6 |
 | `missing_table_high_numeric` | 6 |
+| `vertical_table_low_structure` | 5 |
 | `truncated` | 1 |
 
 ## 问题明细
@@ -26,9 +26,8 @@
 - **p198** `table_structure_medium` [low] score=603, notes=['sparse_table']
 - **p200** `table_structure_medium` [low] score=636, notes=['sparse_table']
 - **p202** `table_structure_medium` [low] score=385, notes=['sparse_table']
-- **p237** `table_structure_medium` [low] score=752, notes=['sparse_table']
+- **p237** `table_structure_medium` [low] score=649, notes=['sparse_table']
 - **p292** `table_structure_medium` [low] score=549, notes=['sparse_table']
-- **p311** `table_structure_medium` [low] score=640, notes=['sparse_table']
 - **p324** `table_structure_medium` [low] score=444, notes=['sparse_table']
 - **p326** `vertical_table_low_structure` [high] score=221, notes=['truncated_or_header_only']
 - **p360** `table_structure_medium` [low] score=446, notes=['sparse_table']
@@ -42,6 +41,7 @@
 - **p410** `table_structure_medium` [low] score=693, notes=['sparse_table']
 - **p412** `vertical_table_low_structure` [high] score=323, notes=['truncated_or_header_only']
 - **p444** `table_structure_medium` [low] score=547, notes=['sparse_table']
+- **p449** `table_structure_medium` [low] score=1074, notes=['complex_colspan_header']
 - **p453** `table_structure_medium` [low] score=1079, notes=['complex_colspan_header']
 - **p455** `table_structure_medium` [low] score=1291, notes=['complex_colspan_header']
 - **p471** `table_structure_medium` [low] score=3226, notes=['complex_colspan_header']
@@ -52,7 +52,6 @@
 - **p629** `table_structure_medium` [low] score=911, notes=['sparse_table']
 - **p639** `table_structure_medium` [low] score=771, notes=['sparse_table']
 - **p640** `table_structure_medium` [low] score=755, notes=['sparse_table']
-- **p642** `vertical_table_low_structure` [high] score=2154, notes=['rotated_table_structure_unstable']
 - **p655** `table_structure_medium` [low] score=635, notes=['sparse_table']
 - **p665** `table_structure_medium` [low] score=673, notes=['sparse_table']
 - **p666** `missing_table_high_numeric` [high] 无 table，text 中约 35 个数值字段、25 行

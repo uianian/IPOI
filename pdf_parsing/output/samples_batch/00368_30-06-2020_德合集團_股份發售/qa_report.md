@@ -2,15 +2,15 @@
 
 - 输入: `/nfs/users/wuqianqian/IPOI/pdf_parsing/output/samples_batch/00368_30-06-2020_德合集團_股份發售/full_parse.json`
 - 总页数: 420
-- 问题条数: 65
-- 建议重跑: `14,23,92,114,115,117,152,153,163,182,184,187,189,195,196,200,202,220,228,235,237,287,336,345,353,356,398,399`
+- 问题条数: 64
+- 建议重跑: `14,23,92,114,131,152,153,163,182,184,187,189,195,196,200,202,220,228,235,237,287,336,345,353,356,398,399`
 
 ## 按标签统计
 
 | 标签 | 次数 |
 | --- | ---: |
 | `table_structure_medium` | 37 |
-| `vertical_table_low_structure` | 28 |
+| `vertical_table_low_structure` | 27 |
 
 ## 问题明细
 
@@ -19,13 +19,12 @@
 - **p67** `table_structure_medium` [low] score=637, notes=['sparse_table']
 - **p92** `vertical_table_low_structure` [high] score=426, notes=['truncated_or_header_only', 'sparse_table']
 - **p114** `vertical_table_low_structure` [high] score=611, notes=['rotated_table_structure_unstable']
-- **p115** `vertical_table_low_structure` [high] score=865, notes=['rotated_table_structure_unstable']
-- **p117** `vertical_table_low_structure` [high] score=998, notes=['rotated_table_structure_unstable']
 - **p118** `table_structure_medium` [low] score=346, notes=['sparse_table']
+- **p131** `vertical_table_low_structure` [high] score=796, notes=['colspan_year_mismatch']
 - **p134** `table_structure_medium` [low] score=777, notes=['sparse_table']
 - **p135** `table_structure_medium` [low] score=777, notes=['sparse_table']
 - **p136** `table_structure_medium` [low] score=777, notes=['sparse_table']
-- **p140** `table_structure_medium` [low] score=771, notes=['sparse_table']
+- **p140** `table_structure_medium` [low] score=772, notes=['sparse_table']
 - **p141** `table_structure_medium` [low] score=772, notes=['sparse_table']
 - **p142** `table_structure_medium` [low] score=772, notes=['sparse_table']
 - **p147** `table_structure_medium` [low] score=772, notes=['sparse_table']
@@ -67,7 +66,7 @@
 - **p338** `table_structure_medium` [low] score=1107, notes=['sparse_table']
 - **p339** `table_structure_medium` [low] score=572, notes=['sparse_table']
 - **p341** `table_structure_medium` [low] score=1296, notes=['sparse_table']
-- **p342** `table_structure_medium` [low] score=1080, notes=['sparse_table']
+- **p342** `table_structure_medium` [low] score=978, notes=['sparse_table']
 - **p345** `vertical_table_low_structure` [high] score=664, notes=['sparse_table', 'truncated_or_header_only']
 - **p350** `table_structure_medium` [low] score=649, notes=['sparse_table']
 - **p353** `vertical_table_low_structure` [high] score=789, notes=['truncated_or_header_only']

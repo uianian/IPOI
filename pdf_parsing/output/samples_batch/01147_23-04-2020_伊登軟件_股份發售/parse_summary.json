@@ -1,15 +1,15 @@
 {
   "total_pages": 458,
-  "total_elements": 5044,
+  "total_elements": 5048,
   "categories": {
-    "text": 2940,
-    "title": 819,
-    "header": 521,
+    "text": 2944,
+    "title": 816,
+    "header": 523,
     "footer": 455,
     "table": 200,
-    "table_footnote": 50,
-    "figure": 43,
-    "table_caption": 10,
+    "table_footnote": 51,
+    "figure": 41,
+    "table_caption": 12,
     "figure_caption": 5,
     "page_footnote": 1
   },
@@ -18,8 +18,8 @@
   "html_tables": 200,
   "markdown_tables": 0,
   "table_structure_confidence_pages": {
-    "high": 94,
+    "high": 95,
     "medium": 34,
-    "low": 13
+    "low": 12
   }
 }

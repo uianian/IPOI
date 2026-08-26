@@ -2,7 +2,7 @@
   {
     "page": 2,
     "bbox": [
-      277,
+      280,
       2322,
       2113,
       2368
@@ -14,7 +14,7 @@
   {
     "page": 2,
     "bbox": [
-      277,
+      280,
       2487,
       2190,
       2600
@@ -26,7 +26,7 @@
   {
     "page": 2,
     "bbox": [
-      277,
+      280,
       2603,
       2190,
       2752
@@ -100,7 +100,7 @@
     "bbox": [
       280,
       287,
-      521,
+      518,
       350
     ],
     "type": "text",
@@ -110,7 +110,7 @@
   {
     "page": 25,
     "bbox": [
-      280,
+      282,
       453,
       2193,
       592
@@ -224,7 +224,7 @@
       2973
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td colspan=\"3\">(人民幣千元)</td><td colspan=\"2\">(未經審計)</td></tr><tr><td>本公司股權持有人應佔</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>年／期內虧損</td><td>(20,044,950)</td><td>(12,429,285)</td><td>(19,651,534)</td><td>(1,617,445)</td><td>(97,371,462)</td></tr><tr><td>加：</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>以股份為基礎的薪酬開支^(1)</td><td>296,535</td><td>701,601</td><td>742,303</td><td>564,039</td><td>977,087</td></tr><tr><td>可轉換可贖回優先股公允</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>價值變動^(2)</td><td>20,522,376</td><td>11,932,515</td><td>19,943,114</td><td>2,890,090</td><td>89,150,056</td></tr><tr><td>經調整利潤／(虧損)淨額(未</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>經審計)^(3)</td><td>773,961</td><td>204,831</td><td>1,033,883</td><td>1,836,684</td><td>(7,244,319)</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td colspan=\"5\">(人民幣千元)</td></tr><tr><td></td><td colspan=\"5\">(未經審計)</td></tr><tr><td>本公司股權持有人應佔</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>年／期內虧損</td><td>(20,044,950)</td><td>(12,429,285)</td><td>(19,651,534)</td><td>(1,617,445)</td><td>(97,371,462)</td></tr><tr><td>加：</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>以股份為基礎的薪酬開支^(1)</td><td>296,535</td><td>701,601</td><td>742,303</td><td>564,039</td><td>977,087</td></tr><tr><td>可轉換可贖回優先股公允</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>價值變動^(2)</td><td>20,522,376</td><td>11,932,515</td><td>19,943,114</td><td>2,890,090</td><td>89,150,056</td></tr><tr><td>經調整利潤／(虧損)淨額(未</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>經審計)^(3)</td><td>773,961</td><td>204,831</td><td>1,033,883</td><td>1,836,684</td><td>(7,244,319)</td></tr></table>",
     "source_tag": "p30_table"
   },
   {
@@ -363,7 +363,7 @@
     "page": 36,
     "bbox": [
       277,
-      843,
+      840,
       2195,
       1101
     ],
@@ -500,7 +500,7 @@
       2335
     ],
     "type": "text",
-    "content": "有關COVID-19爆發及其作為全球性疫情的進一步發展仍存在重大不確定性。倘若中國再次爆發疫情，中國可能再次採取緊急遏制措施，從而可能影響線上業務。因此，目前尚無法合理估計該疫情對我們業務的干擾程度及對我們2020年財務業績及前景的相關影響。詳情請參閱「風險因素 — 與業務有關的風險 — 我們的業務營運及財務表現已受到COVID-19爆發的影響」及「財務資料 — COVID-19對營運的影響」。",
+    "content": "有關COVID-19爆發及其作為全球性疫情的進一步發展仍存在重大不確定性。倘若中國再次爆發疫情，中國可能再次採取緊急遏制措施，從而可能影響線上業務。因此，目前尚無法合理估計該疫情對我們業務的干擾程度及對我們2020年財務業績及前景的相關影響。詳情請參閱「風險因素—與業務有關的風險—我們的業務營運及財務表現已受到COVID-19爆發的影響」及「財務資料—COVID-19對營運的影響」。",
     "source_tag": "p42_text"
   },
   {
@@ -520,24 +520,12 @@
     "bbox": [
       270,
       310,
-      2195,
+      2198,
       2934
     ],
     "type": "table",
     "content": "<table><tr><td>「股東」</td><td>指</td><td>股份持有人</td></tr><tr><td>「股份」</td><td>指</td><td>依文義所指的本公司股本中的A類股份及B類股份</td></tr><tr><td>「購股權披露規定」</td><td>指</td><td>上市規則第17.02(1)(b)條與附錄1A第27段及公司(清盤及雜項條文)條例附表三第一部第10(d)段所載的規定</td></tr><tr><td>「四川福源春」</td><td>指</td><td>四川福源春文化傳播有限公司，於2018年10月17日根據中國法律註冊成立的有限公司，為我們的合併聯屬實體。四川福源春正在辦理註銷</td></tr><tr><td>「四川快手」</td><td>指</td><td>四川快手互聯網信息有限公司，於2020年5月25日根據中國法律註冊成立的有限公司，為我們的合併聯屬實體</td></tr><tr><td>「穩定價格經辦人」</td><td>指</td><td>摩根士丹利亞洲有限公司</td></tr><tr><td>「國家」</td><td>指</td><td>中國中央政府，包括所有政府分部(包括省級、市級及其他地區或地方政府機關)及其機關，或(如文義指明)上述任何一個分部或機關</td></tr><tr><td>「國務院」</td><td>指</td><td>中華人民共和國國務院</td></tr><tr><td>「借股協議」</td><td>指</td><td>Morgan Stanley &amp; Co. International plc、Reach Best及Ke Yong將於定價日或前後訂立的借股協議</td></tr><tr><td>「附屬公司」</td><td>指</td><td>具有公司條例賦予該詞的涵義</td></tr><tr><td>「主要股東」</td><td>指</td><td>具有上市規則賦予該詞的涵義</td></tr><tr><td>「收購守則」</td><td>指</td><td>證監會發佈的公司收購、合併及股份回購守則</td></tr><tr><td>「騰訊」</td><td>指</td><td>騰訊控股有限公司(香港聯交所股份代號：700)，或騰訊控股有限公司及／或其附屬公司(視情況而定)</td></tr></table>",
     "source_tag": "p66_table"
-  },
-  {
-    "page": 71,
-    "bbox": [
-      270,
-      304,
-      2195,
-      2715
-    ],
-    "type": "table",
-    "content": "<table><tr><td>「KGNN」</td><td>指</td><td>快手圖神經網絡，在該自研圖神經網絡基礎上，我們建立了基於深度學習及強化學習的超大規模推薦引擎</td></tr><tr><td>「KTP」</td><td>指</td><td>快手傳輸協議，我們開發的私有傳輸協議</td></tr><tr><td>「快手應用」</td><td>指</td><td>快手主站、快手極速版及快手概念版移動應用的統稱</td></tr><tr><td>「快手概念版」</td><td>指</td><td>我們於2018年11月推出的應用以探索不同的用戶需求及喜好</td></tr><tr><td>「快手極速版」</td><td>指</td><td>於2019年8月正式推出的快手主站之外的版本</td></tr><tr><td>「快手粉條」</td><td>指</td><td>我們提供的內容創作者為其短視頻或直播增加曝光而付費的營銷服務</td></tr><tr><td>「快手主站」</td><td>指</td><td>從2011年推出的最初移動應用GIF快手衍生的移動應用</td></tr><tr><td>「KVC」</td><td>指</td><td>我們開發的專有視頻編解碼器，快手視頻編碼</td></tr><tr><td>「快幣」</td><td>指</td><td>用戶可兌換虛擬物品的快手兌換單位</td></tr><tr><td>「LAS」</td><td>指</td><td>基於流式的直播多碼率自適應標準</td></tr><tr><td>「月活躍用戶」</td><td>指</td><td>月活躍用戶，計算為每日曆月訪問應用程序至少一次的獨立用戶賬戶(剔除作弊賬戶)數目</td></tr><tr><td>「我們的中國應用程序及小程序的月活躍用戶」</td><td>指</td><td>月活躍用戶數按每日曆月至少訪問過一次我們的任一中國應用程序及其相關小程序的移動設備總數計(剔除作弊設備)</td></tr></table>",
-    "source_tag": "p71_table"
   },
   {
     "page": 72,
@@ -1037,7 +1025,7 @@
       277,
       1796,
       2195,
-      2256
+      2252
     ],
     "type": "text",
     "content": "倘若北京達佳未有根據相關中國法律法規維持其資格，適用的企業所得稅稅率可能升至最高25%，或可能無法申報可扣減稅項開支，任何結果均可能導致所得稅開支增加並對經營業績造成重大不利影響。請參閱「風險因素—我們的業務現時受益於若干中國政府激勵措施。倘若我們於日後無法取得適用於我們的政府補助或稅務優惠，或任何現時享有的政府補助或稅務優惠終止、減少或延遲，我們的業務、財務狀況、經營業績及前景將受到重大不利影響」。",
@@ -1046,7 +1034,7 @@
   {
     "page": 137,
     "bbox": [
-      277,
+      275,
       1806,
       2195,
       2345
@@ -1096,7 +1084,7 @@
     "bbox": [
       377,
       1551,
-      2195,
+      2193,
       1855
     ],
     "type": "text",
@@ -1132,7 +1120,7 @@
     "bbox": [
       377,
       843,
-      2193,
+      2195,
       1065
     ],
     "type": "text",
@@ -1227,7 +1215,7 @@
     "page": 194,
     "bbox": [
       295,
-      310,
+      307,
       2170,
       1091
     ],
@@ -1244,7 +1232,7 @@
       2573
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td>2015年 (實際)</td><td>2016年 (實際)</td><td>2017年 (實際)</td><td>2018年 (實際)</td><td>2019年 (實際)</td><td>2020年 (預測)</td><td>2021年 (預測)</td><td>2022年 (預測)</td><td>2023年 (預測)</td><td>2024年 (預測)</td><td>2025年 (預測)</td></tr><tr><td>移動互聯網用戶數</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>(百萬) ……</td><td>620</td><td>695</td><td>753</td><td>817</td><td>873</td><td>943</td><td>995</td><td>1,038</td><td>1,076</td><td>1,109</td><td>1,137</td></tr><tr><td>移動互聯網</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>滲透率(%) ……</td><td>45.3%</td><td>50.6%</td><td>54.4%</td><td>58.8%</td><td>62.4%</td><td>66.9%</td><td>70.2%</td><td>72.8%</td><td>75.0%</td><td>77.0%</td><td>78.5%</td></tr></table>",
+    "content": "<table><tr><td></td><td>2015年 (實際)</td><td>2016年 (實際)</td><td>2017年 (實際)</td><td>2018年 (實際)</td><td>2019年 (實際)</td><td>2020年 (預測)</td><td>2021年 (預測)</td><td>2022年 (預測)</td><td>2023年 (預測)</td><td>2024年 (預測)</td><td>2025年 (預測)</td></tr><tr><td>移動互聯網用戶數</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>(百萬)</td><td>620</td><td>695</td><td>753</td><td>817</td><td>873</td><td>943</td><td>995</td><td>1,038</td><td>1,076</td><td>1,109</td><td>1,137</td></tr><tr><td>移動互聯網</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>滲透率(%)</td><td>45.3%</td><td>50.6%</td><td>54.4%</td><td>58.8%</td><td>62.4%</td><td>66.9%</td><td>70.2%</td><td>72.8%</td><td>75.0%</td><td>77.0%</td><td>78.5%</td></tr></table>",
     "source_tag": "p195_table"
   },
   {
@@ -1325,10 +1313,10 @@
       277,
       1945,
       2183,
-      2957
+      2821
     ],
     "type": "table",
-    "content": "<table><tr><td>年度</td><td>事項</td></tr><tr><td>2011年</td><td>推出GIF快手，供用戶製作並分享GIF動圖，GIF動圖本質上是短視頻的雛形。(<sup>1</sup>)</td></tr><tr><td>2012年</td><td>我們成為中國短視頻行業的先驅，讓用戶能夠在移動設備上創作、上傳及觀看短視頻。(<sup>1</sup>)</td></tr><tr><td>2013年</td><td>我們推出短視頻社交平台。</td></tr><tr><td>2016年</td><td>我們推出直播功能作為平台的自然延伸。</td></tr><tr><td>2017年</td><td>以虛擬禮物打賞所得收入計，於2017年第四季度，快手主站成為全球最大單一直播平台。(<sup>1</sup>)</td></tr><tr><td></td><td>我們開始探索其他變現模式，例如線上營銷服務。</td></tr></table>",
+    "content": "<table><tr><td>年度</td><td>事項</td></tr><tr><td>2011年</td><td>推出GIF快手，供用戶製作並分享GIF動圖，GIF動圖本質上是短視頻的雛形。(<sup>1</sup>)</td></tr><tr><td>2012年</td><td>我們成為中國短視頻行業的先驅，讓用戶能夠在移動設備上創作、上傳及觀看短視頻。(<sup>1</sup>)</td></tr><tr><td>2013年</td><td>我們推出短視頻社交平台。</td></tr><tr><td>2016年</td><td>我們推出直播功能作為平台的自然延伸。</td></tr><tr><td>2017年</td><td>以虛擬禮物打賞所得收入計，於2017年第四季度，快手主站成為全球最大單一直播平台。(<sup>1</sup>)</td></tr></table>",
     "source_tag": "p237_table"
   },
   {
@@ -1358,13 +1346,13 @@
   {
     "page": 242,
     "bbox": [
-      277,
+      282,
       248,
-      2198,
+      2195,
       3006
     ],
     "type": "table",
-    "content": "<table><tr><td>股東</td><td>A系列優先股</td><td>B系列優先股</td><td>C系列優先股</td><td>D系列優先股</td><td>E系列優先股</td><td>F-1系列優先股</td><td>E-1系列優先股</td><td>F-2系列優先股</td><td>全球發售後每股面值</td><td>全球發售完成後每股面值</td><td>全球發售完成後所有權</td></tr><tr><td>Sequoia Capital China GF Holdco III-A, Ltd.<sup>(1)</sup></td><td>—</td><td>—</td><td>51,330,766</td><td>21,364,071</td><td>—</td><td>10,601,338</td><td>—</td><td>—</td><td>83,296,175</td><td>2.465%</td><td>83,296,175</td><td>2.028%</td></tr><tr><td>SC GGFFI Holdco, Ltd.<sup>(1)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>14,008,433</td><td>—</td><td>—</td><td>14,008,433</td><td>0.414%</td><td>14,008,433</td><td>0.341%</td></tr><tr><td>SCC Growth IV 2018-C,</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>9,005,421</td><td>0.266%</td><td>9,005,421</td><td>9,005,421</td><td>0.26%</td><td>0.219%</td></tr><tr><td>L.P.<sup>(1)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>2,001,205</td><td>0.059%</td><td>2,001,205</td><td>2,001,205</td><td>0.049%</td><td>0.049%</td></tr><tr><td>百度(香港)有限公司<sup>(12)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>127,608,382</td><td>—</td><td>—</td><td>127,608,382</td><td>3.776%</td><td>3,106%</td></tr><tr><td>Superior Leap Limited<sup>(13)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>77,451,523</td><td>2.292%</td><td>77,451,523</td><td>77,451,523</td><td>1.885%</td></tr><tr><td>Shunwei Growth II Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>24,479,660</td><td>0.724%</td><td>24,479,660</td><td>24,479,660</td><td>0.596%</td></tr><tr><td>Shunwei Growth III</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>2,001,205</td><td>0.059%</td><td>2,001,205</td><td>2,001,205</td><td>0.049%</td><td>0.049%</td></tr><tr><td>CMC King Investment</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>41,268,162</td><td>1.221%</td><td>41,268,162</td><td>41,268,162</td><td>1.005%</td><td>1.005%</td></tr><tr><td>CMC King II Holdings</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6,018,338</td><td>0.178%</td><td>6,018,338</td><td>0.146%</td></tr><tr><td>Limited<sup>(14)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>11,006,626</td><td>0.326%</td><td>11,006,626</td><td>0.268%</td></tr><tr><td>潤良泰(香港)投資有限公司</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,817,630</td><td>0.172%</td><td>5,817,630</td><td>0.142%</td></tr><tr><td>Tigercub Anatole United Co., Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,817,630</td><td>0.172%</td><td>5,817,630</td><td>5,817,630</td><td>0.172%</td><td>0.142%</td></tr><tr><td>美鴻投資有限公司</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,817,630</td><td>0.172%</td><td>5,817,630</td><td>5,817,630</td><td>0.142%</td><td>0.142%</td></tr><tr><td>PV Poseidon Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3,535,440</td><td>0.105%</td><td>3,535,440</td><td>3,535,440</td><td>0.086%</td><td>0.086%</td></tr><tr><td>Kuaishou Opportunities</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>24,014,457</td><td>0.711%</td><td>24,014,457</td><td>24,014,457</td><td>0.585%</td><td>0.585%</td></tr><tr><td>Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,003,012</td><td>0.148%</td><td>5,003,012</td><td>5,003,012</td><td>0.122%</td><td>0.122%</td></tr><tr><td>中國互聯網投資基金（有限合夥）</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>34,306,363</td><td>1.015%</td><td>34,306,363</td><td>34,306,363</td><td>0.835%</td><td>0.835%</td></tr><tr><td>Concept Thrive Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>36,533,737</td><td>1.081%</td><td>36,533,737</td><td>36,533,737</td><td>0.889%</td><td>0.889%</td></tr><tr><td>Merit New Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>36,533,737</td><td>1.081%</td><td>36,533,737</td><td>36,533,737</td><td>0.889%</td><td>0.889%</td></tr><tr><td>Dahlia Investments</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>29,226,990</td><td>0.865%</td><td>29,226,990</td><td>29,226,990</td><td>0.711%</td><td>0.711%</td></tr><tr><td>Pte. Ltd.<sup>(15)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>13,152,145</td><td>0.389%</td><td>13,152,145</td><td>13,152,145</td><td>0.320%</td><td>0.320%</td></tr><tr><td>Lupin TM 2 Co. Ltd.</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>10,960,121</td><td>0.324%</td><td>10,960,121</td><td>10,960,121</td><td>0.267%</td><td>0.267%</td></tr><tr><td>MIC Capital Management</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>435,534</td><td>0.013%</td><td>435,534</td><td>435,534</td><td>0.011%</td><td>0.011%</td></tr><tr><td>20 RSC Ltd</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>295,140</td><td>0.009%</td><td>295,140</td><td>295,140</td><td>0.007%</td><td>0.007%</td></tr><tr><td>Library Group Volume I</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>8,865,514</td><td>0.262%</td><td>8,865,514</td><td>8,865,514</td><td>0.216%</td><td>0.216%</td></tr><tr><td>Wen Yuan Ltd</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>12,033,695</td><td>0.356%</td><td>12,033,695</td><td>12,033,695</td><td>0.293%</td><td>0.293%</td></tr><tr><td>Jade Laurels Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6,016,848</td><td>0.178%</td><td>6,016,848</td><td>6,016,848</td><td>0.146%</td><td>0.146%</td></tr><tr><td>High Bliss Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Happy Elite Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></table>",
+    "content": "<table><tr><td>股東</td><td>A系列優先股</td><td>B系列優先股</td><td>C系列優先股</td><td>D系列優先股</td><td>E系列優先股</td><td>F-1系列優先股</td><td>E-1系列優先股</td><td>F-2系列優先股</td><td>全球發售後每股面值</td><td>全球發售完成後每股面值</td><td>全球發售完成後所有權</td></tr><tr><td>Sequoia Capital China GF Holdco III-A, Ltd.<sup>(1)</sup></td><td>—</td><td>—</td><td>51,330,766</td><td>21,364,071</td><td>—</td><td>10,601,338</td><td>—</td><td>—</td><td>83,296,175</td><td>2.465%</td><td>83,296,175</td><td>2.028%</td></tr><tr><td>SC GGFFI Holdco, Ltd.<sup>(1)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>14,008,433</td><td>—</td><td>—</td><td>14,008,433</td><td>0.414%</td><td>14,008,433</td><td>0.341%</td></tr><tr><td>SCC Growth IV 2018-C,</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>9,005,421</td><td>0.266%</td><td>9,005,421</td><td>9,005,421</td><td>0.26%</td><td>0.219%</td></tr><tr><td>L.P.<sup>(1)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>2,001,205</td><td>0.059%</td><td>2,001,205</td><td>2,001,205</td><td>0.049%</td><td>0.049%</td></tr><tr><td>百度(香港)有限公司<sup>(12)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>127,608,382</td><td>3.776%</td><td>127,608,382</td><td>3.106%</td><td>3.106%</td></tr><tr><td>Superior Leap Limited<sup>(13)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>77,451,523</td><td>2.292%</td><td>77,451,523</td><td>1.885%</td><td>1.885%</td></tr><tr><td>Shunwei Growth II Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>24,479,660</td><td>0.724%</td><td>24,479,660</td><td>0.596%</td><td>0.596%</td></tr><tr><td>Shunwei Growth III</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>2,001,205</td><td>0.059%</td><td>2,001,205</td><td>2,001,205</td><td>0.049%</td><td>0.049%</td></tr><tr><td>CMC King Investment</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>41,268,162</td><td>1.221%</td><td>41,268,162</td><td>41,268,162</td><td>1.005%</td><td>1.005%</td></tr><tr><td>CMC King II Holdings</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6,018,338</td><td>0.178%</td><td>6,018,338</td><td>0.146%</td></tr><tr><td>Limited<sup>(14)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>11,006,626</td><td>0.326%</td><td>11,006,626</td><td>0.268%</td></tr><tr><td>潤良泰(香港)投資有限公司</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,817,630</td><td>0.172%</td><td>5,817,630</td><td>0.142%</td></tr><tr><td>Tigercub Anatole United Co., Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,817,630</td><td>0.172%</td><td>5,817,630</td><td>5,817,630</td><td>0.172%</td><td>0.142%</td></tr><tr><td>美鴻投資有限公司</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,817,630</td><td>0.172%</td><td>5,817,630</td><td>5,817,630</td><td>0.142%</td><td>0.142%</td></tr><tr><td>PV Poseidon Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3,535,440</td><td>0.105%</td><td>3,535,440</td><td>3,535,440</td><td>0.086%</td><td>0.086%</td></tr><tr><td>Kuaishou Opportunities</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>24,014,457</td><td>0.711%</td><td>24,014,457</td><td>24,014,457</td><td>0.585%</td><td>0.585%</td></tr><tr><td>Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>5,003,012</td><td>0.148%</td><td>5,003,012</td><td>5,003,012</td><td>0.122%</td><td>0.122%</td></tr><tr><td>中國互聯網投資基金（有限合夥）</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>34,306,363</td><td>1.015%</td><td>34,306,363</td><td>34,306,363</td><td>0.835%</td><td>0.835%</td></tr><tr><td>Concept Thrive Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>36,533,737</td><td>1.081%</td><td>36,533,737</td><td>36,533,737</td><td>0.889%</td><td>0.889%</td></tr><tr><td>Merit New Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>36,533,737</td><td>1.081%</td><td>36,533,737</td><td>36,533,737</td><td>0.889%</td><td>0.889%</td></tr><tr><td>Dahlia Investments</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>Pte. Ltd.<sup>(15)</sup></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>29,226,990</td><td>0.865%</td><td>29,226,990</td><td>29,226,990</td><td>0.711%</td><td>0.711%</td></tr><tr><td>Lupin TM 2 Co. Ltd.</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>13,152,145</td><td>0.389%</td><td>13,152,145</td><td>13,152,145</td><td>0.320%</td><td>0.320%</td></tr><tr><td>MIC Capital Management</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td>20 RSC Ltd</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>10,960,121</td><td>0.324%</td><td>10,960,121</td><td>0.267%</td></tr><tr><td>Library Group Volume I</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>435,534</td><td>0.013%</td><td>435,534</td><td>435,534</td><td>0.011%</td><td>0.011%</td></tr><tr><td>Wen Yuan Ltd</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>295,140</td><td>0.009%</td><td>295,140</td><td>295,140</td><td>0.007%</td><td>0.007%</td></tr><tr><td>Jade Laurels Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>8,865,514</td><td>0.262%</td><td>8,865,514</td><td>8,865,514</td><td>0.216%</td><td>0.216%</td></tr><tr><td>High Bliss Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>12,033,695</td><td>0.356%</td><td>12,033,695</td><td>12,033,695</td><td>0.293%</td><td>0.293%</td></tr><tr><td>Happy Elite Limited</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6,016,848</td><td>0.178%</td><td>6,016,848</td><td>6,016,848</td><td>0.146%</td><td>0.146%</td></tr></table>",
     "source_tag": "p242_table"
   },
   {
@@ -1376,7 +1364,7 @@
       3006
     ],
     "type": "table",
-    "content": "<table><tr><td>本招股章程日期每股面值</td><td>A系列優先股</td><td>B系列優先股</td><td>C系列優先股</td><td>D系列優先股</td><td>E系列優先股</td><td>F-1系列優先股</td><td>D-1系列優先股</td><td>E-1系列優先股</td><td>F-2系列優先股</td><td>全球發售後每股面值</td><td>全球發售完成</td></tr><tr><td>0.000053</td><td>本招股章程日期所有權百分比合計^(1)</td><td>本招股章程日期所有權百分比合計^(1)</td><td>美元的股份總數合計^(1)</td><td>美元的股份總數合計^(2)</td><td>全球發售完成所有權百分比合計^(2)</td></tr><tr><td>Keystone KS Limited</td><td>—</td><td>1,281,155</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>2,806,348</td><td>0.083%</td><td>2,806,348</td><td>0.068%</td></tr><tr><td>Kuan &amp; Young KS Limited</td><td>—</td><td>1,465,659</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3,210,500</td><td>0.095%</td><td>3,210,500</td><td>0.078%</td></tr><tr><td>Franchise Fund LP^(16)</td><td>3,768,741</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3,768,741</td><td>0.112%</td><td>3,768,741</td><td>0.092%</td></tr><tr><td>僱員持股平台^(17)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>260,616,743</td><td>6.344%</td></tr><tr><td>全球發售的其他公眾股東</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>8.890%</td></tr><tr><td>總計</td><td>930,672,59</td><td>356,224,601</td><td>474,997,455</td><td>6,416,275</td><td>28,319,024</td><td>42,728,141</td><td>186,068,877</td><td>407,236,905</td><td>34,306,363</td><td>104,576,622</td><td>354,162,343</td><td>100%</td><td>4,108,194,737</td><td>100%</td></tr></table>",
+    "content": "<table><tr><td>本招股章程日期每股面值</td><td>A系列優先股</td><td>B系列優先股</td><td>C系列優先股</td><td>D系列優先股</td><td>E系列優先股</td><td>F-1系列優先股</td><td>D-1系列優先股</td><td>E-1系列優先股</td><td>F-2系列優先股</td><td>全球發售後每股面值</td><td>全球發售完成</td></tr><tr><td>0.000053</td><td>本招股章程日期所有權百分比合計^(1)</td><td>本招股章程日期所有權百分比合計^(1)</td><td>美元的股份總數合計^(1)</td><td>美元的股份總數合計^(2)</td><td>全球發售完成所有權百分比合計^(2)</td></tr><tr><td>Keystone KS Limited</td><td>—</td><td>1,281,155</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>2,806,348</td><td>0.083%</td><td>2,806,348</td><td>0.068%</td></tr><tr><td>Kuan &amp; Young KS Limited</td><td>—</td><td>1,465,659</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3,210,500</td><td>0.095%</td><td>3,210,500</td><td>0.078%</td></tr><tr><td>Franchise Fund LP^(16)</td><td>3,768,741</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>3,768,741</td><td>0.112%</td><td>3,768,741</td><td>0.092%</td></tr><tr><td>僱員持股平台^(17)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>260,616,743</td><td>6.344%</td></tr><tr><td>全球發售的其他公眾股東</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>8.890%</td></tr><tr><td>總計</td><td>930,672,59</td><td>356,224,601</td><td>474,997,455</td><td>6,416,275</td><td>28,319,024</td><td>42,728,141</td><td>186,068,877</td><td>407,236,905</td><td>200,120,473</td><td>34,306,363</td><td>104,576,622</td><td>354,162,343</td><td>100%</td><td>4,108,194,737</td><td>100%</td></tr></table>",
     "source_tag": "p243_table"
   },
   {
@@ -1474,18 +1462,6 @@
     "type": "text",
     "content": "我們力求通過專利、商標、版權、商業機密及保密協議相結合的方式保護知識產權。截至最後可行日期，我們(i)於中國註冊1,178項專利、1,045個軟件及其他版權、3,512個商標及928個主要域名；及(ii)於海外註冊488個商標。此外，截至最後可行日期，我們於中國遞交3,162項專利及1,735個商標申請及於海外遞交437個商標申請。在將任何第三方知識產權用於我們平台前，我們不僅會取得相關權利持有人的授權，亦會在快手應用中設置舉報維權功能，方便用戶舉報上傳到我們平台的違反知識產權的內容。我們有專門的人員處理有關舉報並在必要時刪除侵權內容。我們按照經營所在司法權區的標準行業慣例執行版權保護及刪除政策，一旦確定有用戶多次違規，我們會暫停或終止該用戶的賬戶。營業紀錄期間及直至最後可行日期，並無發生針對我們的有關商標、版權或其他知識產權侵權的重大索賠或糾紛。然而，第三方未經授權使用我們的知識產權以及為保護知識產權免受該未經授權使用所產生的開支可能會對我們的業務及經營業績有不利影響，請參閱「風險因素 — 與業務有關的風險 — 用戶、僱員及／或第三方未經授權使用我們的知識產權、不公平競爭、誹謗或其他侵犯我們權利的行為可能有損我們的品牌及聲譽，而保護知識產權所產生的開支可能對我們的業務有重大不利影響」。",
     "source_tag": "p308_text"
-  },
-  {
-    "page": 311,
-    "bbox": [
-      277,
-      846,
-      2170,
-      1359
-    ],
-    "type": "table",
-    "content": "<table><tr><td>職能</td><td>全職僱員人數</td><td>百分比(%)</td></tr><tr><td>研發</td><td>6,551</td><td>32.9</td></tr><tr><td>客服及運營</td><td>10,552</td><td>52.9</td></tr><tr><td>銷售及推廣</td><td>1,754</td><td>8.8</td></tr><tr><td>一般及行政</td><td>1,084</td><td>5.4</td></tr><tr><td>總計</td><td>19,941</td><td>100</td></tr></table>",
-    "source_tag": "p311_table"
   },
   {
     "page": 313,
@@ -1671,7 +1647,7 @@
     "page": 341,
     "bbox": [
       277,
-      684,
+      688,
       2195,
       1065
     ],
@@ -1928,7 +1904,7 @@
       1938
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td></tr><tr><td></td><td>2021年</td><td>2022年</td><td>2023年</td></tr><tr><td></td><td colspan=\"3\">(人民幣百萬元)</td></tr><tr><td>我們向相關騰訊集團支付的</td><td></td><td></td><td></td></tr><tr><td>支付渠道手續費建議年度上限</td><td>1,118.4</td><td>1,890.6</td><td>2,781.6</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td></tr><tr><td></td><td>2021年</td><td>2022年</td><td>2023年</td></tr><tr><td></td><td colspan=\"3\">(人民幣百萬元)</td></tr><tr><td>我們向相關騰訊集團支付的</td><td></td><td></td><td></td></tr><tr><td>支付渠道手續費建議年度上限……</td><td>1,118.4</td><td>1,890.6</td><td>2,781.6</td></tr></table>",
     "source_tag": "p375_table"
   },
   {
@@ -1971,7 +1947,7 @@
     "page": 408,
     "bbox": [
       282,
-      1528,
+      1534,
       2170,
       2689
     ],
@@ -2078,7 +2054,7 @@
   {
     "page": 420,
     "bbox": [
-      275,
+      277,
       304,
       2175,
       2431
@@ -2204,7 +2180,7 @@
       1200
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td></tr><tr><td colspan=\"8\">(以千元計，百分比除外)</td></tr><tr><td colspan=\"8\">(未經審計)</td></tr><tr><td>直播</td><td>7,948,997</td><td>95.3</td><td>18,615,130</td><td>91.7</td><td>31,442,341</td><td>80.4</td><td>22,922,116</td><td>84.1</td><td>25,309,312</td><td>62.2</td></tr><tr><td>線上營銷服務</td><td>390,581</td><td>4.7</td><td>1,665,095</td><td>8.2</td><td>7,418,502</td><td>19.0</td><td>4,267,512</td><td>15.6</td><td>13,343,194</td><td>32.8</td></tr><tr><td>其他服務</td><td>—</td><td>—</td><td>20,420</td><td>0.1</td><td>259,505</td><td>0.6</td><td>78,340</td><td>0.3</td><td>2,024,935</td><td>5.0</td></tr><tr><td>總計</td><td>8,339,578</td><td>100.0</td><td>20,300,645</td><td>100.0</td><td>39,120,348</td><td>100.0</td><td>27,267,968</td><td>100.0</td><td>40,677,441</td><td>100.0</td></tr></table>",
+    "content": "<table><tr><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"4\">截至9月30日止九個月</td></tr><tr><td colspan=\"2\">2017年</td><td colspan=\"2\">2018年</td><td colspan=\"2\">2019年</td><td colspan=\"2\">2019年</td><td colspan=\"2\">2020年</td></tr><tr><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td><td>人民幣</td><td>%</td></tr><tr><td colspan=\"9\">(以千元計，百分比除外)</td></tr><tr><td colspan=\"9\">(未經審計)</td></tr><tr><td>直播</td><td>7,948,997</td><td>95.3</td><td>18,615,130</td><td>91.7</td><td>31,442,341</td><td>80.4</td><td>22,922,116</td><td>84.1</td><td>25,309,312</td><td>62.2</td></tr><tr><td>線上營銷服務</td><td>390,581</td><td>4.7</td><td>1,665,095</td><td>8.2</td><td>7,418,502</td><td>19.0</td><td>4,267,512</td><td>15.6</td><td>13,343,194</td><td>32.8</td></tr><tr><td>其他服務</td><td>—</td><td>—</td><td>20,420</td><td>0.1</td><td>259,505</td><td>0.6</td><td>78,340</td><td>0.3</td><td>2,024,935</td><td>5.0</td></tr><tr><td>總計</td><td>8,339,578</td><td>100.0</td><td>20,300,645</td><td>100.0</td><td>39,120,348</td><td>100.0</td><td>27,267,968</td><td>100.0</td><td>40,677,441</td><td>100.0</td></tr></table>",
     "source_tag": "p449_table"
   },
   {
@@ -2252,7 +2228,7 @@
       2543
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"6\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣%</td><td>人民幣%</td><td>人民幣%</td><td>人民幣%</td><td>人民幣%</td></tr><tr><td colspan=\"10\">(以千元計，百分比除外)</td></tr><tr><td colspan=\"10\">(未經審計)</td></tr><tr><td>僱員福利開支</td><td>179,433</td><td>2.2</td><td>361,575</td><td>1.8</td><td>563,469</td><td>1.4</td><td>379,441</td><td>1.4</td><td>680,674</td><td>1.7</td></tr><tr><td>其他行政開支</td><td>48,535</td><td>0.5</td><td>180,842</td><td>0.9</td><td>301,906</td><td>0.8</td><td>193,233</td><td>0.7</td><td>400,673</td><td>1.0</td></tr><tr><td>總計</td><td>227,968</td><td>2.7</td><td>542,417</td><td>2.7</td><td>865,375</td><td>2.2</td><td>572,674</td><td>2.1</td><td>1,081,347</td><td>2.7</td></tr></table>",
+    "content": "<table><tr><td colspan=\"6\">截至12月31日止年度</td><td colspan=\"6\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣 %</td><td>人民幣 %</td><td>人民幣 %</td><td>人民幣 %</td><td>人民幣 %</td></tr><tr><td colspan=\"10\">(以千元計，百分比除外)</td></tr><tr><td colspan=\"10\">(未經審計)</td></tr><tr><td>僱員福利開支</td><td>179,433</td><td>2.2</td><td>361,575</td><td>1.8</td><td>563,469</td><td>1.4</td><td>379,441</td><td>1.4</td><td>680,674</td><td>1.7</td></tr><tr><td>其他行政開支</td><td>48,535</td><td>0.5</td><td>180,842</td><td>0.9</td><td>301,906</td><td>0.8</td><td>193,233</td><td>0.7</td><td>400,673</td><td>1.0</td></tr><tr><td>總計</td><td>227,968</td><td>2.7</td><td>542,417</td><td>2.7</td><td>865,375</td><td>2.2</td><td>572,674</td><td>2.1</td><td>1,081,347</td><td>2.7</td></tr></table>",
     "source_tag": "p454_table"
   },
   {
@@ -2270,7 +2246,7 @@
   {
     "page": 455,
     "bbox": [
-      280,
+      282,
       2242,
       823,
       2305
@@ -2294,7 +2270,7 @@
   {
     "page": 456,
     "bbox": [
-      277,
+      275,
       449,
       2195,
       671
@@ -2330,7 +2306,7 @@
   {
     "page": 456,
     "bbox": [
-      277,
+      275,
       1481,
       2195,
       1941
@@ -2369,7 +2345,7 @@
       277,
       2342,
       2195,
-      2639
+      2643
     ],
     "type": "text",
     "content": "因業務收購產生的物業及設備於剩餘可使用年期內折舊。物業及設備的剩餘價值及可使用年期在各報告期末進行審核，並在適當時調整。若資產的賬面值高於其估計可收回金額，該物業及設備賬面值即時撇減至可收回金額。出售所得盈虧是以所得款項與賬面值比較而釐定，並在合併損益表內「其他收益／(虧損)淨額」中確認。",
@@ -2612,7 +2588,7 @@
       1468
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td colspan=\"3\">(人民幣千元)</td><td colspan=\"2\">(未經審計)</td></tr><tr><td>本公司股權持有人應佔</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>年／期內虧損</td><td>(20,044,950)</td><td>(12,429,285)</td><td>(19,651,534)</td><td>(1,617,445)</td><td>(97,371,462)</td></tr><tr><td>加：</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>以股份為基礎的薪酬開支^(1)</td><td>296,535</td><td>701,601</td><td>742,303</td><td>564,039</td><td>977,087</td></tr><tr><td>可轉換可贖回優先股公允價值變動^(2)</td><td>20,522,376</td><td>11,932,515</td><td>19,943,114</td><td>2,890,090</td><td>89,150,056</td></tr><tr><td>經調整利潤／(虧損)淨額 (未經審計)^(3)</td><td>773,961</td><td>204,831</td><td>1,033,883</td><td>1,836,684</td><td>(7,244,319)</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td colspan=\"3\">(人民幣千元)</td><td colspan=\"2\">(未經審計)</td></tr><tr><td>本公司股權持有人應佔</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>年／期內虧損</td><td>(20,044,950)</td><td>(12,429,285)</td><td>(19,651,534)</td><td>(1,617,445)</td><td>(97,371,462)</td></tr><tr><td>加：</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>以股份為基礎的薪酬開支^(1)</td><td>296,535</td><td>701,601</td><td>742,303</td><td>564,039</td><td>977,087</td></tr><tr><td>可轉換可贖回優先股公允</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>價值變動^(2)</td><td>20,522,376</td><td>11,932,515</td><td>19,943,114</td><td>2,890,090</td><td>89,150,056</td></tr><tr><td>經調整利潤／(虧損)淨額</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>(未經審計)^(3)</td><td>773,961</td><td>204,831</td><td>1,033,883</td><td>1,836,684</td><td>(7,244,319)</td></tr></table>",
     "source_tag": "p473_table"
   },
   {
@@ -2764,7 +2740,7 @@
     "bbox": [
       280,
       1475,
-      2193,
+      2190,
       1617
     ],
     "type": "text",
@@ -3065,7 +3041,7 @@
       277,
       1161,
       2168,
-      1673
+      1670
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日</td><td>截至9月30日</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td colspan=\"4\">(人民幣千元)</td></tr><tr><td>三個月內</td><td>136,641</td><td>129,120</td><td>1,104,662</td><td>1,624,531</td></tr><tr><td>三至六個月</td><td>—</td><td>—</td><td>7,552</td><td>210,946</td></tr><tr><td>總計</td><td>136,641</td><td>129,120</td><td>1,112,214</td><td>1,835,477</td></tr></table>",
@@ -3314,7 +3290,7 @@
   {
     "page": 500,
     "bbox": [
-      277,
+      275,
       449,
       2195,
       830
@@ -3506,7 +3482,7 @@
   {
     "page": 506,
     "bbox": [
-      280,
+      277,
       1799,
       2163,
       2282
@@ -3533,7 +3509,7 @@
       277,
       1938,
       2168,
-      2504
+      2500
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日</td><td>截至9月30日</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td colspan=\"4\">(人民幣千元)</td></tr><tr><td>無形資產</td><td>—</td><td>—</td><td>15,057</td><td>7,747</td></tr><tr><td>物業及設備</td><td>95,376</td><td>25,553</td><td>12,571</td><td>314,751</td></tr><tr><td>投資</td><td>—</td><td>—</td><td>—</td><td>55,456</td></tr><tr><td>總計</td><td>95,376</td><td>25,553</td><td>27,628</td><td>377,954</td></tr></table>",
@@ -3629,7 +3605,7 @@
       277,
       502,
       2170,
-      1855
+      1852
     ],
     "type": "table",
     "content": "<table><tr><td></td><td>不足一年</td><td>一至兩年</td><td>兩至五年</td><td>五年以上</td><td>總計</td></tr><tr><td></td><td colspan=\"5\">(人民幣千元)</td></tr><tr><td>2017年12月31日</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>應付賬款</td><td>1,802,517</td><td>—</td><td>—</td><td>—</td><td>1,802,517</td></tr><tr><td>其他應付款項及應計費用(不包括應付僱員福利與其他應付稅項)</td><td>10,439</td><td>—</td><td>—</td><td>—</td><td>10,439</td></tr><tr><td>租賃負債</td><td>212,711</td><td>314,013</td><td>419,288</td><td>—</td><td>946,012</td></tr><tr><td>可轉換可贖回優先股</td><td>—</td><td>—</td><td>26,652,555</td><td>—</td><td>26,652,555</td></tr><tr><td>總計</td><td>2,025,667</td><td>314,013</td><td>27,071,843</td><td>—</td><td>29,411,523</td></tr><tr><td>2018年12月31日</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>應付賬款</td><td>2,025,563</td><td>—</td><td>—</td><td>—</td><td>2,025,563</td></tr><tr><td>其他應付款項及應計費用(不包括應付僱員福利與其他應付稅項)</td><td>47,527</td><td>—</td><td>—</td><td>—</td><td>47,527</td></tr><tr><td>租賃負債</td><td>553,756</td><td>589,619</td><td>307,858</td><td>—</td><td>1,451,233</td></tr><tr><td>可轉換可贖回優先股</td><td>—</td><td>—</td><td>47,211,431</td><td>—</td><td>47,211,431</td></tr><tr><td>總計</td><td>2,626,846</td><td>589,619</td><td>47,519,289</td><td>—</td><td>50,735,754</td></tr></table>",
@@ -3665,7 +3641,7 @@
       277,
       1730,
       2168,
-      2527
+      2524
     ],
     "type": "table",
     "content": "<table><tr><td></td><td>2020年9月30日</td><td>估計上市時</td><td>本公司股權</td><td></td><td></td><td></td></tr><tr><td>本公司股權</td><td></td><td>可轉換可贖回</td><td>持有人應佔</td><td></td><td></td><td></td></tr><tr><td>持有人應佔</td><td></td><td>優先股條款</td><td>未經審計備考</td><td></td><td></td><td></td></tr><tr><td>經審計合併</td><td>估計全球發售</td><td>變動的</td><td>經調整合併</td><td>每股股份未經審計備考經調整</td><td></td><td></td></tr><tr><td>有形負債淨額^(1)</td><td>所得款項淨額^(2)</td><td>相關影響^(3)</td><td>有形資產淨值</td><td>合併有形資產淨值^(4)(5)</td><td></td><td></td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣元</td><td>港元</td></tr><tr><td>按發售價每股股份</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>105.00港元計算</td><td>(149,595,066)</td><td>31,534,718</td><td>175,237,831</td><td>57,177,483</td><td>13.92</td><td>16.64</td></tr><tr><td>按發售價每股股份</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>115.00港元計算</td><td>(149,595,066)</td><td>34,543,063</td><td>175,237,831</td><td>60,185,828</td><td>14.65</td><td>17.52</td></tr></table>",
@@ -3700,7 +3676,7 @@
     "bbox": [
       468,
       2348,
-      2188,
+      2185,
       2411
     ],
     "type": "text",
@@ -3848,7 +3824,7 @@
       2520
     ],
     "type": "table",
-    "content": "<table><tr><td rowspan=\"3\"></td><td colspan=\"4\">截至12月31日</td><td>截至9月30日</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>資產</td><td></td><td></td><td></td><td></td></tr><tr><td>非流動資產</td><td></td><td></td><td></td><td></td></tr><tr><td>物業及設備</td><td>15</td><td>1,057,278</td><td>2,420,770</td><td>6,232,305</td><td>7,021,382</td></tr><tr><td>使用權資產</td><td>16</td><td>865,623</td><td>1,272,218</td><td>4,352,638</td><td>5,394,482</td></tr><tr><td>無形資產</td><td>17</td><td>34,875</td><td>1,045,816</td><td>1,120,308</td><td>1,253,694</td></tr><tr><td>按公允價值計量且其變動</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>計入損益之金融資產</td><td>20</td><td>49,200</td><td>677,919</td><td>2,258,272</td><td>3,998,760</td></tr><tr><td>遞延稅項資產</td><td>31</td><td>7,811</td><td>161,920</td><td>860,185</td><td>2,151,821</td></tr><tr><td>長期定期存款</td><td>23</td><td>—</td><td>—</td><td>110,000</td><td>610,000</td></tr><tr><td>其他非流動資產</td><td></td><td>37,466</td><td>117,738</td><td>169,594</td><td>208,828</td></tr><tr><td></td><td></td><td>2,052,253</td><td>5,696,381</td><td>15,103,302</td><td>20,638,967</td></tr><tr><td>流動資產</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>貿易應收款項</td><td>21</td><td>136,641</td><td>129,045</td><td>1,107,440</td><td>1,812,648</td></tr><tr><td>預付款項、其他應收款項</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>及其他流動資產</td><td>22</td><td>92,557</td><td>724,950</td><td>2,032,754</td><td>2,179,047</td></tr><tr><td>按公允價值計量且其變動</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>計入損益之金融資產</td><td>20</td><td>2,472,037</td><td>4,273,517</td><td>8,902,270</td><td>8,546,045</td></tr><tr><td>短期定期存款</td><td>23</td><td>—</td><td>—</td><td>1,270,994</td><td>10,634,150</td></tr><tr><td>受限制現金</td><td>23</td><td>251,893</td><td>285,274</td><td>1,386</td><td>5,253</td></tr><tr><td>現金及現金等價物</td><td>23</td><td>2,688,512</td><td>5,370,332</td><td>3,996,236</td><td>7,703,012</td></tr><tr><td></td><td></td><td>5,641,640</td><td>10,783,118</td><td>17,311,080</td><td>30,880,155</td></tr><tr><td>資產總額</td><td></td><td>7,693,893</td><td>16,479,499</td><td>32,414,382</td><td>51,519,122</td></tr></table>",
+    "content": "<table><tr><td rowspan=\"3\"></td><td colspan=\"4\">截至12月31日</td><td>截至9月30日</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>資產</td><td></td><td></td><td></td><td></td></tr><tr><td>非流動資產</td><td></td><td></td><td></td><td></td></tr><tr><td>物業及設備 …… 15</td><td>1,057,278</td><td>2,420,770</td><td>6,232,305</td><td>7,021,382</td></tr><tr><td>使用權資產 …… 16</td><td>865,623</td><td>1,272,218</td><td>4,352,638</td><td>5,394,482</td></tr><tr><td>無形資產 …… 17</td><td>34,875</td><td>1,045,816</td><td>1,120,308</td><td>1,253,694</td></tr><tr><td>按公允價值計量且其變動</td><td></td><td></td><td></td><td></td></tr><tr><td>計入損益之金融資產 … 20</td><td>49,200</td><td>677,919</td><td>2,258,272</td><td>3,998,760</td></tr><tr><td>遞延稅項資產 …… 31</td><td>7,811</td><td>161,920</td><td>860,185</td><td>2,151,821</td></tr><tr><td>長期定期存款 …… 23</td><td>—</td><td>—</td><td>110,000</td><td>610,000</td></tr><tr><td>其他非流動資產 ……</td><td>37,466</td><td>117,738</td><td>169,594</td><td>208,828</td></tr><tr><td></td><td>2,052,253</td><td>5,696,381</td><td>15,103,302</td><td>20,638,967</td></tr><tr><td>流動資產</td><td></td><td></td><td></td><td></td></tr><tr><td>貿易應收款項 …… 21</td><td>136,641</td><td>129,045</td><td>1,107,440</td><td>1,812,648</td></tr><tr><td>預付款項、其他應收款項</td><td></td><td></td><td></td><td></td></tr><tr><td>及其他流動資產 …… 22</td><td>92,557</td><td>724,950</td><td>2,032,754</td><td>2,179,047</td></tr><tr><td>按公允價值計量且其變動</td><td></td><td></td><td></td><td></td></tr><tr><td>計入損益之金融資產 … 20</td><td>2,472,037</td><td>4,273,517</td><td>8,902,270</td><td>8,546,045</td></tr><tr><td>短期定期存款 …… 23</td><td>—</td><td>—</td><td>1,270,994</td><td>10,634,150</td></tr><tr><td>受限制現金 …… 23</td><td>251,893</td><td>285,274</td><td>1,386</td><td>5,253</td></tr><tr><td>現金及現金等價物 …… 23</td><td>2,688,512</td><td>5,370,332</td><td>3,996,236</td><td>7,703,012</td></tr><tr><td></td><td>5,641,640</td><td>10,783,118</td><td>17,311,080</td><td>30,880,155</td></tr><tr><td>資產總額 ……</td><td>7,693,893</td><td>16,479,499</td><td>32,414,382</td><td>51,519,122</td></tr></table>",
     "source_tag": "p582_table"
   },
   {
@@ -3860,7 +3836,7 @@
       2712
     ],
     "type": "text",
-    "content": "附註\n\n2017年\n人民幣千元\n\n2018年\n人民幣千元\n\n2019年\n人民幣千元\n\n2020年\n人民幣千元\n\n權益及負債\n\n貴公司股權持有人\n\n應佔權益\n\n股本 24 30 30 30 30\n\n其他儲備 25 1,016,820 (28,397) (321,281) 4,437,845\n\n累計虧損 (23,202,335) (35,676,115) (55,407,785) (152,779,247)\n\n權益總額 (22,185,485) (35,704,482) (55,729,036) (148,341,372)\n\n負債\n\n非流動負債\n\n租賃負債 16 695,784 892,257 3,287,984 3,945,201\n\n遞延稅項負債 31 — 37,885 37,500 33,589\n\n可轉換可贖回優先股 32 26,652,555 47,211,431 69,444,163 52,389,987\n\n27,348,339 48,141,573 72,769,647 56,368,777\n\n流動負債\n\n借款 — — — 300,000\n\n應付賬款 28 1,802,517 2,025,563 9,055,133 10,913,350\n\n其他應付款項及應計費用 29 271,324 844,619 3,027,568 4,092,739\n\n客戶預付款 30 190,074 475,553 1,529,608 3,031,158\n\n所得稅負債 — 91,923 198,132 424,414 435,136\n\n可轉換可贖回優先股 32 — — — 122,847,844\n\n租賃負債 16 175,201 498,541 1,337,048 1,871,490\n\n2,531,039 4,042,408 15,373,771 143,491,717\n\n負債總額 29,879,378 52,183,981 88,143,418 199,860,494\n\n權益及負債總額 7,693,893 16,479,499 32,414,382 51,519,122",
+    "content": "附註\n\n2017年\n人民幣千元\n\n2018年\n人民幣千元\n\n2019年\n人民幣千元\n\n2020年\n人民幣千元\n\n權益及負債\n\n貴公司股權持有人\n\n應佔權益\n\n股本 24 30 30 30 30\n\n其他儲備 25 1,016,820 (28,397) (321,281) 4,437,845\n\n累計虧損 (23,202,335) (35,676,115) (55,407,785) (152,779,247)\n\n權益總額 (22,185,485) (35,704,482) (55,729,036) (148,341,372)\n\n負債\n\n非流動負債\n\n租賃負債 16 695,784 892,257 3,287,984 3,945,201\n\n遞延稅項負債 31 — 37,885 37,500 33,589\n\n可轉換可贖回優先股 32 26,652,555 47,211,431 69,444,163 52,389,987\n\n27,348,339 48,141,573 72,769,647 56,368,777\n\n流動負債\n\n借款 — — — — 300,000\n\n應付賬款 28 1,802,517 2,025,563 9,055,133 10,913,350\n\n其他應付款項及應計費用 29 271,324 844,619 3,027,568 4,092,739\n\n客戶預付款 30 190,074 475,553 1,529,608 3,031,158\n\n所得稅負債 — 91,923 198,132 424,414 435,136\n\n可轉換可贖回優先股 32 — — — — 122,847,844\n\n租賃負債 16 175,201 498,541 1,337,048 1,871,490\n\n2,531,039 4,042,408 15,373,771 143,491,717\n\n負債總額 29,879,378 52,183,981 88,143,418 199,860,494\n\n權益及負債總額 7,693,893 16,479,499 32,414,382 51,519,122",
     "source_tag": "p583_text"
   },
   {
@@ -3872,7 +3848,7 @@
       2477
     ],
     "type": "table",
-    "content": "<table><tr><td rowspan=\"3\">附註</td><td colspan=\"4\">截至12月31日</td><td>截至9月30日</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>資產</td><td></td><td></td><td></td><td></td></tr><tr><td>非流動資產</td><td></td><td></td><td></td><td></td></tr><tr><td>於附屬公司的投資</td><td>18</td><td>467,167</td><td>1,168,768</td><td>1,911,071</td><td>2,844,173</td></tr><tr><td></td><td></td><td>467,167</td><td>1,168,768</td><td>1,911,071</td><td>2,844,173</td></tr><tr><td>流動資產</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>預付款項、其他應收款項</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>及其他流動資產</td><td>22</td><td>1,107,031</td><td>5,624,083</td><td>9,191,993</td><td>23,826,694</td></tr><tr><td>按公允價值計量且其變動</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>計入損益之金融資產</td><td></td><td>1,203,868</td><td>1,737,542</td><td>294,081</td><td>2,073,170</td></tr><tr><td>短期定期存款</td><td>23</td><td>—</td><td>—</td><td>1,270,994</td><td>3,541,252</td></tr><tr><td>受限制現金</td><td></td><td>251,893</td><td>264,576</td><td>—</td><td>—</td></tr><tr><td>現金及現金等價物</td><td>23</td><td>1,672,129</td><td>3,683,005</td><td>1,940,474</td><td>3,533,397</td></tr><tr><td></td><td></td><td>4,234,921</td><td>11,309,206</td><td>12,697,542</td><td>32,974,513</td></tr><tr><td>資產總額</td><td></td><td>4,702,088</td><td>12,477,974</td><td>14,608,613</td><td>35,818,686</td></tr><tr><td>權益及負債</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>貴公司股權持有人</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>應佔權益</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>股本</td><td>24</td><td>30</td><td>30</td><td>30</td><td>30</td></tr><tr><td>其他儲備</td><td>25</td><td>1,112,231</td><td>109,813</td><td>(180,292)</td><td>4,272,310</td></tr><tr><td>累計虧損</td><td></td><td>(23,063,046)</td><td>(34,844,663)</td><td>(54,655,746)</td><td>(143,706,322)</td></tr><tr><td>權益總額</td><td></td><td>(21,950,785)</td><td>(34,734,820)</td><td>(54,836,008)</td><td>(139,433,982)</td></tr></table>",
+    "content": "<table><tr><td rowspan=\"3\">附註</td><td colspan=\"4\">截至12月31日</td><td>截至9月30日</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>資產</td><td></td><td></td><td></td><td></td></tr><tr><td>非流動資產</td><td></td><td></td><td></td><td></td></tr><tr><td>於附屬公司的投資……</td><td>18</td><td>467,167</td><td>1,168,768</td><td>1,911,071</td><td>2,844,173</td></tr><tr><td></td><td></td><td>467,167</td><td>1,168,768</td><td>1,911,071</td><td>2,844,173</td></tr><tr><td>流動資產</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>預付款項、其他應收款項</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>及其他流動資產……</td><td>22</td><td>1,107,031</td><td>5,624,083</td><td>9,191,993</td><td>23,826,694</td></tr><tr><td>按公允價值計量且其變動</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>計入損益之金融資產 …</td><td></td><td>1,203,868</td><td>1,737,542</td><td>294,081</td><td>2,073,170</td></tr><tr><td>短期定期存款……</td><td>23</td><td>—</td><td>—</td><td>1,270,994</td><td>3,541,252</td></tr><tr><td>受限制現金 …</td><td></td><td>251,893</td><td>264,576</td><td>—</td><td>—</td></tr><tr><td>現金及現金等價物……</td><td>23</td><td>1,672,129</td><td>3,683,005</td><td>1,940,474</td><td>3,533,397</td></tr><tr><td></td><td></td><td>4,234,921</td><td>11,309,206</td><td>12,697,542</td><td>32,974,513</td></tr><tr><td>資產總額 …</td><td></td><td>4,702,088</td><td>12,477,974</td><td>14,608,613</td><td>35,818,686</td></tr><tr><td>權益及負債</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>貴公司股權持有人</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>應佔權益</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>股本……</td><td>24</td><td>30</td><td>30</td><td>30</td><td>30</td></tr><tr><td>其他儲備 …</td><td>25</td><td>1,112,231</td><td>109,813</td><td>(180,292)</td><td>4,272,310</td></tr><tr><td>累計虧損 …</td><td></td><td>(23,063,046)</td><td>(34,844,663)</td><td>(54,655,746)</td><td>(143,706,322)</td></tr><tr><td>權益總額 …</td><td></td><td>(21,950,785)</td><td>(34,734,820)</td><td>(54,836,008)</td><td>(139,433,982)</td></tr></table>",
     "source_tag": "p584_table"
   },
   {
@@ -3940,8 +3916,8 @@
     "bbox": [
       277,
       439,
-      2183,
-      1885
+      2180,
+      1882
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"4\">貴公司擁有人應佔</td></tr><tr><td>附註</td><td>股本</td><td>其他儲備</td><td>累計虧損</td><td>總額</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>於2020年1月1日的結餘</td><td>30</td><td>(321,281)</td><td>(55,407,785)</td><td>(55,729,036)</td></tr><tr><td>期內虧損</td><td>—</td><td>—</td><td>(97,371,462)</td><td>(97,371,462)</td></tr><tr><td>其他綜合收益／(虧損)</td><td></td><td></td><td></td><td></td></tr><tr><td>自有信貸風險產生的可轉換可贖</td><td></td><td></td><td></td><td></td></tr><tr><td>回優先股公允價值變動</td><td>25</td><td>—</td><td>(903)</td><td>—</td><td>(903)</td></tr><tr><td>匯兌差額</td><td>25</td><td>—</td><td>3,948,658</td><td>—</td><td>3,948,658</td></tr><tr><td>期內綜合收益／(虧損)總額</td><td></td><td>—</td><td>3,947,755</td><td>(97,371,462)</td><td>(93,423,707)</td></tr><tr><td>與擁有人以其擁有人身份進行的交易</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>以股份為基礎的薪酬</td><td>27</td><td>—</td><td>933,102</td><td>—</td><td>933,102</td></tr><tr><td>將普通股重新指定為優先股</td><td>24</td><td>—</td><td>(121,731)</td><td>—</td><td>(121,731)</td></tr><tr><td>與擁有人以其擁有人身份進行的交易總額</td><td></td><td>—</td><td>811,371</td><td>—</td><td>811,371</td></tr><tr><td>於2020年9月30日的結餘</td><td>30</td><td>4,437,845</td><td>(152,779,247)</td><td>(148,341,372)</td></tr></table>",
@@ -3965,7 +3941,7 @@
       277,
       433,
       2175,
-      2084
+      2087
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td>附註</td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td colspan=\"5\">（未經審計）</td></tr><tr><td>融資活動所得現金流量</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>發行可轉換可贖回優先股</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>所得款項……</td><td>2,419,863</td><td>6,300,116</td><td>1,273,032</td><td>—</td><td>20,956,542</td></tr><tr><td>解除發行可轉換可贖回優先股</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>所得受限制現金……</td><td>—</td><td>—</td><td>253,723</td><td>253,723</td><td>—</td></tr><tr><td>借款所得款項……</td><td>—</td><td>—</td><td>—</td><td>—</td><td>300,000</td></tr><tr><td>支付租賃本金及相關利息……</td><td>(25,304)</td><td>(265,758)</td><td>(641,716)</td><td>(406,097)</td><td>(1,169,302)</td></tr><tr><td>淨行使購股權付款……</td><td>—</td><td>—</td><td>(186,988)</td><td>—</td><td>—</td></tr><tr><td>已付財務成本……</td><td>(36,323)</td><td>(826)</td><td>—</td><td>—</td><td>(20,176)</td></tr><tr><td>融資活動所得／(所用)現金淨額……</td><td>2,358,236</td><td>6,033,532</td><td>698,051</td><td>(152,374)</td><td>20,067,064</td></tr><tr><td>現金及現金等價物增加／(減少)</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>淨額……</td><td>1,516,852</td><td>2,229,702</td><td>(1,430,419)</td><td>(2,398,777)</td><td>3,728,359</td></tr><tr><td>年／期初現金及現金等價物……23(a)</td><td>1,301,005</td><td>2,688,512</td><td>5,370,332</td><td>5,370,332</td><td>3,996,236</td></tr><tr><td>匯率變動對現金及現金等價物的影響……</td><td>(129,345)</td><td>452,118</td><td>56,323</td><td>126,676</td><td>(21,583)</td></tr><tr><td>年／期末現金及現金等價物……23(a)</td><td>2,688,512</td><td>5,370,332</td><td>3,996,236</td><td>3,098,231</td><td>7,703,012</td></tr></table>",
@@ -4184,7 +4160,7 @@
       1763
     ],
     "type": "text",
-    "content": "- 按公允價值計量(且其變動計入其他綜合收益／(虧損)或計入損益)之金融資產；及",
+    "content": "• 按公允價值計量(且其變動計入其他綜合收益／(虧損)或計入損益)之金融資產；及",
     "source_tag": "p604_text"
   },
   {
@@ -4215,9 +4191,9 @@
     "page": 605,
     "bbox": [
       277,
-      2414,
+      2411,
       2195,
-      2689
+      2692
     ],
     "type": "text",
     "content": "• 按公允價值計量且其變動計入其他綜合收益：倘若為收回合約現金流量及處置金融資產而持有之資產的現金流量僅為支付本金及利息，則該等資產按公允價值計量且其變動計入其他綜合收益計量。賬面值變動計入其他綜合收益，惟於損益確認的減值收益或虧損、利息收入及匯兌收益及虧損之確認除外。終止確認金融資產時，先",
@@ -4226,9 +4202,9 @@
   {
     "page": 606,
     "bbox": [
-      277,
+      275,
       284,
-      2193,
+      2195,
       492
     ],
     "type": "text",
@@ -4238,7 +4214,7 @@
   {
     "page": 606,
     "bbox": [
-      277,
+      275,
       568,
       2195,
       836
@@ -4262,7 +4238,7 @@
   {
     "page": 606,
     "bbox": [
-      277,
+      275,
       1395,
       2193,
       1524
@@ -4433,7 +4409,7 @@
       377,
       2014,
       779,
-      2074
+      2070
     ],
     "type": "text",
     "content": "每股基本虧損按：",
@@ -4445,7 +4421,7 @@
       374,
       2163,
       2093,
-      2226
+      2222
     ],
     "type": "text",
     "content": "(a) 貴公司股權持有人應佔虧損，不包括普通股除外的任何股票服務成本；及",
@@ -4538,7 +4514,7 @@
   {
     "page": 619,
     "bbox": [
-      277,
+      275,
       1207,
       2195,
       1415
@@ -4565,7 +4541,7 @@
       277,
       1845,
       2185,
-      1981
+      1978
     ],
     "type": "text",
     "content": "按上述基準，於2018年1月1日、2018年及2019年12月31日與2019年及2020年9月30日的貿易應收款項虧損撥備釐定如下：",
@@ -4648,7 +4624,7 @@
     "bbox": [
       277,
       2755,
-      2193,
+      2195,
       2970
     ],
     "type": "text",
@@ -4744,7 +4720,7 @@
     "bbox": [
       277,
       529,
-      2183,
+      2185,
       3003
     ],
     "type": "text",
@@ -4755,9 +4731,9 @@
     "page": 628,
     "bbox": [
       277,
-      1227,
+      1223,
       2190,
-      2567
+      2570
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"5\">公允價值</td><td colspan=\"5\">輸入參數範圍</td><td></td></tr><tr><td>概述</td><td colspan=\"3\">截至12月31日</td><td colspan=\"2\">截至9月30日</td><td>重大不可觀察輸入參數</td><td colspan=\"3\">截至12月31日</td><td>截至9月30日</td><td>不可觀察輸入參數與公允價值的關係</td></tr><tr><td></td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2019年人民幣千元</td><td>2019年人民幣千元</td><td>2020年人民幣千元</td><td>2017年人民幣千元</td><td>2018年人民幣千元</td><td>2019年人民幣千元</td><td>2019年人民幣千元</td><td>2020年人民幣千元</td><td></td></tr><tr><td>非上市股本證券...</td><td>49,200</td><td>677,919</td><td>2,258,272</td><td>2,597,143</td><td>3,998,760</td><td>預期波幅</td><td>不適用*</td><td>35%-71%</td><td>34%-62%</td><td>34%-66%</td><td>46%-72%</td><td>預期波幅越高，公允價值越低</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>缺乏市場流通性折讓率（「缺乏市場流通性折讓率」）</td><td>不適用*</td><td>8%-14%</td><td>7%-14%</td><td>7%-15%</td><td>9%-30%</td><td>缺乏市場流通性折讓率越高，公允價值越低</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td>無風險利率</td><td>不適用*</td><td>3%</td><td>2%-3%</td><td>2%-3%</td><td>0%-3%</td><td>無風險利率越高，公允價值越低</td></tr><tr><td>理財產品</td><td>2,472,037</td><td>4,273,517</td><td>8,825,068</td><td>10,067,154</td><td>8,450,308</td><td>預期回報率</td><td>2%-5%</td><td>3%-4%</td><td>3%-4%</td><td>3%-4%</td><td>2%-4%</td><td>預期回報率越高，公允價值越高</td></tr></table>",
@@ -4780,7 +4756,7 @@
     "bbox": [
       277,
       1161,
-      2170,
+      2175,
       1786
     ],
     "type": "table",
@@ -4916,7 +4892,7 @@
       1925
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td colspan=\"5\">(未經審計)</td></tr><tr><td>處置物業、設備及無形資產的收益／(虧損)淨額</td><td>—</td><td>49</td><td>(60)</td><td>(60)</td><td>(568)</td></tr><tr><td>按公允價值計量</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>且其變動計入損益之</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>金融資產公允價值</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益／(虧損)淨額</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>—上市和非上市</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>實體投資</td><td>—</td><td>36,835</td><td>(289,930)</td><td>24,941</td><td>160,228</td></tr><tr><td>—理財產品</td><td>49,745</td><td>96,622</td><td>275,889</td><td>195,635</td><td>305,484</td></tr><tr><td>匯兌收益／(虧損)淨額</td><td>(6,061)</td><td>1,161</td><td>10</td><td>(378)</td><td>45,551</td></tr><tr><td>捐贈*</td><td>(2,640)</td><td>(2,769)</td><td>(5,435)</td><td>(1,206)</td><td>(131,684)</td></tr><tr><td>其他</td><td>997</td><td>(2,621)</td><td>(13,317)</td><td>(7,752)</td><td>4,130</td></tr><tr><td></td><td>42,041</td><td>129,277</td><td>(32,843)</td><td>211,180</td><td>383,141</td></tr></table>",
+    "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td colspan=\"5\">(未經審計)</td></tr><tr><td>處置物業、設備及無形資產的收益／(虧損)淨額</td><td>—</td><td>49</td><td>(60)</td><td>(60)</td><td>(568)</td></tr><tr><td>按公允價值計量</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>且其變動計入損益之</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>金融資產公允價值</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>收益／(虧損)淨額</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>—上市和非上市</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>實體投資</td><td>—</td><td>36,835</td><td>(289,930)</td><td>24,941</td><td>160,228</td></tr><tr><td>—理財產品</td><td>49,745</td><td>96,622</td><td>275,889</td><td>195,635</td><td>305,484</td></tr><tr><td>匯兑收益／(虧損)淨額</td><td>(6,061)</td><td>1,161</td><td>10</td><td>(378)</td><td>45,551</td></tr><tr><td>捐贈*</td><td>(2,640)</td><td>(2,769)</td><td>(5,435)</td><td>(1,206)</td><td>(131,684)</td></tr><tr><td>其他</td><td>997</td><td>(2,621)</td><td>(13,317)</td><td>(7,752)</td><td>4,130</td></tr><tr><td></td><td>42,041</td><td>129,277</td><td>(32,843)</td><td>211,180</td><td>383,141</td></tr></table>",
     "source_tag": "p635_table"
   },
   {
@@ -4960,7 +4936,7 @@
     "bbox": [
       277,
       459,
-      2170,
+      2168,
       1647
     ],
     "type": "table",
@@ -5031,7 +5007,7 @@
     "page": 641,
     "bbox": [
       277,
-      453,
+      456,
       2178,
       1349
     ],
@@ -5042,13 +5018,13 @@
   {
     "page": 642,
     "bbox": [
-      301,
-      344,
-      2990,
-      1699
+      347,
+      297,
+      1711,
+      3006
     ],
     "type": "table",
-    "content": "<table><tr><td rowspan=\"2\">名稱</td><td rowspan=\"2\">註冊成立／成立地點及法律實體類別</td><td rowspan=\"2\">註冊成立／成立日期</td><td rowspan=\"2\">已發行／缴足股本詳情</td><td colspan=\"3\">截至12月31日</td><td colspan=\"2\">截至9月30日</td><td></td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td><td>主要業務</td></tr><tr><td>附屬公司</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>直接持有：</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>福永環球有限公司</td><td>香港，有限責任公司</td><td>2014年3月25日</td><td>10,000港元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>投資控股及投資</td></tr><tr><td>Cosmic Blue Investments Limited</td><td>英屬維爾京群島，有限責任公司</td><td>2017年3月16日</td><td>—</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>投資控股及投資</td></tr><tr><td>間接持有：</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>Joyo Technology PTE. LTD.</td><td>新加坡，有限責任公司</td><td>2016年8月3日</td><td>1美元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>開發軟件、提供技術及廣告服務</td></tr><tr><td>北京達佳互聯信息技術有限公司</td><td>中國北京，有限責任公司</td><td>2014年7月2日</td><td>人民幣8,941,454,241元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>開發軟件、硬件及網絡技術</td></tr><tr><td>結構實體 (附註a)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>北京快手科技有限公司</td><td>中國北京，有限責任公司</td><td>2015年3月20日</td><td>人民幣10,000,000元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>提供直播及線上營銷服務</td></tr><tr><td>遊藝星際(北京)科技有限公司</td><td>中國北京，有限責任公司</td><td>2006年11月3日</td><td>人民幣25,600,000元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>提供技術開發、推廣及其他服務</td></tr><tr><td>淮安康祥福文化傳播有限公司</td><td>中國江蘇，有限責任公司</td><td>2017年1月9日</td><td>—</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>提供互聯網信息服務</td></tr><tr><td>北京晨鐘科技有限公司</td><td>中國北京，有限責任公司</td><td>2017年7月6日</td><td>人民幣2,015,000元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td>貴州省梵快文化傳播有限公司</td><td>中國貴州，有限責任公司</td><td>2019年3月5日</td><td>—</td><td>不適用</td><td>不適用</td><td>100%</td><td>100%</td><td>提供多媒體信息技術服務</td></tr><tr><td>北京快手廣告有限公司</td><td>中國北京，有限責任公司</td><td>2016年9月23日</td><td>人民幣60,000元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td>北京雲掣科技有限公司</td><td>中國北京，有限責任公司</td><td>2018年9月19日</td><td>—</td><td>不適用</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td>成都快購科技有限公司</td><td>中國四川，有限責任公司</td><td>2019年10月31日</td><td>—</td><td>不適用</td><td>不適用</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td>淮安興藝文化傳播有限公司</td><td>中國江蘇，有限責任公司</td><td>2017年8月1日</td><td>人民幣2,000元</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr></table>",
+    "content": "<table><tr><td rowspan=\"2\">名稱</td><td rowspan=\"2\">註冊成立／成立地點及法律實體類別</td><td rowspan=\"2\">註冊成立／成立日期</td><td colspan=\"2\">截至12月31日</td><td colspan=\"2\">截至9月30日</td><td rowspan=\"2\">主要業務</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td>附屬公司</td><td>已發行／繳足股本詳情</td><td></td><td></td><td></td><td></td></tr><tr><td>直接持有：</td><td>福永環球有限公司……香港，有限責任公司</td><td>2014年3月25日</td><td>10,000港元</td><td>100%</td><td>100%</td><td>100%</td><td>投資控股及投資</td></tr><tr><td></td><td>Cosmic Blue Investments Limited……英屬維爾京群島，有限責任公司</td><td>2017年3月16日</td><td>—</td><td>100%</td><td>100%</td><td>100%</td><td>投資控股及投資</td></tr><tr><td>間接持有：</td><td>Joyo Technology PTE.LTD.……新加坡，有限責任公司</td><td>2016年8月3日</td><td>1美元</td><td>100%</td><td>100%</td><td>100%</td><td>開發軟件、提供技術及廣告服務</td></tr><tr><td></td><td>北京達佳互聯信息技術有限公司……中國北京，有限責任公司</td><td>2014年7月2日</td><td>人民幣8,941,454,241元</td><td>100%</td><td>100%</td><td>100%</td><td>開發軟件、硬件及網絡技術</td></tr><tr><td>結構實體(附註a)</td><td>北京快手科技有限公司……中國北京，有限責任公司</td><td>2015年3月20日</td><td>人民幣10,000,000元</td><td>100%</td><td>100%</td><td>100%</td><td>提供直播及線上營銷服務</td></tr><tr><td></td><td>遊藝星際(北京)科技有限公司……中國北京，有限責任公司</td><td>2006年11月3日</td><td>人民幣25,600,000元</td><td>100%</td><td>100%</td><td>100%</td><td>提供技術開發、推廣及其他服務</td></tr><tr><td></td><td>淮安康祥福文化傳播有限公司……中國江蘇，有限責任公司</td><td>2017年1月9日</td><td>—</td><td>100%</td><td>100%</td><td>100%</td><td>提供互聯網信息服務</td></tr><tr><td></td><td>北京晨鐘科技有限公司……中國北京，有限責任公司</td><td>2017年7月6日</td><td>人民幣2,015,000元</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td></td><td>貴州省梵快文化傳播有限公司……中國貴州，有限責任公司</td><td>2019年3月5日</td><td>—</td><td>不適用</td><td>100%</td><td>100%</td><td>提供多媒體信息技術服務</td></tr><tr><td></td><td>北京快手廣告有限公司……中國北京，有限責任公司</td><td>2016年9月23日</td><td>人民幣60,000元</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td></td><td>北京雲掣科技有限公司……中國北京，有限責任公司</td><td>2018年9月19日</td><td>—</td><td>不適用</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td></td><td>成都快購科技有限公司……中國四川，有限責任公司</td><td>2019年10月31日</td><td>—</td><td>不適用</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr><tr><td></td><td>淮安興藝文化傳播有限公司……中國江蘇，有限責任公司</td><td>2017年8月1日</td><td>人民幣2,000元</td><td>100%</td><td>100%</td><td>100%</td><td>提供線上營銷及其他服務</td></tr></table>",
     "source_tag": "p642_table"
   },
   {
@@ -5105,7 +5081,7 @@
       275,
       449,
       2195,
-      671
+      668
     ],
     "type": "text",
     "content": "附註24詳述的股份拆細後，截至2017年、2018年及2019年12月31日止年度與截至2019年及2020年9月30日止九個月，就每股基本及攤薄虧損的普通股加權平均數已進行追溯調整。",
@@ -5228,7 +5204,7 @@
       1094
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元（未經審計）</td><td>人民幣千元</td></tr><tr><td>銷售成本</td><td>81,332</td><td>818,866</td><td>1,359,471</td><td>876,441</td><td>2,109,432</td></tr><tr><td>銷售及營銷開支</td><td>285</td><td>598</td><td>2,539</td><td>1,571</td><td>4,878</td></tr><tr><td>行政開支</td><td>1,392</td><td>3,706</td><td>21,755</td><td>15,024</td><td>27,865</td></tr><tr><td>研發開支</td><td>1,177</td><td>5,810</td><td>21,548</td><td>13,735</td><td>32,017</td></tr><tr><td></td><td>84,186</td><td>828,980</td><td>1,405,313</td><td>906,771</td><td>2,174,192</td></tr></table>",
+    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"2\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元（未經審計）</td><td>人民幣千元</td></tr><tr><td>銷售成本</td><td>81,332</td><td>818,866</td><td>1,359,471</td><td>876,441</td><td>2,109,432</td></tr><tr><td>銷售及營銷開支</td><td>285</td><td>598</td><td>2,539</td><td>1,571</td><td>4,878</td></tr><tr><td>行政開支</td><td>1,392</td><td>3,706</td><td>21,755</td><td>15,024</td><td>27,865</td></tr><tr><td>研發開支</td><td>1,177</td><td>5,810</td><td>21,548</td><td>13,735</td><td>32,017</td></tr><tr><td></td><td>84,186</td><td>828,980</td><td>1,405,313</td><td>906,771</td><td>2,174,192</td></tr></table>",
     "source_tag": "p650_table"
   },
   {
@@ -5276,7 +5252,7 @@
       1131
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td></td><td></td><td>(未經審計)</td><td></td></tr><tr><td>租賃付款本金部分……</td><td>18,723</td><td>212,613</td><td>538,414</td><td>343,512</td><td>1,007,403</td></tr><tr><td>已付相關利息……</td><td>6,581</td><td>53,145</td><td>103,302</td><td>62,585</td><td>161,899</td></tr><tr><td></td><td>25,304</td><td>265,758</td><td>641,716</td><td>406,097</td><td>1,169,302</td></tr></table>",
+    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td></td><td></td><td colspan=\"2\">（未經審計）</td></tr><tr><td>租賃付款本金部分……</td><td>18,723</td><td>212,613</td><td>538,414</td><td>343,512</td><td>1,007,403</td></tr><tr><td>已付相關利息……</td><td>6,581</td><td>53,145</td><td>103,302</td><td>62,585</td><td>161,899</td></tr><tr><td></td><td>25,304</td><td>265,758</td><td>641,716</td><td>406,097</td><td>1,169,302</td></tr></table>",
     "source_tag": "p652_table"
   },
   {
@@ -5297,7 +5273,7 @@
       277,
       284,
       2178,
-      1644
+      1647
     ],
     "type": "table",
     "content": "<table><tr><td></td><td>商譽</td><td>許可證及版權</td><td>商標及域名</td><td>軟件</td><td>其他</td><td>總計</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>(未經審計)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>截至2019年9月30日止九個月</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>期初賬面淨值</td><td>816,062</td><td>202,107</td><td>2,079</td><td>19,485</td><td>6,083</td><td>1,045,816</td></tr><tr><td>添置</td><td>—</td><td>38,326</td><td>976</td><td>4,087</td><td>—</td><td>43,389</td></tr><tr><td>攤銷費用</td><td>—</td><td>(31,590)</td><td>(854)</td><td>(7,728)</td><td>(1,825)</td><td>(41,997)</td></tr><tr><td>期末賬面淨值</td><td>816,062</td><td>208,843</td><td>2,201</td><td>15,844</td><td>4,258</td><td>1,047,208</td></tr><tr><td>於2019年9月30日</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>成本</td><td>816,062</td><td>264,607</td><td>3,543</td><td>34,282</td><td>7,300</td><td>1,125,794</td></tr><tr><td>累計攤銷</td><td>—</td><td>(55,764)</td><td>(1,342)</td><td>(18,438)</td><td>(3,042)</td><td>(78,586)</td></tr><tr><td>賬面淨值</td><td>816,062</td><td>208,843</td><td>2,201</td><td>15,844</td><td>4,258</td><td>1,047,208</td></tr><tr><td>截至2020年9月30日止九個月</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>期初賬面淨值</td><td>836,972</td><td>230,744</td><td>1,872</td><td>45,786</td><td>4,934</td><td>1,120,308</td></tr><tr><td>添置</td><td>—</td><td>203,403</td><td>2,933</td><td>17,919</td><td>—</td><td>224,255</td></tr><tr><td>處置</td><td>—</td><td>(300)</td><td>—</td><td>—</td><td>—</td><td>(300)</td></tr><tr><td>攤銷費用</td><td>—</td><td>(75,014)</td><td>(1,170)</td><td>(12,303)</td><td>(2,082)</td><td>(90,569)</td></tr><tr><td>期末賬面淨值</td><td>836,972</td><td>358,833</td><td>3,635</td><td>51,402</td><td>2,852</td><td>1,253,694</td></tr><tr><td>於2020年9月30日</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>成本</td><td>836,972</td><td>504,860</td><td>6,476</td><td>86,492</td><td>8,670</td><td>1,443,470</td></tr><tr><td>累計攤銷</td><td>—</td><td>(146,027)</td><td>(2,841)</td><td>(35,090)</td><td>(5,818)</td><td>(189,776)</td></tr><tr><td>賬面淨值</td><td>836,972</td><td>358,833</td><td>3,635</td><td>51,402</td><td>2,852</td><td>1,253,694</td></tr></table>",
@@ -5345,7 +5321,7 @@
       277,
       615,
       2170,
-      2315
+      2312
     ],
     "type": "table",
     "content": "<table><tr><td></td><td colspan=\"3\">截至12月31日</td><td>截至9月30日</td></tr><tr><td></td><td>2017年</td><td>2018年</td><td>2019年</td><td>2020年</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>資產負債表所示資產</td><td></td><td></td><td></td><td></td></tr><tr><td>按公允價值計量且其變動計入</td><td></td><td></td><td></td><td></td></tr><tr><td>損益之金融資產：</td><td></td><td></td><td></td><td></td></tr><tr><td>—上市股本證券</td><td>—</td><td>—</td><td>77,202</td><td>95,737</td></tr><tr><td>—非上市股本證券</td><td>49,200</td><td>677,919</td><td>2,258,272</td><td>3,998,760</td></tr><tr><td>—理財產品</td><td>2,472,037</td><td>4,273,517</td><td>8,825,068</td><td>8,450,308</td></tr><tr><td>按攤銷成本計量之金融資產：</td><td></td><td></td><td></td><td></td></tr><tr><td>—貿易應收款項</td><td>136,641</td><td>129,045</td><td>1,107,440</td><td>1,812,648</td></tr><tr><td>—預付款項、其他應收款項及</td><td></td><td></td><td></td><td></td></tr><tr><td>其他流動資產(不包括預付</td><td></td><td></td><td></td><td></td></tr><tr><td>推廣及廣告費、可抵扣增值稅</td><td></td><td></td><td></td><td></td></tr><tr><td>和其他預付稅項、預付租金、</td><td></td><td></td><td></td><td></td></tr><tr><td>預付帶寬費及其他預付款項).</td><td>35,036</td><td>98,403</td><td>134,817</td><td>143,895</td></tr><tr><td>—其他非流動資產</td><td>13,642</td><td>50,829</td><td>44,627</td><td>86,448</td></tr><tr><td>—定期存款</td><td>—</td><td>—</td><td>1,380,994</td><td>11,244,150</td></tr><tr><td>—受限制現金</td><td>251,893</td><td>285,274</td><td>1,386</td><td>5,253</td></tr><tr><td>—現金及現金等價物</td><td>2,688,512</td><td>5,370,332</td><td>3,996,236</td><td>7,703,012</td></tr><tr><td>總計</td><td>5,646,961</td><td>10,885,319</td><td>17,826,042</td><td>33,540,211</td></tr></table>",
@@ -5564,7 +5540,7 @@
       2520
     ],
     "type": "table",
-    "content": "<table><tr><td></td><td>資本儲備</td><td>以股份為基礎的薪酬</td><td>匯兑差額 (附註a)</td><td>法定盈餘儲備 (附註b)</td><td>其他</td><td>總計</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>於2017年1月1日</td><td>(7,247)</td><td>170,624</td><td>(302,039)</td><td>416</td><td>(24,463)</td><td>(162,709)</td></tr><tr><td>以股份為基礎的薪酬</td><td>—</td><td>296,535</td><td>—</td><td>—</td><td>—</td><td>296,535</td></tr><tr><td>匯兌差額</td><td>—</td><td>—</td><td>881,907</td><td>—</td><td>—</td><td>881,907</td></tr><tr><td>自有信貸風險產生的可轉換可贖回</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>優先股公允價值變動</td><td>—</td><td>—</td><td>—</td><td>—</td><td>(58,351)</td><td>(58,351)</td></tr><tr><td>轉撥至法定儲備</td><td>—</td><td>—</td><td>—</td><td>59,438</td><td>—</td><td>59,438</td></tr></table>",
+    "content": "<table><tr><td></td><td>資本儲備</td><td>以股份為基礎的薪酬</td><td>匯兑差額 (附註a)</td><td>法定盈餘儲備 (附註b)</td><td>其他</td><td>總計</td></tr><tr><td></td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td>於2017年1月1日</td><td>(7,247)</td><td>170,624</td><td>(302,039)</td><td>416</td><td>(24,463)</td><td>(162,709)</td></tr><tr><td>以股份為基礎的薪酬</td><td>—</td><td>296,535</td><td>—</td><td>—</td><td>—</td><td>296,535</td></tr><tr><td>匯兑差額</td><td>—</td><td>—</td><td>881,907</td><td>—</td><td>—</td><td>881,907</td></tr><tr><td>自有信貸風險產生的可轉換可贖回</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>優先股公允價值變動</td><td>—</td><td>—</td><td>—</td><td>—</td><td>(58,351)</td><td>(58,351)</td></tr><tr><td>轉撥至法定儲備</td><td>—</td><td>—</td><td>—</td><td>59,438</td><td>—</td><td>59,438</td></tr></table>",
     "source_tag": "p667_table"
   },
   {
@@ -5583,7 +5559,7 @@
     "page": 669,
     "bbox": [
       277,
-      310,
+      314,
       2178,
       1812
     ],
@@ -5992,7 +5968,7 @@
     "bbox": [
       277,
       320,
-      2180,
+      2183,
       2100
     ],
     "type": "table",
@@ -6002,9 +5978,9 @@
   {
     "page": 690,
     "bbox": [
-      277,
-      463,
-      2173,
+      275,
+      459,
+      2175,
       2739
     ],
     "type": "table",
@@ -6077,7 +6053,7 @@
       277,
       1571,
       2170,
-      1908
+      1905
     ],
     "type": "table",
     "content": "<table><tr><td>(ii)購買服務</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>貴集團的被投資公司 ……</td><td>—</td><td>103</td><td>64</td><td>64</td><td>369</td></tr><tr><td>貴公司股東之一……</td><td>278,672</td><td>821,556</td><td>1,072,869</td><td>742,471</td><td>1,596,128</td></tr><tr><td></td><td>278,672</td><td>821,659</td><td>1,072,933</td><td>742,535</td><td>1,596,497</td></tr></table>",
@@ -6116,7 +6092,7 @@
       1210
     ],
     "type": "table",
-    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td></td><td></td><td colspan=\"2\">(未經審計)</td></tr><tr><td>工資、薪金及花紅……</td><td>10,292</td><td>13,934</td><td>17,118</td><td>12,824</td><td>13,475</td></tr><tr><td>以股份為基礎的薪酬開支.</td><td>95,724</td><td>39,371</td><td>16,711</td><td>13,983</td><td>30,488</td></tr><tr><td>其他社會保障成本、住房</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>福利及其他僱員福利...</td><td>427</td><td>468</td><td>468</td><td>352</td><td>290</td></tr><tr><td></td><td>106,443</td><td>53,773</td><td>34,297</td><td>27,159</td><td>44,253</td></tr></table>",
+    "content": "<table><tr><td colspan=\"3\">截至12月31日止年度</td><td colspan=\"3\">截至9月30日止九個月</td></tr><tr><td>2017年</td><td>2018年</td><td>2019年</td><td>2019年</td><td>2020年</td></tr><tr><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td><td>人民幣千元</td></tr><tr><td></td><td></td><td></td><td colspan=\"2\">（未經審計）</td></tr><tr><td>工資、薪金及花紅……</td><td>10,292</td><td>13,934</td><td>17,118</td><td>12,824</td><td>13,475</td></tr><tr><td>以股份為基礎的薪酬開支.</td><td>95,724</td><td>39,371</td><td>16,711</td><td>13,983</td><td>30,488</td></tr><tr><td>其他社會保障成本、住房</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>福利及其他僱員福利...</td><td>427</td><td>468</td><td>468</td><td>352</td><td>290</td></tr><tr><td></td><td>106,443</td><td>53,773</td><td>34,297</td><td>27,159</td><td>44,253</td></tr></table>",
     "source_tag": "p695_table"
   },
   {
@@ -6206,7 +6182,7 @@
   {
     "page": 704,
     "bbox": [
-      277,
+      280,
       1306,
       1173,
       1369
@@ -6218,7 +6194,7 @@
   {
     "page": 704,
     "bbox": [
-      275,
+      277,
       1465,
       2193,
       1690
@@ -6230,7 +6206,7 @@
   {
     "page": 704,
     "bbox": [
-      275,
+      277,
       1941,
       2195,
       2242
@@ -6398,7 +6374,7 @@
   {
     "page": 720,
     "bbox": [
-      275,
+      277,
       1554,
       2195,
       2173
@@ -6483,7 +6459,7 @@
     "page": 732,
     "bbox": [
       275,
-      684,
+      688,
       2195,
       1065
     ],
@@ -6615,7 +6591,7 @@
     "page": 751,
     "bbox": [
       377,
-      922,
+      919,
       2193,
       1144
     ],
@@ -6964,7 +6940,7 @@
     "bbox": [
       372,
       317,
-      2158,
+      2155,
       2619
     ],
     "type": "table",
@@ -6977,7 +6953,7 @@
       372,
       317,
       2163,
-      2610
+      2613
     ],
     "type": "table",
     "content": "<table><tr><td>序號</td><td>版權</td><td>版本</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>71</td><td>Android版66小遊戲軟件</td><td>V1.0</td><td>中國</td><td>2019SR1004483</td><td>2019年9月27日</td></tr><tr><td>72</td><td>iOS版66極速版軟件</td><td>V1.0</td><td>中國</td><td>2019SR1077866</td><td>2019年10月24日</td></tr><tr><td>73</td><td>Android版愛遊鬥地主遊戲軟件</td><td>V3.9</td><td>中國</td><td>2020SR0371514</td><td>2020年4月24日</td></tr><tr><td>74</td><td>Gif快手動畫製作分享軟件</td><td>V3.01</td><td>中國</td><td>2012SR060049</td><td>2012月7月5日</td></tr><tr><td>75</td><td>Android版快看點軟件</td><td>V1.0</td><td>中國</td><td>2019SR0018916</td><td>2019年1月7日</td></tr><tr><td>76</td><td>iOS版快看點軟件</td><td>V1.0</td><td>中國</td><td>2019SR0893993</td><td>2019年8月28日</td></tr><tr><td>77</td><td>Android版快手小店商家版軟件</td><td>V1.0</td><td>中國</td><td>2020SR1501925</td><td>2020年9月18日</td></tr><tr><td>78</td><td>Android版MV MASTER軟件</td><td>V1.0</td><td>中國</td><td>2019SR0236406</td><td>2019年3月11日</td></tr><tr><td>79</td><td>iOS版MV MASTER軟件</td><td>V1.0</td><td>中國</td><td>2019SR0296378</td><td>2019年4月1日</td></tr><tr><td>80</td><td>Android版LOLita軟件</td><td>V1.0</td><td>中國</td><td>2019SR1058195</td><td>2019年10月18日</td></tr><tr><td>81</td><td>Android版Snack Video軟件</td><td>V1.0</td><td>中國</td><td>2019SR0944872</td><td>2019年9月11日</td></tr><tr><td>82</td><td>Kwaipro Android版軟件</td><td>V1.0</td><td>中國</td><td>2019SR1441859</td><td>2019年12月27日</td></tr><tr><td>83</td><td>AcFun彈幕視頻網安卓客戶端軟件</td><td>2.3.2</td><td>中國</td><td>2020SR0111927</td><td>2020年1月21日</td></tr></table>",
@@ -7034,13 +7010,13 @@
   {
     "page": 779,
     "bbox": [
-      367,
+      369,
       291,
       2163,
       2752
     ],
     "type": "table",
-    "content": "<table><tr><td>序號</td><td>版權</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>31</td><td>快閃模板系列作品</td><td>中國</td><td>國作登字-2019-I-00874220</td><td>2019年8月27日</td></tr><tr><td>32</td><td>快手電商寶典</td><td>中國</td><td>國作登字-2019-F-00877669</td><td>2019年9月3日</td></tr><tr><td>33</td><td>閃電購小黃車</td><td>中國</td><td>國作登字-2019-F-00881047</td><td>2019年9月10日</td></tr><tr><td>34</td><td>粉絲團圖標</td><td>中國</td><td>國作登字-2019-F-00895011</td><td>2019年10月8日</td></tr><tr><td>35</td><td>一甜相機吉祥物—小甜集合版</td><td>中國</td><td>國作登字-2019-F-00906302</td><td>2019年10月17日</td></tr><tr><td>36</td><td>一甜相機吉祥物—小甜人物版本</td><td>中國</td><td>國作登字-2019-F-00906305</td><td>2019年10月17日</td></tr><tr><td>37</td><td>一甜相機吉祥物—小甜獨角獸版本</td><td>中國</td><td>國作登字-2019-F-00906304</td><td>2019年10月17日</td></tr><tr><td>38</td><td>AC娘表情玩偶</td><td>中國</td><td>國作登字-2019-F-00932216</td><td>2019年11月12日</td></tr><tr><td>39</td><td>磁力引擎logo</td><td>中國</td><td>國作登字-2019-F-00955109</td><td>2019年12月16日</td></tr><tr><td>40</td><td>小葵表情包</td><td>中國</td><td>國作登字-2020-F-00990181</td><td>2020年3月3日</td></tr><tr><td>41</td><td>ac系列小劇場4</td><td>中國</td><td>國作登字-2020-L-00984129</td><td>2020年2月11日</td></tr><tr><td>42</td><td>ac系列小劇場3</td><td>中國</td><td>國作登字-2019-L-00932215</td><td>2019年11月12日</td></tr><tr><td>43</td><td>ac系列小劇場2</td><td>中國</td><td>國作登字-2019-L-00909122</td><td>2019年10月23日</td></tr><tr><td>44</td><td>ac系列小劇場</td><td>中國</td><td>國作登字-2019-F-00884687</td><td>2019年9月18日</td></tr><tr><td>45</td><td>2019ac娘春節表情包</td><td>中國</td><td>國作登字-2019-I-00785523</td><td>2019年5月21日</td></tr></table>",
+    "content": "<table><tr><td>序號</td><td>版權</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>31</td><td>快閃模板系列作品</td><td>中國</td><td>國作登字 -2019-I-00874220</td><td>2019年 8月27日</td></tr><tr><td>32</td><td>快手電商寶典</td><td>中國</td><td>國作登字 -2019-F-00877669</td><td>2019年 9月3日</td></tr><tr><td>33</td><td>閃電購小黃車</td><td>中國</td><td>國作登字 -2019-F-00881047</td><td>2019年 9月10日</td></tr><tr><td>34</td><td>粉絲團圖標</td><td>中國</td><td>國作登字 -2019-F-00895011</td><td>2019年 10月8日</td></tr><tr><td>35</td><td>一甜相機吉祥物—小甜集合版</td><td>中國</td><td>國作登字 -2019-F-00906302</td><td>2019年 10月17日</td></tr><tr><td>36</td><td>一甜相機吉祥物—小甜人物版本</td><td>中國</td><td>國作登字 -2019-F-00906305</td><td>2019年 10月17日</td></tr><tr><td>37</td><td>一甜相機吉祥物—小甜獨角獸版本</td><td>中國</td><td>國作登字 -2019-F-00906304</td><td>2019年 10月17日</td></tr><tr><td>38</td><td>AC娘表情玩偶</td><td>中國</td><td>國作登字 -2019-F-00932216</td><td>2019年 11月12日</td></tr><tr><td>39</td><td>磁力引擎logo</td><td>中國</td><td>國作登字 -2019-F-00955109</td><td>2019年 12月16日</td></tr><tr><td>40</td><td>小葵表情包</td><td>中國</td><td>國作登字 -2020-F-00990181</td><td>2020年 3月3日</td></tr><tr><td>41</td><td>ac系列小劇場4</td><td>中國</td><td>國作登字 -2020-L-00984129</td><td>2020年 2月11日</td></tr><tr><td>42</td><td>ac系列小劇場3</td><td>中國</td><td>國作登字 -2019-L-00932215</td><td>2019年 11月12日</td></tr><tr><td>43</td><td>ac系列小劇場2</td><td>中國</td><td>國作登字 -2019-L-00909122</td><td>2019年 10月23日</td></tr><tr><td>44</td><td>ac系列小劇場</td><td>中國</td><td>國作登字 -2019-F-00884687</td><td>2019年 9月18日</td></tr><tr><td>45</td><td>2019ac娘春節表情包</td><td>中國</td><td>國作登字 -2019-I-00785523</td><td>2019年 5月21日</td></tr></table>",
     "source_tag": "p779_table"
   },
   {
@@ -7064,7 +7040,7 @@
       2752
     ],
     "type": "table",
-    "content": "<table><tr><td>序號</td><td>版權</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>58</td><td>小快—政企合作款(CN)</td><td>中國</td><td>國作登字-2020-F-01090009</td><td>2020年8月3日</td></tr><tr><td>59</td><td>小快—9周年司慶金屬款(CN)</td><td>中國</td><td>國作登字-2020-F-01090008</td><td>2020年8月3日</td></tr><tr><td>60</td><td>小六—9周年司慶金屬款(CN)</td><td>中國</td><td>國作登字-2020-F-01090007</td><td>2020年8月3日</td></tr><tr><td>61</td><td>快手logo</td><td>中國</td><td>國作登字-2020-F-01107478</td><td>2020年8月27日</td></tr><tr><td>62</td><td>ACFUN Logo</td><td>中國</td><td>國作登字-2020-F-01027924</td><td>2020年4月30日</td></tr><tr><td>63</td><td>AcFun形象簡筆</td><td>中國</td><td>國作登字-2020-F-01027923</td><td>2020年4月30日</td></tr><tr><td>64</td><td>TD娘Q版人物形象</td><td>中國</td><td>國作登字-2020-F-01027932</td><td>2020年4月30日</td></tr><tr><td>65</td><td>卡通形象 — AC猴</td><td>中國</td><td>國作登字-2020-F-01027933</td><td>2020年4月30日</td></tr><tr><td>66</td><td>AC娘與TD娘</td><td>中國</td><td>國作登字-2020-F-01027921</td><td>2020年4月30日</td></tr><tr><td>67</td><td>AC娘Q版人物形象</td><td>中國</td><td>國作登字-2020-F-01027920</td><td>2020年4月30日</td></tr><tr><td>68</td><td>AC娘全套表情</td><td>中國</td><td>國作登字-2020-F-01027934</td><td>2020年4月30日</td></tr><tr><td>69</td><td>AC包子頭</td><td>中國</td><td>國作登字-2020-F-01027930</td><td>2020年4月30日</td></tr><tr><td>70</td><td>AC猴子</td><td>中國</td><td>國作登字-2020-F-01027922</td><td>2020年4月30日</td></tr><tr><td>71</td><td>人物形象 — TD娘</td><td>中國</td><td>國作登字-2020-F-01027931</td><td>2020年4月30日</td></tr><tr><td>72</td><td>人物形象 — AC娘</td><td>中國</td><td>國作登字-2020-F-01027943</td><td>2020年4月30日</td></tr></table>",
+    "content": "<table><tr><td>序號</td><td>版權</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>58</td><td>小快—政企合作款(CN)</td><td>中國</td><td>國作登字 -2020-F-01090009</td><td>2020年 8月3日</td></tr><tr><td>59</td><td>小快—9周年司慶金屬款 (CN)</td><td>中國</td><td>國作登字 -2020-F-01090008</td><td>2020年 8月3日</td></tr><tr><td>60</td><td>小六—9周年司慶金屬款 (CN)</td><td>中國</td><td>國作登字 -2020-F-01090007</td><td>2020年 8月3日</td></tr><tr><td>61</td><td>快手logo</td><td>中國</td><td>國作登字 -2020-F-01107478</td><td>2020年 8月27日</td></tr><tr><td>62</td><td>ACFUN Logo</td><td>中國</td><td>國作登字 -2020-F-01027924</td><td>2020年 4月30日</td></tr><tr><td>63</td><td>AcFun形象簡筆</td><td>中國</td><td>國作登字 -2020-F-01027923</td><td>2020年 4月30日</td></tr><tr><td>64</td><td>TD娘Q版人物形象</td><td>中國</td><td>國作登字 -2020-F-01027932</td><td>2020年 4月30日</td></tr><tr><td>65</td><td>卡通形象 — AC猴</td><td>中國</td><td>國作登字 -2020-F-01027933</td><td>2020年 4月30日</td></tr><tr><td>66</td><td>AC娘與TD娘</td><td>中國</td><td>國作登字 -2020-F-01027921</td><td>2020年 4月30日</td></tr><tr><td>67</td><td>AC娘Q版人物形象</td><td>中國</td><td>國作登字 -2020-F-01027920</td><td>2020年 4月30日</td></tr><tr><td>68</td><td>AC娘全套表情</td><td>中國</td><td>國作登字 -2020-F-01027934</td><td>2020年 4月30日</td></tr><tr><td>69</td><td>AC包子頭</td><td>中國</td><td>國作登字 -2020-F-01027930</td><td>2020年 4月30日</td></tr><tr><td>70</td><td>AC猴子</td><td>中國</td><td>國作登字 -2020-F-01027922</td><td>2020年 4月30日</td></tr><tr><td>71</td><td>人物形象 — TD娘</td><td>中國</td><td>國作登字 -2020-F-01027931</td><td>2020年 4月30日</td></tr><tr><td>72</td><td>人物形象 — AC娘</td><td>中國</td><td>國作登字 -2020-F-01027943</td><td>2020年 4月30日</td></tr></table>",
     "source_tag": "p781_table"
   },
   {
@@ -7112,7 +7088,7 @@
       1452
     ],
     "type": "table",
-    "content": "<table><tr><td>序號</td><td>版權</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>116</td><td>磁力金牛Logo</td><td>中國</td><td>國作登字 -2020-F-00019063</td><td>2020年 12月14日</td></tr><tr><td>117</td><td>仙樂Logo</td><td>中國</td><td>國作登字 -2020-F-00019065</td><td>2020年 12月14日</td></tr><tr><td>118</td><td>AC娘休閒形象</td><td>中國</td><td>國作登字 -2020-F-00001393</td><td>2020年 10月29日</td></tr><tr><td>119</td><td>AC娘Q版表情包</td><td>中國</td><td>國作登字 -2020-I-00003518</td><td>2020年 11月9日</td></tr><tr><td>120</td><td>TD娘Q版表情包</td><td>中國</td><td>國作登字 -2020-I-00003519</td><td>2020年 11月9日</td></tr><tr><td>121</td><td>AC&TD娘Q版表情包</td><td>中國</td><td>國作登字 -2020-I-00003520</td><td>2020年 11月9日</td></tr><tr><td>122</td><td>童話系列魔法表情</td><td>中國</td><td>國作登字 -2020-I-00008431</td><td>2020年 11月24日</td></tr></table>",
+    "content": "<table><tr><td>序號</td><td>版權</td><td>註冊地點</td><td>註冊編號</td><td>註冊日期</td></tr><tr><td>116</td><td>磁力金牛Logo</td><td>中國</td><td>國作登字-2020-F-00019063</td><td>2020年12月14日</td></tr><tr><td>117</td><td>仙樂Logo</td><td>中國</td><td>國作登字-2020-F-00019065</td><td>2020年12月14日</td></tr><tr><td>118</td><td>AC娘休閒形象</td><td>中國</td><td>國作登字-2020-F-00001393</td><td>2020年10月29日</td></tr><tr><td>119</td><td>AC娘Q版表情包</td><td>中國</td><td>國作登字-2020-I-00003518</td><td>2020年11月9日</td></tr><tr><td>120</td><td>TD娘Q版表情包</td><td>中國</td><td>國作登字-2020-I-00003519</td><td>2020年11月9日</td></tr><tr><td>121</td><td>AC&TD娘Q版表情包</td><td>中國</td><td>國作登字-2020-I-00003520</td><td>2020年11月9日</td></tr><tr><td>122</td><td>童話系列魔法表情</td><td>中國</td><td>國作登字-2020-I-00008431</td><td>2020年11月24日</td></tr></table>",
     "source_tag": "p785_table"
   },
   {
@@ -7166,10 +7142,10 @@
   {
     "page": 789,
     "bbox": [
-      372,
+      369,
       284,
       2163,
-      2709
+      2705
     ],
     "type": "table",
     "content": "<table><tr><td>序號</td><td>域名</td><td>註冊擁有人</td><td>註冊地點</td><td>註冊日期</td><td>到期日</td></tr><tr><td>96.</td><td>52yt.net</td><td>北京快手</td><td>中國</td><td>2019年7月9日</td><td>2021年7月9日</td></tr><tr><td>97.</td><td>mvmaster.com</td><td>北京快手</td><td>中國</td><td>2018年6月26日</td><td>2021年6月26日</td></tr><tr><td>98.</td><td>yiqixie.cn</td><td>北京快手</td><td>中國</td><td>2015年11月9日</td><td>2022年11月9日</td></tr><tr><td>99.</td><td>playcasualgame.cn</td><td>北京沐榕</td><td>中國</td><td>2019年4月25日</td><td>2021年4月25日</td></tr><tr><td>100.</td><td>playcasualgame.com</td><td>北京沐榕</td><td>中國</td><td>2019年4月25日</td><td>2021年4月25日</td></tr><tr><td>101.</td><td>xiatou.com</td><td>北京慕遠</td><td>中國</td><td>2007年7月9日</td><td>2024年7月9日</td></tr><tr><td>102.</td><td>xiatouapp.com</td><td>北京慕遠</td><td>中國</td><td>2017年6月22日</td><td>2023年6月22日</td></tr><tr><td>103.</td><td>m2ucam.com</td><td>北京慕遠</td><td>中國</td><td>2018年7月23日</td><td>2022年7月23日</td></tr><tr><td>104.</td><td>m2ucam.cn</td><td>北京慕遠</td><td>中國</td><td>2018年7月23日</td><td>2022年7月23日</td></tr><tr><td>105.</td><td>m2uapp.cn</td><td>北京慕遠</td><td>中國</td><td>2018年7月25日</td><td>2023年7月25日</td></tr><tr><td>106.</td><td>m2uapp.com</td><td>北京慕遠</td><td>中國</td><td>2018年7月25日</td><td>2023年7月25日</td></tr><tr><td>107.</td><td>66ring.com</td><td>北京慕遠</td><td>中國</td><td>2018年11月15日</td><td>2021年11月15日</td></tr><tr><td>108.</td><td>66ring.cn</td><td>北京慕遠</td><td>中國</td><td>2018年11月15日</td><td>2021年11月15日</td></tr><tr><td>109.</td><td>66ring.com.cn</td><td>北京慕遠</td><td>中國</td><td>2018年11月15日</td><td>2021年11月15日</td></tr><tr><td>110.</td><td>duckingo.cn</td><td>北京慕遠</td><td>中國</td><td>2019年8月8日</td><td>2022年8月8日</td></tr><tr><td>111.</td><td>duckingo.com</td><td>北京慕遠</td><td>中國</td><td>2019年8月8日</td><td>2022年8月8日</td></tr><tr><td>112.</td><td>shanggukt.cn</td><td>北京上古開天</td><td>中國</td><td>2019年7月22日</td><td>2022年7月22日</td></tr><tr><td>113.</td><td>shanggukt.com</td><td>北京上古開天</td><td>中國</td><td>2019年7月22日</td><td>2022年7月22日</td></tr><tr><td>114.</td><td>gifshow.com</td><td>北京一笑</td><td>中國</td><td>2011年8月25日</td><td>2021年8月25日</td></tr><tr><td>115.</td><td>inkuai.com</td><td>北京一笑</td><td>中國</td><td>2014年12月3日</td><td>2020年12月3日</td></tr><tr><td>116.</td><td>mulightvip.cn</td><td>北京雲掣</td><td>中國</td><td>2018年10月16日</td><td>2022年10月16日</td></tr><tr><td>117.</td><td>mulightvip.com</td><td>北京雲掣</td><td>中國</td><td>2018年10月16日</td><td>2022年10月16日</td></tr><tr><td>118.</td><td>ring0123.com</td><td>北京雲掣</td><td>中國</td><td>2018年10月18日</td><td>2021年10月18日</td></tr><tr><td>119.</td><td>ring0123.cn</td><td>北京雲掣</td><td>中國</td><td>2018年10月18日</td><td>2021年10月18日</td></tr><tr><td>120.</td><td>ring0123.com.cn</td><td>北京雲掣</td><td>中國</td><td>2018年10月18日</td><td>2021年10月18日</td></tr><tr><td>121.</td><td>yuncheapp.cn</td><td>北京雲掣</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr></table>",
@@ -7184,7 +7160,7 @@
       2431
     ],
     "type": "table",
-    "content": "<table><tr><td>序號</td><td>域名</td><td>註冊擁有人</td><td>註冊地點</td><td>註冊日期</td><td>到期日</td></tr><tr><td>122.</td><td>yuncheapp.com</td><td>北京雲掣</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr><tr><td>123.</td><td>bjzbky.com</td><td>北京中博科遠</td><td>中國</td><td>2017年8月14日</td><td>2023年8月14日</td></tr><tr><td>124.</td><td>ndcsk.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>125.</td><td>ndcimgs.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>126.</td><td>xxpkg.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>127.</td><td>ndcyx.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>128.</td><td>xyyimgs.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>129.</td><td>kwaigobuy.com</td><td>成都快購</td><td>中國</td><td>2019年10月24日</td><td>2021年10月24日</td></tr><tr><td>130.</td><td>kwaixiaodian.com</td><td>成都快購</td><td>中國</td><td>2019年10月25日</td><td>2021年10月25日</td></tr><tr><td>131.</td><td>suiyiapp.cn</td><td>成都遂意</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr><tr><td>132.</td><td>suiyiapp.com</td><td>成都遂意</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr><tr><td>133.</td><td>yximgs.com</td><td>程一笑先生</td><td>中國</td><td>2012年4月19日</td><td>2021年4月19日</td></tr><tr><td>134.</td><td>yxixy.com</td><td>程一笑先生</td><td>中國</td><td>2012年4月19日</td><td>2022年4月19日</td></tr><tr><td>135.</td><td>ksfankuai.cn</td><td>貴州梵快</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>136.</td><td>ksfankuai.com</td><td>貴州梵快</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>137.</td><td>ksfanxin.cn</td><td>貴州梵心靈指</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>138.</td><td>ksfanxin.com</td><td>貴州梵心靈指</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>139.</td><td>hzi1.com</td><td>海南子依</td><td>中國</td><td>2019年7月22日</td><td>2022年7月22日</td></tr><tr><td>140.</td><td>hzi1.cn</td><td>海南子依</td><td>中國</td><td>2019年7月22日</td><td>2022年7月22日</td></tr><tr><td>141.</td><td>uyouqu.com</td><td>杭州遊趣</td><td>中國</td><td>2016年1月15日</td><td>2024年1月15日</td></tr><tr><td>142.</td><td>uyouqu.cn</td><td>杭州遊趣</td><td>中國</td><td>2016年1月21日</td><td>2022年1月21日</td></tr><tr><td>143.</td><td>viviv.com</td><td>杭州遊趣</td><td>中國</td><td>2004年1月14日</td><td>2021年1月14日</td></tr><tr><td>144.</td><td>getkwai.com</td><td>杭州遊趣</td><td>中國</td><td>2018年5月19日</td><td>2021年5月19日</td></tr></table>",
+    "content": "<table><tr><td>序號</td><td>域名</td><td>註冊擁有人</td><td>註冊地點</td><td>註冊日期</td><td>到期日</td></tr><tr><td>122.</td><td>yuncheapp.com</td><td>北京雲掣</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr><tr><td>123.</td><td>bjzbky.com</td><td>北京中博科遠</td><td>中國</td><td>2017年8月14日</td><td>2023年8月14日</td></tr><tr><td>124.</td><td>ndcsk.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>125.</td><td>ndcimgs.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>126.</td><td>xxpkg.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>127.</td><td>ndcyx.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>128.</td><td>xyyimages.com</td><td>北京中博科遠</td><td>中國</td><td>2020年4月3日</td><td>2021年4月3日</td></tr><tr><td>129.</td><td>kwaigobuy.com</td><td>成都快購</td><td>中國</td><td>2019年10月24日</td><td>2021年10月24日</td></tr><tr><td>130.</td><td>kwaixiaodian.com</td><td>成都快購</td><td>中國</td><td>2019年10月25日</td><td>2021年10月25日</td></tr><tr><td>131.</td><td>suiyiapp.cn</td><td>成都遂意</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr><tr><td>132.</td><td>suiyiapp.com</td><td>成都遂意</td><td>中國</td><td>2018年11月6日</td><td>2021年11月6日</td></tr><tr><td>133.</td><td>yximages.com</td><td>程一笑先生</td><td>中國</td><td>2012年4月19日</td><td>2021年4月19日</td></tr><tr><td>134.</td><td>yxixy.com</td><td>程一笑先生</td><td>中國</td><td>2012年4月19日</td><td>2022年4月19日</td></tr><tr><td>135.</td><td>ksfankuai.cn</td><td>貴州梵快</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>136.</td><td>ksfankuai.com</td><td>貴州梵快</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>137.</td><td>ksfanxin.cn</td><td>貴州梵心靈指</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>138.</td><td>ksfanxin.com</td><td>貴州梵心靈指</td><td>中國</td><td>2019年3月6日</td><td>2023年3月6日</td></tr><tr><td>139.</td><td>hzi1.com</td><td>海南子依</td><td>中國</td><td>2019年7月22日</td><td>2022年7月22日</td></tr><tr><td>140.</td><td>hzi1.cn</td><td>海南子依</td><td>中國</td><td>2019年7月22日</td><td>2022年7月22日</td></tr><tr><td>141.</td><td>uyouqu.com</td><td>杭州遊趣</td><td>中國</td><td>2016年1月15日</td><td>2024年1月15日</td></tr><tr><td>142.</td><td>uyouqu.cn</td><td>杭州遊趣</td><td>中國</td><td>2016年1月21日</td><td>2022年1月21日</td></tr><tr><td>143.</td><td>viviv.com</td><td>杭州遊趣</td><td>中國</td><td>2004年1月14日</td><td>2021年1月14日</td></tr><tr><td>144.</td><td>getkwai.com</td><td>杭州遊趣</td><td>中國</td><td>2018年5月19日</td><td>2021年5月19日</td></tr></table>",
     "source_tag": "p790_table"
   },
   {
@@ -7256,15 +7232,15 @@
       3006
     ],
     "type": "table",
-    "content": "<table><tr><td>姓名</td><td>職位</td><td>授出日期</td><td>歸屬期</td><td>行使價(美元)</td><td>股份總數</td><td>股份的百分比^(1)</td><td>權益的百分比^(2)</td><td></td></tr><tr><td>宿華……</td><td>聯合創始人、執行董事、董事長</td><td>2014年12月22日至</td><td>4年</td><td>0.0000053至</td><td>56,961,183^(3)</td><td>0.1387%^(3)</td><td>0.0518%^(3)</td></tr><tr><td>12號樓2009室</td><td>兼首席執行官</td><td>2020年4月1日</td><td></td><td>0.0422</td><td></td><td></td><td></td></tr><tr><td>程一笑……</td><td>聯合創始人、執行董事兼首席產</td><td>2014年12月22日</td><td>4年</td><td>0.0000053</td><td>45,568,873^(4)</td><td>零^(4)</td><td>零^(4)</td></tr><tr><td>3號院1幢6單元609</td><td>品官</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>鍾奕淇……</td><td>首席財務官</td><td>2017年3月31日</td><td>4年</td><td>0.0422</td><td>41,067,612^(6)</td><td>零^(5)</td><td>零^(5)</td></tr><tr><td>1號院8號樓1層101</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>",
+    "content": "<table><tr><td>姓名</td><td>職位</td><td>授出日期</td><td>歸屬期</td><td>行使價(美元)</td><td>股份總數</td><td>股份的百分比^(1)</td><td>權益的百分比^(2)</td></tr><tr><td>宿華……</td><td>聯合創始人、執行董事、董事長</td><td>2014年12月22日至</td><td>4年</td><td>0.0000053至</td><td>56,961,183^(3)</td><td>0.1387%^(3)</td><td>0.0518%^(3)</td></tr><tr><td>12號樓2009室</td><td>兼首席執行官</td><td>2020年4月1日</td><td></td><td>0.0422</td><td></td><td></td><td></td></tr><tr><td>程一笑……</td><td>聯合創始人、執行董事兼首席產</td><td>2014年12月22日</td><td>4年</td><td>0.0000053</td><td>45,568,873^(4)</td><td>零^(4)</td><td>零^(4)</td></tr><tr><td>3號院1幢6單元609</td><td>品官</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>鍾奕淇……</td><td>首席財務官</td><td>2017年3月31日</td><td>4年</td><td>0.0422</td><td>41,067,612^(6)</td><td>零^(5)</td><td>零^(5)</td></tr><tr><td>1號院8號樓1層101</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table>",
     "source_tag": "p809_table"
   },
   {
     "page": 810,
     "bbox": [
-      317,
-      294,
-      1265,
+      312,
+      291,
+      1270,
       3003
     ],
     "type": "table",
@@ -7275,7 +7251,7 @@
     "page": 812,
     "bbox": [
       272,
-      916,
+      913,
       2170,
       2186
     ],
@@ -7316,7 +7292,7 @@
       1551
     ],
     "type": "table",
-    "content": "<table><tr><td rowspan=\"5\">行使價(美元)</td><td>與已授出但未行使</td><td></td><td></td><td colspan=\"2\">已授出但未行使</td></tr><tr><td>購股權相關的</td><td></td><td></td><td>購股權佔本</td><td>已授出但未行使</td></tr><tr><td></td><td>公司股權(一</td><td>購股權佔本</td></tr><tr><td></td><td>股一票基準)</td><td>公司投票權</td></tr><tr><td></td><td>的概約</td><td>益的概約</td></tr><tr><td>行使價(美元)</td><td>B類股份總數</td><td>授出日期</td><td>歸屬期</td><td>百分比^(1)</td><td>百分比^(2)</td></tr><tr><td>0.0422</td><td>189,550,018</td><td>2014年12月22日至2021年1月7日</td><td>0至4年</td><td>4.6139%</td><td>1.7225%</td></tr><tr><td>3.7191至16.66</td><td>35,706,871</td><td>2019年1月14日至2020年12月17日</td><td>4年</td><td>0.8692%</td><td>0.3245%</td></tr><tr><td>總計</td><td>225,256,889</td><td></td><td></td><td>5.4831%</td><td>2.0470%</td></tr></table>",
+    "content": "<table><tr><td rowspan=\"5\">行使價(美元)</td><td colspan=\"5\">已授出但未行使</td></tr><tr><td>B類股份總數</td><td>授出日期</td><td>歸屬期</td><td>百分比^(1)</td><td>百分比^(2)</td></tr><tr><td>0.0422</td><td>189,550,018</td><td>2014年12月22日至2021年1月7日</td><td>0至4年</td><td>4.6139%</td><td>1.7225%</td></tr><tr><td>3.7191至16.66</td><td>35,706,871</td><td>2019年1月14日至2020年12月17日</td><td>4年</td><td>0.8692%</td><td>0.3245%</td></tr><tr><td>總計</td><td>225,256,889</td><td></td><td></td><td>5.4831%</td><td>2.0470%</td></tr></table>",
     "source_tag": "p815_table"
   },
   {
@@ -7360,7 +7336,7 @@
     "bbox": [
       277,
       2117,
-      2168,
+      2163,
       2739
     ],
     "type": "table",
@@ -7371,7 +7347,7 @@
     "page": 841,
     "bbox": [
       277,
-      310,
+      307,
       2168,
       1349
     ],
